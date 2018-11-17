@@ -1,0 +1,25 @@
+{
+  "name": "yaxi",
+  "version": "1.0.15",
+  "description": "",
+  "main": "build/build-css.js",
+  "scripts": {
+    "build": "node build/build.js",
+    "build:wallet": "node build/build-wallet.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/y4d/yaxi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/y4d/yaxi/issues"
+  },
+  "homepage": "https://github.com/y4d/yaxi#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "webminify": "^1.3.8"
+  }
+}

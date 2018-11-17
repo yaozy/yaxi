@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html style="font-size: 100px;">
+<head>
+    <title>test</title>
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+    <link rel="stylesheet" href="dist/css/default/yaxi.css" />
+</head>
+<body>
+    
+    <script type="text/javascript" src="dist/js/yaxi.js"></script>
+
+    <script type="text/javascript">
+
+
+        var Model = yaxi.model({
+         
+            text: '',
+            displayText: function () {
+
+                return 'PS: ' + this.text;
+            },
+            submodel: yaxi.model({
+
+                value: 0
+            }),
+            store: yaxi.store({
+
+                name: '',
+                age: 0
+            })
+        });
+
+
+        var model = new Model({
+
+            text: 11111,
+            submodel: {
+                value: 20
+            }
+        });
+
+
+        model.store.push({ name: 1111, age: 1 }, { name: 2222, age: 2 });
+
+
+        var page = new yaxi.Page({
+
+            header: 'header',
+            content: {
+                Class: yaxi.Panel,
+                model: model,
+                children: [
+                    {
+                        Class: yaxi.Slider,
+                        value: 20,
+                        steps: [10, 50, 70, 100]
+                    },
+                    {
+                        Class: yaxi.Text,
+                        bindings: {
+                            text: 'displayText'
+                        }
+                    },
+                    {
+                        Class: yaxi.ProgressBar,
+                        value: 50,
+                        bindings: {
+                            value: 'submodel.value'
+                        }
+                    },
+                    {
+                        Class: yaxi.Repeater,
+                        store: 'store',
+                        template: {
+                            Class: yaxi.Text,
+                            bindings: {
+                                text: 'name'
+                            }
+                        }
+                    }
+                ],
+                pulldown: function (pulldown) {
+
+                    setTimeout(function () {
+
+                        pulldown.hide();
+
+                    }, 3000);
+                },
+                loading: function (loading) {
+
+                    setTimeout(function () {
+
+                        loading.done();
+
+                    }, 3000);
+                }
+            },
+            footer: {
+                Class: yaxi.Text,
+                text: 'footer',
+                style: {
+                    backgroundColor: yaxi.color.default5,
+                    textAlign: 'center'
+                }
+            }
+
+        });
+
+
+        page.open();
+
+    
+    </script>
+
+</body>
+</html>

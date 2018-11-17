@@ -1,0 +1,58 @@
+.yx-page,
+.yx-dialog {
+    position: absolute;
+    display: -webkit-flex;
+    display: flex;
+    flex-flow: column;
+    align-items: stretch;
+    background-color: @back-color;
+}
+
+.yx-page {
+    width: 100%;
+    height: 100%;
+}
+
+.yx-header {
+    flex-shrink: 0;
+    height: .45rem;
+    line-height: .45rem;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 1px solid @header-border-color;
+    background-color: @header-back-color;
+    color: @header-font-color;
+}
+
+.yx-content {
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.yx-footer {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.yx-backbutton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: .45rem;
+    height: 100%;
+    z-index: 10;
+    color: @header-font-color;
+}
+
+.yx-header svg {
+    fill: @header-font-color;
+}
+
+.yx-title {
+    width: 100%;
+    height: .45rem;
+    line-height: .45rem;
+    font-size: .18rem;
+    text-align: center;
+}

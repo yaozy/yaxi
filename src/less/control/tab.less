@@ -1,0 +1,16 @@
+.yx-tab {
+    display: -webkit-flex;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+}
+
+.yx-tab>* {
+    flex-grow: 1;
+    border-bottom: 1px solid @default-color-1;
+}
+
+.yx-tab>[theme="primary"] {
+    border-bottom: 1px solid @primary-color-1;
+}
