@@ -1,0 +1,43 @@
+.yx-number {
+    position: relative;
+}
+
+.yx-number>input {
+    padding: 0 .02rem;
+}
+
+.yx-number>span {
+    display: none;
+}
+
+.yx-number[button] {
+    padding: 0 .3rem;
+}
+
+.yx-number[button]>span {
+    display: inline-block;
+}
+
+.yx-number-plus,
+.yx-number-minus {
+    position: absolute;
+    display: inline-block;
+    width: .3rem;
+    height: 100%;
+    text-align: center;
+    font-family: serif;
+    font-weight: lighter;
+    color: @default-color-2;
+}
+
+.yx-number-plus {
+    right: 0;
+    border-left: 1px solid @default-color-4;
+    font-size: .16rem;
+}
+
+.yx-number-minus {
+    left: 0;
+    border-right: 1px solid @default-color-4;
+    font-size: .2rem;
+}

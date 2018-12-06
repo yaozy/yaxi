@@ -1,0 +1,45 @@
+.yx-carousel {
+    position: relative;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
+
+.yx-carousel-host {
+    width: auto !important;
+    height: 100%;
+}
+
+.yx-carousel-host>.yx-control {
+    display: inline-block !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.yx-carousel-pagination {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: .1rem;
+    height: .2rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+
+.yx-carousel-dot {
+    display: inline-block;
+    width: .2rem;
+    height: .2rem;
+    line-height: .2rem;
+}
+
+.yx-carousel-dot>svg {
+    width: .1rem;
+    height: .1rem;
+    vertical-align: middle;
+    fill: @default-color-3;
+}
+
+.yx-carousel-dot.yx-carousel-selected>svg {
+    fill: @primary-color-3;
+}

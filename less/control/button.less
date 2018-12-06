@@ -1,0 +1,47 @@
+.yx-button {
+    margin: 0;
+    outline: none;
+    border: none;
+    white-space: nowrap;
+    text-align: center;
+    transition: .1s;
+    color: @default-color-1;
+    background-color: @default-color-3;
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.yx-button[theme="primary"] {
+    background-color: @primary-color-1;
+    color: @back-color;
+}
+
+.yx-button[theme="second"] {
+    background-color: @second-color-1;
+    color: @back-color;
+}
+
+.yx-button[theme="success"] {
+    background-color: @success-color-1;
+    color: @back-color;
+}
+
+.yx-button[theme="warning"] {
+    background-color: @warning-color-1;
+    color: @back-color;
+}
+
+.yx-button[theme="danger"] {
+    background-color: @danger-color-1;
+    color: @back-color;
+}
+
+.yx-button[disabled],
+.yx-button[theme][disabled] {
+    background-color: @disabled-color-5;
+	color: @disabled-color-1;
+    cursor: not-allowed;
+}

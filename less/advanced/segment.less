@@ -1,0 +1,46 @@
+.yx-segment {
+    position: relative;
+    height: .4rem;
+}
+
+.yx-segment-line {
+    position: absolute;
+    top: 50%;
+    left: .15rem;
+    right: .15rem;
+    height: 4px;
+    margin-top: -2px;
+    background-color: @default-color-3;
+}
+
+.yx-segment-body {
+    position: absolute;
+    left: .15rem;
+    right: .15rem;
+    height: 100%;
+}
+
+.yx-segment-node,
+.yx-segment-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0;
+}
+
+.yx-segment-node {
+    width: .2rem;
+    height: .2rem;
+    margin-top: -.1rem;
+    border-radius: .1rem;
+    background-color: @back-color;
+    fill: @default-color-3;
+    transform: translateX(-.1rem);
+}
+
+.yx-segment-thumb {
+    width: .24rem;
+    height: .24rem;
+    margin-top: -.12rem;
+    fill: @primary-color-1;
+    transform: translateX(-.12rem);
+}

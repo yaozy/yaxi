@@ -1,0 +1,59 @@
+.yx-panel {
+    position:relative;
+}
+
+
+[layout="row"] {
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+[layout="row-center"] {
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[layout="row-fill"] {
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+}
+
+[layout="row-fill"]>* {
+    height: 100%;
+    flex-grow: 1;
+}
+
+
+
+[layout="column"] {
+    display: -webkit-flex;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+[layout="column-center"] {
+    display: -webkit-flex;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+}
+
+[layout="column-fill"] {
+    display: -webkit-flex;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+[layout="column-fill"]>* {
+    width: 100%;
+    flex-grow: 1;
+}

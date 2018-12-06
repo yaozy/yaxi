@@ -13,71 +13,141 @@
     <script type="text/javascript">
 
 
+        var Store = yaxi.store({
+            name: '',
+            age: 0
+        });
+
         var Model = yaxi.model({
-         
+            width: '320px',
             text: '',
             displayText: function () {
 
-                return 'PS: ' + this.text;
+                return this.text;
             },
             submodel: yaxi.model({
 
                 value: 0
             }),
-            store: yaxi.store({
-
-                name: '',
-                age: 0
-            })
+            store: Store
         });
 
 
         var model = new Model({
 
-            text: 11111,
+            text: 11111.1222223,
             submodel: {
                 value: 20
-            }
+            },
+            store: [
+                { name: 1111, age: 1 },
+                { name: 2222, age: 2 }
+            ]
         });
 
-
-        model.store.push({ name: 1111, age: 1 }, { name: 2222, age: 2 });
 
 
         var page = new yaxi.Page({
 
-            header: 'header',
+            // header: 'header',
+            header: {
+                Class: yaxi.Panel,
+                children: [
+                    {
+                        Class: yaxi.BackButton,
+                        text: 'header'
+                    }
+                ]
+            },
             content: {
                 Class: yaxi.Panel,
                 model: model,
                 children: [
                     {
-                        Class: yaxi.Slider,
-                        value: 20,
-                        steps: [10, 50, 70, 100]
-                    },
-                    {
-                        Class: yaxi.Text,
-                        bindings: {
-                            text: 'displayText'
-                        }
-                    },
-                    {
-                        Class: yaxi.ProgressBar,
+                        Class: yaxi.Segment,
                         value: 50,
-                        bindings: {
-                            value: 'submodel.value'
-                        }
+                        segments: 2
                     },
                     {
                         Class: yaxi.Repeater,
                         store: 'store',
                         template: {
                             Class: yaxi.Text,
+                            style: {
+                                display: 'block'
+                            },
                             bindings: {
                                 text: 'name'
                             }
                         }
+                    },
+                    {
+                        Class: yaxi.Number,
+                        min: 0,
+                        max: 9,
+                        value: 1,
+                        button: true
+                    },
+                    {
+                        Class: yaxi.TextBox,
+                        style: 'background-color:#888888;color:@default3;width:%width;',
+                        bindings: {
+                            value: 'text',
+                            change: 'text'
+                        }
+                    },
+                    // {
+                    //     Class: yaxi.Text,
+                    //     bindings: {
+                    //         text: 'displayText | fixed:2'
+                    //     }
+                    // },
+                    // {
+                    //     Class: yaxi.ProgressBar,
+                    //     value: 50,
+                    //     bindings: {
+                    //         value: 'submodel.value'
+                    //     }
+                    // },
+                    {
+                        Class: yaxi.Carousel,
+                        time: 2000,
+                        style: {
+                            height: '4rem',
+                            backgroundColor: '#eee'
+                        },
+                        children: [
+                            {
+                                Class: yaxi.IconButton,
+                                svg: 'icon-yaxi-copy',
+                                text: 'test1',
+                                vertical: true,
+                                style: {
+                                    display: 'block',
+                                    border: '1px solid silver'
+                                }
+                            },
+                            {
+                                Class: yaxi.IconButton,
+                                svg: 'icon-yaxi-copy',
+                                text: 'test2',
+                                vertical: true,
+                                style: {
+                                    display: 'block',
+                                    border: '1px solid silver'
+                                }
+                            },
+                            {
+                                Class: yaxi.IconButton,
+                                svg: 'icon-yaxi-copy',
+                                text: 'test3',
+                                vertical: true,
+                                style: {
+                                    display: 'block',
+                                    border: '1px solid silver'
+                                }
+                            }
+                        ]
                     }
                 ],
                 pulldown: function (pulldown) {
@@ -88,14 +158,14 @@
 
                     }, 3000);
                 },
-                loading: function (loading) {
+                // loading: function (loading) {
 
-                    setTimeout(function () {
+                //     setTimeout(function () {
 
-                        loading.done();
+                //         loading.hide();
 
-                    }, 3000);
-                }
+                //     }, 3000);
+                // }
             },
             footer: {
                 Class: yaxi.Text,

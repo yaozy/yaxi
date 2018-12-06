@@ -1,0 +1,54 @@
+.yx-actionsheet {
+    position: absolute;
+    left: .1rem;
+    right: .1rem;
+    bottom: .1rem;
+    z-index: 100;
+}
+
+
+.yx-actionsheet-content,
+.yx-actionsheet-cancel {
+    display: block;
+    background-color: @actionsheet-back-color;
+    border: 1px solid @actionsheet-border-color;
+    text-align: center;
+}
+
+
+.yx-actionsheet-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: .5rem;
+    line-height: .52rem;
+    color: @actionsheet-header-color;
+    text-align: center;
+    z-index: 1;
+}
+
+.yx-actionsheet-content {
+    padding-top: .5rem;
+    border-radius: .05rem;
+    color: @actionsheet-content-color;
+    box-shadow: 0 0 8px @actionsheet-border-color;
+}
+
+.yx-actionsheet-content>* {
+    display: block;
+    height: .5rem;
+    line-height: .5rem;
+    border-top: .5px solid @actionsheet-border-color;
+}
+
+.yx-actionsheet-cancel {
+    margin-top: .1rem;
+    height: .5rem;
+    line-height: .5rem;
+    border-radius: .05rem;
+    color: @actionsheet-cancel-color;
+    font-size: .14rem;
+    font-weight: bold;
+    box-shadow: 0 0 8px @actionsheet-border-color;
+}
