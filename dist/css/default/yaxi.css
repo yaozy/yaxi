@@ -752,6 +752,30 @@ textarea::-webkit-input-placeholder {
 .yx-carousel-dot.yx-carousel-selected > svg {
   fill: #ff6a48;
 }
+.yx-circletext {
+  position: relative;
+  display: inline-block;
+  width: 0.2rem;
+  height: 0.2rem;
+}
+.yx-circletext > svg {
+  position: absolute;
+  display: inline-block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  fill: #ff6a48;
+}
+.yx-circletext > span {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1em;
+  margin-top: -0.7em;
+  text-align: center;
+}
 .yx-gestureinput {
   width: 3.75rem;
   height: 3.75rem;

@@ -138,39 +138,48 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
     function change(control, value) {
 
-        var binding, e;
+        var any;
 
-        value = control.__convert_value[1].call(this, value);
+        any = control.value;
+        control.value = value;
 
-        if (control.value !== value)
+        if ((value = control.value) !== any)
         {
-            control.value = value;
-
             if (binding = control.__binding_push)
             {
                 binding.model.$push(control, value);
             }
 
-            e = new yaxi.Event();
-            e.type = 'change';
-            e.dom = control.$dom.firstChild;
-            e.value = value;
+            any = new yaxi.Event();
+            any.type = 'change';
+            any.dom = control.$dom.firstChild;
+            any.value = value;
 
-            return control.trigger(e);
+            return control.trigger(any);
         }
+        
+        control.__set_value(control.$dom, value);
     }
 
 
 
     this.__on_change = function () {
 
-        var binding;
+        var value = this.value,
+            binding;
 
         this.value = +this.$dom.firstChild.value || 0;
-        
-        if (binding = this.__binding_push)
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.value);
+            if (binding = this.__binding_push)
+            {
+                binding.model.$push(this, this.value);
+            }
+        }
+        else
+        {
+            this.__set_value(this.$dom, value);
         }
     }
 

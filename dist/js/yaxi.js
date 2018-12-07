@@ -7070,6 +7070,9 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('maxLength', 0);
 
 
+    this.$property('pattern', '');
+
+
     this.$property('format', {
     
         defaultValue: null,
@@ -7134,16 +7137,30 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     }
 
 
+    this.__set_pattern = function (dom, value) {
+
+        dom.firstChild.setAttribute('pattern', value);
+    }
+
+
     
     this.__on_change = function () {
 
-        var binding = this.__binding_push;
+        var value = this.$dom.firstChild.value,
+            binding;
 
-        this.text = this.$dom.firstChild.value;
-        
-        if (binding)
+        this.value = value;
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.text);
+            if (binding = this.__binding_push)
+            {
+                binding.model.$push(this, this.value);
+            }
+        }
+        else
+        {
+            this.__set_value(this.$dom, value);
         }
     }
 
@@ -7477,39 +7494,48 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
     function change(control, value) {
 
-        var binding, e;
+        var any;
 
-        value = control.__convert_value[1].call(this, value);
+        any = control.value;
+        control.value = value;
 
-        if (control.value !== value)
+        if ((value = control.value) !== any)
         {
-            control.value = value;
-
             if (binding = control.__binding_push)
             {
                 binding.model.$push(control, value);
             }
 
-            e = new yaxi.Event();
-            e.type = 'change';
-            e.dom = control.$dom.firstChild;
-            e.value = value;
+            any = new yaxi.Event();
+            any.type = 'change';
+            any.dom = control.$dom.firstChild;
+            any.value = value;
 
-            return control.trigger(e);
+            return control.trigger(any);
         }
+        
+        control.__set_value(control.$dom, value);
     }
 
 
 
     this.__on_change = function () {
 
-        var binding;
+        var value = this.value,
+            binding;
 
         this.value = +this.$dom.firstChild.value || 0;
-        
-        if (binding = this.__binding_push)
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.value);
+            if (binding = this.__binding_push)
+            {
+                binding.model.$push(this, this.value);
+            }
+        }
+        else
+        {
+            this.__set_value(this.$dom, value);
         }
     }
 
@@ -9311,6 +9337,41 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 }).register('Carousel');
+
+
+
+
+yaxi.CircleText = yaxi.Control.extend(function () {
+
+
+
+    yaxi.template(this, '<span class="yx-control yx-circletext"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg><span></span></span>');
+
+
+
+    this.$property('text', '');
+
+
+    this.$property('fill', '');
+
+
+    
+
+    this.__set_text = function (dom, value) {
+
+        dom.lastChild.textContent = value;
+    }
+
+
+    this.__set_fill = function (dom, value) {
+
+        dom.firstChild.style.fill = value;
+    }
+
+
+
+
+}).register('CircleText');
 
 
 

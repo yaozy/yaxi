@@ -44,6 +44,9 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('maxLength', 0);
 
 
+    this.$property('pattern', '');
+
+
     this.$property('format', {
     
         defaultValue: null,
@@ -108,16 +111,30 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     }
 
 
+    this.__set_pattern = function (dom, value) {
+
+        dom.firstChild.setAttribute('pattern', value);
+    }
+
+
     
     this.__on_change = function () {
 
-        var binding = this.__binding_push;
+        var value = this.$dom.firstChild.value,
+            binding;
 
-        this.text = this.$dom.firstChild.value;
-        
-        if (binding)
+        this.value = value;
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.text);
+            if (binding = this.__binding_push)
+            {
+                binding.model.$push(this, this.value);
+            }
+        }
+        else
+        {
+            this.__set_value(this.$dom, value);
         }
     }
 
