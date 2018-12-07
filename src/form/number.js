@@ -15,15 +15,36 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
     // 当前值
-    this.$property('value', 0);
+    this.$property('value', {
+    
+        defaultValue: 0,
+        convertor: function (value) {
+
+            var any;
+
+            value = +value || 0;
+
+            if (value < (any = this.min))
+            {
+                return any;
+            }
+
+            if (value > (any = this.max))
+            {
+                return any;
+            }
+
+            return value;
+        }
+    });
 
 
     // 最小值
-    this.$property('min', -Infinity);
+    this.$property('min', -Infinity, false);
 
 
     // 最大值
-    this.$property('max', Infinity);
+    this.$property('max', Infinity, false);
 
 
     // 加减步进
@@ -45,17 +66,6 @@ yaxi.Number = yaxi.TextBox.extend(function () {
     }
 
 
-    this.__set_min = function (dom, value) {
-
-        dom.setAttribute('min', value);
-    }
-
-
-    this.__set_max = function (dom, value) {
-
-        dom.setAttribute('max', value);
-    }
-
 
     this.__set_value = function (dom, value) {
 
@@ -68,44 +78,88 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
         dom = dom.firstChild;
         dom.value = value ? value : (dom.value ? 0 : '');
+
+        dom = dom.nextSibling;
+
+        if (value === this.min)
+        {
+            dom.setAttribute('disabled', true);
+        }
+        else
+        {
+            dom.removeAttribute('disabled');
+        }
+
+        dom = dom.nextSibling;
+
+        if (value === this.max)
+        {
+            dom.setAttribute('disabled', true);
+        }
+        else
+        {
+            dom.removeAttribute('disabled');
+        }
     }
 
 
-    this.__on_tap = function (target) {
+    this.__on_tap = function (event) {
 
         var dom = this.$dom,
-            any;
+            target = event.dom,
+            keys;
 
         while (target && target !== dom)
         {
-            if (any = target.classList)
+            if (keys = target.classList)
             {
-                if (any.contains('yx-number-minus'))
+                if (keys.contains('yx-number-minus'))
                 {
-                    this.value = (+dom.firstChild.value || 0) - this.step;
+                    change(this, (+dom.firstChild.value || 0) - this.step);
 
-                    if (any = this.__binding_push)
-                    {
-                        any.model.$push(this, this.value);
-                    }
-                    return;
+                    event.stop();
+                    return false;
                 }
                 
-                if (any.contains('yx-number-plus'))
+                if (keys.contains('yx-number-plus'))
                 {
-                    this.value = (+dom.firstChild.value || 0) + this.step;
+                    change(this, (+dom.firstChild.value || 0) + this.step);
 
-                    if (any = this.__binding_push)
-                    {
-                        any.model.$push(this, this.value);
-                    }
-                    return;
+                    event.stop();
+                    return false;
                 }
             }
 
             target = target.parentNode;
         }
     }
+
+
+
+    function change(control, value) {
+
+        var binding, e;
+
+        value = control.__convert_value[1].call(this, value);
+
+        if (control.value !== value)
+        {
+            control.value = value;
+
+            if (binding = control.__binding_push)
+            {
+                binding.model.$push(control, value);
+            }
+
+            e = new yaxi.Event();
+            e.type = 'change';
+            e.dom = control.$dom.firstChild;
+            e.value = value;
+
+            return control.trigger(e);
+        }
+    }
+
 
 
     this.__on_change = function () {

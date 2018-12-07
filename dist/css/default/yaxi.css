@@ -455,6 +455,7 @@ textarea::-webkit-input-placeholder {
   font-family: serif;
   font-weight: lighter;
   color: #606266;
+  cursor: default;
 }
 .yx-number-plus {
   right: 0;
@@ -465,6 +466,10 @@ textarea::-webkit-input-placeholder {
   left: 0;
   border-right: 1px solid #e0e0e0;
   font-size: 0.2rem;
+}
+.yx-number-plus[disabled],
+.yx-number-minus[disabled] {
+  color: #e0e0e0;
 }
 .yx-password {
   position: relative;

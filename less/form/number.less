@@ -28,6 +28,7 @@
     font-family: serif;
     font-weight: lighter;
     color: @default-color-2;
+    cursor: default;
 }
 
 .yx-number-plus {
@@ -40,4 +41,9 @@
     left: 0;
     border-right: 1px solid @default-color-4;
     font-size: .2rem;
+}
+
+.yx-number-plus[disabled],
+.yx-number-minus[disabled] {
+    color: @default-color-4;
 }

@@ -18,9 +18,10 @@ yaxi.Password = yaxi.TextBox.extend(function () {
     }
 
 
-    this.__on_tap = function (target) {
+    this.__on_tap = function (event) {
 
         var dom = this.$dom,
+            target = event.dom,
             icon;
 
         while (target && target !== dom)

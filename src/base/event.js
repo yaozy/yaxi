@@ -452,9 +452,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 tapControl = control;
                 tapTime = any;
 
-                if (any = control.__on_tap)
+                if ((any = control.__on_tap) && any.call(control, event) === false)
                 {
-                    any.call(control, event.dom);
+                    return false;
                 }
                 
                 event.type = 'tap';
@@ -497,9 +497,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             e = new Event();
             e.type = 'input';
-            e.dom = event.dom;
+            e.dom = event.target;
             e.original = event;
-            e.value = event.target.value;
+            e.value = e.dom.value;
 
             return control.trigger(e);
         }
@@ -521,8 +521,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
             e = new Event();
             e.type = 'change';
             e.dom = event.target;
-            e.original = event;
-            e.value = event.target.value;
+            e.value = e.dom.value;
 
             return control.trigger(e);
         }
