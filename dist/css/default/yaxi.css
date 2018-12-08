@@ -546,53 +546,6 @@ textarea::-webkit-input-placeholder {
   right: 0;
   transition: right 1s;
 }
-.yx-actionsheet {
-  position: absolute;
-  left: 0.1rem;
-  right: 0.1rem;
-  bottom: 0.1rem;
-  z-index: 100;
-}
-.yx-actionsheet-content,
-.yx-actionsheet-cancel {
-  display: block;
-  background-color: #ffffff;
-  border: 1px solid #c0c4cc;
-  text-align: center;
-}
-.yx-actionsheet-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 0.5rem;
-  line-height: 0.52rem;
-  color: #606060;
-  text-align: center;
-  z-index: 1;
-}
-.yx-actionsheet-content {
-  padding-top: 0.5rem;
-  border-radius: 0.05rem;
-  color: #000000;
-  box-shadow: 0 0 8px #c0c4cc;
-}
-.yx-actionsheet-content > * {
-  display: block;
-  height: 0.5rem;
-  line-height: 0.5rem;
-  border-top: 0.5px solid #c0c4cc;
-}
-.yx-actionsheet-cancel {
-  margin-top: 0.1rem;
-  height: 0.5rem;
-  line-height: 0.5rem;
-  border-radius: 0.05rem;
-  color: #606060;
-  font-size: 0.14rem;
-  font-weight: bold;
-  box-shadow: 0 0 8px #c0c4cc;
-}
 .yx-dialog {
   overflow: hidden;
   width: 80%;
@@ -714,6 +667,53 @@ textarea::-webkit-input-placeholder {
   background-repeat: no-repeat;
   background-size: contain;
 }
+.yx-actionsheet {
+  position: absolute;
+  left: 0.1rem;
+  right: 0.1rem;
+  bottom: 0.1rem;
+  z-index: 100;
+}
+.yx-actionsheet-content,
+.yx-actionsheet-cancel {
+  display: block;
+  background-color: #ffffff;
+  border: 1px solid #c0c4cc;
+  text-align: center;
+}
+.yx-actionsheet-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  line-height: 0.52rem;
+  color: #606060;
+  text-align: center;
+  z-index: 1;
+}
+.yx-actionsheet-content {
+  padding-top: 0.5rem;
+  border-radius: 0.05rem;
+  color: #000000;
+  box-shadow: 0 0 8px #c0c4cc;
+}
+.yx-actionsheet-content > * {
+  display: block;
+  height: 0.5rem;
+  line-height: 0.5rem;
+  border-top: 0.5px solid #c0c4cc;
+}
+.yx-actionsheet-cancel {
+  margin-top: 0.1rem;
+  height: 0.5rem;
+  line-height: 0.5rem;
+  border-radius: 0.05rem;
+  color: #606060;
+  font-size: 0.14rem;
+  font-weight: bold;
+  box-shadow: 0 0 8px #c0c4cc;
+}
 .yx-carousel {
   position: relative;
   overflow: hidden !important;
@@ -749,7 +749,7 @@ textarea::-webkit-input-placeholder {
   vertical-align: middle;
   fill: #c0c4cc;
 }
-.yx-carousel-dot.yx-carousel-selected > svg {
+.yx-carousel-selected > svg {
   fill: #ff6a48;
 }
 .yx-circletext {
@@ -844,10 +844,13 @@ textarea::-webkit-input-placeholder {
   width: 0.2rem;
   height: 0.2rem;
   margin-top: -0.1rem;
-  border-radius: 0.1rem;
-  background-color: #ffffff;
-  fill: #c0c4cc;
   transform: translateX(-0.1rem);
+}
+.yx-segment-node > circle:first-child {
+  fill: #c0c4cc;
+}
+.yx-segment-node > circle:last-child {
+  fill: #ffffff;
 }
 .yx-segment-thumb {
   width: 0.24rem;

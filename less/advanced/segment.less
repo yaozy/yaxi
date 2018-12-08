@@ -31,10 +31,15 @@
     width: .2rem;
     height: .2rem;
     margin-top: -.1rem;
-    border-radius: .1rem;
-    background-color: @back-color;
-    fill: @default-color-3;
     transform: translateX(-.1rem);
+}
+
+.yx-segment-node>circle:first-child {
+    fill: @default-color-3;
+}
+
+.yx-segment-node>circle:last-child {
+    fill: @back-color;
 }
 
 .yx-segment-thumb {

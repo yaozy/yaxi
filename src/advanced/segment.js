@@ -4,8 +4,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 	var create = Object.create;
 
-    var thumb = '<svg class="yx-segment-thumb" aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg>';
-
+    var thumb = '<svg class="yx-segment-thumb" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>'
 
 
     yaxi.template(this, '<div class="yx-control yx-segment"><div class="yx-segment-line"></div><div class="yx-segment-body">' + thumb + '</div>');
@@ -144,9 +143,9 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
         for (var i = 0, l = segments.length; i < l; i++)
         {
-            array.push('<svg class="yx-segment-node" aria-hidden="true" style="left:',
+            array.push('<svg class="yx-segment-node" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100" style="left:',
                 segments[i],
-                '%;"><use xlink:href="#icon-yaxi-ring"></use></svg>');
+                '%;"><circle cx="50" cy="50" r="50" /><circle cx="50" cy="50" r="40" /></svg>');
         }
 
         return array.join('');

@@ -3099,21 +3099,131 @@ yaxi.Stream = Object.extend(function (Class) {
 
 
 
-/**
- * 本部分代码从flyingon或yaxi框架中相关代码修改而来
- */
-
-
 // http
-(function (yaxi) {
+yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-    var http = yaxi.http = Object.create(null);
-
+    // 编码方式
     var enctype = 'application/x-www-form-urlencoded';
 
     
+
+    // 重定向状态码
+    this.redirectStatus = 299;
+
+
+    // 重定向
+    this.redirect = function () {
+        
+        location.href = 'index.html';
+    }
+
+
+
+    this.send = function (options) {
+
+        var self = this,
+            stream = new yaxi.Stream(),
+            ajax = new XMLHttpRequest(),
+            any;
+        
+        // CORS
+        if (options.CORS)
+        {
+            // withCredentials是XMLHTTPRequest2中独有的
+            if ('withCredentials' in ajax)
+            {
+                ajax.withCredentials = true;
+            }
+            else if (any = window.XDomainRequest)
+            {
+                ajax = new any();
+            }
+        }
+
+        ajax.onreadystatechange = function () {
+
+            if (this.readyState === 4)
+            {
+                this.onreadystatechange = null;
+
+                clearTimeout(self.__timeout);
+
+                self.receive(this, stream, options);
+                self = stream = options = null;
+            }
+        }
+
+        ajax.open(options.method, options.url, options.async !== false);
+
+        if (options.contentType)
+        {
+            ajax.setRequestHeader('Content-Type', options.contentType);
+
+            // if (any = options.data)
+            // {
+            //     ajax.setRequestHeader('Content-Length', any.length);
+            // }
+        }
+
+        if (any = options.header)
+        {
+            for (var name in any)
+            {
+                ajax.setRequestHeader(name, any[name]);
+            }
+        }
+
+        this.__timeout = setTimeout(function () {
+
+            ajax.abort();
+
+            stream.reject({
+                url: url,
+                status: 'timeout'
+            });
+
+        }, options.timeout || 30000);
+
+        ajax.send(options.data);
+
+        return stream;
+    }
+
+
+    this.receive = function (ajax, stream, options) {
+
+        if (ajax.status >= 100 && ajax.status < 300)
+        {
+            this.response(ajax, stream, options);
+        }
+        else
+        {
+            stream.reject({
+                url: options.url,
+                status: ajax.status,
+                message: ajax.statusText || ajax.responseText,
+                options: options
+            });
+        }
+    }
+
+
+    this.response = function (ajax, stream, options) {
+
+        if (ajax.status === this.redirectStatus)
+        {
+            this.redirect();
+        }
+        else
+        {
+            stream.resolve(ajax.responseText || ajax.responseXML);
+        }
+    }
+
+
+
     
     function encodeData(data) {
 
@@ -3183,20 +3293,9 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
-    
-    function send(method, url, data, options) {
+    function parseOptions(method, url, data, options, flag) {
 
-        var stream = new yaxi.Stream(),
-            ajax = stream.ajax = new XMLHttpRequest(),
-            type,
-            any;
-
-        options = options || {};
-        options.method = method;
-        options.url = url;
-        options.data = data;
-        
-        if (/get|head|options/i.test(method))
+        if (flag || /GET|HEAD|OPTIONS/i.test(method))
         {
             if (data)
             {
@@ -3204,153 +3303,77 @@ yaxi.Stream = Object.extend(function (Class) {
                 data = null;
             }
         }
-        else if ((type = options.contentType) === enctype)
+        else if (options.contentType === enctype)
         {
             data = encodeData(data);
         }
-        else if (typeof data !== 'string')
+        else if (data && typeof data !== 'string')
         {
-            type = 'application/json';
+            options.contentType = 'application/json';
             data = JSON.stringify(data);
         }
-        
-        // CORS
-        if (options.CORS)
-        {
-            // withCredentials是XMLHTTPRequest2中独有的
-            if ('withCredentials' in ajax)
-            {
-                ajax.withCredentials = true;
-            }
-            else if (any = window.XDomainRequest)
-            {
-                ajax = new any();
-            }
+
+        options.method = method;
+        options.url = url;
+        options.data = data;
+
+        return options;
+    }
+
+
+
+    this.__class_init = function (Class) {
+
+
+        var parse = parseOptions;
+
+
+        Class.send = function (method, url, data, options) {
+
+            options = parse(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
+            return new Class().send(options);
         }
-
-        ajax.onreadystatechange = function () {
-
-            if (this.readyState === 4)
-            {
-                if (http.timeout)
-                {
-                    clearTimeout(http.timeout);
-                    http.timeout = 0;
-                }
-
-                if (this.status >= 100 && this.status < 300)
-                {
-                    if (this.status === http.redirectStatus)
-                    {
-                        http.redirect();
-                    }
-                    else
-                    {
-                        stream.resolve(this.responseText || this.responseXML);
-                    }
-                }
-                else
-                {
-                    stream.reject({
-                        url: url,
-                        status: this.status,
-                        message: this.statusText || this.responseText
-                    });
-                }
-                
-                // 清除引用
-                this.onreadystatechange = null;
-            }
-        }
-
-        ajax.open(method, url, options.async !== false);
-        
-        if (type)
-        {
-            ajax.setRequestHeader('Content-Type', type);
-            // ajax.setRequestHeader('Content-Length', data.length);
-        }
-
-        if (any = options.header)
-        {
-            for (var name in any)
-            {
-                ajax.setRequestHeader(name, any[name]);
-            }
-        }
-
-        http.timeout = setTimeout(function () {
-
-            ajax.abort();
-
-            stream.reject({
-                url: url,
-                status: 'timeout',
-                message: http.timeoutText
-            });
-
-        }, options.timeout || 30000);
-
-        ajax.send(data);
-
-        return stream;
-    }
-
-
-
-    // 重定向状态码
-    http.redirectStatus = 299;
-
-
-    // 超时提醒
-    http.timeoutText = '请求超时!';
-
-
-    // 重定向
-    http.redirect = function () {
-        
-        location.href = 'index.html';
-    }
-
-
-    http.send = function (method, url, data, options) {
-
-        return send(method || 'GET', url, data, options);
-    }
-
-
-    http.head = function (url, data, options) {
-
-        return send('HEAD', url, data, options);
-    }
-
-
-    http.get = function (url, data, options) {
-
-        return send('GET', url, data, options);
-    }
-
-
-    http.post = function (url, data, options) {
-
-        return send('POST', url, data, options);
-    }
-
-
-    http.put = function (url, data, options) {
-
-        return send('PUT', url, data, options);
-    }
     
-
-    http.del = function (url, data, options) {
-
-        return send('DELETE', url, data, options);
+    
+        Class.head = function (url, data, options) {
+    
+            options = parse('HEAD', url, data, options || {}, true);
+            return new Class().send(options);
+        }
+    
+    
+        Class.get = function (url, data, options) {
+    
+            options = parse('GET', url, data, options || {}, true);
+            return new Class().send(options);
+        }
+    
+    
+        Class.post = function (url, data, options) {
+    
+            options = parse('POST', url, data, options || {});
+            return new Class().send(options);
+        }
+    
+    
+        Class.put = function (url, data, options) {
+    
+            options = parse('PUT', url, data, options || {});
+            return new Class().send(options);
+        }
+        
+    
+        Class.del = function (url, data, options) {
+    
+            options = parse('DELETE', url, data, options || {});
+            return new Class().send(options);
+        }
     }
 
 
 
-})(yaxi);
+});
+
 
 
 
@@ -8115,250 +8138,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.Control.extend(function (Class, base) {
-
-
-
-    var stack = yaxi.__layer_stack;
-
-
-
-    Class['en-US'] = 'Cancel';
-
-
-    Class['zh-CN'] = '取消';
-
-
-    Class['zh-TW'] = '取消';
-
-    
-
-
-	yaxi.template(this, '<div class="yx-control yx-actionsheet"></div>');
-
-
-
-
-	// header
-	this.header = null;
-
-
-	// 页体
-	this.content = null;
-
-
-	// 取消
-	this.cancel = true;
-
-
-
-    this.__convert_header = [0, function (data) {
-
-        if (data !== false)
-        {
-            var control;
-
-            if (!data || typeof data !== 'object')
-            {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
-            }
-
-            data.className = 'yx-actionsheet-header ' + (data.className || '');
-
-            control = this.header = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-        }
-    }];
-
-	
-	this.__convert_content = [0, function (data) {
-		
-		if (data)
-        {
-            var control;
-
-            if (data instanceof Array)
-            {
-                data = {
-                    Class: yaxi.Panel,
-                    children: data
-                }
-            }
-
-            data.className = 'yx-actionsheet-content ' + (data.className || '');
-            
-            control = this.content = new (data.Class || yaxi.Panel)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', selected);
-        }
-	}];
-	
-	
-	this.__convert_cancel = [0, function (data) {
-	
-        if (data !== false)
-        {
-            var control;
-
-            if (!data || typeof data !== 'object')
-            {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
-            }
-
-            data.className = 'yx-actionsheet-cancel ' + (data.className || '');
-
-            control = this.cancel = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', close);
-        }
-	}];
-
-
-
-    function selected(event) {
-
-        var control = event.target,
-            parent;
-
-        while (control && (parent = control.parent))
-        {
-            if (parent === this)
-            {
-                this.parent.close(control);
-                return;
-            }
-
-            control = parent;
-        }
-    }
-
-
-    function close() {
-
-        this.parent.close();
-    }
-
-	
-	
-	this.show = function () {
-		
-        if (stack.indexOf(this) < 0)
-        {
-            var dom = this.$dom,
-                any;
-            
-            if (!dom)
-            {
-                dom = this.render();
-
-                if (any = this.header)
-                {
-                    dom.appendChild(any.$dom || any.render());
-                }
-
-                if (any = this.content)
-                {
-                    dom.appendChild(any.$dom || any.render());
-                }
-
-                if (any = this.cancel)
-                {
-                    dom.appendChild(any.$dom || any.render());
-                }
-            }
-
-            document.body.appendChild(dom);
-            stack.push(this);
-        }
-
-        return this;
-	}
-	
-	
-	
-	this.close = function (selected) {
-		
-		var parent, dom;
-
-		if (stack[stack.length - 1] === this)
-		{
-            stack.pop();
-
-            if ((dom = this.$dom) && (parent = dom.parentNode))
-            {
-                parent.removeChild(dom);
-            }
-
-            this.trigger('closed', { selected: selected || this.cancel });
-            
-            if (this.autoDestroy !== false)
-            {
-                this.destroy();
-            }
-		}
-    }
-    
-
-    this.destroy = function () {
-
-        var control;
-
-        if (control = this.header)
-        {
-            this.header = null;
-            control.destroy();
-        }
-
-        if (control = this.content)
-        {
-            this.content = null;
-            control.destroy();
-        }
-
-        if (control = this.cancel)
-        {
-            this.cancel = null;
-            control.destroy();
-        }
-
-        base.destroy.call(this);
-    }
-
-
-
-    yaxi.actionsheet = function (data) {
-
-        if (!data || !data.content)
-        {
-            throw 'actionsheet must input a object and content not allow empty!'
-        }
-
-        if (data.cancel === void 0)
-        {
-            data.cancel = {
-                Class: yaxi.Text,
-                text: Class[yaxi.language]
-            };
-        }
-
-        return new Class(data).show();
-    }
-    
-
-});
-
-
-
-
 yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
     
@@ -9010,6 +8789,250 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
 
 
+yaxi.Control.extend(function (Class, base) {
+
+
+
+    var stack = yaxi.__layer_stack;
+
+
+
+    Class['en-US'] = 'Cancel';
+
+
+    Class['zh-CN'] = '取消';
+
+
+    Class['zh-TW'] = '取消';
+
+    
+
+
+	yaxi.template(this, '<div class="yx-control yx-actionsheet"></div>');
+
+
+
+
+	// header
+	this.header = null;
+
+
+	// 页体
+	this.content = null;
+
+
+	// 取消
+	this.cancel = true;
+
+
+
+    this.__convert_header = [0, function (data) {
+
+        if (data !== false)
+        {
+            var control;
+
+            if (!data || typeof data !== 'object')
+            {
+                data = {
+                    Class: yaxi.Text,
+                    text: data
+                };
+            }
+
+            data.className = 'yx-actionsheet-header ' + (data.className || '');
+
+            control = this.header = new (data.Class || yaxi.Text)();
+            control.parent = this;
+            control.__init(data);
+        }
+    }];
+
+	
+	this.__convert_content = [0, function (data) {
+		
+		if (data)
+        {
+            var control;
+
+            if (data instanceof Array)
+            {
+                data = {
+                    Class: yaxi.Panel,
+                    children: data
+                }
+            }
+
+            data.className = 'yx-actionsheet-content ' + (data.className || '');
+            
+            control = this.content = new (data.Class || yaxi.Panel)();
+            control.parent = this;
+            control.__init(data);
+            control.on('tap', selected);
+        }
+	}];
+	
+	
+	this.__convert_cancel = [0, function (data) {
+	
+        if (data !== false)
+        {
+            var control;
+
+            if (!data || typeof data !== 'object')
+            {
+                data = {
+                    Class: yaxi.Text,
+                    text: data
+                };
+            }
+
+            data.className = 'yx-actionsheet-cancel ' + (data.className || '');
+
+            control = this.cancel = new (data.Class || yaxi.Text)();
+            control.parent = this;
+            control.__init(data);
+            control.on('tap', close);
+        }
+	}];
+
+
+
+    function selected(event) {
+
+        var control = event.target,
+            parent;
+
+        while (control && (parent = control.parent))
+        {
+            if (parent === this)
+            {
+                this.parent.close(control);
+                return;
+            }
+
+            control = parent;
+        }
+    }
+
+
+    function close() {
+
+        this.parent.close();
+    }
+
+	
+	
+	this.show = function () {
+		
+        if (stack.indexOf(this) < 0)
+        {
+            var dom = this.$dom,
+                any;
+            
+            if (!dom)
+            {
+                dom = this.render();
+
+                if (any = this.header)
+                {
+                    dom.appendChild(any.$dom || any.render());
+                }
+
+                if (any = this.content)
+                {
+                    dom.appendChild(any.$dom || any.render());
+                }
+
+                if (any = this.cancel)
+                {
+                    dom.appendChild(any.$dom || any.render());
+                }
+            }
+
+            document.body.appendChild(dom);
+            stack.push(this);
+        }
+
+        return this;
+	}
+	
+	
+	
+	this.close = function (selected) {
+		
+		var parent, dom;
+
+		if (stack[stack.length - 1] === this)
+		{
+            stack.pop();
+
+            if ((dom = this.$dom) && (parent = dom.parentNode))
+            {
+                parent.removeChild(dom);
+            }
+
+            this.trigger('closed', { selected: selected || this.cancel });
+            
+            if (this.autoDestroy !== false)
+            {
+                this.destroy();
+            }
+		}
+    }
+    
+
+    this.destroy = function () {
+
+        var control;
+
+        if (control = this.header)
+        {
+            this.header = null;
+            control.destroy();
+        }
+
+        if (control = this.content)
+        {
+            this.content = null;
+            control.destroy();
+        }
+
+        if (control = this.cancel)
+        {
+            this.cancel = null;
+            control.destroy();
+        }
+
+        base.destroy.call(this);
+    }
+
+
+
+    yaxi.actionsheet = function (data) {
+
+        if (!data || !data.content)
+        {
+            throw 'actionsheet must input a object and content not allow empty!'
+        }
+
+        if (data.cancel === void 0)
+        {
+            data.cancel = {
+                Class: yaxi.Text,
+                text: Class[yaxi.language]
+            };
+        }
+
+        return new Class(data).show();
+    }
+    
+
+});
+
+
+
+
 yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
@@ -9310,7 +9333,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         {
             array.push('<div class="yx-carousel-dot', 
                 index === i ? ' yx-carousel-selected' : '',
-                '"><svg class="yx-icon-svg" aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg></div>');
+                '"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg></div>');
         }
 
         return array.join('');
@@ -9345,11 +9368,17 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
 
-    yaxi.template(this, '<span class="yx-control yx-circletext"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg><span></span></span>');
+    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy=".4em" text-anchor="middle" style="font-size:500%;" /></svg>');
 
 
 
     this.$property('text', '');
+
+    
+    this.$property('stroke', '');
+
+
+    this.$property('strokeWidth', 0);
 
 
     this.$property('fill', '');
@@ -9360,6 +9389,18 @@ yaxi.CircleText = yaxi.Control.extend(function () {
     this.__set_text = function (dom, value) {
 
         dom.lastChild.textContent = value;
+    }
+
+
+    this.__set_stroke = function (dom, value) {
+
+        dom.firstChild.style.stroke = value;
+    }
+
+
+    this.__set_strokeWidth = function (dom, value) {
+
+        dom.firstChild.style.strokeWidth = value;
     }
 
 
@@ -9735,8 +9776,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 	var create = Object.create;
 
-    var thumb = '<svg class="yx-segment-thumb" aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg>';
-
+    var thumb = '<svg class="yx-segment-thumb" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>'
 
 
     yaxi.template(this, '<div class="yx-control yx-segment"><div class="yx-segment-line"></div><div class="yx-segment-body">' + thumb + '</div>');
@@ -9875,9 +9915,9 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
         for (var i = 0, l = segments.length; i < l; i++)
         {
-            array.push('<svg class="yx-segment-node" aria-hidden="true" style="left:',
+            array.push('<svg class="yx-segment-node" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100" style="left:',
                 segments[i],
-                '%;"><use xlink:href="#icon-yaxi-ring"></use></svg>');
+                '%;"><circle cx="50" cy="50" r="50" /><circle cx="50" cy="50" r="40" /></svg>');
         }
 
         return array.join('');

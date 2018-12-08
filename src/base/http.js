@@ -1,18 +1,128 @@
-/**
- * 本部分代码从flyingon或yaxi框架中相关代码修改而来
- */
-
-
 // http
-(function (yaxi) {
+yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-    var http = yaxi.http = Object.create(null);
-
+    // 编码方式
     var enctype = 'application/x-www-form-urlencoded';
 
     
+
+    // 重定向状态码
+    this.redirectStatus = 299;
+
+
+    // 重定向
+    this.redirect = function () {
+        
+        location.href = 'index.html';
+    }
+
+
+
+    this.send = function (options) {
+
+        var self = this,
+            stream = new yaxi.Stream(),
+            ajax = new XMLHttpRequest(),
+            any;
+        
+        // CORS
+        if (options.CORS)
+        {
+            // withCredentials是XMLHTTPRequest2中独有的
+            if ('withCredentials' in ajax)
+            {
+                ajax.withCredentials = true;
+            }
+            else if (any = window.XDomainRequest)
+            {
+                ajax = new any();
+            }
+        }
+
+        ajax.onreadystatechange = function () {
+
+            if (this.readyState === 4)
+            {
+                this.onreadystatechange = null;
+
+                clearTimeout(self.__timeout);
+
+                self.receive(this, stream, options);
+                self = stream = options = null;
+            }
+        }
+
+        ajax.open(options.method, options.url, options.async !== false);
+
+        if (options.contentType)
+        {
+            ajax.setRequestHeader('Content-Type', options.contentType);
+
+            // if (any = options.data)
+            // {
+            //     ajax.setRequestHeader('Content-Length', any.length);
+            // }
+        }
+
+        if (any = options.header)
+        {
+            for (var name in any)
+            {
+                ajax.setRequestHeader(name, any[name]);
+            }
+        }
+
+        this.__timeout = setTimeout(function () {
+
+            ajax.abort();
+
+            stream.reject({
+                url: url,
+                status: 'timeout'
+            });
+
+        }, options.timeout || 30000);
+
+        ajax.send(options.data);
+
+        return stream;
+    }
+
+
+    this.receive = function (ajax, stream, options) {
+
+        if (ajax.status >= 100 && ajax.status < 300)
+        {
+            this.response(ajax, stream, options);
+        }
+        else
+        {
+            stream.reject({
+                url: options.url,
+                status: ajax.status,
+                message: ajax.statusText || ajax.responseText,
+                options: options
+            });
+        }
+    }
+
+
+    this.response = function (ajax, stream, options) {
+
+        if (ajax.status === this.redirectStatus)
+        {
+            this.redirect();
+        }
+        else
+        {
+            stream.resolve(ajax.responseText || ajax.responseXML);
+        }
+    }
+
+
+
     
     function encodeData(data) {
 
@@ -82,20 +192,9 @@
     }
 
 
-    
-    function send(method, url, data, options) {
+    function parseOptions(method, url, data, options, flag) {
 
-        var stream = new yaxi.Stream(),
-            ajax = stream.ajax = new XMLHttpRequest(),
-            type,
-            any;
-
-        options = options || {};
-        options.method = method;
-        options.url = url;
-        options.data = data;
-        
-        if (/get|head|options/i.test(method))
+        if (flag || /GET|HEAD|OPTIONS/i.test(method))
         {
             if (data)
             {
@@ -103,150 +202,74 @@
                 data = null;
             }
         }
-        else if ((type = options.contentType) === enctype)
+        else if (options.contentType === enctype)
         {
             data = encodeData(data);
         }
-        else if (typeof data !== 'string')
+        else if (data && typeof data !== 'string')
         {
-            type = 'application/json';
+            options.contentType = 'application/json';
             data = JSON.stringify(data);
         }
-        
-        // CORS
-        if (options.CORS)
-        {
-            // withCredentials是XMLHTTPRequest2中独有的
-            if ('withCredentials' in ajax)
-            {
-                ajax.withCredentials = true;
-            }
-            else if (any = window.XDomainRequest)
-            {
-                ajax = new any();
-            }
+
+        options.method = method;
+        options.url = url;
+        options.data = data;
+
+        return options;
+    }
+
+
+
+    this.__class_init = function (Class) {
+
+
+        var parse = parseOptions;
+
+
+        Class.send = function (method, url, data, options) {
+
+            options = parse(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
+            return new Class().send(options);
         }
-
-        ajax.onreadystatechange = function () {
-
-            if (this.readyState === 4)
-            {
-                if (http.timeout)
-                {
-                    clearTimeout(http.timeout);
-                    http.timeout = 0;
-                }
-
-                if (this.status >= 100 && this.status < 300)
-                {
-                    if (this.status === http.redirectStatus)
-                    {
-                        http.redirect();
-                    }
-                    else
-                    {
-                        stream.resolve(this.responseText || this.responseXML);
-                    }
-                }
-                else
-                {
-                    stream.reject({
-                        url: url,
-                        status: this.status,
-                        message: this.statusText || this.responseText
-                    });
-                }
-                
-                // 清除引用
-                this.onreadystatechange = null;
-            }
-        }
-
-        ajax.open(method, url, options.async !== false);
-        
-        if (type)
-        {
-            ajax.setRequestHeader('Content-Type', type);
-            // ajax.setRequestHeader('Content-Length', data.length);
-        }
-
-        if (any = options.header)
-        {
-            for (var name in any)
-            {
-                ajax.setRequestHeader(name, any[name]);
-            }
-        }
-
-        http.timeout = setTimeout(function () {
-
-            ajax.abort();
-
-            stream.reject({
-                url: url,
-                status: 'timeout',
-                message: http.timeoutText
-            });
-
-        }, options.timeout || 30000);
-
-        ajax.send(data);
-
-        return stream;
-    }
-
-
-
-    // 重定向状态码
-    http.redirectStatus = 299;
-
-
-    // 超时提醒
-    http.timeoutText = '请求超时!';
-
-
-    // 重定向
-    http.redirect = function () {
-        
-        location.href = 'index.html';
-    }
-
-
-    http.send = function (method, url, data, options) {
-
-        return send(method || 'GET', url, data, options);
-    }
-
-
-    http.head = function (url, data, options) {
-
-        return send('HEAD', url, data, options);
-    }
-
-
-    http.get = function (url, data, options) {
-
-        return send('GET', url, data, options);
-    }
-
-
-    http.post = function (url, data, options) {
-
-        return send('POST', url, data, options);
-    }
-
-
-    http.put = function (url, data, options) {
-
-        return send('PUT', url, data, options);
-    }
     
-
-    http.del = function (url, data, options) {
-
-        return send('DELETE', url, data, options);
+    
+        Class.head = function (url, data, options) {
+    
+            options = parse('HEAD', url, data, options || {}, true);
+            return new Class().send(options);
+        }
+    
+    
+        Class.get = function (url, data, options) {
+    
+            options = parse('GET', url, data, options || {}, true);
+            return new Class().send(options);
+        }
+    
+    
+        Class.post = function (url, data, options) {
+    
+            options = parse('POST', url, data, options || {});
+            return new Class().send(options);
+        }
+    
+    
+        Class.put = function (url, data, options) {
+    
+            options = parse('PUT', url, data, options || {});
+            return new Class().send(options);
+        }
+        
+    
+        Class.del = function (url, data, options) {
+    
+            options = parse('DELETE', url, data, options || {});
+            return new Class().send(options);
+        }
     }
 
 
 
-})(yaxi);
+});
+

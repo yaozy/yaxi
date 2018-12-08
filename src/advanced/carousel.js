@@ -298,7 +298,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         {
             array.push('<div class="yx-carousel-dot', 
                 index === i ? ' yx-carousel-selected' : '',
-                '"><svg class="yx-icon-svg" aria-hidden="true"><use xlink:href="#icon-yaxi-circle"></use></svg></div>');
+                '"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg></div>');
         }
 
         return array.join('');
