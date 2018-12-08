@@ -18,6 +18,9 @@ yaxi.CircleText = yaxi.Control.extend(function () {
     this.$property('fill', '');
 
 
+    this.$property('color', '');
+
+
     
 
     this.__set_text = function (dom, value) {
@@ -43,6 +46,11 @@ yaxi.CircleText = yaxi.Control.extend(function () {
         dom.firstChild.style.fill = value;
     }
 
+
+    this.__set_color = function (dom, value) {
+
+        dom.lastChild.style.fill = value;
+    }
 
 
 
