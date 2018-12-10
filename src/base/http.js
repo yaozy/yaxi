@@ -79,7 +79,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             ajax.abort();
 
             stream.reject({
-                url: url,
+                url: options.url,
                 status: 'timeout'
             });
 

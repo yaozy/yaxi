@@ -218,6 +218,63 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 
 
 
+;(function (html) {
+
+
+    var encode = Object.create(null);
+
+    var decode = Object.create(null);
+
+
+    encode['&'] = '&amp;';
+    encode['<'] = '&lt;';
+    encode['>'] = '&gt;';
+    encode['\''] = '&apos;';
+    encode['"'] = '&quot;';
+
+    decode['amp'] = '&';
+    decode['lt'] = '<';
+    decode['gt'] = '>';
+    decode['apos'] = '\'';
+    decode['quot'] = '"';
+
+
+
+    //html编码函数
+    html.encode = function (text) {
+
+        if (text && typeof text === 'string')
+        {
+            var keys = encode;
+
+            return text.replace(/([&<>'"])/g, function (_, key) {
+
+                return keys[key];
+            });
+        }
+
+        return '' + text;
+    };
+
+
+    //html解码函数
+    html.decode = function (text) {
+
+        var keys = decode;
+
+        return text && text.replace(/&(\w+);/g, function (_, key) {
+
+            return keys[key] || key;
+        });
+    };
+
+
+
+})(yaxi.html = Object.create(null));
+
+
+
+
 ;(function (Math) {
 
 
@@ -3180,7 +3237,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             ajax.abort();
 
             stream.reject({
-                url: url,
+                url: options.url,
                 status: 'timeout'
             });
 
@@ -3373,10 +3430,6 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 });
-
-
-
-
 
 
 
@@ -5972,6 +6025,44 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
 
 }).register('Loading');
+
+
+
+
+yaxi.Multiline = yaxi.Control.extend(function () {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-multiline"></div>');
+
+
+
+    this.$property('text', '');
+
+
+
+    this.__set_text = function (dom, value) {
+
+        if (value)
+        {
+            var list = yaxi.html.encode(value).split('\n');
+
+            for (var i = list.length; i--;)
+            {
+                list[i] = '<div>' + encode(list[i]) + '</div>';
+            }
+
+            dom.innerHTML = list.join('');
+        }
+        else
+        {
+            dom.innerHTML = '';
+        }
+    }
+
+
+
+}).register('Multiline');
 
 
 
@@ -9368,7 +9459,7 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
 
-    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy=".4em" text-anchor="middle" style="font-size:500%;" /></svg>');
+    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy="20" text-anchor="middle" style="font-size:60;" /></svg>');
 
 
 
@@ -9385,6 +9476,9 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
     this.$property('color', '');
+
+
+    this.$property('textSize', 60);
 
 
     
@@ -9416,6 +9510,14 @@ yaxi.CircleText = yaxi.Control.extend(function () {
     this.__set_color = function (dom, value) {
 
         dom.lastChild.style.fill = value;
+    }
+
+
+    this.__set_textSize = function (dom, value) {
+
+        dom = dom.lastChild;
+        dom.style.fontSize = value;
+        dom.setAttribute('dy', 100 - value >> 1);
     }
 
 

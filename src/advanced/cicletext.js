@@ -2,7 +2,7 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
 
-    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy=".4em" text-anchor="middle" style="font-size:500%;" /></svg>');
+    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy="20" text-anchor="middle" style="font-size:60;" /></svg>');
 
 
 
@@ -19,6 +19,9 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
     this.$property('color', '');
+
+
+    this.$property('textSize', 60);
 
 
     
@@ -50,6 +53,14 @@ yaxi.CircleText = yaxi.Control.extend(function () {
     this.__set_color = function (dom, value) {
 
         dom.lastChild.style.fill = value;
+    }
+
+
+    this.__set_textSize = function (dom, value) {
+
+        dom = dom.lastChild;
+        dom.style.fontSize = value;
+        dom.setAttribute('dy', 100 - value >> 1);
     }
 
 
