@@ -18,7 +18,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
             for (var i = list.length; i--;)
             {
-                list[i] = '<div>' + encode(list[i]) + '</div>';
+                list[i] = '<div>' + list[i] + '</div>';
             }
 
             dom.innerHTML = list.join('');

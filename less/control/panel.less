@@ -1,5 +1,21 @@
 .yx-panel {
-    position:relative;
+    position: relative;
+}
+
+
+[layout="block"]>div,
+[layout="block"]>span {
+    display: block;
+}
+
+[layout="inline"]>div,
+[layout="inline"]>span {
+    display: inline;
+}
+
+[layout="inline-block"]>div,
+[layout="inline-block"]>span {
+    display: inline-block;
 }
 
 
@@ -23,11 +39,11 @@
     align-items: center;
 }
 
-[layout="row-fill"]>* {
+[layout="row-fill"]>div,
+[layout="row-fill"]>span {
     height: 100%;
     flex-grow: 1;
 }
-
 
 
 [layout="column"] {
@@ -53,7 +69,8 @@
     align-items: center;
 }
 
-[layout="column-fill"]>* {
+[layout="column-fill"]>div,
+[layout="column-fill"]>span {
     width: 100%;
     flex-grow: 1;
 }

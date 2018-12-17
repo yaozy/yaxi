@@ -4785,23 +4785,34 @@ yaxi.__extend_pulldown = function () {
 
     function scroll() {
 
-        var loading = this.__loading;
+        var loading;
 
-        if (!pulldown && loading && loading.status !== 'completed')
+        if (!pulldown && (loading = this.__loading) && loading.status !== 'completed')
         {
+            // 延时处理以避免加载太快
+            var time = new Date().getTime();
+
+            if (time - (loading.__time || 0) < 100)
+            {
+                return;
+            }
+
+            var dom = this.$dom;
+
             if (loading.before)
             {
-                if (this.scrollTop > this.offsetHeight)
+                if (dom.scrollTop > dom.offsetHeight)
                 {
                     return;
                 }
             }
-            else if (this.scrollTop + (this.offsetHeight << 1) < this.scrollHeight)
+            else if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
             {
                 return;
             }
 
             loading.index++;
+            loading.__time = time;
             loading.onload.call(this, loading);
         }
     }
@@ -6049,7 +6060,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
             for (var i = list.length; i--;)
             {
-                list[i] = '<div>' + encode(list[i]) + '</div>';
+                list[i] = '<div>' + list[i] + '</div>';
             }
 
             dom.innerHTML = list.join('');
@@ -6894,7 +6905,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.$property('selectedIndex', {
 
         type: 'int',
-        defaultValue: this.__index = -1
+        defaultValue: -1
     });
 
 
@@ -6913,7 +6924,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         get: function () {
 
-            var index = this.__index;
+            var index = this.selectedIndex;
             return index >= 0 && this.__children[index] || null;
         }
     });
@@ -6924,7 +6935,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         get: function () {
 
-            var index = this.__index,
+            var index = this.selectedIndex,
                 item;
 
             if (index >= 0 && (item = this.__children[index]))
@@ -6958,54 +6969,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     }
 
 
-    function openTab(index) {
-
-        var children = this.__children,
-            last,
-            item,
-            host;
-
-        if (last = children[this.__index])
-        {
-            last.theme = '';
-
-            if (host = last.host)
-            {
-                host.style.display = 'none';
-                host.onhide && host.onhide();
-            }
-        }
-
-        if (item = children[index])
-        {
-            item.theme = 'primary';
-
-            if (host = item.host)
-            {
-                host.style.display = 'block';
-                host.onshow && host.onshow();
-            }
-            else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
-            {
-                host = createControl(this.baseURL, item.url, item.args);
-
-                children.push(item.host = host);
-                host.onshow && host.onshow();
-            }
-        }
-        else if (last)
-        {
-            index = -1;
-        }
-
-        this.__index = index;
-
-        this.trigger('change', {
-            last: last,
-            selected: item
-        });
-    }
-
 
     function createControl(base, url, args) {
 
@@ -7034,7 +6997,50 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     this.__set_selectedIndex = function (dom, value) {
 
-        openTab.call(this, value | 0);
+        var children = this.__children,
+            last,
+            item,
+            host;
+
+        if (last = children[this.__index])
+        {
+            last.theme = '';
+
+            if (host = last.host)
+            {
+                host.style.display = 'none';
+                host.onhide && host.onhide();
+            }
+        }
+
+        if (item = children[value])
+        {
+            item.theme = 'primary';
+
+            if (host = item.host)
+            {
+                host.style.display = 'block';
+                host.onshow && host.onshow();
+            }
+            else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
+            {
+                host = createControl(this.baseURL, item.url, item.args);
+
+                children.push(item.host = host);
+                host.onshow && host.onshow();
+            }
+        }
+        else if (last)
+        {
+            value = -1;
+        }
+
+        this.__index = value;
+
+        this.trigger('change', {
+            last: last,
+            selected: item
+        });
     }
 
 
@@ -8099,7 +8105,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType) {
 		
-		if (this.onclosing(closeType) !== false)
+		if (this.onclosing(closeType || (closeType = 'OK')) !== false)
 		{
 			var opener = this.opener || null,
 				dom = this.$dom;
@@ -8786,6 +8792,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
     
         if (options.mask || options.loading && options.mask !== false)
         {
+            mask.style.backgroundColor = '';
             document.body.appendChild(mask);
         }
 
@@ -8809,15 +8816,22 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
                 break;
         }
 
-        delay = setTimeout(close, options.time || 2500);
+        if (options.time >= 0)
+        {
+            delay = setTimeout(close, 2500);
+        }
     }
 
 
     function close() {
 
         var any;
-
-        delay = 0;
+        
+        if (delay)
+        {
+            clearTimeout(delay);
+            delay = 0;
+        }
 
         if (any = dom.parentNode)
         {
@@ -8836,6 +8850,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
         if (delay)
         {
             clearTimeout(delay);
+            delay = 0;
         }
 
         if (!options)
@@ -8845,11 +8860,21 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
         if (typeof options === 'string')
         {
-            options = { text: options };
+            options = { text: options, time: 2500 };
+        }
+        else if (!options.time)
+        {
+            options.time = 2500;
         }
     
         if (options.delay > 0)
         {
+            if (!mask.parentNode)
+            {
+                mask.style.backgroundColor = 'rgba(255,255,255,0)';
+                document.body.appendChild(mask);
+            }
+
             delay = setTimeout(function () {
 
                 show(options);
@@ -8864,11 +8889,6 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
 
     this.toast.hide = function () {
-
-        if (delay)
-        {
-            clearTimeout(delay);
-        }
 
         close();
     }

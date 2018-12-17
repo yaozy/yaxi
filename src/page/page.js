@@ -244,7 +244,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType) {
 		
-		if (this.onclosing(closeType) !== false)
+		if (this.onclosing(closeType || (closeType = 'OK')) !== false)
 		{
 			var opener = this.opener || null,
 				dom = this.$dom;

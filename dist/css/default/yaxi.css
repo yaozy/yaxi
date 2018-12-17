@@ -227,6 +227,18 @@ textarea::-webkit-input-placeholder {
 .yx-panel {
   position: relative;
 }
+[layout="block"] > div,
+[layout="block"] > span {
+  display: block;
+}
+[layout="inline"] > div,
+[layout="inline"] > span {
+  display: inline;
+}
+[layout="inline-block"] > div,
+[layout="inline-block"] > span {
+  display: inline-block;
+}
 [layout="row"] {
   display: -webkit-flex;
   display: flex;
@@ -244,7 +256,8 @@ textarea::-webkit-input-placeholder {
   display: flex;
   align-items: center;
 }
-[layout="row-fill"] > * {
+[layout="row-fill"] > div,
+[layout="row-fill"] > span {
   height: 100%;
   flex-grow: 1;
 }
@@ -268,7 +281,8 @@ textarea::-webkit-input-placeholder {
   flex-flow: column;
   align-items: center;
 }
-[layout="column-fill"] > * {
+[layout="column-fill"] > div,
+[layout="column-fill"] > span {
   width: 100%;
   flex-grow: 1;
 }

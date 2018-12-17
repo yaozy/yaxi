@@ -25,6 +25,7 @@
     
         if (options.mask || options.loading && options.mask !== false)
         {
+            mask.style.backgroundColor = '';
             document.body.appendChild(mask);
         }
 
@@ -48,15 +49,22 @@
                 break;
         }
 
-        delay = setTimeout(close, options.time || 2500);
+        if (options.time >= 0)
+        {
+            delay = setTimeout(close, 2500);
+        }
     }
 
 
     function close() {
 
         var any;
-
-        delay = 0;
+        
+        if (delay)
+        {
+            clearTimeout(delay);
+            delay = 0;
+        }
 
         if (any = dom.parentNode)
         {
@@ -75,6 +83,7 @@
         if (delay)
         {
             clearTimeout(delay);
+            delay = 0;
         }
 
         if (!options)
@@ -84,11 +93,21 @@
 
         if (typeof options === 'string')
         {
-            options = { text: options };
+            options = { text: options, time: 2500 };
+        }
+        else if (!options.time)
+        {
+            options.time = 2500;
         }
     
         if (options.delay > 0)
         {
+            if (!mask.parentNode)
+            {
+                mask.style.backgroundColor = 'rgba(255,255,255,0)';
+                document.body.appendChild(mask);
+            }
+
             delay = setTimeout(function () {
 
                 show(options);
@@ -103,11 +122,6 @@
 
 
     this.toast.hide = function () {
-
-        if (delay)
-        {
-            clearTimeout(delay);
-        }
 
         close();
     }

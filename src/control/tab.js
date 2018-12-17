@@ -18,7 +18,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.$property('selectedIndex', {
 
         type: 'int',
-        defaultValue: this.__index = -1
+        defaultValue: -1
     });
 
 
@@ -37,7 +37,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         get: function () {
 
-            var index = this.__index;
+            var index = this.selectedIndex;
             return index >= 0 && this.__children[index] || null;
         }
     });
@@ -48,7 +48,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         get: function () {
 
-            var index = this.__index,
+            var index = this.selectedIndex,
                 item;
 
             if (index >= 0 && (item = this.__children[index]))
@@ -82,54 +82,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     }
 
 
-    function openTab(index) {
-
-        var children = this.__children,
-            last,
-            item,
-            host;
-
-        if (last = children[this.__index])
-        {
-            last.theme = '';
-
-            if (host = last.host)
-            {
-                host.style.display = 'none';
-                host.onhide && host.onhide();
-            }
-        }
-
-        if (item = children[index])
-        {
-            item.theme = 'primary';
-
-            if (host = item.host)
-            {
-                host.style.display = 'block';
-                host.onshow && host.onshow();
-            }
-            else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
-            {
-                host = createControl(this.baseURL, item.url, item.args);
-
-                children.push(item.host = host);
-                host.onshow && host.onshow();
-            }
-        }
-        else if (last)
-        {
-            index = -1;
-        }
-
-        this.__index = index;
-
-        this.trigger('change', {
-            last: last,
-            selected: item
-        });
-    }
-
 
     function createControl(base, url, args) {
 
@@ -158,7 +110,50 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     this.__set_selectedIndex = function (dom, value) {
 
-        openTab.call(this, value | 0);
+        var children = this.__children,
+            last,
+            item,
+            host;
+
+        if (last = children[this.__index])
+        {
+            last.theme = '';
+
+            if (host = last.host)
+            {
+                host.style.display = 'none';
+                host.onhide && host.onhide();
+            }
+        }
+
+        if (item = children[value])
+        {
+            item.theme = 'primary';
+
+            if (host = item.host)
+            {
+                host.style.display = 'block';
+                host.onshow && host.onshow();
+            }
+            else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
+            {
+                host = createControl(this.baseURL, item.url, item.args);
+
+                children.push(item.host = host);
+                host.onshow && host.onshow();
+            }
+        }
+        else if (last)
+        {
+            value = -1;
+        }
+
+        this.__index = value;
+
+        this.trigger('change', {
+            last: last,
+            selected: item
+        });
     }
 
 

@@ -396,23 +396,34 @@ yaxi.__extend_pulldown = function () {
 
     function scroll() {
 
-        var loading = this.__loading;
+        var loading;
 
-        if (!pulldown && loading && loading.status !== 'completed')
+        if (!pulldown && (loading = this.__loading) && loading.status !== 'completed')
         {
+            // 延时处理以避免加载太快
+            var time = new Date().getTime();
+
+            if (time - (loading.__time || 0) < 100)
+            {
+                return;
+            }
+
+            var dom = this.$dom;
+
             if (loading.before)
             {
-                if (this.scrollTop > this.offsetHeight)
+                if (dom.scrollTop > dom.offsetHeight)
                 {
                     return;
                 }
             }
-            else if (this.scrollTop + (this.offsetHeight << 1) < this.scrollHeight)
+            else if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
             {
                 return;
             }
 
             loading.index++;
+            loading.__time = time;
             loading.onload.call(this, loading);
         }
     }
