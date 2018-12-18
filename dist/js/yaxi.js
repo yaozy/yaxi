@@ -1611,6 +1611,28 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
+    // 定义转换器
+    this.$convert = function (name, fn, result) {
+
+        this['__convert_' + name] = typeof fn === 'function' ? [result !== false ? name : 0, fn] : false;
+    }
+
+
+
+    // 合并参数
+    this.$combine = function (data, defaults) {
+
+        if (data)
+        {
+            return defaults ? Object.assign({}, defaults, data) : data;
+        }
+        
+        return defaults;
+    }
+
+
+
+
     // 不处理Class属性
     this.__convert_Class = false;
 
@@ -7733,7 +7755,6 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-
     this.$property('text', '');
 
 
@@ -7747,6 +7768,10 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
 
 
     this.$property('uncheckedIcon', 'icon-yaxi-radio-unchecked');
+
+
+    // 互斥容器级别
+    this.$property('host', 1);
 
     
 
@@ -7789,16 +7814,51 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
 
     this.__on_tap = function () {
 
-        var binding = this.__binding_push;
-
-        this.checked = !this.checked;
-
-        if (binding)
+        if (!this.checked)
         {
-            binding.model.$push(this, this.checked);
+            var binding = this.__binding_push;
+
+            this.checked = true;
+    
+            if (binding)
+            {
+                binding.model.$push(this, true);
+            }
+    
+            this.trigger('change');
+
+            // 同一容器内的组件互斥
+            this.mutex(this.host)
+        }
+    }
+
+
+
+    this.mutex = function (host) {
+
+        var parent = this.parent;
+
+        host |= 0;
+
+        while (--host)
+        {
+            parent = parent.parent;
         }
 
-        this.trigger('change');
+        if (parent)
+        {
+            var list = parent.query('>>RadioButton');
+
+            for (var i = list.length; i--;)
+            {
+                var item = list[i];
+    
+                if (item instanceof Class && item !== this && item.checked)
+                {
+                    item.checked = false;
+                }
+            }
+        }
     }
 
 

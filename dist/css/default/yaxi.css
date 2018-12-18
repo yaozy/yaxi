@@ -418,16 +418,19 @@ textarea::-webkit-input-placeholder {
   height: 0.3rem;
   line-height: 0.3rem;
 }
-.yx-checkbox > * {
+.yx-checkbox > svg {
   display: inline-block;
   vertical-align: middle;
-}
-.yx-checkbox > svg {
   overflow: hidden;
   margin: 0 0.04rem;
   width: 1em;
   height: 1em;
   vertical-align: text-bottom;
+}
+.yx-checkbox > span {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0.1em;
 }
 .yx-memo {
   display: inline-block;
@@ -512,16 +515,19 @@ textarea::-webkit-input-placeholder {
   height: 0.3rem;
   line-height: 0.3rem;
 }
-.yx-radiobutton > * {
+.yx-radiobutton > svg {
   display: inline-block;
   vertical-align: middle;
-}
-.yx-radiobutton > svg {
   overflow: hidden;
   margin: 0 0.04rem;
   width: 1em;
   height: 1em;
   vertical-align: text-bottom;
+}
+.yx-radiobutton > span {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0.1em;
 }
 .yx-switchbutton {
   position: relative;

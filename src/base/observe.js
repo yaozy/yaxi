@@ -110,6 +110,28 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
+    // 定义转换器
+    this.$convert = function (name, fn, result) {
+
+        this['__convert_' + name] = typeof fn === 'function' ? [result !== false ? name : 0, fn] : false;
+    }
+
+
+
+    // 合并参数
+    this.$combine = function (data, defaults) {
+
+        if (data)
+        {
+            return defaults ? Object.assign({}, defaults, data) : data;
+        }
+        
+        return defaults;
+    }
+
+
+
+
     // 不处理Class属性
     this.__convert_Class = false;
 
