@@ -38,7 +38,7 @@ yaxi.showMessage = function (options) {
                 },
                 children: [
                     {
-                        Class: yaxi.Text,
+                        Class: yaxi.Multiline,
                         text: options.content
                     }
                 ]

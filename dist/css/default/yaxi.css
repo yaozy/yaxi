@@ -228,15 +228,18 @@ textarea::-webkit-input-placeholder {
   position: relative;
 }
 [layout="block"] > div,
-[layout="block"] > span {
+[layout="block"] > span,
+[layout="block"] > * {
   display: block;
 }
 [layout="inline"] > div,
-[layout="inline"] > span {
+[layout="inline"] > span,
+[layout="inline"] > * {
   display: inline;
 }
 [layout="inline-block"] > div,
-[layout="inline-block"] > span {
+[layout="inline-block"] > span,
+[layout="inline-block"] > * {
   display: inline-block;
 }
 [layout="row"] {
@@ -257,7 +260,8 @@ textarea::-webkit-input-placeholder {
   align-items: center;
 }
 [layout="row-fill"] > div,
-[layout="row-fill"] > span {
+[layout="row-fill"] > span,
+[layout="row-fill"] > * {
   height: 100%;
   flex-grow: 1;
 }
@@ -282,7 +286,8 @@ textarea::-webkit-input-placeholder {
   align-items: center;
 }
 [layout="column-fill"] > div,
-[layout="column-fill"] > span {
+[layout="column-fill"] > span,
+[layout="column-fill"] > * {
   width: 100%;
   flex-grow: 1;
 }
@@ -568,7 +573,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-dialog {
   overflow: hidden;
-  width: 80%;
+  width: 3.15rem;
   height: auto;
   min-height: 1.2rem;
   border-radius: 0.05rem;

@@ -105,26 +105,38 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
     };
 
 
-    this.addYear = function (value) {
 
-        this.setFullYear(this.getFullYear() + (value | 0));
+    this.addHour = function (value) {
+
+        if (value |= 0)
+        {
+            this.setTime(this.getTime() + value * 3600000);
+        }
+
         return this;
-    };
+    }
 
 
-    this.addMonth = function (value) {
+    this.addMinute = function (value) {
 
-        this.setMonth(this.getMonth() + (value | 0));
+        if (value |= 0)
+        {
+            this.setTime(this.getTime() + value * 60000);
+        }
+
         return this;
-    };
+    }
 
 
-    this.addDate = function (value) {
+    this.addSecond = function (value) {
 
-        this.setDate(this.getDate() + (value | 0));
+        if (value |= 0)
+        {
+            this.setTime(this.getTime() + value * 1000);
+        }
+
         return this;
-    };
-
+    }
 
 
     //解决不同浏览器对字符串解析不同的问题(不同浏览器之间存在很多差别)
