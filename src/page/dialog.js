@@ -1,8 +1,8 @@
-yaxi.Dialog = yaxi.Page.extend(function (Class, base) {
+yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	
 	
 	
-	var stack = [];
+	var stack = Class.stack = [];
 	
 	var eventName = 'ontouchstart' ? 'touchstart' : 'mousedown';
 

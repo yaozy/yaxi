@@ -149,12 +149,15 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
+    var last = 0;
+
     var position = 0;
 
 
     function touchstart() {
 
-        var dom = this.$dom;
+        var dom = this.$dom,
+            width = dom.clientWidth;
 
         if (this.__delay)
         {
@@ -162,14 +165,28 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
             this.__delay = 0;
         }
 
-        position = -this.index * dom.clientWidth;
+        last = -(this.__children.length - 1) * width;
+        position = -this.index * width;
+
         dom.firstChild.style.transition = '';
     }
 
 
     function touchmove(event) {
 
-        this.$dom.firstChild.style.transform = 'translateX(' + (position + event.distanceX) + 'px)';
+        var offset = position + event.distanceX;
+
+        if (offset > 0)
+        {
+            offset = 0;
+        }
+        else if (offset < last)
+        {
+            offset = last;
+        }
+
+        this.$dom.firstChild.style.transform = 'translateX(' + offset + 'px)';
+
         event.stop();
         return false;
     }
@@ -216,7 +233,10 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         }
         else // 回到第一页动画特殊处理
         {
-            any = +style1.transform.match(/\d+/) + 100;
+            if (any = +style1.transform.match(/\d+/) | 0)
+            {
+                any += 100;
+            }
 
             style2 = dom.firstChild.firstChild.style;
             style2.transform = 'translateX(' + any + '%)';

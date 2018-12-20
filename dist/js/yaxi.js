@@ -2988,15 +2988,13 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
-    this.reject = function (reason, abort) {
+    this.reject = function (reason) {
 
         var fn = this.__fail,
             next = this.__next;
 
         if (fn)
         {
-            abort = true;
-
             try
             {
                 if (fn.call(this, reason, next) === false)
@@ -3004,20 +3002,17 @@ yaxi.Stream = Object.extend(function (Class) {
                     return false;
                 }
             }
-            catch (error)
+            catch (e)
             {
-                console.error(error);
-                
-                reason = error.message || error || reason;
-                abort = false;
+                reason = e;
             }
         }
 
         if (next)
         {
-            next.reject(reason, abort);
+            next.reject(reason);
         }
-        else if (!abort) // 处理过则不再抛出异常
+        else
         {
             throw reason;
         }
@@ -3239,10 +3234,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             {
                 this.onreadystatechange = null;
 
-                clearTimeout(self.__timeout);
-
-                self.receive(this, stream, options);
-                self = stream = options = null;
+                if (self)
+                {
+                    clearTimeout(this.__timeout);
+                    self.receive(this, stream, options);
+                }
             }
         }
 
@@ -3266,8 +3262,9 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             }
         }
 
-        this.__timeout = setTimeout(function () {
+        ajax.__timeout = setTimeout(function () {
 
+            self = null;
             ajax.abort();
 
             stream.reject({
@@ -3400,7 +3397,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
         }
         else if (data && typeof data !== 'string')
         {
-            options.contentType = 'application/json';
+            if (!options.contentType)
+            {
+                options.contentType = 'application/json';
+            }
+            
             data = JSON.stringify(data);
         }
 
@@ -8367,11 +8368,11 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.Dialog = yaxi.Page.extend(function (Class, base) {
+yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	
 	
 	
-	var stack = [];
+	var stack = Class.stack = [];
 	
 	var eventName = 'ontouchstart' ? 'touchstart' : 'mousedown';
 
@@ -9367,12 +9368,15 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
+    var last = 0;
+
     var position = 0;
 
 
     function touchstart() {
 
-        var dom = this.$dom;
+        var dom = this.$dom,
+            width = dom.clientWidth;
 
         if (this.__delay)
         {
@@ -9380,14 +9384,28 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
             this.__delay = 0;
         }
 
-        position = -this.index * dom.clientWidth;
+        last = -(this.__children.length - 1) * width;
+        position = -this.index * width;
+
         dom.firstChild.style.transition = '';
     }
 
 
     function touchmove(event) {
 
-        this.$dom.firstChild.style.transform = 'translateX(' + (position + event.distanceX) + 'px)';
+        var offset = position + event.distanceX;
+
+        if (offset > 0)
+        {
+            offset = 0;
+        }
+        else if (offset < last)
+        {
+            offset = last;
+        }
+
+        this.$dom.firstChild.style.transform = 'translateX(' + offset + 'px)';
+
         event.stop();
         return false;
     }
@@ -9434,7 +9452,10 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         }
         else // 回到第一页动画特殊处理
         {
-            any = +style1.transform.match(/\d+/) + 100;
+            if (any = +style1.transform.match(/\d+/) | 0)
+            {
+                any += 100;
+            }
 
             style2 = dom.firstChild.firstChild.style;
             style2.transform = 'translateX(' + any + '%)';

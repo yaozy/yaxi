@@ -47,10 +47,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             {
                 this.onreadystatechange = null;
 
-                clearTimeout(self.__timeout);
-
-                self.receive(this, stream, options);
-                self = stream = options = null;
+                if (self)
+                {
+                    clearTimeout(this.__timeout);
+                    self.receive(this, stream, options);
+                }
             }
         }
 
@@ -74,8 +75,9 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             }
         }
 
-        this.__timeout = setTimeout(function () {
+        ajax.__timeout = setTimeout(function () {
 
+            self = null;
             ajax.abort();
 
             stream.reject({
@@ -208,7 +210,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
         }
         else if (data && typeof data !== 'string')
         {
-            options.contentType = 'application/json';
+            if (!options.contentType)
+            {
+                options.contentType = 'application/json';
+            }
+            
             data = JSON.stringify(data);
         }
 

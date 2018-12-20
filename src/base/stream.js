@@ -181,15 +181,13 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
-    this.reject = function (reason, abort) {
+    this.reject = function (reason) {
 
         var fn = this.__fail,
             next = this.__next;
 
         if (fn)
         {
-            abort = true;
-
             try
             {
                 if (fn.call(this, reason, next) === false)
@@ -197,20 +195,17 @@ yaxi.Stream = Object.extend(function (Class) {
                     return false;
                 }
             }
-            catch (error)
+            catch (e)
             {
-                console.error(error);
-                
-                reason = error.message || error || reason;
-                abort = false;
+                reason = e;
             }
         }
 
         if (next)
         {
-            next.reject(reason, abort);
+            next.reject(reason);
         }
-        else if (!abort) // 处理过则不再抛出异常
+        else
         {
             throw reason;
         }
