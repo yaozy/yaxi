@@ -47,7 +47,7 @@ yaxi.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = require.fn(this.baseURL, url),
+                var Class = require.execute(this.baseURL, url),
                     args = control.args;
 
                 if (args && args.length > 0)

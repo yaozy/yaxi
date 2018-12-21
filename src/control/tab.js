@@ -85,7 +85,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = require.fn(base, url),
+        var Class = require.execute(base, url),
             control,
             style;
 

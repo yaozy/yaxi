@@ -51,7 +51,7 @@
 
         if (options.time >= 0)
         {
-            delay = setTimeout(close, 2500);
+            delay = setTimeout(close, options.time || 2500);
         }
     }
 

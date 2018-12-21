@@ -3470,115 +3470,67 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-window.require = window.require || (function () {
+window.require || (function () {
 
 
 
 	// 已加载缓存集合
-	var caches = Object.create(null);
+	var modules = Object.create(null);
 
     // 已加载的多语言资源
     var languages = Object.create(null);
 
-	// 基础路径
-	var base = location.href.substring(0, location.href.lastIndexOf('/'));
+    // 内联的模块集合
+    var inlines = Object.create(null);
+
+
+    // 全局require
+    var global;
 
 
 
 
-	function absouteUrl(path, url) {
-		
-		var path;
-		
-		url = path + url;
-		
-		while (true)
-		{
-			path = url.replace(/[^/]*\/\.\.\//, '');
-			
-			if (path === url)
-			{
-				break;
-			}
-			
-			url = path;
-		}
-		
-		return url.replace(/[.]+\//g, '');
-	}
+    function factory(base) {
 
+        var last = base.length - 1;
 
+        function require(url, cmd) {
 
-	function loadCss(text) {
-
-        var dom = document.createElement('style');  
-			
-        dom.setAttribute('type', 'text/css');  
-    
-        if (dom.styleSheet) // IE  
-        {
-            dom.styleSheet.cssText = text;  
-        }
-        else // w3c  
-        {
-            dom.appendChild(document.createTextNode(text));  
-        }
-    
-        document.head.appendChild(dom);
-
-        return { exports: true };
-	}
-
-
-	function loadJs(text, url, cmd) {
-
-        var module = { exports: {} },
-            fn;
-
-        if (text)
-        {
-            text = text + '\r\n//# sourceURL=' + url;
-
-            if (cmd === false)
-            {
-                eval.call(window, text);
-            }
-            else
-            {
-                url = url.substring(0, url.lastIndexOf('/') + 1);
-
-                fn = require.bind(this, url);
-                fn.baseURL = url;
-
-                new Function(['require', 'exports', 'module'], text)(fn, module.exports, module);
-            }
+            return execute(require.baseURL, url, cmd);
         }
 
-		return module;
-	}
+        if (base[last] === '/')
+        {
+            base = base.substring(0, last);
+        }
+
+        require.baseURL = base;
+
+        return require;
+    }
 
 
 
-	function require(path, url, cmd) {
-		
-		var ext = url.match(/\.\w+$/),
-			any;
+    function execute(base, url, cmd) {
 
-		if (ext)
-		{
-			ext = ext[0].toLowerCase();
-		}
-		else
-		{
-			url += '.js';
-			ext = '.js';
-		}
+        var ext = url.match(/\.\w+$/),
+            any;
 
-		url = url[0] === '/' ? base + url : absouteUrl(path || base, url);
+        if (ext)
+        {
+            ext = ext[0].toLowerCase();
+        }
+        else
+        {
+            url += '.js';
+            ext = '.js';
+        }
 
-		if (any = caches[url])
-		{
-			return any.exports;
+        url = url[0] === '/' ? global.baseURL + url : absouteUrl(base, url);
+
+        if (any = modules[url])
+        {
+            return any.exports;
         }
 
         if (url.indexOf('{{language}}') >= 0)
@@ -3589,7 +3541,54 @@ window.require = window.require || (function () {
         
         return load(url, ext, cmd);
     }
+
     
+	function absouteUrl(base, url) {
+		
+		var base;
+		
+		url = base + '/' + url;
+		
+		while (true)
+		{
+			base = url.replace(/[^/]*\/\.\.\//, '');
+			
+			if (base === url)
+			{
+				break;
+			}
+			
+			url = base;
+		}
+		
+		return url.replace(/[.]+\//g, '');
+	}
+
+
+    function load(url, ext, cmd, path) {
+
+        var text = inlines[path || url] || ajax(path || url);
+		
+		switch (ext)
+		{
+			case '.css':
+                modules[url] = loadCss(text);
+                return true;
+
+			case '.js':
+                return (modules[url] = loadJs(text, path || url, cmd)).exports;
+
+            case '.json':
+                text = text ? JSON.parse(text) : null;
+                modules[url] = { exports: text };
+                return text;
+
+			default:
+                modules[url] = { exports: text };
+                return text;
+		}
+    }
+
 
     function ajax(url) {
 
@@ -3621,78 +3620,51 @@ window.require = window.require || (function () {
     }
 
 
-    function load(url, ext, cmd, path) {
+	function loadCss(text) {
 
-        var text = ajax(path || url);
-		
-		switch (ext)
-		{
-			case '.css':
-                caches[url] = loadCss(text);
-                return true;
-
-			case '.js':
-                return (caches[url] = loadJs(text, path || url, cmd)).exports;
-
-            case '.json':
-                text = text ? JSON.parse(text) : null;
-                caches[url] = { exports: text };
-                return text;
-
-			default:
-                caches[url] = { exports: text };
-                return text;
-		}
-    }
-
-
-
-
-	function requireGlobal(url, cmd) {
-
-		return require(base, url, cmd);
-    }
-
-
-
-    requireGlobal.fn = require;
-
-
-    requireGlobal.switchLanguage = function (language) {
-
-        if (language)
+        var dom = document.createElement('style');  
+			
+        dom.setAttribute('type', 'text/css');  
+    
+        if (dom.styleSheet) // IE  
         {
-            var user = require(base, '/utils/user.js');
-
-            yaxi.language = language;
-            
-            user.language = language;
-            user.save();
+            dom.styleSheet.cssText = text;  
         }
-        else
+        else // w3c  
         {
-            language = yaxi.language;
+            dom.appendChild(document.createTextNode(text));  
         }
+    
+        document.head.appendChild(dom);
 
-        for (var key in languages)
+        return { exports: true };
+	}
+
+
+	function loadJs(text, url, cmd) {
+
+        var module = { exports: {} };
+
+        if (text)
         {
-            var url = key.replace('{{language}}', language),
-                data = ajax(url);
+            text = text + '\r\n//# sourceURL=' + url;
 
-            switch (languages[key])
+            if (cmd === false)
             {
-                case '.js':
-                    data = loadJs(data, url).exports;
-                    break;
-
-                case '.json':
-                    data = data ? JSON.parse(text) : null;
-                    break;
+                eval.call(window, text);
             }
-
-            mixin(caches[key].exports, data);
+            else
+            {
+                new Function(['require', 'exports', 'module'], text)(
+                    factory(url.substring(0, url.lastIndexOf('/') + 1)),
+                    module.exports,
+                    module);
+            }
         }
+
+		return module;
     }
+    
 
 
     function mixin(target, source) {
@@ -3714,11 +3686,48 @@ window.require = window.require || (function () {
 
 
 
-    return requireGlobal;
 
+    global = window.require = factory(location.href.substring(0, location.href.lastIndexOf('/')));
     
 
-})(window);
+    global.execute = execute;
+
+
+    global.switchLanguage = function (language) {
+
+        yaxi.language = language;
+
+        for (var key in languages)
+        {
+            var url = key.replace('{{language}}', language),
+                data = ajax(url);
+
+            switch (languages[key])
+            {
+                case '.js':
+                    data = loadJs(data, url).exports;
+                    break;
+
+                case '.json':
+                    data = data ? JSON.parse(text) : null;
+                    break;
+            }
+
+            mixin(modules[key].exports, data);
+        }
+    }
+
+    
+    
+    // 定义window模块
+    global.define = function (name, text) {
+
+        
+    }
+
+
+
+})();
 
 
 
@@ -4471,7 +4480,7 @@ yaxi.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = require.fn(this.baseURL, url),
+                var Class = require.execute(this.baseURL, url),
                     args = control.args;
 
                 if (args && args.length > 0)
@@ -7007,7 +7016,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = require.fn(base, url),
+        var Class = require.execute(base, url),
             control,
             style;
 
@@ -8891,7 +8900,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
         if (options.time >= 0)
         {
-            delay = setTimeout(close, 2500);
+            delay = setTimeout(close, options.time || 2500);
         }
     }
 
