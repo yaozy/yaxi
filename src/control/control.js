@@ -1,12 +1,14 @@
 yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
+
+    var create = Object.create;
+
     
     var eventTarget = yaxi.EventTarget.prototype;
 
-
     // 注册的控件类集合
-    var Controls = yaxi.Controls = Object.create(null);
+    var Controls = yaxi.Controls = create(null);
 
 
 
@@ -84,10 +86,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     });
 
     
-    this.__convert_style = [0, function (data) {
+    this.$converters.style = {
+        
+        fn: function (data) {
      
-        this.__style = new yaxi.Style(this, data);
-    }];
+            this.__style = new yaxi.Style(this, data);
+        }
+    };
 
 
 
@@ -242,13 +247,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.__convert_events = [0, function (events) {
+    this.$converters.events = {
+        
+        fn: function (events) {
 
-        for (var name in events)
-        {
-            this.on(name, events[name]);
+            for (var name in events)
+            {
+                this.on(name, events[name]);
+            }
         }
-    }];
+    };
 
 
 
@@ -508,7 +516,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     // 更新补丁
-    var renderer = this.renderer = Object.create(null);
+    var renderer = this.renderer = create(null);
 
 
     renderer.className = function (dom, value) {
@@ -602,6 +610,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         this.parent = this.$storage = this.__loading = this.__pulldown = null;
         this.destroyed = true;
+    }
+
+
+
+    
+    this.__class_init = function (Class, base) {
+
+        this.$defaults = create(base.$defaults);
+        this.$converters = create(base.$converters);
+        this.renderer = create(base.renderer);
     }
 
 

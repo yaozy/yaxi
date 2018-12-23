@@ -34,28 +34,16 @@ Object.extend = function (fn) {
     Class.extend = this.extend || Object.extend;
     Class.prototype = prototype;
 
-    // 如父类支持属性默认值则生成默认值集合
-    if (base && base.$defaults)
+    // 类初始化
+    if (prototype.__class_init)
     {
-        prototype.$defaults = Object.create(base.$defaults);
-
-        // 如果父类支持更新补丁则自动生成更新补丁对象
-        if (base.renderer)
-        {
-            prototype.renderer = Object.create(base.renderer);
-        }
+        prototype.__class_init(Class, base);
     }
 
     if (fn)
     {
         fn.call(prototype, Class, base);
         ctor = Class.ctor;
-    }
-
-    // 类初始化
-    if (fn = prototype.__class_init)
-    {
-        fn.call(prototype, Class, base);
     }
 
 	return Class;
@@ -760,7 +748,7 @@ yaxi.__extend_properties = function (get, set) {
     // 定义属性方法
     return function (name, options, change) {
 
-        var defaultValue, convertor, key;
+        var defaultValue, converter, key;
 
         if (/\W/.test(name))
         {
@@ -771,7 +759,7 @@ yaxi.__extend_properties = function (get, set) {
         {
             key = options.name || name;
             defaultValue = options.defaultValue;
-            convertor = options.convertor;
+            converter = options.converter;
 
             if (defaultValue === void 0)
             {
@@ -785,42 +773,47 @@ yaxi.__extend_properties = function (get, set) {
             options = {};
         }
 
-        if (!convertor)
+        if (!converter)
         {
             switch (options.type || typeof defaultValue)
             {
                 case 'boolean':
-                    convertor = to_boolean;
+                    converter = to_boolean;
                     break;
     
                 case 'int':
                 case 'integer':
-                    convertor = to_integer;
+                    converter = to_integer;
                     break;
     
                 case 'number':
-                    convertor = to_number;
+                    converter = to_number;
                     break;
     
                 case 'string':
-                    convertor = to_string;
+                    converter = to_string;
                     break;
     
                 case 'date':
-                    convertor = to_date;
+                    converter = to_date;
                     break;
     
                 default:
-                    convertor = to_object;
+                    converter = to_object;
                     break;
             }
         }
  
         options.get || (options.get = get(key, change = change !== false));
-        options.set || (options.set = set(key, convertor, change));
+        options.set || (options.set = set(key, converter, change));
 
         this.$defaults[name] = defaultValue;
-        this['__convert_' + name] = [key, convertor, change];
+
+        this.$converters[name] = {
+            name: key,
+            change: change,
+            fn: converter
+        };
 
         define(this, name, options);
     }
@@ -1540,31 +1533,30 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     // 初始化数据
     this.__init = function (data) {
 
-        var changes, convert, any;
+        var converters = this.$converters,
+            converter,
+            changes,
+            key;
 
         for (var name in data)
         {
-            if (convert = this['__convert_' + name])
+            if (converter = converters[name])
             {
-                // 默认转换器
-                if (any = convert[0])
+                // 需要处理变化
+                if (converter.change)
                 {
-                    // 需要处理变化
-                    if (convert[2])
-                    {
-                        (changes || (changes = this.__changes = {}))[name] = convert[1].call(this, data[name]);
-                    }
-                    else
-                    {
-                        this.$storage[any] = convert[1].call(this, data[name]);
-                    }
+                    (changes || (changes = this.__changes = {}))[name] = converter.fn.call(this, data[name]);
+                }
+                else if (key = converter.name) // 默认转换器
+                {
+                    this.$storage[key] = converter.fn.call(this, data[name]);
                 }
                 else // 自定义转换器
                 {
-                    convert[1].call(this, data[name]);
+                    converter.fn.call(this, data[name]);
                 }
             }
-            else if (convert !== false)
+            else if (converter !== false)
             {
                 this[name] = data[name];
             }
@@ -1574,7 +1566,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 默认值集合
-    this.$defaults = Object.create(null);
+    this.$defaults = create(null);
+
+
+    // 转换器集合
+    this.$converters = create(null);
 
 
     
@@ -1591,13 +1587,13 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
             return this.$storage[name];
         }
 
-    }, function (name, convertor, change) {
+    }, function (name, converter, change) {
 
         return change ? function (value) {
 
             var changes = this.__changes;
 
-            value = convertor.call(this, value);
+            value = converter.call(this, value);
 
             if (changes)
             {
@@ -1622,18 +1618,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
         } : function (value) {
 
-            this.$storage[name] = convertor.call(this, value);
+            this.$storage[name] = converter.call(this, value);
         }
 
     });
 
-
-
-    // 定义转换器
-    this.$convert = function (name, fn, result) {
-
-        this['__convert_' + name] = typeof fn === 'function' ? [result !== false ? name : 0, fn] : false;
-    }
 
 
 
@@ -1648,11 +1637,6 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
         return defaults;
     }
 
-
-
-
-    // 不处理Class属性
-    this.__convert_Class = false;
 
 
 
@@ -1705,18 +1689,23 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
+    // 不转换Class
+    this.$converters.Class = false;
+
 
     // 转换bindings
-    this.__convert_bindings = [0, function (data) {
+    this.$converters.bindings = {
 
-        var model;
+        fn: function (data) {
 
-        if (data && (model = this.model = this.__find_model()))
-        {
-            model.$bind(this, data);
+            var model;
+
+            if (data && (model = this.model = this.__find_model()))
+            {
+                model.$bind(this, data);
+            }
         }
-    }];
-
+    };
 
 
 
@@ -1789,6 +1778,16 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     yaxi.__patch_update = update;
 
     
+
+
+
+    this.__class_init = function (Class, base) {
+
+        this.$defaults = create(base.$defaults);
+        this.$converters = create(base.$converters);
+    }
+
+
 
 });
 
@@ -2010,6 +2009,8 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
         
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
+
+        prototype.$converters = extend(null);
         
         for (var name in properties)
         {
@@ -2140,7 +2141,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             return this.$storage[name];
         }
 
-    }, function (name, convertor) {
+    }, function (name, converter) {
 
         var watches = watchKeys;
 
@@ -2148,9 +2149,9 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
             var any = this.$storage;
 
-            if (convertor)
+            if (converter)
             {
-                value = convertor(value);
+                value = converter(value);
             }
 
             if (value === any[name] || watches[name] && this.$notify(name, value) === false)
@@ -2493,13 +2494,14 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (data)
         {
-            var storage = this.$storage || (this.$storage = {});
+            var converter = this.$converters,
+                storage = this.$storage || (this.$storage = {});
 
             for (var name in data)
             {
-                if (convert = this['__convert_' + name])
+                if (convert = converter[name])
                 {
-                    storage[name] = convert[1].call(this, data[name]);
+                    storage[name] = convert.fn.call(this, data[name]);
                 }
                 else
                 {
@@ -2535,7 +2537,6 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             }
         }
     }
-
 
 
 
@@ -3826,12 +3827,14 @@ window.require || (function () {
 yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
+
+    var create = Object.create;
+
     
     var eventTarget = yaxi.EventTarget.prototype;
 
-
     // 注册的控件类集合
-    var Controls = yaxi.Controls = Object.create(null);
+    var Controls = yaxi.Controls = create(null);
 
 
 
@@ -3909,10 +3912,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     });
 
     
-    this.__convert_style = [0, function (data) {
+    this.$converters.style = {
+        
+        fn: function (data) {
      
-        this.__style = new yaxi.Style(this, data);
-    }];
+            this.__style = new yaxi.Style(this, data);
+        }
+    };
 
 
 
@@ -4067,13 +4073,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.__convert_events = [0, function (events) {
+    this.$converters.events = {
+        
+        fn: function (events) {
 
-        for (var name in events)
-        {
-            this.on(name, events[name]);
+            for (var name in events)
+            {
+                this.on(name, events[name]);
+            }
         }
-    }];
+    };
 
 
 
@@ -4333,7 +4342,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     // 更新补丁
-    var renderer = this.renderer = Object.create(null);
+    var renderer = this.renderer = create(null);
 
 
     renderer.className = function (dom, value) {
@@ -4431,6 +4440,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    
+    this.__class_init = function (Class, base) {
+
+        this.$defaults = create(base.$defaults);
+        this.$converters = create(base.$converters);
+        this.renderer = create(base.renderer);
+    }
+
+
+
 }).register('Control');
 
 
@@ -4453,7 +4472,7 @@ yaxi.container = function (base) {
     
         defaultValue: false,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             value = !!value;
 
@@ -5019,13 +5038,16 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.__convert_children = [0, function (value) {
+    this.$converters.children = {
+        
+        fn: function (value) {
       
-        if (value && value.length > 0)
-        {
-            this.__children.__init(this, value);
+            if (value && value.length > 0)
+            {
+                this.__children.__init(this, value);
+            }
         }
-    }];
+    };
 
 
     // 子控件类型
@@ -6766,7 +6788,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         defaultValue: null,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             if (value)
             {
@@ -6794,7 +6816,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             var storage = this.$storage;
 
-            value = this.__convert_store[1].call(this, value);
+            value = this.$converters.store.fn.call(this, value);
 
             if (storage.store !== value)
             {
@@ -6970,7 +6992,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.__convert_openURL = false;
+    this.$converters.openURL = false;
 
 
 
@@ -7157,7 +7179,7 @@ yaxi.Text = yaxi.Control.extend(function () {
     this.$property('format', {
     
         defaultValue: null,
-        convertor: function (value) {
+        converter: function (value) {
 
             this.__format = typeof value === 'function' ? value : yaxi.pipe.compile(value);
             return value;
@@ -7252,7 +7274,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     
         defaultValue: null,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             this.__format = typeof value === 'function' ? value : yaxi.pipe.compile(value);
             return value;
@@ -7559,7 +7581,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
     this.$property('value', {
     
         defaultValue: 0,
-        convertor: function (value) {
+        converter: function (value) {
 
             var any;
 
@@ -8082,25 +8104,28 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 
 
-	this.__convert_header = [0, function (data) {
+	this.$converters.header = {
 		
-		var control;
+		fn: function (data) {
+		
+			var control;
 
-		if (!data || typeof data !== 'object')
-		{
-			data = this.__template_header(data);
+			if (!data || typeof data !== 'object')
+			{
+				data = this.__template_header(data);
+			}
+			
+			data.key = data.key || 'page-header';
+			data.className = 'yx-header ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+
+			control.__init(data);
+
+			this.__children.push(this.header = control);
 		}
-		
-		data.key = data.key || 'page-header';
-		data.className = 'yx-header ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-
-		control.__init(data);
-
-		this.__children.push(this.header = control);
-	}];
+	};
 
 
 	this.__template_header = function (text) {
@@ -8119,51 +8144,57 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.__convert_content = [0, function (data) {
+	this.$converters.content = {
 		
-		var control;
+		fn: function (data) {
 		
-		if (!data || typeof data !== 'object')
-		{
-			data = {
-				Class: yaxi.Text,
-				text: data
-			};
+			var control;
+			
+			if (!data || typeof data !== 'object')
+			{
+				data = {
+					Class: yaxi.Text,
+					text: data
+				};
+			}
+
+			data.key = data.key || 'page-content';
+			data.className = 'yx-content ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+			control.__init(data);
+
+			this.__children.push(this.content = control);
 		}
-
-		data.key = data.key || 'page-content';
-		data.className = 'yx-content ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-		control.__init(data);
-
-		this.__children.push(this.content = control);
-	}];
+	};
 	
 	
-	this.__convert_footer = [0, function (data) {
+	this.$converters.footer = {
+		
+		fn: function (data) {
 	
-		var control;
+			var control;
 
-		if (!data || typeof data !== 'object')
-		{
-			data = {
-				Class: yaxi.Text,
-				text: data
-			};
+			if (!data || typeof data !== 'object')
+			{
+				data = {
+					Class: yaxi.Text,
+					text: data
+				};
+			}
+
+			data.key = data.key || 'page-footer';
+			data.className = 'yx-footer ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+
+			control.__init(data);
+
+			this.__children.push(this.footer = control);
 		}
-
-		data.key = data.key || 'page-footer';
-		data.className = 'yx-footer ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-
-		control.__init(data);
-
-		this.__children.push(this.footer = control);
-	}];
+	};
 
 
 
@@ -9046,75 +9077,84 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__convert_header = [0, function (data) {
+    this.$converters.header = {
+        
+        fn: function (data) {
 
-        if (data !== false)
-        {
-            var control;
-
-            if (!data || typeof data !== 'object')
+            if (data !== false)
             {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
-            }
+                var control;
 
-            data.className = 'yx-actionsheet-header ' + (data.className || '');
-
-            control = this.header = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-        }
-    }];
-
-	
-	this.__convert_content = [0, function (data) {
-		
-		if (data)
-        {
-            var control;
-
-            if (data instanceof Array)
-            {
-                data = {
-                    Class: yaxi.Panel,
-                    children: data
+                if (!data || typeof data !== 'object')
+                {
+                    data = {
+                        Class: yaxi.Text,
+                        text: data
+                    };
                 }
+
+                data.className = 'yx-actionsheet-header ' + (data.className || '');
+
+                control = this.header = new (data.Class || yaxi.Text)();
+                control.parent = this;
+                control.__init(data);
             }
-
-            data.className = 'yx-actionsheet-content ' + (data.className || '');
-            
-            control = this.content = new (data.Class || yaxi.Panel)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', selected);
         }
-	}];
-	
-	
-	this.__convert_cancel = [0, function (data) {
-	
-        if (data !== false)
-        {
-            var control;
+    };
 
-            if (!data || typeof data !== 'object')
+	
+	this.$converters.content = {
+        
+        fn: function (data) {
+		
+            if (data)
             {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
+                var control;
+
+                if (data instanceof Array)
+                {
+                    data = {
+                        Class: yaxi.Panel,
+                        children: data
+                    }
+                }
+
+                data.className = 'yx-actionsheet-content ' + (data.className || '');
+                
+                control = this.content = new (data.Class || yaxi.Panel)();
+                control.parent = this;
+                control.__init(data);
+                control.on('tap', selected);
             }
-
-            data.className = 'yx-actionsheet-cancel ' + (data.className || '');
-
-            control = this.cancel = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', close);
         }
-	}];
+	};
+	
+	
+	this.$converters.cancel = {
+        
+        fn: function (data) {
+	
+            if (data !== false)
+            {
+                var control;
+
+                if (!data || typeof data !== 'object')
+                {
+                    data = {
+                        Class: yaxi.Text,
+                        text: data
+                    };
+                }
+
+                data.className = 'yx-actionsheet-cancel ' + (data.className || '');
+
+                control = this.cancel = new (data.Class || yaxi.Text)();
+                control.parent = this;
+                control.__init(data);
+                control.on('tap', close);
+            }
+        }
+	};
 
 
 
@@ -9291,7 +9331,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         defaultValue: 0,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             if ((value |= 0) < 0)
             {
@@ -9313,7 +9353,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     
         defaultValue: 0,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             value |= 0;
             return value < 0 ? 0 : value;
@@ -9350,13 +9390,18 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.__convert_children = [0, function (value) {
+
+    this.$converters.children = {
+        
+        fn: function (value) {
       
-        if (value && value.length > 0)
-        {
-            this.__children.__init(this, value);
+            if (value && value.length > 0)
+            {
+                this.__children.__init(this, value);
+            }
         }
-    }];
+    };
+
 
 
     // 子控件类型
@@ -10083,7 +10128,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     
         defaultValue: null,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             if (value)
             {

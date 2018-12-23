@@ -15,7 +15,7 @@ yaxi.container = function (base) {
     
         defaultValue: false,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             value = !!value;
 

@@ -35,75 +35,84 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__convert_header = [0, function (data) {
+    this.$converters.header = {
+        
+        fn: function (data) {
 
-        if (data !== false)
-        {
-            var control;
-
-            if (!data || typeof data !== 'object')
+            if (data !== false)
             {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
-            }
+                var control;
 
-            data.className = 'yx-actionsheet-header ' + (data.className || '');
-
-            control = this.header = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-        }
-    }];
-
-	
-	this.__convert_content = [0, function (data) {
-		
-		if (data)
-        {
-            var control;
-
-            if (data instanceof Array)
-            {
-                data = {
-                    Class: yaxi.Panel,
-                    children: data
+                if (!data || typeof data !== 'object')
+                {
+                    data = {
+                        Class: yaxi.Text,
+                        text: data
+                    };
                 }
+
+                data.className = 'yx-actionsheet-header ' + (data.className || '');
+
+                control = this.header = new (data.Class || yaxi.Text)();
+                control.parent = this;
+                control.__init(data);
             }
-
-            data.className = 'yx-actionsheet-content ' + (data.className || '');
-            
-            control = this.content = new (data.Class || yaxi.Panel)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', selected);
         }
-	}];
-	
-	
-	this.__convert_cancel = [0, function (data) {
-	
-        if (data !== false)
-        {
-            var control;
+    };
 
-            if (!data || typeof data !== 'object')
+	
+	this.$converters.content = {
+        
+        fn: function (data) {
+		
+            if (data)
             {
-                data = {
-                    Class: yaxi.Text,
-                    text: data
-                };
+                var control;
+
+                if (data instanceof Array)
+                {
+                    data = {
+                        Class: yaxi.Panel,
+                        children: data
+                    }
+                }
+
+                data.className = 'yx-actionsheet-content ' + (data.className || '');
+                
+                control = this.content = new (data.Class || yaxi.Panel)();
+                control.parent = this;
+                control.__init(data);
+                control.on('tap', selected);
             }
-
-            data.className = 'yx-actionsheet-cancel ' + (data.className || '');
-
-            control = this.cancel = new (data.Class || yaxi.Text)();
-            control.parent = this;
-            control.__init(data);
-            control.on('tap', close);
         }
-	}];
+	};
+	
+	
+	this.$converters.cancel = {
+        
+        fn: function (data) {
+	
+            if (data !== false)
+            {
+                var control;
+
+                if (!data || typeof data !== 'object')
+                {
+                    data = {
+                        Class: yaxi.Text,
+                        text: data
+                    };
+                }
+
+                data.className = 'yx-actionsheet-cancel ' + (data.className || '');
+
+                control = this.cancel = new (data.Class || yaxi.Text)();
+                control.parent = this;
+                control.__init(data);
+                control.on('tap', close);
+            }
+        }
+	};
 
 
 

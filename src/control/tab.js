@@ -28,7 +28,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.__convert_openURL = false;
+    this.$converters.openURL = false;
 
 
 

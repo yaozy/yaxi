@@ -12,7 +12,7 @@ yaxi.Text = yaxi.Control.extend(function () {
     this.$property('format', {
     
         defaultValue: null,
-        convertor: function (value) {
+        converter: function (value) {
 
             this.__format = typeof value === 'function' ? value : yaxi.pipe.compile(value);
             return value;

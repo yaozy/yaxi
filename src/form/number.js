@@ -18,7 +18,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
     this.$property('value', {
     
         defaultValue: 0,
-        convertor: function (value) {
+        converter: function (value) {
 
             var any;
 

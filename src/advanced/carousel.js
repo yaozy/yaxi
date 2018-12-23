@@ -36,7 +36,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         defaultValue: 0,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             if ((value |= 0) < 0)
             {
@@ -58,7 +58,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     
         defaultValue: 0,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             value |= 0;
             return value < 0 ? 0 : value;
@@ -95,13 +95,18 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.__convert_children = [0, function (value) {
+
+    this.$converters.children = {
+        
+        fn: function (value) {
       
-        if (value && value.length > 0)
-        {
-            this.__children.__init(this, value);
+            if (value && value.length > 0)
+            {
+                this.__children.__init(this, value);
+            }
         }
-    }];
+    };
+
 
 
     // 子控件类型

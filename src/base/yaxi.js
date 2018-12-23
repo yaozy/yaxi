@@ -34,28 +34,16 @@ Object.extend = function (fn) {
     Class.extend = this.extend || Object.extend;
     Class.prototype = prototype;
 
-    // 如父类支持属性默认值则生成默认值集合
-    if (base && base.$defaults)
+    // 类初始化
+    if (prototype.__class_init)
     {
-        prototype.$defaults = Object.create(base.$defaults);
-
-        // 如果父类支持更新补丁则自动生成更新补丁对象
-        if (base.renderer)
-        {
-            prototype.renderer = Object.create(base.renderer);
-        }
+        prototype.__class_init(Class, base);
     }
 
     if (fn)
     {
         fn.call(prototype, Class, base);
         ctor = Class.ctor;
-    }
-
-    // 类初始化
-    if (fn = prototype.__class_init)
-    {
-        fn.call(prototype, Class, base);
     }
 
 	return Class;

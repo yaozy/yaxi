@@ -47,7 +47,7 @@ yaxi.__extend_properties = function (get, set) {
     // 定义属性方法
     return function (name, options, change) {
 
-        var defaultValue, convertor, key;
+        var defaultValue, converter, key;
 
         if (/\W/.test(name))
         {
@@ -58,7 +58,7 @@ yaxi.__extend_properties = function (get, set) {
         {
             key = options.name || name;
             defaultValue = options.defaultValue;
-            convertor = options.convertor;
+            converter = options.converter;
 
             if (defaultValue === void 0)
             {
@@ -72,42 +72,47 @@ yaxi.__extend_properties = function (get, set) {
             options = {};
         }
 
-        if (!convertor)
+        if (!converter)
         {
             switch (options.type || typeof defaultValue)
             {
                 case 'boolean':
-                    convertor = to_boolean;
+                    converter = to_boolean;
                     break;
     
                 case 'int':
                 case 'integer':
-                    convertor = to_integer;
+                    converter = to_integer;
                     break;
     
                 case 'number':
-                    convertor = to_number;
+                    converter = to_number;
                     break;
     
                 case 'string':
-                    convertor = to_string;
+                    converter = to_string;
                     break;
     
                 case 'date':
-                    convertor = to_date;
+                    converter = to_date;
                     break;
     
                 default:
-                    convertor = to_object;
+                    converter = to_object;
                     break;
             }
         }
  
         options.get || (options.get = get(key, change = change !== false));
-        options.set || (options.set = set(key, convertor, change));
+        options.set || (options.set = set(key, converter, change));
 
         this.$defaults[name] = defaultValue;
-        this['__convert_' + name] = [key, convertor, change];
+
+        this.$converters[name] = {
+            name: key,
+            change: change,
+            fn: converter
+        };
 
         define(this, name, options);
     }

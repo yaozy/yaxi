@@ -51,7 +51,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     
         defaultValue: null,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             this.__format = typeof value === 'function' ? value : yaxi.pipe.compile(value);
             return value;

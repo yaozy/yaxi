@@ -112,25 +112,28 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 
 
-	this.__convert_header = [0, function (data) {
+	this.$converters.header = {
 		
-		var control;
+		fn: function (data) {
+		
+			var control;
 
-		if (!data || typeof data !== 'object')
-		{
-			data = this.__template_header(data);
+			if (!data || typeof data !== 'object')
+			{
+				data = this.__template_header(data);
+			}
+			
+			data.key = data.key || 'page-header';
+			data.className = 'yx-header ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+
+			control.__init(data);
+
+			this.__children.push(this.header = control);
 		}
-		
-		data.key = data.key || 'page-header';
-		data.className = 'yx-header ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-
-		control.__init(data);
-
-		this.__children.push(this.header = control);
-	}];
+	};
 
 
 	this.__template_header = function (text) {
@@ -149,51 +152,57 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.__convert_content = [0, function (data) {
+	this.$converters.content = {
 		
-		var control;
+		fn: function (data) {
 		
-		if (!data || typeof data !== 'object')
-		{
-			data = {
-				Class: yaxi.Text,
-				text: data
-			};
+			var control;
+			
+			if (!data || typeof data !== 'object')
+			{
+				data = {
+					Class: yaxi.Text,
+					text: data
+				};
+			}
+
+			data.key = data.key || 'page-content';
+			data.className = 'yx-content ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+			control.__init(data);
+
+			this.__children.push(this.content = control);
 		}
-
-		data.key = data.key || 'page-content';
-		data.className = 'yx-content ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-		control.__init(data);
-
-		this.__children.push(this.content = control);
-	}];
+	};
 	
 	
-	this.__convert_footer = [0, function (data) {
+	this.$converters.footer = {
+		
+		fn: function (data) {
 	
-		var control;
+			var control;
 
-		if (!data || typeof data !== 'object')
-		{
-			data = {
-				Class: yaxi.Text,
-				text: data
-			};
+			if (!data || typeof data !== 'object')
+			{
+				data = {
+					Class: yaxi.Text,
+					text: data
+				};
+			}
+
+			data.key = data.key || 'page-footer';
+			data.className = 'yx-footer ' + (data.className || '');
+
+			control = new (data.Class || yaxi.Panel)();
+			control.parent = this;
+
+			control.__init(data);
+
+			this.__children.push(this.footer = control);
 		}
-
-		data.key = data.key || 'page-footer';
-		data.className = 'yx-footer ' + (data.className || '');
-
-		control = new (data.Class || yaxi.Panel)();
-		control.parent = this;
-
-		control.__init(data);
-
-		this.__children.push(this.footer = control);
-	}];
+	};
 
 
 

@@ -44,7 +44,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     
         defaultValue: null,
 
-        convertor: function (value) {
+        converter: function (value) {
 
             if (value)
             {

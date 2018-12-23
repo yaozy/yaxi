@@ -49,6 +49,8 @@
         
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
+
+        prototype.$converters = extend(null);
         
         for (var name in properties)
         {
@@ -179,7 +181,7 @@
             return this.$storage[name];
         }
 
-    }, function (name, convertor) {
+    }, function (name, converter) {
 
         var watches = watchKeys;
 
@@ -187,9 +189,9 @@
 
             var any = this.$storage;
 
-            if (convertor)
+            if (converter)
             {
-                value = convertor(value);
+                value = converter(value);
             }
 
             if (value === any[name] || watches[name] && this.$notify(name, value) === false)
@@ -532,13 +534,14 @@
 
         if (data)
         {
-            var storage = this.$storage || (this.$storage = {});
+            var converter = this.$converters,
+                storage = this.$storage || (this.$storage = {});
 
             for (var name in data)
             {
-                if (convert = this['__convert_' + name])
+                if (convert = converter[name])
                 {
-                    storage[name] = convert[1].call(this, data[name]);
+                    storage[name] = convert.fn.call(this, data[name]);
                 }
                 else
                 {
@@ -574,7 +577,6 @@
             }
         }
     }
-
 
 
 
