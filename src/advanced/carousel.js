@@ -138,7 +138,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         if (any = this.time)
         {
-            this.__set_time(dom, any);
+            this.renderer.time(dom, any);
         }
 
         children.onchange = onchange;
@@ -208,19 +208,22 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         }
         else
         {
-            this.__set_index(this.$dom, index | 0);
+            this.renderer.index(this.$dom, index | 0);
         }
 
         if (value = this.time)
         {
-            this.__set_time(this.$dom, value + 1000);
+            this.renderer.time(this.$dom, value + 1000);
         }
     }
 
 
 
+
+    var renderer = this.renderer;
+
     
-    this.__set_index = function (dom, value) {
+    renderer.index = function (dom, value) {
 
         var name = 'yx-carousel-selected',
             style1 = dom.firstChild.style,
@@ -264,7 +267,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_time = function (dom, value) {
+    renderer.time = function (dom, value) {
 
         if (this.__delay)
         {
@@ -278,7 +281,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_pagination = function (dom, value) {
+    renderer.pagination = function (dom, value) {
 
         dom.lastChild.innerHTML = renderPagination(this.__children, value, this.index);
     }

@@ -12,7 +12,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.textContent = value;
     }

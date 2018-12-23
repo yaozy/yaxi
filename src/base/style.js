@@ -5,13 +5,17 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     var create = Object.create;
 
     var cache = create(null);
+
+    var defaults = this.$defaults = create(null);
+
+    var map;
     
 
 
     Class.ctor = function (parent, data) {
 
-        this.parent = parent;
-        this.$storage = create(this.$defaults);
+        this.$parent = parent;
+        this.$storage = create(defaults);
 
         if (data)
         {
@@ -21,9 +25,9 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
 
 
-    var keys = (function () {
+    ;(function () {
 
-        var keys = Object.create(null),
+        var keys = map = Object.create(null),
             properties = {},
             style = document.createElement('div').style,
             regex1 = /^(?:webkit|ms|moz|o)([A-Z])/,
@@ -65,14 +69,12 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             this.$property(name, properties[name]);
         }
 
-        return keys;
-
     }).call(this);
 
 
 
 
-    function parse(text, keys, color) {
+    function parse(text, map, color) {
 
         var style = create(null),
             regex1 = /\s*:\s*/g,
@@ -90,7 +92,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
                 if (token = list[1])
                 {
                     name =  list[0].replace(regex2, '');
-                    name = keys[name] || name;
+                    name = map[name] || name;
 
                     token = token.replace(regex3, '');
 
@@ -128,7 +130,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (typeof data === 'string')
         {
-            data = cache[data] || parse(data, keys, yaxi.color);
+            data = cache[data] || parse(data, map, yaxi.color);
         }
 
         base.__init.call(this, data);
@@ -140,7 +142,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         var dom, changes;
 
-        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
+        if ((dom = this.$parent) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
                 style = dom.style;

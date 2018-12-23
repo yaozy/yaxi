@@ -38,6 +38,12 @@ Object.extend = function (fn) {
     if (base && base.$defaults)
     {
         prototype.$defaults = Object.create(base.$defaults);
+
+        // 如果父类支持更新补丁则自动生成更新补丁对象
+        if (base.renderer)
+        {
+            prototype.renderer = Object.create(base.renderer);
+        }
     }
 
     if (fn)
@@ -1796,13 +1802,17 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     var create = Object.create;
 
     var cache = create(null);
+
+    var defaults = this.$defaults = create(null);
+
+    var map;
     
 
 
     Class.ctor = function (parent, data) {
 
-        this.parent = parent;
-        this.$storage = create(this.$defaults);
+        this.$parent = parent;
+        this.$storage = create(defaults);
 
         if (data)
         {
@@ -1812,9 +1822,9 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
 
 
-    var keys = (function () {
+    ;(function () {
 
-        var keys = Object.create(null),
+        var keys = map = Object.create(null),
             properties = {},
             style = document.createElement('div').style,
             regex1 = /^(?:webkit|ms|moz|o)([A-Z])/,
@@ -1856,14 +1866,12 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             this.$property(name, properties[name]);
         }
 
-        return keys;
-
     }).call(this);
 
 
 
 
-    function parse(text, keys, color) {
+    function parse(text, map, color) {
 
         var style = create(null),
             regex1 = /\s*:\s*/g,
@@ -1881,7 +1889,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
                 if (token = list[1])
                 {
                     name =  list[0].replace(regex2, '');
-                    name = keys[name] || name;
+                    name = map[name] || name;
 
                     token = token.replace(regex3, '');
 
@@ -1919,7 +1927,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (typeof data === 'string')
         {
-            data = cache[data] || parse(data, keys, yaxi.color);
+            data = cache[data] || parse(data, map, yaxi.color);
         }
 
         base.__init.call(this, data);
@@ -1931,7 +1939,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         var dom, changes;
 
-        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
+        if ((dom = this.$parent) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
                 style = dom.style;
@@ -4299,6 +4307,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         if ((changes = this.__changes) && (dom = this.$dom))
         {
             var storage = this.$storage,
+                renderer = this.renderer,
                 value,
                 fn;
 
@@ -4306,22 +4315,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             {
                 storage[name] = value = changes[name];
 
-                if (fn = this['__set_' + name])
+                if (fn = renderer[name])
                 {
                     fn.call(this, dom, value);
                 }
-                else if (fn !== false)
+                else
                 {
-                    if (name in dom)
-                    {
-                        (fn = updateDom(name, value)).call(this, dom, value);
-                    }
-                    else
-                    {
-                        fn = false;
-                    }
-
-                    Class.prototype['__set_' + name] = fn;
+                    (renderer[name] = updateDom(name, value)).call(this, dom, value);
                 }
             }
 
@@ -4331,16 +4331,22 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     
 
-    this.__set_className = function (dom, value) {
+
+    // 更新补丁
+    var renderer = this.renderer = Object.create(null);
+
+
+    renderer.className = function (dom, value) {
 
         dom.className = value ? this.$className + ' ' + value : this.$className;
     }
 
 
-    this.__set_theme = function (dom, value) {
+    renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
     }
+
 
 
     function updateDom(name, value) {
@@ -4422,7 +4428,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         this.parent = this.$storage = this.__loading = this.__pulldown = null;
         this.destroyed = true;
     }
-
 
 
 
@@ -4675,7 +4680,7 @@ yaxi.container = function (base) {
 
 
 
-    this.__set_layout = function (dom, value) {
+    this.renderer.layout = function (dom, value) {
 
         dom.setAttribute('layout', value);
     }
@@ -5081,7 +5086,7 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.textContent = value;
     }
@@ -5659,7 +5664,7 @@ yaxi.HtmlControl = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_html = function (dom, value) {
+    this.renderer.html = function (dom, value) {
 
         dom.innerHTML = value;
     }
@@ -5697,7 +5702,10 @@ yaxi.Icon = yaxi.Control.extend(function () {
 
 
 
-    this.__set_icon = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.icon = function (dom, value) {
 
         var classList = dom.classList,
             icon = this.__icon;
@@ -5714,7 +5722,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_svg = function (dom, value) {
+    renderer.svg = function (dom, value) {
 
         if (value)
         {
@@ -5737,7 +5745,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         if (dom = dom.firstChild)
         {
@@ -5746,7 +5754,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_size = function (dom, value) {
+    renderer.size = function (dom, value) {
 
         if (dom = dom.firstChild)
         {
@@ -5796,19 +5804,22 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_text = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.text = function (dom, value) {
 
         dom.firstChild.lastChild.textContent = value;
     }
 
 
-    this.__set_icon = function (dom, value) {
+    renderer.icon = function (dom, value) {
 
         dom.firstChild.firstChild.className = value;
     }
 
 
-    this.__set_svg = function (dom, value) {
+    renderer.svg = function (dom, value) {
 
         dom = dom.firstChild.firstChild;
 
@@ -5833,7 +5844,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         if (dom = dom.firstChild.firstChild.firstChild)
         {
@@ -5842,7 +5853,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_size = function (dom, value) {
+    renderer.size = function (dom, value) {
 
         if (dom = dom.firstChild.firstChild.firstChild)
         {
@@ -5851,7 +5862,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_vertical = function (dom, value) {
+    renderer.vertical = function (dom, value) {
 
         dom.firstChild.setAttribute('layout', value ? 'column-center' : 'row-center');
     }
@@ -6096,7 +6107,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         if (value)
         {
@@ -6134,7 +6145,7 @@ yaxi.ProgressBar = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_value = function (dom, value) {
+    this.renderer.value = function (dom, value) {
 
         dom.firstChild.style.width = value + '%';
     }
@@ -7039,7 +7050,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.__set_selectedIndex = function (dom, value) {
+    this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
             last,
@@ -7156,7 +7167,7 @@ yaxi.Text = yaxi.Control.extend(function () {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         var format = this.__format;
 
@@ -7275,7 +7286,11 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.__set_value = function (dom, value) {
+
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         var format = this.__format;
 
@@ -7289,19 +7304,19 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.__set_placeholder = function (dom, value) {
+    renderer.placeholder = function (dom, value) {
 
         dom.firstChild.placeholder = value;
     }
 
 
-    this.__set_maxLength = function (dom, value) {
+    renderer.maxLength = function (dom, value) {
 
         dom.firstChild.maxLength = value;
     }
 
 
-    this.__set_pattern = function (dom, value) {
+    renderer.pattern = function (dom, value) {
 
         dom.firstChild.setAttribute('pattern', value);
     }
@@ -7324,7 +7339,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
     }
 
@@ -7361,19 +7376,22 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.__set_text = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.text = function (dom, value) {
 
         dom.lastChild.textContent = value;
     }
 
 
-    this.__set_checked = function (dom, value) {
+    renderer.checked = function (dom, value) {
 
         dom.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    this.__set_checkedIcon = function (dom, value) {
+    renderer.checkedIcon = function (dom, value) {
 
         if (value && this.checked)
         {
@@ -7382,7 +7400,7 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_uncheckedIcon = function (dom, value) {
+    renderer.uncheckedIcon = function (dom, value) {
 
         if (value && !this.checked)
         {
@@ -7391,7 +7409,7 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         dom.firstChild.style.fill = value;
     }
@@ -7486,13 +7504,16 @@ yaxi.Memo = yaxi.Control.extend(function () {
     
 
 
-    this.__set_value = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         dom.firstChild.value = value;
     }
 
 
-    this.__set_placeholder = function (dom, value) {
+    renderer.placeholder = function (dom, value) {
 
         dom.firstChild.placeholder = value;
     }
@@ -7573,7 +7594,10 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_button = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.button = function (dom, value) {
 
         if (value)
         {
@@ -7587,7 +7611,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_value = function (dom, value) {
+    renderer.value = function (dom, value) {
 
         var format = this.__format;
 
@@ -7678,7 +7702,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
             return control.trigger(any);
         }
         
-        control.__set_value(control.$dom, value);
+        control.renderer.value(control.$dom, value);
     }
 
 
@@ -7699,7 +7723,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
     }
 
@@ -7724,7 +7748,7 @@ yaxi.Password = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_type = function (dom, value) {
+    this.renderer.type = function (dom, value) {
 
         dom.lastChild.className = value ? 'yx-password-' + value : '';
     }
@@ -7798,19 +7822,22 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.__set_text = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.text = function (dom, value) {
 
         dom.lastChild.textContent = value;
     }
 
 
-    this.__set_checked = function (dom, value) {
+    renderer.checked = function (dom, value) {
 
         dom.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    this.__set_checkedIcon = function (dom, value) {
+    renderer.checkedIcon = function (dom, value) {
 
         if (value && this.checked)
         {
@@ -7819,7 +7846,7 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_uncheckedIcon = function (dom, value) {
+    renderer.uncheckedIcon = function (dom, value) {
 
         if (value && !this.checked)
         {
@@ -7827,7 +7854,7 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
         }
     }
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         dom.firstChild.style.fill = value;
     }
@@ -7904,7 +7931,7 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_checked = function (dom, value) {
+    this.renderer.checked = function (dom, value) {
 
         var classList = dom.classList;
 
@@ -8363,7 +8390,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.lastChild.innerHTML = value;
         dom.style.width = value ? 'auto' : '';
@@ -8835,7 +8862,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.textContent = value;
     }
@@ -9366,7 +9393,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         if (any = this.time)
         {
-            this.__set_time(dom, any);
+            this.renderer.time(dom, any);
         }
 
         children.onchange = onchange;
@@ -9436,19 +9463,22 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         }
         else
         {
-            this.__set_index(this.$dom, index | 0);
+            this.renderer.index(this.$dom, index | 0);
         }
 
         if (value = this.time)
         {
-            this.__set_time(this.$dom, value + 1000);
+            this.renderer.time(this.$dom, value + 1000);
         }
     }
 
 
 
+
+    var renderer = this.renderer;
+
     
-    this.__set_index = function (dom, value) {
+    renderer.index = function (dom, value) {
 
         var name = 'yx-carousel-selected',
             style1 = dom.firstChild.style,
@@ -9492,7 +9522,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_time = function (dom, value) {
+    renderer.time = function (dom, value) {
 
         if (this.__delay)
         {
@@ -9506,7 +9536,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_pagination = function (dom, value) {
+    renderer.pagination = function (dom, value) {
 
         dom.lastChild.innerHTML = renderPagination(this.__children, value, this.index);
     }
@@ -9581,6 +9611,7 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
 
+
     yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy="20" text-anchor="middle" style="font-size:60;" /></svg>');
 
 
@@ -9605,37 +9636,41 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
     
 
-    this.__set_text = function (dom, value) {
+
+    var renderer = this.renderer;
+
+
+    renderer.text = function (dom, value) {
 
         dom.lastChild.textContent = value;
     }
 
 
-    this.__set_stroke = function (dom, value) {
+    renderer.stroke = function (dom, value) {
 
         dom.firstChild.style.stroke = value;
     }
 
 
-    this.__set_strokeWidth = function (dom, value) {
+    renderer.strokeWidth = function (dom, value) {
 
         dom.firstChild.style.strokeWidth = value;
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         dom.firstChild.style.fill = value;
     }
 
 
-    this.__set_color = function (dom, value) {
+    renderer.color = function (dom, value) {
 
         dom.lastChild.style.fill = value;
     }
 
 
-    this.__set_textSize = function (dom, value) {
+    renderer.textSize = function (dom, value) {
 
         dom = dom.lastChild;
         dom.style.fontSize = value;
@@ -9968,7 +10003,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_value = function (dom, value) {
+    this.renderer.value = function (dom, value) {
 
         if (value)
         {
@@ -10111,13 +10146,16 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_value = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         dom.lastChild.lastChild.style.left = value + '%';
     }
 
 
-    this.__set_segments = function (dom, value) {
+    renderer.segments = function (dom, value) {
 
         value = value ? render.call(this, value) : '';
 
@@ -10126,7 +10164,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_space = function (dom, value) {
+    renderer.space = function (dom, value) {
 
         dom = dom.firstChild;
 
@@ -10240,7 +10278,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
 
         event.stop();
@@ -10250,7 +10288,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
     function touchcancel() {
 
-        this.__set_value(this.$dom, this.value);
+        this.renderer.value(this.$dom, this.value);
     }
 
 

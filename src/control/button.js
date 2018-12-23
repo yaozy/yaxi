@@ -34,7 +34,7 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.textContent = value;
     }

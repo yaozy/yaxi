@@ -22,7 +22,7 @@ yaxi.Text = yaxi.Control.extend(function () {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         var format = this.__format;
 

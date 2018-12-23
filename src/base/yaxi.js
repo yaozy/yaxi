@@ -38,6 +38,12 @@ Object.extend = function (fn) {
     if (base && base.$defaults)
     {
         prototype.$defaults = Object.create(base.$defaults);
+
+        // 如果父类支持更新补丁则自动生成更新补丁对象
+        if (base.renderer)
+        {
+            prototype.renderer = Object.create(base.renderer);
+        }
     }
 
     if (fn)

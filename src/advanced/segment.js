@@ -107,13 +107,16 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_value = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         dom.lastChild.lastChild.style.left = value + '%';
     }
 
 
-    this.__set_segments = function (dom, value) {
+    renderer.segments = function (dom, value) {
 
         value = value ? render.call(this, value) : '';
 
@@ -122,7 +125,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_space = function (dom, value) {
+    renderer.space = function (dom, value) {
 
         dom = dom.firstChild;
 
@@ -236,7 +239,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
 
         event.stop();
@@ -246,7 +249,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
     function touchcancel() {
 
-        this.__set_value(this.$dom, this.value);
+        this.renderer.value(this.$dom, this.value);
     }
 
 

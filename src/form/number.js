@@ -53,7 +53,10 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_button = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.button = function (dom, value) {
 
         if (value)
         {
@@ -67,7 +70,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_value = function (dom, value) {
+    renderer.value = function (dom, value) {
 
         var format = this.__format;
 
@@ -158,7 +161,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
             return control.trigger(any);
         }
         
-        control.__set_value(control.$dom, value);
+        control.renderer.value(control.$dom, value);
     }
 
 
@@ -179,7 +182,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
     }
 

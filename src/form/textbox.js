@@ -85,7 +85,11 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.__set_value = function (dom, value) {
+
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         var format = this.__format;
 
@@ -99,19 +103,19 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.__set_placeholder = function (dom, value) {
+    renderer.placeholder = function (dom, value) {
 
         dom.firstChild.placeholder = value;
     }
 
 
-    this.__set_maxLength = function (dom, value) {
+    renderer.maxLength = function (dom, value) {
 
         dom.firstChild.maxLength = value;
     }
 
 
-    this.__set_pattern = function (dom, value) {
+    renderer.pattern = function (dom, value) {
 
         dom.firstChild.setAttribute('pattern', value);
     }
@@ -134,7 +138,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
         }
         else
         {
-            this.__set_value(this.$dom, value);
+            this.renderer.value(this.$dom, value);
         }
     }
 

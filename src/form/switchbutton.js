@@ -12,7 +12,7 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_checked = function (dom, value) {
+    this.renderer.checked = function (dom, value) {
 
         var classList = dom.classList;
 

@@ -24,7 +24,10 @@ yaxi.Icon = yaxi.Control.extend(function () {
 
 
 
-    this.__set_icon = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.icon = function (dom, value) {
 
         var classList = dom.classList,
             icon = this.__icon;
@@ -41,7 +44,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_svg = function (dom, value) {
+    renderer.svg = function (dom, value) {
 
         if (value)
         {
@@ -64,7 +67,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         if (dom = dom.firstChild)
         {
@@ -73,7 +76,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    this.__set_size = function (dom, value) {
+    renderer.size = function (dom, value) {
 
         if (dom = dom.firstChild)
         {

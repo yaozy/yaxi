@@ -108,7 +108,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.__set_selectedIndex = function (dom, value) {
+    this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
             last,

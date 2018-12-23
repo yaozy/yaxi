@@ -44,7 +44,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         dom.lastChild.innerHTML = value;
         dom.style.width = value ? 'auto' : '';

@@ -482,6 +482,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         if ((changes = this.__changes) && (dom = this.$dom))
         {
             var storage = this.$storage,
+                renderer = this.renderer,
                 value,
                 fn;
 
@@ -489,22 +490,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             {
                 storage[name] = value = changes[name];
 
-                if (fn = this['__set_' + name])
+                if (fn = renderer[name])
                 {
                     fn.call(this, dom, value);
                 }
-                else if (fn !== false)
+                else
                 {
-                    if (name in dom)
-                    {
-                        (fn = updateDom(name, value)).call(this, dom, value);
-                    }
-                    else
-                    {
-                        fn = false;
-                    }
-
-                    Class.prototype['__set_' + name] = fn;
+                    (renderer[name] = updateDom(name, value)).call(this, dom, value);
                 }
             }
 
@@ -514,16 +506,22 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     
 
-    this.__set_className = function (dom, value) {
+
+    // 更新补丁
+    var renderer = this.renderer = Object.create(null);
+
+
+    renderer.className = function (dom, value) {
 
         dom.className = value ? this.$className + ' ' + value : this.$className;
     }
 
 
-    this.__set_theme = function (dom, value) {
+    renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
     }
+
 
 
     function updateDom(name, value) {
@@ -605,7 +603,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         this.parent = this.$storage = this.__loading = this.__pulldown = null;
         this.destroyed = true;
     }
-
 
 
 

@@ -11,7 +11,7 @@ yaxi.HtmlControl = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_html = function (dom, value) {
+    this.renderer.html = function (dom, value) {
 
         dom.innerHTML = value;
     }

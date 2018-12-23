@@ -12,7 +12,7 @@ yaxi.Password = yaxi.TextBox.extend(function () {
 
 
 
-    this.__set_type = function (dom, value) {
+    this.renderer.type = function (dom, value) {
 
         dom.lastChild.className = value ? 'yx-password-' + value : '';
     }

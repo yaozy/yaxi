@@ -33,19 +33,22 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_text = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.text = function (dom, value) {
 
         dom.firstChild.lastChild.textContent = value;
     }
 
 
-    this.__set_icon = function (dom, value) {
+    renderer.icon = function (dom, value) {
 
         dom.firstChild.firstChild.className = value;
     }
 
 
-    this.__set_svg = function (dom, value) {
+    renderer.svg = function (dom, value) {
 
         dom = dom.firstChild.firstChild;
 
@@ -70,7 +73,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_fill = function (dom, value) {
+    renderer.fill = function (dom, value) {
 
         if (dom = dom.firstChild.firstChild.firstChild)
         {
@@ -79,7 +82,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_size = function (dom, value) {
+    renderer.size = function (dom, value) {
 
         if (dom = dom.firstChild.firstChild.firstChild)
         {
@@ -88,7 +91,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.__set_vertical = function (dom, value) {
+    renderer.vertical = function (dom, value) {
 
         dom.firstChild.setAttribute('layout', value ? 'column-center' : 'row-center');
     }

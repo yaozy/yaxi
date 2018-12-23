@@ -242,7 +242,7 @@ yaxi.container = function (base) {
 
 
 
-    this.__set_layout = function (dom, value) {
+    this.renderer.layout = function (dom, value) {
 
         dom.setAttribute('layout', value);
     }

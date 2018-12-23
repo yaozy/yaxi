@@ -65,13 +65,16 @@ yaxi.Memo = yaxi.Control.extend(function () {
     
 
 
-    this.__set_value = function (dom, value) {
+    var renderer = this.renderer;
+
+
+    renderer.value = function (dom, value) {
 
         dom.firstChild.value = value;
     }
 
 
-    this.__set_placeholder = function (dom, value) {
+    renderer.placeholder = function (dom, value) {
 
         dom.firstChild.placeholder = value;
     }

@@ -10,7 +10,7 @@ yaxi.ProgressBar = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__set_value = function (dom, value) {
+    this.renderer.value = function (dom, value) {
 
         dom.firstChild.style.width = value + '%';
     }

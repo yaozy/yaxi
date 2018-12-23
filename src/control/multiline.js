@@ -10,7 +10,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
 
 
-    this.__set_text = function (dom, value) {
+    this.renderer.text = function (dom, value) {
 
         if (value)
         {
