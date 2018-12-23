@@ -112,7 +112,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 
 
-	this.$converters.header = {
+	this.$converter.header = {
 		
 		fn: function (data) {
 		
@@ -152,7 +152,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.$converters.content = {
+	this.$converter.content = {
 		
 		fn: function (data) {
 		
@@ -178,7 +178,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	};
 	
 	
-	this.$converters.footer = {
+	this.$converter.footer = {
 		
 		fn: function (data) {
 	

@@ -96,7 +96,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.$converters.children = {
+    this.$converter.children = {
         
         fn: function (value) {
       

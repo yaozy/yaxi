@@ -21,7 +21,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     // 初始化数据
     this.__init = function (data) {
 
-        var converters = this.$converters,
+        var converters = this.$converter,
             converter,
             changes,
             key;
@@ -58,7 +58,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 转换器集合
-    this.$converters = create(null);
+    this.$converter = create(null);
 
 
     
@@ -178,11 +178,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 不转换Class
-    this.$converters.Class = false;
+    this.$converter.Class = false;
 
 
     // 转换bindings
-    this.$converters.bindings = {
+    this.$converter.bindings = {
 
         fn: function (data) {
 
@@ -272,7 +272,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     this.__class_init = function (Class, base) {
 
         this.$defaults = create(base.$defaults);
-        this.$converters = create(base.$converters);
+        this.$converter = create(base.$converter);
     }
 
 

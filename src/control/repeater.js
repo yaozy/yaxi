@@ -90,7 +90,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             var storage = this.$storage;
 
-            value = this.$converters.store.fn.call(this, value);
+            value = this.$converter.store.fn.call(this, value);
 
             if (storage.store !== value)
             {

@@ -108,7 +108,7 @@ yaxi.__extend_properties = function (get, set) {
 
         this.$defaults[name] = defaultValue;
 
-        this.$converters[name] = {
+        this.$converter[name] = {
             name: key,
             change: change,
             fn: converter

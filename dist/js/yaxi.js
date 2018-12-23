@@ -809,7 +809,7 @@ yaxi.__extend_properties = function (get, set) {
 
         this.$defaults[name] = defaultValue;
 
-        this.$converters[name] = {
+        this.$converter[name] = {
             name: key,
             change: change,
             fn: converter
@@ -1533,7 +1533,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     // 初始化数据
     this.__init = function (data) {
 
-        var converters = this.$converters,
+        var converters = this.$converter,
             converter,
             changes,
             key;
@@ -1570,7 +1570,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 转换器集合
-    this.$converters = create(null);
+    this.$converter = create(null);
 
 
     
@@ -1690,11 +1690,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 不转换Class
-    this.$converters.Class = false;
+    this.$converter.Class = false;
 
 
     // 转换bindings
-    this.$converters.bindings = {
+    this.$converter.bindings = {
 
         fn: function (data) {
 
@@ -1784,7 +1784,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     this.__class_init = function (Class, base) {
 
         this.$defaults = create(base.$defaults);
-        this.$converters = create(base.$converters);
+        this.$converter = create(base.$converter);
     }
 
 
@@ -2010,7 +2010,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
 
-        prototype.$converters = extend(null);
+        prototype.$converter = extend(null);
         
         for (var name in properties)
         {
@@ -2494,14 +2494,15 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (data)
         {
-            var converter = this.$converters,
-                storage = this.$storage || (this.$storage = {});
+            var storage = this.$storage || (this.$storage = {}),
+                converters = this.$converter,
+                converter;
 
             for (var name in data)
             {
-                if (convert = converter[name])
+                if (converter = converters[name])
                 {
-                    storage[name] = convert.fn.call(this, data[name]);
+                    storage[name] = converter.fn.call(this, data[name]);
                 }
                 else
                 {
@@ -3912,7 +3913,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     });
 
     
-    this.$converters.style = {
+    this.$converter.style = {
         
         fn: function (data) {
      
@@ -4073,7 +4074,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.$converters.events = {
+    this.$converter.events = {
         
         fn: function (events) {
 
@@ -4444,7 +4445,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.__class_init = function (Class, base) {
 
         this.$defaults = create(base.$defaults);
-        this.$converters = create(base.$converters);
+        this.$converter = create(base.$converter);
         this.renderer = create(base.renderer);
     }
 
@@ -5038,7 +5039,7 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.$converters.children = {
+    this.$converter.children = {
         
         fn: function (value) {
       
@@ -6816,7 +6817,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             var storage = this.$storage;
 
-            value = this.$converters.store.fn.call(this, value);
+            value = this.$converter.store.fn.call(this, value);
 
             if (storage.store !== value)
             {
@@ -6992,7 +6993,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.$converters.openURL = false;
+    this.$converter.openURL = false;
 
 
 
@@ -8104,7 +8105,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 
 
-	this.$converters.header = {
+	this.$converter.header = {
 		
 		fn: function (data) {
 		
@@ -8144,7 +8145,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.$converters.content = {
+	this.$converter.content = {
 		
 		fn: function (data) {
 		
@@ -8170,7 +8171,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	};
 	
 	
-	this.$converters.footer = {
+	this.$converter.footer = {
 		
 		fn: function (data) {
 	
@@ -9077,7 +9078,7 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.$converters.header = {
+    this.$converter.header = {
         
         fn: function (data) {
 
@@ -9103,7 +9104,7 @@ yaxi.Control.extend(function (Class, base) {
     };
 
 	
-	this.$converters.content = {
+	this.$converter.content = {
         
         fn: function (data) {
 		
@@ -9130,7 +9131,7 @@ yaxi.Control.extend(function (Class, base) {
 	};
 	
 	
-	this.$converters.cancel = {
+	this.$converter.cancel = {
         
         fn: function (data) {
 	
@@ -9391,7 +9392,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.$converters.children = {
+    this.$converter.children = {
         
         fn: function (value) {
       

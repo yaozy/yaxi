@@ -86,7 +86,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     });
 
     
-    this.$converters.style = {
+    this.$converter.style = {
         
         fn: function (data) {
      
@@ -247,7 +247,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.$converters.events = {
+    this.$converter.events = {
         
         fn: function (events) {
 
@@ -618,7 +618,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.__class_init = function (Class, base) {
 
         this.$defaults = create(base.$defaults);
-        this.$converters = create(base.$converters);
+        this.$converter = create(base.$converter);
         this.renderer = create(base.renderer);
     }
 

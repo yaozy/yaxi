@@ -35,7 +35,7 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.$converters.header = {
+    this.$converter.header = {
         
         fn: function (data) {
 
@@ -61,7 +61,7 @@ yaxi.Control.extend(function (Class, base) {
     };
 
 	
-	this.$converters.content = {
+	this.$converter.content = {
         
         fn: function (data) {
 		
@@ -88,7 +88,7 @@ yaxi.Control.extend(function (Class, base) {
 	};
 	
 	
-	this.$converters.cancel = {
+	this.$converter.cancel = {
         
         fn: function (data) {
 	

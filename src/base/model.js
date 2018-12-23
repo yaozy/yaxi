@@ -50,7 +50,7 @@
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
 
-        prototype.$converters = extend(null);
+        prototype.$converter = extend(null);
         
         for (var name in properties)
         {
@@ -534,14 +534,15 @@
 
         if (data)
         {
-            var converter = this.$converters,
-                storage = this.$storage || (this.$storage = {});
+            var storage = this.$storage || (this.$storage = {}),
+                converters = this.$converter,
+                converter;
 
             for (var name in data)
             {
-                if (convert = converter[name])
+                if (converter = converters[name])
                 {
-                    storage[name] = convert.fn.call(this, data[name]);
+                    storage[name] = converter.fn.call(this, data[name]);
                 }
                 else
                 {
