@@ -2,10 +2,6 @@
 yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
-
-    // 编码方式
-    var enctype = 'application/x-www-form-urlencoded';
-
     
 
     // 重定向状态码
@@ -196,26 +192,26 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
     function parseOptions(method, url, data, options, flag) {
 
-        if (flag || /GET|HEAD|OPTIONS/i.test(method))
+        if (data && !(data instanceof FormData))
         {
-            if (data)
+            if (flag || /GET|HEAD|OPTIONS/i.test(method))
             {
                 url = url + (url.indexOf('?') >= 0 ? '&' : '?') + encodeData(data);
                 data = null;
             }
-        }
-        else if (options.contentType === enctype)
-        {
-            data = encodeData(data);
-        }
-        else if (data && typeof data !== 'string')
-        {
-            if (!options.contentType)
+            else if (options.contentType === 'application/x-www-form-urlencoded')
             {
-                options.contentType = 'application/json';
+                data = encodeData(data);
             }
-            
-            data = JSON.stringify(data);
+            else if (typeof data !== 'string')
+            {
+                if (!options.contentType)
+                {
+                    options.contentType = 'application/json';
+                }
+                
+                data = JSON.stringify(data);
+            }
         }
 
         options.method = method;
@@ -227,7 +223,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-    this.__class_init = function (Class) {
+    ;(this.__class_init = function (Class) {
 
 
         var parse = parseOptions;
@@ -273,7 +269,8 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             options = parse('DELETE', url, data, options || {});
             return new Class().send(options);
         }
-    }
+        
+    })(Class);
 
 
 

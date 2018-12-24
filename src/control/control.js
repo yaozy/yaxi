@@ -556,7 +556,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-
+    
     
     this.destroy = function () {
 
@@ -569,6 +569,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (bindings = this.__bindings)
         {
+            this.__bindings = this.__binding_push = null;
+
             for (var name in bindings)
             {
                 if ((any = bindings[name]) && (any = any.model) && any.__bindings)
@@ -576,26 +578,19 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                     any.$unbind(bindings[name]);
                 }
             }
-
-            this.__bindings = this.__binding_push = null;
         }
 
-        if (any = this.__style)
+        if ((any = this.__style) && (bindings = any.__bindings))
         {
-            any.parent = null;
+            any.__bindings = null;
 
-            if (bindings = any.__bindings)
+            for (var name in bindings)
             {
-                for (var name in bindings)
+                if ((any = bindings[name]) && (any = any.model))
                 {
-                    if ((any = bindings[name]) && (any = any.model))
-                    {
-                        any.$unbind(name, this);
-                    }
+                    any.$unbind(name, this);
                 }
             }
-
-            this.__style = null;
         }
 
         if (this.__event_keys)
@@ -608,7 +603,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = this.$storage = this.__loading = this.__pulldown = null;
+        this.parent = null;
         this.destroyed = true;
     }
 

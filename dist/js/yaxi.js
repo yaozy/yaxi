@@ -3199,10 +3199,6 @@ yaxi.Stream = Object.extend(function (Class) {
 yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
-
-    // 编码方式
-    var enctype = 'application/x-www-form-urlencoded';
-
     
 
     // 重定向状态码
@@ -3393,26 +3389,26 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
     function parseOptions(method, url, data, options, flag) {
 
-        if (flag || /GET|HEAD|OPTIONS/i.test(method))
+        if (data && !(data instanceof FormData))
         {
-            if (data)
+            if (flag || /GET|HEAD|OPTIONS/i.test(method))
             {
                 url = url + (url.indexOf('?') >= 0 ? '&' : '?') + encodeData(data);
                 data = null;
             }
-        }
-        else if (options.contentType === enctype)
-        {
-            data = encodeData(data);
-        }
-        else if (data && typeof data !== 'string')
-        {
-            if (!options.contentType)
+            else if (options.contentType === 'application/x-www-form-urlencoded')
             {
-                options.contentType = 'application/json';
+                data = encodeData(data);
             }
-            
-            data = JSON.stringify(data);
+            else if (typeof data !== 'string')
+            {
+                if (!options.contentType)
+                {
+                    options.contentType = 'application/json';
+                }
+                
+                data = JSON.stringify(data);
+            }
         }
 
         options.method = method;
@@ -3424,7 +3420,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-    this.__class_init = function (Class) {
+    ;(this.__class_init = function (Class) {
 
 
         var parse = parseOptions;
@@ -3470,7 +3466,8 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
             options = parse('DELETE', url, data, options || {});
             return new Class().send(options);
         }
-    }
+        
+    })(Class);
 
 
 
@@ -3484,18 +3481,18 @@ window.require || (function () {
 
 
 
+    // 全局require
+    var global = window.require = factory(location.href.substring(0, location.href.lastIndexOf('/')));
+
+
 	// 已加载缓存集合
-	var modules = Object.create(null);
+	var modules = global.modules = Object.create(null);
 
     // 已加载的多语言资源
-    var languages = Object.create(null);
+    var languages = global.languages = Object.create(null);
 
-    // 内联的模块集合
-    var inlines = Object.create(null);
-
-
-    // 全局require
-    var global;
+    // 文件集合
+    var files = global.files = Object.create(null);
 
 
 
@@ -3504,9 +3501,9 @@ window.require || (function () {
 
         var last = base.length - 1;
 
-        function require(url, cmd) {
+        function require(url, flags) {
 
-            return execute(require.baseURL, url, cmd);
+            return load(require.baseURL, url, flags);
         }
 
         if (base[last] === '/')
@@ -3515,13 +3512,22 @@ window.require || (function () {
         }
 
         require.baseURL = base;
+        require.worker = worker;
 
         return require;
     }
 
 
+    
+    // 创建webworker工作线程
+    function worker(files, fn) {
 
-    function execute(base, url, cmd) {
+        return new WebWorker(this.baseURL, files, fn);
+    }
+
+
+
+    function load(base, url, flags) {
 
         var ext = url.match(/\.\w+$/),
             any;
@@ -3538,7 +3544,7 @@ window.require || (function () {
 
         url = url[0] === '/' ? global.baseURL + url : absouteUrl(base, url);
 
-        if (any = modules[url])
+        if (flags !== 'content' && (any = modules[url]))
         {
             return any.exports;
         }
@@ -3546,16 +3552,25 @@ window.require || (function () {
         if (url.indexOf('{{language}}') >= 0)
         {
             languages[url] = ext;
-            return load(url, ext, cmd, url.replace('{{language}}', yaxi.language));
+            any = url.replace('{{language}}', yaxi.language);
         }
-        
-        return load(url, ext, cmd);
+        else
+        {
+            any = url;
+        }
+
+        switch (flags)
+        {
+            case 'content':
+                return files[any] || ajax(any);
+
+            default:
+                return execute(url, ext, flags, any);
+        }
     }
 
     
 	function absouteUrl(base, url) {
-		
-		var base;
 		
 		url = base + '/' + url;
 		
@@ -3575,9 +3590,9 @@ window.require || (function () {
 	}
 
 
-    function load(url, ext, cmd, path) {
+    function execute(url, ext, flags, file) {
 
-        var text = inlines[path || url] || ajax(path || url);
+        var text = files[file] || ajax(file);
 		
 		switch (ext)
 		{
@@ -3586,7 +3601,7 @@ window.require || (function () {
                 return true;
 
 			case '.js':
-                return (modules[url] = loadJs(text, path || url, cmd)).exports;
+                return (modules[url] = loadJs(text, file, flags)).exports;
 
             case '.json':
                 text = text ? JSON.parse(text) : null;
@@ -3600,12 +3615,12 @@ window.require || (function () {
     }
 
 
-    function ajax(url) {
+    function ajax(file) {
 
         var xhr = new XMLHttpRequest(),
             text;
 						
-		xhr.open('GET', url, false);
+		xhr.open('GET', file, false);
 
         xhr.onreadystatechange = function () {
 
@@ -3626,7 +3641,7 @@ window.require || (function () {
 
         xhr.send(null);
 
-        return text;
+        return files[file] = text;
     }
 
 
@@ -3651,7 +3666,7 @@ window.require || (function () {
 	}
 
 
-	function loadJs(text, url, cmd) {
+	function loadJs(text, url, flags) {
 
         var module = { exports: {} };
 
@@ -3659,7 +3674,7 @@ window.require || (function () {
         {
             text = text + '\r\n//# sourceURL=' + url;
 
-            if (cmd === false)
+            if (flags === false)
             {
                 eval.call(window, text);
             }
@@ -3696,11 +3711,7 @@ window.require || (function () {
 
 
 
-
-    global = window.require = factory(location.href.substring(0, location.href.lastIndexOf('/')));
-    
-
-    global.execute = execute;
+    global.load = load;
 
 
     global.switchLanguage = function (language) {
@@ -3727,12 +3738,166 @@ window.require || (function () {
         }
     }
 
+
+
+
     
-    
-    // 定义window模块
-    global.define = function (name, text) {
+    var seed = 1;
+
+
+    var code = '(' + (function (self) {
+
+        self.addEventListener('message', function (event) {
+            
+            var target = this,
+                data = event.data,
+                uuid = data.uuid,
+                method = data.method,
+                index = 0,
+                list = method.split('.'),
+                name,
+                fn;
+
+            try
+            {
+                name = list.pop();
+
+                while (target && (fn = list[index++]))
+                {
+                    target = target[fn];
+                }
+
+                if (target && (fn = target[name]))
+                {
+                    list = data.args || [];
+
+                    if (data.async)
+                    {
+                        list.push(function (value, e) {
+
+                            _(uuid, value, e);
+                        });
+
+                        fn.apply(target, list);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _(uuid, fn.apply(target, list));
+                        }
+                        catch (e)
+                        {
+                            _(uuid, null, e);
+                        }
+                    }
+                }
+                else
+                {
+                    _(uuid, null, 'not support method "' + method + '"!');
+                }
+            }
+            catch (e)
+            {
+                _(uuid, null, e);
+            }
+        });
 
         
+        function _(uuid, value, e) {
+
+            self.postMessage(JSON.stringify([uuid, value, e]));
+        }
+
+
+    }) + ')(this);\n\n\n\n\n\n';
+
+    
+
+    function WebWorker(base, files, fn) {
+
+        var list = [code];
+
+        for (var key in files)
+        {
+            var text = load(base, key, 'content');
+
+            if (files[key])
+            {
+                list.push('var ', files[key], ' = (function (require, module, exports) {\nexports = moudle.exports = {};\n\n\n\n',
+                        text,
+                    'return module;\n\n\n\n})(function () { throw "Can not use require in require.worker!" }, {});');
+            }
+            else
+            {
+                list.push(text);
+            }
+        }
+
+        if (fn)
+        {
+            if (typeof fn === 'function')
+            {
+                fn = '\n\n\n\n\n\n;(' + fn + ').call(this, this);';
+            }
+
+            list.push(fn);
+        }
+
+        this.queue = [];
+        this.worker = new Worker(URL.createObjectURL(new Blob(list)));
+        this.worker.onmessage = onmessage.bind(this);
+    }
+
+    
+    
+    function onmessage(event) {
+
+        var data;
+
+        if (data = event.data)
+        {
+            var queue = this.queue,
+                index = 0,
+                uuid = (data = JSON.parse(data))[0],
+                item;
+
+            while (item = queue[index])
+            {
+                if (item === uuid)
+                {
+                    queue[index + 1].call(this, data[1], data[2]);
+                    queue.splice(index, 2);
+                    return;
+                }
+
+                index += 2;
+            }
+        }
+    }
+
+
+    WebWorker.prototype.exec = function (method, args, callback, async) {
+
+        if (method)
+        {
+            var uuid = seed++;
+
+            this.queue.push(uuid, callback);
+
+            this.worker.postMessage({
+                uuid: uuid,
+                method: method,
+                args: args,
+                async: async
+            });
+        }
+    }
+
+
+    WebWorker.prototype.terminate = function () {
+
+        this.worker.terminate();
     }
 
 
@@ -4383,7 +4548,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-
+    
     
     this.destroy = function () {
 
@@ -4396,6 +4561,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (bindings = this.__bindings)
         {
+            this.__bindings = this.__binding_push = null;
+
             for (var name in bindings)
             {
                 if ((any = bindings[name]) && (any = any.model) && any.__bindings)
@@ -4403,26 +4570,19 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                     any.$unbind(bindings[name]);
                 }
             }
-
-            this.__bindings = this.__binding_push = null;
         }
 
-        if (any = this.__style)
+        if ((any = this.__style) && (bindings = any.__bindings))
         {
-            any.parent = null;
+            any.__bindings = null;
 
-            if (bindings = any.__bindings)
+            for (var name in bindings)
             {
-                for (var name in bindings)
+                if ((any = bindings[name]) && (any = any.model))
                 {
-                    if ((any = bindings[name]) && (any = any.model))
-                    {
-                        any.$unbind(name, this);
-                    }
+                    any.$unbind(name, this);
                 }
             }
-
-            this.__style = null;
         }
 
         if (this.__event_keys)
@@ -4435,7 +4595,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = this.$storage = this.__loading = this.__pulldown = null;
+        this.parent = null;
         this.destroyed = true;
     }
 
@@ -4505,7 +4665,7 @@ yaxi.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = require.execute(this.baseURL, url),
+                var Class = require.load(this.baseURL, url),
                     args = control.args;
 
                 if (args && args.length > 0)
@@ -7050,7 +7210,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = require.execute(base, url),
+        var Class = require.load(base, url),
             control,
             style;
 
