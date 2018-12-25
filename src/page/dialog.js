@@ -172,7 +172,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 || this.onclosing(closeType) === false)
+		if (index < 0 || this.onclosing(closeType || (closeType = 'OK')) === false)
 		{
 			return false;
 		}

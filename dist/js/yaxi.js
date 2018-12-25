@@ -8833,13 +8833,16 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 
 	
 	
-	this.show = function (reference, offset) {
+	this.show = function () {
 		
-		var rect = reference.getBoundingClientRect(),
-			offsetX = offset ? (offset.x | 0) : 0,
-			offsetY = offset ? (offset.y | 0) : 0;
-		
-		this.showAt(rect.left + offsetX, rect.top + reference.offsetHeight + offsetY);
+		if (stack.indexOf(this) < 0)
+		{
+			var dom = this.$dom || (this.$dom = this.render());
+			
+			document.body.appendChild(dom);
+			stack.push(this);
+		}
+
 		return this;
 	}
 	
