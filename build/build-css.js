@@ -5,7 +5,7 @@ const theme = webminify.theme || 'default'
 webminify()
     .load('less', [
         'theme/' + theme + '/color.less',
-        'base/(reset|animation|base).less',
+        'base/(reset|animation).less',
         'control/(control|panel).less',
         'control/*.less',
         'layout/*.less',

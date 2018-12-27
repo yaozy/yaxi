@@ -1,29 +1,29 @@
 .yx-control[theme="primary"] {
-    border-color: @primary-color-3;
+    border-color: @primary-color-1;
     color: @primary-color-1;
     fill: @icon-color-2;
 }
 
 .yx-control[theme="second"] {
-    border-color: @second-color-3;
+    border-color: @second-color-1;
     color: @second-color-1;
     fill: @icon-color-3;
 }
 
 .yx-control[theme="success"] {
-    border-color: @success-color-3;
+    border-color: @success-color-1;
     color: @success-color-1;
     fill: @icon-color-4;
 }
 
 .yx-control[theme="warning"] {
-    border-color: @warning-color-3;
+    border-color: @warning-color-1;
     color: @warning-color-1;
     fill: @icon-color-4;
 }
 
 .yx-control[theme="danger"] {
-    border-color: @danger-color-3;
+    border-color: @danger-color-1;
     color: @danger-color-1;
     fill: @icon-color-4;
 }
@@ -52,7 +52,114 @@
     border-right-style: solid;
 }
 
+.yx-control[line="top"] {
+    border-right-width: 1px;
+    border-right-style: solid;
+}
+
 .yx-control[line="bottom"] {
     border-bottom-width: 1px;
     border-bottom-style: solid;
+}
+
+.yx-control[line="all"] {
+    border-width: 1px;
+    border-style: solid;
+}
+
+
+.yx-control[line="top-1px"],
+.yx-control[line="left-1px"],
+.yx-control[line="right-1px"],
+.yx-control[line="bottom-1px"] {
+    position: relative;
+}
+
+.yx-control[line="top-1px"]::before,
+.yx-control[line="left-1px"]::before,
+.yx-control[line="right-1px"]::before,
+.yx-control[line="bottom-1px"]::before {
+    background-color: @default-color-1;
+}
+
+.yx-control[line="top-1px"][theme="primary"]::before,
+.yx-control[line="left-1px"][theme="primary"]::before,
+.yx-control[line="right-1px"][theme="primary"]::before,
+.yx-control[line="bottom-1px"][theme="primary"]::before {
+    background-color: @primary-color-1;
+}
+
+.yx-control[line="top-1px"][theme="second"]::before,
+.yx-control[line="left-1px"][theme="second"]::before,
+.yx-control[line="right-1px"][theme="second"]::before,
+.yx-control[line="bottom-1px"][theme="second"]::before {
+    background-color: @second-color-1;
+}
+
+.yx-control[line="top-1px"][theme="success"]::before,
+.yx-control[line="left-1px"][theme="success"]::before,
+.yx-control[line="right-1px"][theme="success"]::before,
+.yx-control[line="bottom-1px"][theme="success"]::before {
+    background-color: @success-color-1;
+}
+
+.yx-control[line="top-1px"][theme="warning"]::before,
+.yx-control[line="left-1px"][theme="warning"]::before,
+.yx-control[line="right-1px"][theme="warning"]::before,
+.yx-control[line="bottom-1px"][theme="warning"]::before {
+    background-color: @warning-color-1;
+}
+
+.yx-control[line="top-1px"][theme="danger"]::before,
+.yx-control[line="left-1px"][theme="danger"]::before,
+.yx-control[line="right-1px"][theme="danger"]::before,
+.yx-control[line="bottom-1px"][theme="danger"]::before {
+    background-color: @danger-color-1;
+}
+
+.yx-control[line="top-1px"][theme="disabled"]::before,
+.yx-control[line="left-1px"][theme="disabled"]::before,
+.yx-control[line="right-1px"][theme="disabled"]::before,
+.yx-control[line="bottom-1px"][theme="disabled"]::before {
+    background-color: @disabled-color-1;
+}
+
+.yx-control[line="top-1px"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform: scaleY(.3);
+}
+
+.yx-control[line="left-1px"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    transform: scaleX(.3);
+}
+
+.yx-control[line="right-1px"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    transform: scaleX(.3);
+}
+
+.yx-control[line="bottom-1px"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    transform: scaleY(.3);
 }
