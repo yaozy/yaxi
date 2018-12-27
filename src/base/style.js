@@ -145,11 +145,24 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
         if ((dom = this.$owner) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
-                style = dom.style;
+                style = dom.style,
+                value;
 
             for (var name in changes)
             {
-                storage[name] = style[name] = changes[name];
+                value = changes[name];
+
+                // 圆角边框转换rem为px以解决在android下不圆的问题
+                if (name === 'borderRadius' && value.indexOf('rem') > 0)
+                {
+                    style[name] = (parseFloat(value) * yaxi.rem | 0) + 'px';
+                }
+                else
+                {
+                    style[name] = value;
+                }
+
+                storage[name] = value;
             }
 
             this.__changes = null;

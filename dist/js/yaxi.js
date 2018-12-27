@@ -1378,8 +1378,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
     document.addEventListener('keyup', listener, true);
 
 
-    document.addEventListener('focus', listener, true);
+    document.addEventListener('focus', function (event) {
+     
+        var target = event.target,
+            control,
+            e;
 
+        target.scrollIntoViewIfNeeded();
+
+        if (control = findControl(target))
+        {
+            e = new Event();
+            e.type = 'focus';
+            e.dom = event.target;
+            e.original = event;
+
+            return control.trigger(e);
+        }
+        
+    }, true);
+
+    
     document.addEventListener('blur', listener, true);
 
 
@@ -1943,11 +1962,24 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
         if ((dom = this.$owner) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
-                style = dom.style;
+                style = dom.style,
+                value;
 
             for (var name in changes)
             {
-                storage[name] = style[name] = changes[name];
+                value = changes[name];
+
+                // 圆角边框转换rem为px以解决在android下不圆的问题
+                if (name === 'borderRadius' && value.indexOf('rem') > 0)
+                {
+                    style[name] = (parseFloat(value) * yaxi.rem | 0) + 'px';
+                }
+                else
+                {
+                    style[name] = value;
+                }
+
+                storage[name] = value;
             }
 
             this.__changes = null;
@@ -4090,6 +4122,9 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    this.$property('radius', 0);
+
+
     // 线条 top|left|right|bottom
     this.$property('line', '');
 
@@ -4588,6 +4623,12 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.alt = function (dom, value) {
 
         dom.alt = value;
+    }
+
+
+    renderer.radius = function (dom, value) {
+
+        dom.style.borderRadius = (value * yaxi.rem | 0) + 'px';
     }
 
 
@@ -8456,14 +8497,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onopening() !== false)
 		{
-			var body = document.body,
-				dom = this.$dom || this.render();
-
-			body.focus();
-			body.appendChild(dom);
+			document.body.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
-			
 		    this.opener = opener;
 
 			this.onopened();
@@ -8519,12 +8555,12 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.onopening = function (options) {
+	this.onopening = function () {
 		
 	}
 	
 	
-	this.onopened = function (options) {
+	this.onopened = function () {
 		
 	}
 	

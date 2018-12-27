@@ -93,6 +93,9 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    this.$property('radius', 0);
+
+
     // 线条 top|left|right|bottom
     this.$property('line', '');
 
@@ -591,6 +594,12 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.alt = function (dom, value) {
 
         dom.alt = value;
+    }
+
+
+    renderer.radius = function (dom, value) {
+
+        dom.style.borderRadius = (value * yaxi.rem | 0) + 'px';
     }
 
 
