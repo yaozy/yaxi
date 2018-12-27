@@ -11,15 +11,21 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
  
+        var init;
+        
         this.$storage = create(this.$defaults);
-
         this.__children = new yaxi.ControlCollection(this);
+        
+		if (init = this.init)
+		{
+			init.apply(this, arguments);
+		}
 
-        if (data)
+        if (values)
         {
-            this.__init(data);
+            this.assign(values);
         }
     }
 
@@ -51,11 +57,11 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     this.$converter.children = {
         
-        fn: function (value) {
+        fn: function (values) {
       
-            if (value && value.length > 0)
+            if (values && values.length > 0)
             {
-                this.__children.__init(this, value);
+                this.__children.assign(values);
             }
         }
     };

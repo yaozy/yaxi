@@ -11,15 +11,21 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     
 
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
 
+        var init;
+        
         this.$storage = create(this.$defaults);
-
         this.__children = new yaxi.ControlCollection(this);
 
-        if (data)
+        if (init = this.init)
+		{
+			init.apply(this, arguments);
+        }
+        
+        if (values)
         {
-            this.__init(data);
+            this.assign(values);
         }
     }
 
@@ -110,13 +116,13 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__init = function (data) {
+    this.assign = function (values) {
 
-        base.__init.call(this, data);
+        base.assign.call(this, values);
         
-        if (data.template && (data = this.store))
+        if (values.template && (values = this.store))
         {
-            this.__model_insert(-1, data);
+            this.__model_insert(-1, values);
         }
     }
 
@@ -161,7 +167,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 any.parent = this;
                 any.model = list[i];
 
-                any.__init(template);
+                any.assign(template);
             }
 
             // 先直接插件到子控件集合(不使用children的push及splice以提升性能)

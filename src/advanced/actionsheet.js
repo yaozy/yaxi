@@ -37,25 +37,25 @@ yaxi.Control.extend(function (Class, base) {
 
     this.$converter.header = {
         
-        fn: function (data) {
+        fn: function (values) {
 
-            if (data !== false)
+            if (values !== false)
             {
                 var control;
 
-                if (!data || typeof data !== 'object')
+                if (!values || typeof values !== 'object')
                 {
-                    data = {
+                    values = {
                         Class: yaxi.Text,
-                        text: data
+                        text: values
                     };
                 }
 
-                data.className = 'yx-actionsheet-header ' + (data.className || '');
+                values.className = 'yx-actionsheet-header ' + (values.className || '');
 
-                control = this.header = new (data.Class || yaxi.Text)();
+                control = this.header = new (values.Class || yaxi.Text)();
                 control.parent = this;
-                control.__init(data);
+                control.assign(values);
             }
         }
     };
@@ -63,25 +63,25 @@ yaxi.Control.extend(function (Class, base) {
 	
 	this.$converter.content = {
         
-        fn: function (data) {
+        fn: function (values) {
 		
-            if (data)
+            if (values)
             {
                 var control;
 
-                if (data instanceof Array)
+                if (values instanceof Array)
                 {
-                    data = {
+                    values = {
                         Class: yaxi.Panel,
-                        children: data
+                        children: values
                     }
                 }
 
-                data.className = 'yx-actionsheet-content ' + (data.className || '');
+                values.className = 'yx-actionsheet-content ' + (values.className || '');
                 
-                control = this.content = new (data.Class || yaxi.Panel)();
+                control = this.content = new (values.Class || yaxi.Panel)();
                 control.parent = this;
-                control.__init(data);
+                control.assign(values);
                 control.on('tap', selected);
             }
         }
@@ -90,25 +90,25 @@ yaxi.Control.extend(function (Class, base) {
 	
 	this.$converter.cancel = {
         
-        fn: function (data) {
+        fn: function (values) {
 	
-            if (data !== false)
+            if (values !== false)
             {
                 var control;
 
-                if (!data || typeof data !== 'object')
+                if (!values || typeof values !== 'object')
                 {
-                    data = {
+                    values = {
                         Class: yaxi.Text,
-                        text: data
+                        text: values
                     };
                 }
 
-                data.className = 'yx-actionsheet-cancel ' + (data.className || '');
+                values.className = 'yx-actionsheet-cancel ' + (values.className || '');
 
-                control = this.cancel = new (data.Class || yaxi.Text)();
+                control = this.cancel = new (values.Class || yaxi.Text)();
                 control.parent = this;
-                control.__init(data);
+                control.assign(values);
                 control.on('tap', close);
             }
         }

@@ -177,6 +177,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 			return false;
 		}
 
+		stack.splice(index, 1);
+
 		var dom = this.$dom;
 
 		if (dom && dom.parentNode)
@@ -186,10 +188,16 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 		if (dom = mask.parentNode)
 		{
-			dom.removeChild(mask);
+			if (stack[0])
+			{
+				dom = stack[status.length - 1].$dom;
+				dom.parentNode.insertBefore(mask, dom);
+			}
+			else
+			{
+				dom.removeChild(mask);
+			}
 		}
-
-		stack.splice(index, 1);
 
 		if (stack[0])
 		{

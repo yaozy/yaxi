@@ -8,6 +8,7 @@ webminify()
         'base/(reset|animation|base).less',
         'control/(control|panel).less',
         'control/*.less',
+        'layout/*.less',
         'form/textbox.less',
         'form/*.less',
         'page/*.less',

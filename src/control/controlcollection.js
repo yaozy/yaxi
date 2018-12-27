@@ -14,13 +14,13 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    Class.ctor = function (owner, data) {
+    Class.ctor = function (owner, values) {
 
         this.owner = owner;
 
-        if (data && data.length > 0)
+        if (values && values.length > 0)
         {
-            this.__init(owner, data);
+            this.assign(values);
         }
     }
 
@@ -45,16 +45,22 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    this.__init = function (owner, data) {
+    this.assign = function (values) {
 
-        var childClass = owner.__child_class,
+        var owner = this.owner,
+            childClass = owner.__child_class,
             subtype = owner.subtype || yaxi.Control,
             index = 0,
             control;
 
-        for (var i = 0, l = data.length; i < l; i++)
+        if (this.length > 0)
         {
-            if (control = createControl(owner, childClass, subtype, data[i]))
+            this.clear();
+        }
+
+        for (var i = 0, l = values.length; i < l; i++)
+        {
+            if (control = createControl(owner, childClass, subtype, values[i]))
             {
                 this[index++] = control;
             }
@@ -66,38 +72,40 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    function createControl(owner, childClass, subtype, data) {
+    function createControl(owner, childClass, subtype, values) {
 
         var control;
 
-        if (data)
+        if (values)
         {
-            if (data.$storage)
+            if (values.$storage)
             {
-                if (data instanceof childClass)
+                if (values instanceof childClass)
                 {
-                    if (data.destroyed)
+                    control = values;
+
+                    if (control.destroyed)
                     {
                         console.error('对象已经被销毁,不能够再使用!');
                         return;
                     }
 
-                    if ((control = data.parent) && control !== owner)
+                    if (control.parent && control.parent !== owner)
                     {
-                        data.remove();
+                        control.remove();
                     }
 
-                    data.parent = owner;
-                    data.__last_index = null;
+                    control.parent = owner;
+                    control.__last_index = null;
 
-                    return data;
+                    return control;
                 }
             }
             else
             {
-                control = new (data.Class || subtype)();
+                control = new (values.Class || subtype)();
                 control.parent = owner;
-                control.__init(data);
+                control.assign(values);
             }
         }
         else

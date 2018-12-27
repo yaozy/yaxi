@@ -33,7 +33,7 @@
         });
 
 
-        var model = new Model({
+        var model = new Model().$assign({
 
             text: 11111.1222223,
             submodel: {
@@ -47,7 +47,7 @@
 
 
 
-        var page = new yaxi.Page({
+        var page = new yaxi.Page().assign({
 
             // header: 'header',
             header: {

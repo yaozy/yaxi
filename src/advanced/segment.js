@@ -12,14 +12,21 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
+
+        var init;
 
         // 初始化存储值
         this.$storage = create(this.$defaults);
 
-        if (data)
+        if (init = this.init)
+		{
+			init.apply(this, arguments);
+        }
+        
+        if (values)
         {
-            this.__init(data);
+            this.assign(values);
         }
 
         this.on('touchstart', touchstart);

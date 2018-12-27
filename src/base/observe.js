@@ -6,49 +6,51 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     
 
 
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
 
         this.$storage = create(this.$defaults);
 
-        if (data)
+        if (values)
         {
-            this.__init(data);
+            this.assign(values);
         }
     }
 
 
 
-    // 初始化数据
-    this.__init = function (data) {
+    // 赋值
+    this.assign = function (values) {
 
         var converters = this.$converter,
             converter,
             changes,
             key;
 
-        for (var name in data)
+        for (var name in values)
         {
             if (converter = converters[name])
             {
                 // 需要处理变化
                 if (converter.change)
                 {
-                    (changes || (changes = this.__changes = {}))[name] = converter.fn.call(this, data[name]);
+                    (changes || (changes = this.__changes = {}))[name] = converter.fn.call(this, values[name]);
                 }
                 else if (key = converter.name) // 默认转换器
                 {
-                    this.$storage[key] = converter.fn.call(this, data[name]);
+                    this.$storage[key] = converter.fn.call(this, values[name]);
                 }
                 else // 自定义转换器
                 {
-                    converter.fn.call(this, data[name]);
+                    converter.fn.call(this, values[name]);
                 }
             }
             else if (converter !== false)
             {
-                this[name] = data[name];
+                this[name] = values[name];
             }
         }
+
+        return this;
     }
 
 
@@ -110,20 +112,6 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
         }
 
     });
-
-
-
-
-    // 合并参数
-    this.$combine = function (data, defaults) {
-
-        if (data)
-        {
-            return defaults ? Object.assign({}, defaults, data) : data;
-        }
-        
-        return defaults;
-    }
 
 
 

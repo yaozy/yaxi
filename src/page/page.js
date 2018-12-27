@@ -77,16 +77,23 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	Class.ctor = function (data) {
+	Class.ctor = function (values) {
+
+		var init;
 
 		this.$storage = create(this.$defaults);
 
 		this.key = 'page';
 		this.__children = [];
 
-		if (data)
+        if (init = this.init)
 		{
-			this.__init(data);
+			init.apply(this, arguments);
+        }
+
+		if (values)
+		{
+			this.assign(values);
 		}
 	}
 
@@ -114,22 +121,22 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 	this.$converter.header = {
 		
-		fn: function (data) {
+		fn: function (values) {
 		
 			var control;
 
-			if (!data || typeof data !== 'object')
+			if (!values || typeof values !== 'object')
 			{
-				data = this.__template_header(data);
+				values = this.__template_header(values);
 			}
 			
-			data.key = data.key || 'page-header';
-			data.className = 'yx-header ' + (data.className || '');
+			values.key = values.key || 'page-header';
+			values.className = 'yx-header ' + (values.className || '');
 
-			control = new (data.Class || yaxi.Panel)();
+			control = new (values.Class || yaxi.Panel)();
 			control.parent = this;
 
-			control.__init(data);
+			control.assign(values);
 
 			this.__children.push(this.header = control);
 		}
@@ -154,24 +161,24 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.$converter.content = {
 		
-		fn: function (data) {
+		fn: function (values) {
 		
 			var control;
 			
-			if (!data || typeof data !== 'object')
+			if (!values || typeof values !== 'object')
 			{
-				data = {
+				values = {
 					Class: yaxi.Text,
-					text: data
+					text: values
 				};
 			}
 
-			data.key = data.key || 'page-content';
-			data.className = 'yx-content ' + (data.className || '');
+			values.key = values.key || 'page-content';
+			values.className = 'yx-content ' + (values.className || '');
 
-			control = new (data.Class || yaxi.Panel)();
+			control = new (values.Class || yaxi.Panel)();
 			control.parent = this;
-			control.__init(data);
+			control.assign(values);
 
 			this.__children.push(this.content = control);
 		}
@@ -180,25 +187,25 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.$converter.footer = {
 		
-		fn: function (data) {
+		fn: function (values) {
 	
 			var control;
 
-			if (!data || typeof data !== 'object')
+			if (!values || typeof values !== 'object')
 			{
-				data = {
+				values = {
 					Class: yaxi.Text,
-					text: data
+					text: values
 				};
 			}
 
-			data.key = data.key || 'page-footer';
-			data.className = 'yx-footer ' + (data.className || '');
+			values.key = values.key || 'page-footer';
+			values.className = 'yx-footer ' + (values.className || '');
 
-			control = new (data.Class || yaxi.Panel)();
+			control = new (values.Class || yaxi.Panel)();
 			control.parent = this;
 
-			control.__init(data);
+			control.assign(values);
 
 			this.__children.push(this.footer = control);
 		}

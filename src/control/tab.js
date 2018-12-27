@@ -6,9 +6,9 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
     
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
 
-        base.constructor.ctor.call(this, data);
+        base.constructor.ctor.call(this, values);
         this.on('tap', handleTap);
     }
 

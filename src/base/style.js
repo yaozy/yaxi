@@ -12,14 +12,14 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
 
 
-    Class.ctor = function (parent, data) {
+    Class.ctor = function (owner, values) {
 
-        this.$parent = parent;
+        this.$owner = owner;
         this.$storage = create(defaults);
 
-        if (data)
+        if (values)
         {
-            this.__init(data);
+            this.assign(values);
         }
     }
     
@@ -126,14 +126,14 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
 
     
-    this.__init = function (data) {
+    this.assign = function (values) {
 
-        if (typeof data === 'string')
+        if (typeof values === 'string')
         {
-            data = cache[data] || parse(data, map, yaxi.color);
+            values = cache[values] || parse(values, map, yaxi.color);
         }
 
-        base.__init.call(this, data);
+        base.assign.call(this, values);
     }
 
 
@@ -142,7 +142,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         var dom, changes;
 
-        if ((dom = this.$parent) && (dom = dom.$dom) && (changes = this.__changes))
+        if ((dom = this.$owner) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
                 style = dom.style;

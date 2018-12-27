@@ -36,15 +36,10 @@
             options,
             type;
 
-        function Model(data, parent) {
+        function Model(parent) {
 
             this.$parent = parent || null;
             this.$storage = extend(defaults);
-
-            if (data)
-            {
-                this.$load(data);
-            }
         }
         
         Model.model = prototype.__model_type = 1;
@@ -84,24 +79,17 @@
         return {
             get: function () {
 
-                return this[name] || (this[name] = new Model(null, this));
+                return this[name] || (this[name] = new Model(this));
             },
             set: function (value) {
 
                 var model = this[name];
 
-                if (value && typeof value === 'object')
+                if (value)
                 {
-                    if (model)
+                    if (value != null)
                     {
-                        for (var key in value)
-                        {
-                            model[key] = value[key];
-                        }
-                    }
-                    else
-                    {
-                        this[name] = new Model(value, this);
+                        (model || (this[name] = new Model(this))).$assign(value);
                     }
                 }
                 else if (model)
@@ -120,7 +108,7 @@
         return {
             get: function () {
 
-                return this[name] || (this[name] = new Store(null, this));
+                return this[name] || (this[name] = new Store(this));
             },
             set: function (value) {
 
@@ -130,17 +118,17 @@
                 {
                     if (store)
                     {
-                        if (store && store.length > 0)
+                        if (store.length > 0)
                         {
                             store.clear();
                         }
-
-                        store.push.apply(store, value);
                     }
                     else
                     {
-                        this[name] = new Store(value, this);
+                        this[name] = store = new Store(this);
                     }
+                    
+                    store.push.apply(store, value);
                 }
                 else if (store && store.length > 0)
                 {
@@ -205,8 +193,6 @@
             {
                 pushBindings(this, any);
             }
-
-            return this;
         }
 
     });
@@ -354,6 +340,8 @@
         {
             bindingTarget = null;
         }
+
+        return this;
     }
 
 
@@ -373,6 +361,8 @@
                 }
             }
         }
+
+        return this;
     }
 
 
@@ -391,6 +381,8 @@
 
             this[binding.name] = value;
         }
+
+        return this;
     }
 
 
@@ -425,6 +417,8 @@
                 (this.__watches || (this.__watches = {}))[name] = [listener];
             }
         }
+
+        return this;
     }
 
 
@@ -477,6 +471,8 @@
 
             this.__watches = null;
         }
+
+        return this;
     }
 
 
@@ -506,6 +502,8 @@
 
             target = target.$parent;
         }
+
+        return this;
     }
 
 
@@ -513,24 +511,27 @@
     // 保存状态
     this.$save = function () {
 
+        return this;
     }
 
 
     // 恢复到上次保存的状态
     this.$restore = function () {
 
+        return this;
     }
 
 
     // 获取变化
     this.$changes = function () {
 
+        return this;
     }
 
 
 
-    // 加载数据
-    this.$load = function (data) {
+    // 赋值
+    this.$assign = function (data) {
 
         if (data)
         {
@@ -550,6 +551,8 @@
                 }
             }
         }
+
+        return this;
     }
 
 
@@ -577,6 +580,8 @@
                 }
             }
         }
+        
+        return this;
     }
 
 

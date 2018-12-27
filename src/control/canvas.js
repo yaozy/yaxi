@@ -6,10 +6,17 @@ yaxi.Canvas = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (data) {
+    Class.ctor = function (values) {
 
-        base.constructor.ctor.call(this, data);
+        var init;
+        
+        this.$storage = create(this.$defaults);
 
+        if (init = this.init)
+		{
+			init.apply(this, arguments);
+        }
+        
         this.on('touchstart', touchstart.bind(this));
         this.on('touchmove', touchmove.bind(this));
     }

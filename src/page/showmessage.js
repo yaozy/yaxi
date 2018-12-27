@@ -95,7 +95,7 @@ yaxi.showMessage = function (options) {
         }
     };
     
-    return new yaxi.Dialog(options).open();
+    return new yaxi.Dialog().assign(options).open();
 }
 
 
@@ -121,6 +121,7 @@ yaxi.prompt = function (options) {
                 Class: options.control || (options.password ? yaxi.Password : yaxi.TextBox),
                 key: 'input',
                 value: options.value || '',
+                placeholder: options.placeholder || '',
                 style: {
                     width: '100%',
                     margin: '.3rem 0.1rem .2rem',

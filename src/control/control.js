@@ -24,6 +24,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+
+    Class.ctor = function (values) {
+
+        var init;
+
+        this.$storage = create(this.$defaults);
+
+        if (init = this.init)
+		{
+			init.apply(this, arguments);
+        }
+        
+        if (values)
+        {
+            this.assign(values);
+        }
+    }
+
     
 
     // id
@@ -88,9 +106,9 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     
     this.$converter.style = {
         
-        fn: function (data) {
+        fn: function (values) {
      
-            this.__style = new yaxi.Style(this, data);
+            (this.__style = new yaxi.Style(this)).assign(values);
         }
     };
 

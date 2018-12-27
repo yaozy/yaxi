@@ -21,14 +21,9 @@
     
         var prototype = create(base);
 
-        function Store(data, parent) {
+        function Store(parent) {
 
             this.$parent = parent || null;
-
-            if (data && data.length > 0)
-            {
-                push.apply(this, createModels(this, data, 0, [], 'push'));
-            }
         }
 
         prototype.$Model = yaxi.model(properties);
@@ -97,14 +92,14 @@
         var outputs = [],
             Model = store.$Model,
             parent = store.$parent,
-            length = list.length;
+            length = list.length,
+            model;
 
         while (index < length)
         {
-            item = new Model(list[index++]);
-            item.$parent = parent;
-
-            outputs.push(item);
+            model = new Model(parent);
+            model.$assign(list[index++]);
+            outputs.push(model);
         }
 
         return outputs;
@@ -184,7 +179,7 @@
 
     this.splice = function (index, length) {
 
-        var controls;
+        var deleted, inserted;
 
         if ((index |= 0) < 0 && (index += this.length) < 0)
         {
@@ -193,27 +188,30 @@
 
         if (arguments.length > 2)
         {
-            controls = createModels(this, arguments, 2);
-            controls = splice.apply(this,  [index, length].concat(controls));
-
-            notify(this, '__model_insert', index, controls);
+            inserted = createModels(this, arguments, 2);
+            deleted = splice.apply(this, [index, length].concat(inserted));
         }
         else
         {
-            controls = splice.apply(this, arguments);
+            deleted = splice.apply(this, arguments);
         }
 
-        if (controls.length > 0)
+        if (deleted.length > 0)
         {
-            for (var i = controls.length; i--;)
+            for (var i = deleted.length; i--;)
             {
-                controls[i].$parent = controls[i].__bindings = null;
+                deleted[i].$parent = deleted[i].__bindings = null;
             }
 
-            notify(this, '__model_remove', index, controls.length);
+            notify(this, '__model_remove', index, deleted.length);
         }
 
-        return controls;
+        if (inserted)
+        {
+            notify(this, '__model_insert', index, inserted);
+        }
+
+        return deleted;
     }
 
 
