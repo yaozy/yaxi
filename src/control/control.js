@@ -93,6 +93,15 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    // 线条 top|left|right|bottom
+    this.$property('line', '');
+
+
+    // svg填充色
+    this.$property('fill', '');
+
+
+
 
     // 样式集
     Object.defineProperty(this, 'style', {
@@ -537,15 +546,63 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var renderer = this.renderer = create(null);
 
 
-    renderer.className = function (dom, value) {
+    renderer.id = function (dom, value) {
 
-        dom.className = value ? this.$className + ' ' + value : this.$className;
+        dom.id = value;
     }
 
 
     renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
+    }
+
+
+    renderer.className = function (dom, value) {
+
+        dom.className = value ? this.$className + ' ' + value : this.$className;
+    }
+
+
+    renderer.disabled = function (dom, value) {
+
+        dom.disabled = value;
+    }
+
+
+    renderer.lang = function (dom, value) {
+
+        dom.lang = value;
+    }
+
+
+    renderer.title = function (dom, value) {
+
+        dom.title = value;
+    }
+
+
+    renderer.accessKey = function (dom, value) {
+
+        dom.accessKey = value;
+    }
+
+    
+    renderer.alt = function (dom, value) {
+
+        dom.alt = value;
+    }
+
+
+    renderer.line = function (dom, value) {
+
+        dom.setAttribute('line', value);
+    }
+
+    
+    renderer.fill = function (dom, value) {
+
+        dom.style.fill = value;
     }
 
 

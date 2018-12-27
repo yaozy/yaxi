@@ -10,9 +10,6 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     this.$property('text', '');
     
 
-    this.$property('fill', '');
-
-    
     this.$property('checked', false);
 
 
@@ -54,12 +51,6 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
         {
             dom.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
         }
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        dom.firstChild.style.fill = value;
     }
 
 

@@ -4076,6 +4076,15 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    // 线条 top|left|right|bottom
+    this.$property('line', '');
+
+
+    // svg填充色
+    this.$property('fill', '');
+
+
+
 
     // 样式集
     Object.defineProperty(this, 'style', {
@@ -4520,15 +4529,63 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var renderer = this.renderer = create(null);
 
 
-    renderer.className = function (dom, value) {
+    renderer.id = function (dom, value) {
 
-        dom.className = value ? this.$className + ' ' + value : this.$className;
+        dom.id = value;
     }
 
 
     renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
+    }
+
+
+    renderer.className = function (dom, value) {
+
+        dom.className = value ? this.$className + ' ' + value : this.$className;
+    }
+
+
+    renderer.disabled = function (dom, value) {
+
+        dom.disabled = value;
+    }
+
+
+    renderer.lang = function (dom, value) {
+
+        dom.lang = value;
+    }
+
+
+    renderer.title = function (dom, value) {
+
+        dom.title = value;
+    }
+
+
+    renderer.accessKey = function (dom, value) {
+
+        dom.accessKey = value;
+    }
+
+    
+    renderer.alt = function (dom, value) {
+
+        dom.alt = value;
+    }
+
+
+    renderer.line = function (dom, value) {
+
+        dom.setAttribute('line', value);
+    }
+
+    
+    renderer.fill = function (dom, value) {
+
+        dom.style.fill = value;
     }
 
 
@@ -5904,10 +5961,6 @@ yaxi.Icon = yaxi.Control.extend(function () {
     // svg图标
     this.$property('svg', '');
 
-    
-    // svg图标颜色
-    this.$property('fill', '');
-
 
     // svg图标大小
     this.$property('size', '');
@@ -5958,15 +6011,6 @@ yaxi.Icon = yaxi.Control.extend(function () {
     }
 
 
-    renderer.fill = function (dom, value) {
-
-        if (dom = dom.firstChild)
-        {
-            dom.style.fill = value;
-        }
-    }
-
-
     renderer.size = function (dom, value) {
 
         if (dom = dom.firstChild)
@@ -6003,10 +6047,6 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     this.$property('svg', '');
 
 
-    // svg图标颜色
-    this.$property('fill', '');
-
-    
     // svg图标大小
     this.$property('size', '');
 
@@ -6053,15 +6093,6 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
         else
         {
             dom.innerHTML = '';
-        }
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        if (dom = dom.firstChild.firstChild.firstChild)
-        {
-            dom.style.fill = value;
         }
     }
 
@@ -7269,6 +7300,13 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
+
+    this.renderer.selectedLine = function (dom, value) {
+
+        dom.setAttribute('line', value);
+    }
+
+
     this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
@@ -7581,9 +7619,6 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     this.$property('text', '');
     
 
-    this.$property('fill', '');
-
-    
     this.$property('checked', false);
 
 
@@ -7625,12 +7660,6 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
         {
             dom.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
         }
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        dom.firstChild.style.fill = value;
     }
 
 
@@ -8023,9 +8052,6 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
     this.$property('text', '');
 
 
-    this.$property('fill', '');
-    
-
     this.$property('checked', false);
 
 
@@ -8071,11 +8097,6 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
         {
             dom.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
         }
-    }
-
-    renderer.fill = function (dom, value) {
-
-        dom.firstChild.style.fill = value;
     }
 
     
@@ -9895,7 +9916,7 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
 
-    yaxi.template(this, '<svg class="yx-control yx-circletext" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /><text x="50%" y="50%" dy="20" text-anchor="middle" style="font-size:60;" /></svg>');
+    yaxi.template(this, '<span class="yx-control yx-circletext"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="50" ry="50" /></svg><span></span></span>');
 
 
 
@@ -9906,16 +9927,6 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
 
     this.$property('strokeWidth', 0);
-
-
-    this.$property('fill', '');
-
-
-    this.$property('color', '');
-
-
-    this.$property('textSize', 60);
-
 
     
 
@@ -9931,33 +9942,13 @@ yaxi.CircleText = yaxi.Control.extend(function () {
 
     renderer.stroke = function (dom, value) {
 
-        dom.firstChild.style.stroke = value;
+        dom.firstChild.firstChild.style.stroke = value;
     }
 
 
     renderer.strokeWidth = function (dom, value) {
 
-        dom.firstChild.style.strokeWidth = value;
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        dom.firstChild.style.fill = value;
-    }
-
-
-    renderer.color = function (dom, value) {
-
-        dom.lastChild.style.fill = value;
-    }
-
-
-    renderer.textSize = function (dom, value) {
-
-        dom = dom.lastChild;
-        dom.style.fontSize = value;
-        dom.setAttribute('dy', 100 - value >> 1);
+        dom.firstChild.firstChild.style.strokeWidth = value;
     }
 
 

@@ -1,56 +1,58 @@
 .yx-control[theme="primary"] {
     border-color: @primary-color-3;
     color: @primary-color-1;
+    fill: @icon-color-2;
 }
 
 .yx-control[theme="second"] {
     border-color: @second-color-3;
     color: @second-color-1;
+    fill: @icon-color-3;
 }
 
 .yx-control[theme="success"] {
     border-color: @success-color-3;
     color: @success-color-1;
+    fill: @icon-color-4;
 }
 
 .yx-control[theme="warning"] {
     border-color: @warning-color-3;
     color: @warning-color-1;
+    fill: @icon-color-4;
 }
 
 .yx-control[theme="danger"] {
     border-color: @danger-color-3;
     color: @danger-color-1;
+    fill: @icon-color-4;
 }
 
 .yx-control[theme="disabled"] {
     border-color: @disabled-color-3;
     background-color: @disabled-color-5;
     color: @disabled-color-1;
+    fill: @icon-color-4;
     cursor: not-allowed;
 }
 
 
-[theme="primary"] svg {
-    fill: @icon-color-2;
+.yx-control[line="top"] {
+    border-top-width: 1px;
+    border-top-style: solid;
 }
 
-[theme="second"] svg {
-    fill: @icon-color-3;
+.yx-control[line="left"] {
+    border-left-width: 1px;
+    border-left-style: solid;
 }
 
-[theme="success"] svg {
-    fill: @icon-color-4;
+.yx-control[line="right"] {
+    border-right-width: 1px;
+    border-right-style: solid;
 }
 
-[theme="warning"] svg {
-    fill: @icon-color-5;
-}
-
-[theme="danger"] svg {
-    fill: @icon-color-6;
-}
-
-[theme="disabled"] svg {
-    fill: @icon-color-7;
+.yx-control[line="bottom"] {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
 }

@@ -108,6 +108,13 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
+
+    this.renderer.selectedLine = function (dom, value) {
+
+        dom.setAttribute('line', value);
+    }
+
+
     this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,

@@ -19,10 +19,6 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     this.$property('svg', '');
 
 
-    // svg图标颜色
-    this.$property('fill', '');
-
-    
     // svg图标大小
     this.$property('size', '');
 
@@ -69,15 +65,6 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
         else
         {
             dom.innerHTML = '';
-        }
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        if (dom = dom.firstChild.firstChild.firstChild)
-        {
-            dom.style.fill = value;
         }
     }
 

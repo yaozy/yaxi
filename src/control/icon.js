@@ -13,10 +13,6 @@ yaxi.Icon = yaxi.Control.extend(function () {
     // svg图标
     this.$property('svg', '');
 
-    
-    // svg图标颜色
-    this.$property('fill', '');
-
 
     // svg图标大小
     this.$property('size', '');
@@ -63,15 +59,6 @@ yaxi.Icon = yaxi.Control.extend(function () {
         else
         {
             dom.innerHTML = '';
-        }
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        if (dom = dom.firstChild)
-        {
-            dom.style.fill = value;
         }
     }
 
