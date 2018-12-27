@@ -2,16 +2,30 @@ var yaxi = Object.create(null);
 
 
 
-// rem自适应计算（按照375px的宽度，1rem = 100px的比例）
-document.documentElement.style.fontSize = (yaxi.rem = window.innerWidth * 100 / 375) + 'px';
-
-
 // 当前语言
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
+// 处理rem自适应及支持1px边框问题
+(function () {
+
+    var ratio = window.devicePixelRatio || 1,
+        scale = 1 / ratio;
+
+    document.querySelector("meta[name=viewport]").setAttribute('content',
+        'width=device-width,initial-scale=' + scale +
+        ',maximum-scale=' + scale +
+        ',minimum-scale=' + scale +
+        ',user-scalable=no');
+
+    // rem自适应计算（按照375px的宽度，1rem = 100px的比例）
+    document.documentElement.style.fontSize = (yaxi.rem = window.innerWidth * 100 / 375) + 'px';
+
+})();
 
 
+
+// 对象继承实现
 Object.extend = function (fn) {
 	
     var base = this.prototype || null,

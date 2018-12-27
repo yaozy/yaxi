@@ -232,14 +232,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onopening() !== false)
 		{
-			var body = document.body,
-				dom = this.$dom || this.render();
-
-			body.focus();
-			body.appendChild(dom);
+			document.body.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
-			
 		    this.opener = opener;
 
 			this.onopened();
@@ -295,12 +290,12 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.onopening = function (options) {
+	this.onopening = function () {
 		
 	}
 	
 	
-	this.onopened = function (options) {
+	this.onopened = function () {
 		
 	}
 	

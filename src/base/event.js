@@ -538,8 +538,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
     document.addEventListener('keyup', listener, true);
 
 
-    document.addEventListener('focus', listener, true);
+    document.addEventListener('focus', function (event) {
+     
+        var target = event.target,
+            control,
+            e;
 
+        target.scrollIntoViewIfNeeded();
+
+        if (control = findControl(target))
+        {
+            e = new Event();
+            e.type = 'focus';
+            e.dom = event.target;
+            e.original = event;
+
+            return control.trigger(e);
+        }
+        
+    }, true);
+
+    
     document.addEventListener('blur', listener, true);
 
 
