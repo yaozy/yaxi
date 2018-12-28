@@ -6,34 +6,9 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
-
-// 处理rem自适应及支持1px边框问题
-(function () {
-
-    var style = document.documentElement.style,
-        scale = +window.devicePixelRatio || 1,
-        width = window.innerWidth,
-        height = window.innerHeight;
-
-    if (scale >= 2)
-    {
-        scale = (scale * 10000 / 2 | 0) / 10000;
-    }
-
-    yaxi.scale = scale;
-    
-    width = width * scale + .5 | 0;
-    height = height * scale + .5 | 0;
-
-    // rem自适应计算（按照375px的宽度，1rem = 100px的比例）
-    style.fontSize = (yaxi.rem = (width * 10000 / 375 | 0) / 100) + 'px';
-    style.overflow = 'hidden';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    style.transformOrigin = '0 0';
-    style.transform = 'scale(' + 1 / scale + ',' + 1 / scale + ')';
-
-})();
+// 处理rem自适应
+// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
+document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
 
 
 
@@ -1174,8 +1149,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var scale = yaxi.scale || 1,
-            e = new Event();
+        var e = new Event();
 
         touch = touch || event.changedTouches[0];
 
@@ -1184,8 +1158,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
         e.start = start;
         e.original = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX * scale | 0;
-        e.clientY = touch.clientY * scale | 0;
+        e.clientX = touch.clientX << 1;
+        e.clientY = touch.clientY << 1;
         e.distanceX = e.clientX - start.clientX;
         e.distanceY = e.clientY - start.clientY;
 
@@ -1226,15 +1200,14 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0],
-                scale = yaxi.scale;
+            var touch = event.changedTouches[0];
 
             start.tap = start.longTap = true;
 
             start.dom = event.target;
             start.control = control;
-            start.clientX = touch.clientX * scale | 0;
-            start.clientY = touch.clientY * scale | 0;
+            start.clientX = touch.clientX << 1;
+            start.clientY = touch.clientY << 1;
 
             if (control.trigger(touchEvent(event, touch)) === false)
             {
@@ -1398,7 +1371,12 @@ yaxi.EventTarget = Object.extend(function (Class) {
             control,
             e;
 
-        target.scrollIntoViewIfNeeded();
+        // 页面刚打开时禁止自动弹出键盘
+        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
+        {
+            target.blur();
+            return;
+        }
 
         if (control = findControl(target))
         {
@@ -1417,6 +1395,18 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     document.addEventListener('scroll', listener, true);
+
+
+    window.addEventListener('resize', function () {
+
+        var dom = document.activeElement;
+
+        // 打开输入法时把焦点控件移动可视区
+        if (dom && this.innerHeight / this.innerWidth < 1.2)
+        {
+            dom.scrollIntoViewIfNeeded();
+        }
+    });
 
 
 
@@ -4054,8 +4044,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var Controls = yaxi.Controls = create(null);
 
 
+    var host = yaxi.__dom_host = document.createElement('div');
 
-    
+    host.className = 'yx-host';
+
+    if (document.body)
+    {
+        document.body.appendChild(host);
+    }
+    else
+    {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.body.appendChild(host);
+        });
+    }
+
+
+
     Class.register = function (name) {
 
         if (name)
@@ -8564,7 +8570,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onopening() !== false)
 		{
-			document.body.appendChild(this.$dom || this.render());
+			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
 		    this.opener = opener;
@@ -8579,6 +8585,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
+			this.openTime = new Date();
 		}
 
 		return this;
@@ -8870,7 +8877,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 	function computePosition() {
 
-		var dialog = stack[stack.length - 1],
+		var host = yaxi.__dom_host,
+			dialog = stack[stack.length - 1],
 			dom;
 
 		if (dialog && (dom = dialog.$dom))
@@ -8885,7 +8893,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'middle':
-					style.top = (document.body.clientHeight - dom.offsetHeight >> 1) + 'px';
+					style.top = (host.clientHeight - dom.offsetHeight >> 1) + 'px';
 					style.bottom = '';
 					break;
 
@@ -8903,7 +8911,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'center':
-					style.left = (document.body.clientWidth - dom.offsetWidth >> 1) + 'px';
+					style.left = (host.clientWidth - dom.offsetWidth >> 1) + 'px';
 					style.right = '';
 					break;
 				
@@ -8924,16 +8932,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 			return false;
 		}
 
-		document.body.appendChild(mask);
-		document.body.appendChild(this.$dom || this.render());
+		var host = yaxi.__dom_host;
 
-		// 打开弹出窗口时让出焦点
-		var dom = document.activeElement;
-
-		if (dom)
-		{
-			dom.blur();
-		}
+		host.appendChild(mask);
+		host.appendChild(this.$dom || this.render());
 
 		this.onopened();
 		this.onshow();
@@ -9035,7 +9037,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 		{
 			var dom = this.$dom || (this.$dom = this.render());
 			
-			document.body.appendChild(dom);
+			yaxi.__dom_host.appendChild(dom);
 			stack.push(this);
 		}
 
@@ -9054,7 +9056,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 			style.left = x > 0 ? x + 'px' : x;
 			style.top = y > 0 ? y + 'px' : y;
 			
-			document.body.appendChild(dom);
+			yaxi.__dom_host.appendChild(dom);
 			
 			stack.push(this);
 		}
@@ -9292,7 +9294,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
     function show(options) {
 
-        var body = document.body,
+        var host = yaxi.__dom_host,
             style = dom.style;
 
         close();
@@ -9303,13 +9305,13 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
         if (options.mask || options.loading && options.mask !== false)
         {
             mask.style.backgroundColor = '';
-            document.body.appendChild(mask);
+            host.appendChild(mask);
         }
 
-        body.appendChild(dom);
+        host.appendChild(dom);
 
         style.cssText = options.style || '';
-        style.left = (body.clientWidth - dom.offsetWidth >> 1) + 'px';
+        style.left = (host.clientWidth - dom.offsetWidth >> 1) + 'px';
 
         switch (options.position)
         {
@@ -9322,7 +9324,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
                 break;
 
             default:
-                style.top = (body.clientHeight - dom.offsetHeight >> 1) + 'px';
+                style.top = (host.clientHeight - dom.offsetHeight >> 1) + 'px';
                 break;
         }
 
@@ -9382,7 +9384,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
             if (!mask.parentNode)
             {
                 mask.style.backgroundColor = 'rgba(255,255,255,0)';
-                document.body.appendChild(mask);
+                yaxi.__dom_host.appendChild(mask);
             }
 
             delay = setTimeout(function () {
@@ -9580,7 +9582,7 @@ yaxi.Control.extend(function (Class, base) {
                 }
             }
 
-            document.body.appendChild(dom);
+            yaxi.__dom_host.appendChild(dom);
             stack.push(this);
         }
 
@@ -10175,12 +10177,11 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     function touchstart(event) {
 
         var dom = this.$dom.firstChild,
-            scale = yaxi.scale,
             rect = dom.getBoundingClientRect(),
             index;
 
-        state.x = rect.left * scale | 0;
-        state.y = rect.top * scale | 0;
+        state.x = rect.left << 1;
+        state.y = rect.top << 1;
         state.width = dom.offsetWidth;
         state.height = dom.offsetHeight;
         state.size = state.width / 6 | 0;
@@ -10557,7 +10558,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         var target = event.dom,
             dom = this.$dom.lastChild;
 
-        state.left = dom.offsetLeft;
+        state.left = dom.getBoundingClientRect().left << 1;
         state.width = dom.offsetWidth;
 
         while (target && target !== dom)

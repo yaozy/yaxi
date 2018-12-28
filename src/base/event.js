@@ -322,8 +322,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var scale = yaxi.scale || 1,
-            e = new Event();
+        var e = new Event();
 
         touch = touch || event.changedTouches[0];
 
@@ -332,8 +331,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
         e.start = start;
         e.original = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX * scale | 0;
-        e.clientY = touch.clientY * scale | 0;
+        e.clientX = touch.clientX << 1;
+        e.clientY = touch.clientY << 1;
         e.distanceX = e.clientX - start.clientX;
         e.distanceY = e.clientY - start.clientY;
 
@@ -374,15 +373,14 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0],
-                scale = yaxi.scale;
+            var touch = event.changedTouches[0];
 
             start.tap = start.longTap = true;
 
             start.dom = event.target;
             start.control = control;
-            start.clientX = touch.clientX * scale | 0;
-            start.clientY = touch.clientY * scale | 0;
+            start.clientX = touch.clientX << 1;
+            start.clientY = touch.clientY << 1;
 
             if (control.trigger(touchEvent(event, touch)) === false)
             {
@@ -546,7 +544,12 @@ yaxi.EventTarget = Object.extend(function (Class) {
             control,
             e;
 
-        target.scrollIntoViewIfNeeded();
+        // 页面刚打开时禁止自动弹出键盘
+        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
+        {
+            target.blur();
+            return;
+        }
 
         if (control = findControl(target))
         {
@@ -565,6 +568,18 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     document.addEventListener('scroll', listener, true);
+
+
+    window.addEventListener('resize', function () {
+
+        var dom = document.activeElement;
+
+        // 打开输入法时把焦点控件移动可视区
+        if (dom && this.innerHeight / this.innerWidth < 1.2)
+        {
+            dom.scrollIntoViewIfNeeded();
+        }
+    });
 
 
 

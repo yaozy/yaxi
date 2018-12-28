@@ -144,12 +144,11 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     function touchstart(event) {
 
         var dom = this.$dom.firstChild,
-            scale = yaxi.scale,
             rect = dom.getBoundingClientRect(),
             index;
 
-        state.x = rect.left * scale | 0;
-        state.y = rect.top * scale | 0;
+        state.x = rect.left << 1;
+        state.y = rect.top << 1;
         state.width = dom.offsetWidth;
         state.height = dom.offsetHeight;
         state.size = state.width / 6 | 0;

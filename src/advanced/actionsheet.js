@@ -168,7 +168,7 @@ yaxi.Control.extend(function (Class, base) {
                 }
             }
 
-            document.body.appendChild(dom);
+            yaxi.__dom_host.appendChild(dom);
             stack.push(this);
         }
 

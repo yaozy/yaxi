@@ -16,7 +16,7 @@
 
     function show(options) {
 
-        var body = document.body,
+        var host = yaxi.__dom_host,
             style = dom.style;
 
         close();
@@ -27,13 +27,13 @@
         if (options.mask || options.loading && options.mask !== false)
         {
             mask.style.backgroundColor = '';
-            document.body.appendChild(mask);
+            host.appendChild(mask);
         }
 
-        body.appendChild(dom);
+        host.appendChild(dom);
 
         style.cssText = options.style || '';
-        style.left = (body.clientWidth - dom.offsetWidth >> 1) + 'px';
+        style.left = (host.clientWidth - dom.offsetWidth >> 1) + 'px';
 
         switch (options.position)
         {
@@ -46,7 +46,7 @@
                 break;
 
             default:
-                style.top = (body.clientHeight - dom.offsetHeight >> 1) + 'px';
+                style.top = (host.clientHeight - dom.offsetHeight >> 1) + 'px';
                 break;
         }
 
@@ -106,7 +106,7 @@
             if (!mask.parentNode)
             {
                 mask.style.backgroundColor = 'rgba(255,255,255,0)';
-                document.body.appendChild(mask);
+                yaxi.__dom_host.appendChild(mask);
             }
 
             delay = setTimeout(function () {

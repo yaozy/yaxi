@@ -17,7 +17,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 		{
 			var dom = this.$dom || (this.$dom = this.render());
 			
-			document.body.appendChild(dom);
+			yaxi.__dom_host.appendChild(dom);
 			stack.push(this);
 		}
 
@@ -36,7 +36,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 			style.left = x > 0 ? x + 'px' : x;
 			style.top = y > 0 ? y + 'px' : y;
 			
-			document.body.appendChild(dom);
+			yaxi.__dom_host.appendChild(dom);
 			
 			stack.push(this);
 		}

@@ -84,7 +84,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 	function computePosition() {
 
-		var dialog = stack[stack.length - 1],
+		var host = yaxi.__dom_host,
+			dialog = stack[stack.length - 1],
 			dom;
 
 		if (dialog && (dom = dialog.$dom))
@@ -99,7 +100,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'middle':
-					style.top = (document.body.clientHeight - dom.offsetHeight >> 1) + 'px';
+					style.top = (host.clientHeight - dom.offsetHeight >> 1) + 'px';
 					style.bottom = '';
 					break;
 
@@ -117,7 +118,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'center':
-					style.left = (document.body.clientWidth - dom.offsetWidth >> 1) + 'px';
+					style.left = (host.clientWidth - dom.offsetWidth >> 1) + 'px';
 					style.right = '';
 					break;
 				
@@ -138,16 +139,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 			return false;
 		}
 
-		document.body.appendChild(mask);
-		document.body.appendChild(this.$dom || this.render());
+		var host = yaxi.__dom_host;
 
-		// 打开弹出窗口时让出焦点
-		var dom = document.activeElement;
-
-		if (dom)
-		{
-			dom.blur();
-		}
+		host.appendChild(mask);
+		host.appendChild(this.$dom || this.render());
 
 		this.onopened();
 		this.onshow();

@@ -232,7 +232,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onopening() !== false)
 		{
-			document.body.appendChild(this.$dom || this.render());
+			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
 		    this.opener = opener;
@@ -247,6 +247,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
+			this.openTime = new Date();
 		}
 
 		return this;

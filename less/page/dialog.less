@@ -1,4 +1,9 @@
 .yx-dialog {
+    position: absolute;
+    display: -webkit-flex;
+    display: flex;
+    flex-flow: column;
+    align-items: stretch;
     overflow: hidden;
     width: 3.15rem;
     height: auto;
@@ -6,6 +11,7 @@
     // border: 1px solid @header-border-color;
     // box-shadow: 0 0 .08rem @header-border-color;
     border-radius: .05rem;
+    background-color: @back-color;
     z-index: 30;
 }
 

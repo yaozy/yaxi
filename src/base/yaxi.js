@@ -6,34 +6,9 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
-
-// 处理rem自适应及支持1px边框问题
-(function () {
-
-    var style = document.documentElement.style,
-        scale = +window.devicePixelRatio || 1,
-        width = window.innerWidth,
-        height = window.innerHeight;
-
-    if (scale >= 2)
-    {
-        scale = (scale * 10000 / 2 | 0) / 10000;
-    }
-
-    yaxi.scale = scale;
-    
-    width = width * scale + .5 | 0;
-    height = height * scale + .5 | 0;
-
-    // rem自适应计算（按照375px的宽度，1rem = 100px的比例）
-    style.fontSize = (yaxi.rem = (width * 10000 / 375 | 0) / 100) + 'px';
-    style.overflow = 'hidden';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    style.transformOrigin = '0 0';
-    style.transform = 'scale(' + 1 / scale + ',' + 1 / scale + ')';
-
-})();
+// 处理rem自适应
+// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
+document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
 
 
 
