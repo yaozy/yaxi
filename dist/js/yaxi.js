@@ -7430,7 +7430,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
         var children = this.__children,
             last,
             item,
-            host;
+            host,
+            start;
 
         if (last = children[this.__index])
         {
@@ -7458,6 +7459,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
                 children.push(item.host = host);
                 host.onshow && host.onshow();
+
+                create = true;
             }
         }
         else if (last)
@@ -7469,7 +7472,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         this.trigger('change', {
             last: last,
-            selected: item
+            selected: item,
+            create: create || false
         });
     }
 
@@ -9288,7 +9292,8 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
 
     function show(options) {
 
-        var style = dom.style;
+        var body = document.body,
+            style = dom.style;
 
         close();
 
@@ -9301,10 +9306,10 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
             document.body.appendChild(mask);
         }
 
-        document.body.appendChild(dom);
+        body.appendChild(dom);
 
         style.cssText = options.style || '';
-        style.left = (window.innerWidth - dom.offsetWidth >> 1) + 'px';
+        style.left = (body.clientWidth - dom.offsetWidth >> 1) + 'px';
 
         switch (options.position)
         {
@@ -9317,7 +9322,7 @@ yaxi.Title = yaxi.Control.extend(function (Class) {
                 break;
 
             default:
-                style.top = (window.innerHeight - dom.offsetHeight >> 1) + 'px';
+                style.top = (body.clientHeight - dom.offsetHeight >> 1) + 'px';
                 break;
         }
 

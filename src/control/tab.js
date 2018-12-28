@@ -120,7 +120,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
         var children = this.__children,
             last,
             item,
-            host;
+            host,
+            start;
 
         if (last = children[this.__index])
         {
@@ -148,6 +149,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
                 children.push(item.host = host);
                 host.onshow && host.onshow();
+
+                create = true;
             }
         }
         else if (last)
@@ -159,7 +162,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         this.trigger('change', {
             last: last,
-            selected: item
+            selected: item,
+            create: create || false
         });
     }
 

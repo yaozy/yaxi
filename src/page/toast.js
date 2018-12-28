@@ -16,7 +16,8 @@
 
     function show(options) {
 
-        var style = dom.style;
+        var body = document.body,
+            style = dom.style;
 
         close();
 
@@ -29,10 +30,10 @@
             document.body.appendChild(mask);
         }
 
-        document.body.appendChild(dom);
+        body.appendChild(dom);
 
         style.cssText = options.style || '';
-        style.left = (window.innerWidth - dom.offsetWidth >> 1) + 'px';
+        style.left = (body.clientWidth - dom.offsetWidth >> 1) + 'px';
 
         switch (options.position)
         {
@@ -45,7 +46,7 @@
                 break;
 
             default:
-                style.top = (window.innerHeight - dom.offsetHeight >> 1) + 'px';
+                style.top = (body.clientHeight - dom.offsetHeight >> 1) + 'px';
                 break;
         }
 
