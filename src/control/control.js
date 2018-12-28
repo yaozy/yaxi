@@ -93,9 +93,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.$property('radius', 0);
-
-
     // 线条 top|left|right|bottom
     this.$property('line', '');
 
@@ -569,37 +566,38 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     renderer.disabled = function (dom, value) {
 
-        dom.disabled = value;
+        if (value)
+        {
+            dom.setAttribute('disabled', 'disabled');
+        }
+        else
+        {
+            dom.removeAttribute('disabled');
+        }
     }
 
 
     renderer.lang = function (dom, value) {
 
-        dom.lang = value;
+        dom.setAttribute('lang', value);
     }
 
 
     renderer.title = function (dom, value) {
 
-        dom.title = value;
+        dom.setAttribute('title', value);
     }
 
 
     renderer.accessKey = function (dom, value) {
 
-        dom.accessKey = value;
+        dom.setAttribute('accessKey', value);
     }
 
     
     renderer.alt = function (dom, value) {
 
-        dom.alt = value;
-    }
-
-
-    renderer.radius = function (dom, value) {
-
-        dom.style.borderRadius = (value * yaxi.rem | 0) + 'px';
+        dom.setAttribute('alt', value);
     }
 
 

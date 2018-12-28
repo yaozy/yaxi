@@ -6,20 +6,32 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
+
 // 处理rem自适应及支持1px边框问题
 (function () {
 
-    var ratio = window.devicePixelRatio || 1,
-        scale = 1 / ratio;
+    var style = document.documentElement.style,
+        scale = +window.devicePixelRatio || 1,
+        width = window.innerWidth,
+        height = window.innerHeight;
 
-    document.querySelector("meta[name=viewport]").setAttribute('content',
-        'width=device-width,initial-scale=' + scale +
-        ',maximum-scale=' + scale +
-        ',minimum-scale=' + scale +
-        ',user-scalable=no');
+    if (scale >= 2)
+    {
+        scale = (scale * 10000 / 2 | 0) / 10000;
+    }
+
+    yaxi.scale = scale;
+    
+    width = width * scale + .5 | 0;
+    height = height * scale + .5 | 0;
 
     // rem自适应计算（按照375px的宽度，1rem = 100px的比例）
-    document.documentElement.style.fontSize = (yaxi.rem = window.innerWidth * 100 / 375) + 'px';
+    style.fontSize = (yaxi.rem = (width * 10000 / 375 | 0) / 100) + 'px';
+    style.overflow = 'hidden';
+    style.width = width + 'px';
+    style.height = height + 'px';
+    style.transformOrigin = '0 0';
+    style.transform = 'scale(' + 1 / scale + ',' + 1 / scale + ')';
 
 })();
 

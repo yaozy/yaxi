@@ -99,7 +99,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'middle':
-					style.top = (window.innerHeight - dom.offsetHeight >> 1) + 'px';
+					style.top = (document.body.clientHeight - dom.offsetHeight >> 1) + 'px';
 					style.bottom = '';
 					break;
 
@@ -117,7 +117,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'center':
-					style.left = (window.innerWidth - dom.offsetWidth >> 1) + 'px';
+					style.left = (document.body.clientWidth - dom.offsetWidth >> 1) + 'px';
 					style.right = '';
 					break;
 				

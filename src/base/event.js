@@ -322,7 +322,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var e = new Event();
+        var scale = yaxi.scale || 1,
+            e = new Event();
 
         touch = touch || event.changedTouches[0];
 
@@ -331,10 +332,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
         e.start = start;
         e.original = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = (e.screenX = touch.screenX) - start.screenX;
-        e.distanceY = (e.screenY = touch.screenY) - start.screenY;
+        e.clientX = touch.clientX * scale | 0;
+        e.clientY = touch.clientY * scale | 0;
+        e.distanceX = e.clientX - start.clientX;
+        e.distanceY = e.clientY - start.clientY;
 
         return e;
     }
@@ -373,14 +374,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
+            var touch = event.changedTouches[0],
+                scale = yaxi.scale;
 
             start.tap = start.longTap = true;
 
             start.dom = event.target;
             start.control = control;
-            start.screenX = touch.screenX;
-            start.screenY = touch.screenY;
+            start.clientX = touch.clientX * scale | 0;
+            start.clientY = touch.clientY * scale | 0;
 
             if (control.trigger(touchEvent(event, touch)) === false)
             {

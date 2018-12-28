@@ -172,7 +172,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         var target = event.dom,
             dom = this.$dom.lastChild;
 
-        state.left = dom.getBoundingClientRect().left;
+        state.left = dom.offsetLeft;
         state.width = dom.offsetWidth;
 
         while (target && target !== dom)

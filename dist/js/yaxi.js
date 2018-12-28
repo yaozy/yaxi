@@ -6,20 +6,32 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
+
 // 处理rem自适应及支持1px边框问题
 (function () {
 
-    var ratio = window.devicePixelRatio || 1,
-        scale = 1 / ratio;
+    var style = document.documentElement.style,
+        scale = +window.devicePixelRatio || 1,
+        width = window.innerWidth,
+        height = window.innerHeight;
 
-    document.querySelector("meta[name=viewport]").setAttribute('content',
-        'width=device-width,initial-scale=' + scale +
-        ',maximum-scale=' + scale +
-        ',minimum-scale=' + scale +
-        ',user-scalable=no');
+    if (scale >= 2)
+    {
+        scale = (scale * 10000 / 2 | 0) / 10000;
+    }
+
+    yaxi.scale = scale;
+    
+    width = width * scale + .5 | 0;
+    height = height * scale + .5 | 0;
 
     // rem自适应计算（按照375px的宽度，1rem = 100px的比例）
-    document.documentElement.style.fontSize = (yaxi.rem = window.innerWidth * 100 / 375) + 'px';
+    style.fontSize = (yaxi.rem = (width * 10000 / 375 | 0) / 100) + 'px';
+    style.overflow = 'hidden';
+    style.width = width + 'px';
+    style.height = height + 'px';
+    style.transformOrigin = '0 0';
+    style.transform = 'scale(' + 1 / scale + ',' + 1 / scale + ')';
 
 })();
 
@@ -1162,7 +1174,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var e = new Event();
+        var scale = yaxi.scale || 1,
+            e = new Event();
 
         touch = touch || event.changedTouches[0];
 
@@ -1171,10 +1184,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
         e.start = start;
         e.original = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = (e.screenX = touch.screenX) - start.screenX;
-        e.distanceY = (e.screenY = touch.screenY) - start.screenY;
+        e.clientX = touch.clientX * scale | 0;
+        e.clientY = touch.clientY * scale | 0;
+        e.distanceX = e.clientX - start.clientX;
+        e.distanceY = e.clientY - start.clientY;
 
         return e;
     }
@@ -1213,14 +1226,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
+            var touch = event.changedTouches[0],
+                scale = yaxi.scale;
 
             start.tap = start.longTap = true;
 
             start.dom = event.target;
             start.control = control;
-            start.screenX = touch.screenX;
-            start.screenY = touch.screenY;
+            start.clientX = touch.clientX * scale | 0;
+            start.clientY = touch.clientY * scale | 0;
 
             if (control.trigger(touchEvent(event, touch)) === false)
             {
@@ -4122,9 +4136,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.$property('radius', 0);
-
-
     // 线条 top|left|right|bottom
     this.$property('line', '');
 
@@ -4598,37 +4609,38 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     renderer.disabled = function (dom, value) {
 
-        dom.disabled = value;
+        if (value)
+        {
+            dom.setAttribute('disabled', 'disabled');
+        }
+        else
+        {
+            dom.removeAttribute('disabled');
+        }
     }
 
 
     renderer.lang = function (dom, value) {
 
-        dom.lang = value;
+        dom.setAttribute('lang', value);
     }
 
 
     renderer.title = function (dom, value) {
 
-        dom.title = value;
+        dom.setAttribute('title', value);
     }
 
 
     renderer.accessKey = function (dom, value) {
 
-        dom.accessKey = value;
+        dom.setAttribute('accessKey', value);
     }
 
     
     renderer.alt = function (dom, value) {
 
-        dom.alt = value;
-    }
-
-
-    renderer.radius = function (dom, value) {
-
-        dom.style.borderRadius = (value * yaxi.rem | 0) + 'px';
+        dom.setAttribute('alt', value);
     }
 
 
@@ -5228,8 +5240,8 @@ yaxi.__extend_pulldown = function () {
 
             // 以当前控件和位置开始滑动
             start.control = this;
-            start.screenX = event.screenX;
-            start.screenY = event.screenY;
+            start.clientX = event.clientX;
+            start.clientY = event.clientY;
     
             overflowY = style.overflowY;
             style.overflowY = 'hidden';
@@ -6169,6 +6181,57 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
 
 }).register('IconButton');
+
+
+
+
+yaxi.IFrame = yaxi.Control.extend(function (Class, base) {
+
+
+
+    yaxi.template(this, '<iframe class="yx-control yx-iframe"></iframe>');
+
+
+
+    this.$property('src', '');
+
+
+
+    this.renderer.src = function (dom, value) {
+
+        dom.src = value;
+    }
+
+
+
+    function findControl(source) {
+
+        var iframes = document.querySelectorAll('iframe');
+
+        for (var i = iframes.length; i--;)
+        {
+            if (iframes[i].contentWindow === source)
+            {
+                return iframes[i].$control;
+            }
+        }
+    }
+
+
+    window.addEventListener('message', function (event) {
+
+        var control = findControl(event.source);
+
+        if (control)
+        {
+            control.trigger('message', {
+                data: event.data
+            });
+        }
+    });
+
+
+});
 
 
 
@@ -8818,7 +8881,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'middle':
-					style.top = (window.innerHeight - dom.offsetHeight >> 1) + 'px';
+					style.top = (document.body.clientHeight - dom.offsetHeight >> 1) + 'px';
 					style.bottom = '';
 					break;
 
@@ -8836,7 +8899,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 					break;
 
 				case 'center':
-					style.left = (window.innerWidth - dom.offsetWidth >> 1) + 'px';
+					style.left = (document.body.clientWidth - dom.offsetWidth >> 1) + 'px';
 					style.right = '';
 					break;
 				
@@ -9961,53 +10024,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.CircleText = yaxi.Control.extend(function () {
-
-
-
-
-    yaxi.template(this, '<span class="yx-control yx-circletext"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="50" ry="50" /></svg><span></span></span>');
-
-
-
-    this.$property('text', '');
-
-    
-    this.$property('stroke', '');
-
-
-    this.$property('strokeWidth', 0);
-
-    
-
-
-    var renderer = this.renderer;
-
-
-    renderer.text = function (dom, value) {
-
-        dom.lastChild.textContent = value;
-    }
-
-
-    renderer.stroke = function (dom, value) {
-
-        dom.firstChild.firstChild.style.stroke = value;
-    }
-
-
-    renderer.strokeWidth = function (dom, value) {
-
-        dom.firstChild.firstChild.style.strokeWidth = value;
-    }
-
-
-
-}).register('CircleText');
-
-
-
-
 yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
 
@@ -10154,11 +10170,12 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     function touchstart(event) {
 
         var dom = this.$dom.firstChild,
+            scale = yaxi.scale,
             rect = dom.getBoundingClientRect(),
             index;
 
-        state.x = rect.left;
-        state.y = rect.top;
+        state.x = rect.left * scale | 0;
+        state.y = rect.top * scale | 0;
         state.width = dom.offsetWidth;
         state.height = dom.offsetHeight;
         state.size = state.width / 6 | 0;
@@ -10535,7 +10552,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         var target = event.dom,
             dom = this.$dom.lastChild;
 
-        state.left = dom.getBoundingClientRect().left;
+        state.left = dom.offsetLeft;
         state.width = dom.offsetWidth;
 
         while (target && target !== dom)

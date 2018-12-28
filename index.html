@@ -121,44 +121,17 @@
                     //     }
                     // },
                     {
-                        Class: yaxi.Carousel,
-                        time: 2000,
-                        style: {
-                            height: '4rem',
-                            backgroundColor: '#eee'
-                        },
-                        children: [
-                            {
-                                Class: yaxi.IconButton,
-                                svg: 'icon-yaxi-copy',
-                                text: 'test1',
-                                vertical: true,
-                                style: {
-                                    display: 'block',
-                                    border: '1px solid silver'
-                                }
-                            },
-                            {
-                                Class: yaxi.IconButton,
-                                svg: 'icon-yaxi-copy',
-                                text: 'test2',
-                                vertical: true,
-                                style: {
-                                    display: 'block',
-                                    border: '1px solid silver'
-                                }
-                            },
-                            {
-                                Class: yaxi.IconButton,
-                                svg: 'icon-yaxi-copy',
-                                text: 'test3',
-                                vertical: true,
-                                style: {
-                                    display: 'block',
-                                    border: '1px solid silver'
-                                }
+                        Class: yaxi.GestureInput
+                    },
+                    {
+                        Class: yaxi.IFrame,
+                        src: 'iframe.html',
+                        events: {
+                            message: function (event) {
+
+                                debugger
                             }
-                        ]
+                        }
                     }
                 ],
                 pulldown: function (pulldown) {

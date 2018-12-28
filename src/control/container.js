@@ -489,8 +489,8 @@ yaxi.__extend_pulldown = function () {
 
             // 以当前控件和位置开始滑动
             start.control = this;
-            start.screenX = event.screenX;
-            start.screenY = event.screenY;
+            start.clientX = event.clientX;
+            start.clientY = event.clientY;
     
             overflowY = style.overflowY;
             style.overflowY = 'hidden';
