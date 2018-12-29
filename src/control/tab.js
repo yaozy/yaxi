@@ -118,16 +118,16 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
-            last,
+            privious,
             item,
             host,
             start;
 
-        if (last = children[this.__index])
+        if (privious = children[this.__index])
         {
-            last.theme = '';
+            privious.theme = '';
 
-            if (host = last.host)
+            if (host = privious.host)
             {
                 host.style.display = 'none';
                 host.onhide && host.onhide();
@@ -141,19 +141,19 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             if (host = item.host)
             {
                 host.style.display = 'block';
-                host.onshow && host.onshow();
+                host.onshow && host.onshow(false);
             }
             else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
             {
                 host = createControl(this.baseURL, item.url, item.args);
 
                 children.push(item.host = host);
-                host.onshow && host.onshow();
+                host.onshow && host.onshow(true);
 
-                create = true;
+                start = true;
             }
         }
-        else if (last)
+        else if (privious)
         {
             value = -1;
         }
@@ -161,9 +161,10 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
         this.__index = value;
 
         this.trigger('change', {
-            last: last,
+            last: privious,
+            privious: privious,
             selected: item,
-            create: create || false
+            start: start || false
         });
     }
 
@@ -175,7 +176,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         if (host && host.onshow)
         {
-            host.onshow();
+            host.onshow(false);
         }
     }
 

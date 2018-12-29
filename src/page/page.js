@@ -238,7 +238,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		    this.opener = opener;
 
 			this.onopened();
-			this.onshow();
+			this.onshow(true);
 
 			if (opener)
 			{
@@ -311,7 +311,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 
 
-	this.onshow = function () {
+	this.onshow = function (first) {
 
 	}
 
