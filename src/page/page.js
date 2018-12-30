@@ -77,7 +77,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	Class.ctor = function (values) {
+	Class.ctor = function () {
 
 		var init;
 
@@ -90,26 +90,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		{
 			init.apply(this, arguments);
         }
-
-		if (values)
-		{
-			this.assign(values);
-		}
 	}
-
-	
-
-
-	// 页头
-	this.header = null;
-
-
-	// 页体
-	this.content = null;
-
-
-	// 页脚
-	this.footer = null;
 
 
 
@@ -117,6 +98,61 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	this.$property('autoDestroy', true, false);
 
 		
+
+	// 页头
+	Object.defineProperty(this, 'header', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'header')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
+	// 页内容区
+	Object.defineProperty(this, 'content', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'content')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
+	// 页脚
+	Object.defineProperty(this, 'footer', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'footer')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
 
 
 	this.$converter.header = {
@@ -128,17 +164,20 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			if (!values || typeof values !== 'object')
 			{
 				values = this.__template_header(values);
+				control = new yaxi.Header();
 			}
-			
-			values.key = values.key || 'page-header';
-			values.className = 'yx-header ' + (values.className || '');
+			else
+			{
+				values.key = values.key || 'header';
+				values.className = 'yx-header ' + (values.className || '');
 
-			control = new (values.Class || yaxi.Panel)();
+				control = new (values.Class || yaxi.Panel)();
+			}
+
 			control.parent = this;
-
 			control.assign(values);
 
-			this.__children.push(this.header = control);
+			this.__children.push(control);
 		}
 	};
 
@@ -173,14 +212,14 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'page-content';
+			values.key = values.key || 'content';
 			values.className = 'yx-content ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();
 			control.parent = this;
 			control.assign(values);
 
-			this.__children.push(this.content = control);
+			this.__children.push(control);
 		}
 	};
 	
@@ -199,7 +238,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'page-footer';
+			values.key = values.key || 'footer';
 			values.className = 'yx-footer ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();
@@ -207,9 +246,29 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			control.assign(values);
 
-			this.__children.push(this.footer = control);
+			this.__children.push(control);
 		}
 	};
+
+
+	this.$converter.children = {
+
+		fn: function (values) {
+
+			var children = this.__children,
+				control,
+				options;
+
+			for (var i = 0, l = values.length; i < l; i++)
+			{
+				options = values[i];
+				control = new (options.Class || yaxi.Panel)();
+				control.parent = this;
+
+				children.push(control.assign(options));
+			}
+		}
+	}
 
 
 

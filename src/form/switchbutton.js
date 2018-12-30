@@ -30,15 +30,7 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
     this.__on_tap = function () {
 
-        var binding = this.__binding_push;
-
-        this.checked = !this.checked;
-
-        if (binding)
-        {
-            binding.model.$push(this, this.checked);
-        }
-
+        this.$push(this.checked = !this.checked);
         this.trigger('change');
     }
 

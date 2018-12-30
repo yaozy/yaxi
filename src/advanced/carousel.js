@@ -11,7 +11,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -21,11 +21,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
 
         this.on('touchstart', touchstart);

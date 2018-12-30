@@ -12,7 +12,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -24,11 +24,6 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
         
-        if (values)
-        {
-            this.assign(values);
-        }
-
         this.on('touchstart', touchstart);
         this.on('touchmove', touchmove);
         this.on('touchend', touchend);

@@ -1334,7 +1334,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
 
-    document.addEventListener('change', function () {
+    document.addEventListener('change', function (event) {
 
         var control, fn, e;
 
@@ -1342,7 +1342,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             if (fn = control.__on_change)
             {
-                fn.call(control);
+                fn.call(control, event.target);
             }
 
             e = new Event();
@@ -1555,14 +1555,9 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         this.$storage = create(this.$defaults);
-
-        if (values)
-        {
-            this.assign(values);
-        }
     }
 
 
@@ -1669,16 +1664,56 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     this.model = null;
 
 
+
+    // 不转换Class
+    this.$converter.Class = false;
+
+
+    // 转换bindings
+    this.$converter.bindings = {
+
+        fn: function (values) {
+
+            var model;
+
+            if (values && (model = this.model = this.__find_model()))
+            {
+                yaxi.__bind_model.call(model, this, values);
+            }
+        }
+    };
+
+
+    
+    // 推送绑定
+    this.$push = function (value) {
+
+        var binding = this.__binding_push,
+            pipe;
+
+        if (binding)
+        {
+            if (pipe = binding.pipe)
+            {
+                value = pipe(value);
+            }
+
+            binding.model[binding.name] = value;
+        }
+    }
+
+
     // 查找关联的模型
     this.__find_model = function () {
     
-        var target = this;
+        var target = this,
+            model;
 
         while (target)
         {
-            if (target.model)
+            if (model = target.model)
             {
-                return target.model;
+                return typeof model === 'object' ? model : nulll
             }
 
             target = target.parent;
@@ -1701,36 +1736,14 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 model = model[key];
             }
 
-            if (model && model.__model_type === 2)
+            if (model && typeof model === 'object')
             {
                 return model;
             }
-
-            throw '"' + name + '" is not a store!';
         }
 
-        throw 'can not find any model!';
+        throw 'can not find model "' + name + '"!';
     }
-
-
-
-    // 不转换Class
-    this.$converter.Class = false;
-
-
-    // 转换bindings
-    this.$converter.bindings = {
-
-        fn: function (data) {
-
-            var model;
-
-            if (data && (model = this.model = this.__find_model()))
-            {
-                model.$bind(this, data);
-            }
-        }
-    };
 
 
 
@@ -1825,44 +1838,27 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
     var create = Object.create;
 
-    var cache = create(null);
-
     var defaults = this.$defaults = create(null);
-
-    var map;
     
 
 
-    Class.ctor = function (owner, values) {
+    Class.ctor = function (parent) {
 
-        this.$owner = owner;
+        this.parent = parent;
         this.$storage = create(defaults);
-
-        if (values)
-        {
-            this.assign(values);
-        }
     }
     
 
 
     ;(function () {
 
-        var keys = map = Object.create(null),
-            properties = {},
+        var keys = {},
             style = document.createElement('div').style,
-            regex1 = /^(?:webkit|ms|moz|o)([A-Z])/,
-            regex2 = /([A-Z])/g,
-            key;
+            regex = /^(?:webkit|ms|moz|o)([A-Z])/;
 
         function replace(_, key) {
 
             return key.toLowerCase();
-        }
-
-        function css(_, key) {
-
-            return '-' + key.toLowerCase();
         }
 
         for (var name in style)
@@ -1871,23 +1867,21 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             {
                 case 'cssFloat':
                 case 'styleFloat':
-                    properties.float = { name: name, defaultValue: '' };
-                    keys.float = 'float';
+                    keys.float = { name: name, defaultValue: '' };
                     break;
 
                 case 'cssText':
                     break;
 
                 default:
-                    properties[key = name.replace(regex1, replace)] = { name: name, defaultValue: '' };
-                    keys[key.replace(regex2, css)] = key;
+                keys[key = name.replace(regex, replace)] = { name: name, defaultValue: '' };
                     break;
             }
         }
 
-        for (var name in properties)
+        for (var name in keys)
         {
-            this.$property(name, properties[name]);
+            this.$property(name, keys[name]);
         }
 
     }).call(this);
@@ -1895,75 +1889,11 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    function parse(text, map, color) {
-
-        var style = create(null),
-            regex1 = /\s*:\s*/g,
-            regex2 = /^\s+/,
-            regex3 = /\s+$/,
-            tokens = text.split(';'),
-            token,
-            list,
-            name;
-
-        for (var i = 0, l = tokens.length; i < l; i++)
-        {
-            if ((token = tokens[i]) && (list = token.split(regex1, 2)))
-            {
-                if (token = list[1])
-                {
-                    name =  list[0].replace(regex2, '');
-                    name = map[name] || name;
-
-                    token = token.replace(regex3, '');
-
-                    switch (token[0])
-                    {
-                        case '@':
-                            if (token.length > 1 && (token = color[token.substring(1)]))
-                            {
-                                style[name] = token;
-                            }
-                            break;
-
-                        case '%':
-                            if (token.length > 1)
-                            {
-                                (style.bindings || (style.bindings = {}))[name] = token.substring(1);
-                            }
-                            break;
-
-                        default:
-                            style[name] = token;
-                            break;
-                    }
-                }
-            }
-        }
-
-        return cache[text] = style;
-    }
-
-
-
-    
-    this.assign = function (values) {
-
-        if (typeof values === 'string')
-        {
-            values = cache[values] || parse(values, map, yaxi.color);
-        }
-
-        base.assign.call(this, values);
-    }
-
-
-
     this.__update_patch = function () {
 
         var dom, changes;
 
-        if ((dom = this.$owner) && (dom = dom.$dom) && (changes = this.__changes))
+        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
         {
             var storage = this.$storage,
                 style = dom.style,
@@ -2217,12 +2147,66 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
     
 
+    // 创建绑定对象
+    function createBinding(model, tokens, expression) {
+
+        var name = tokens[0];
+
+        if (!model[name])
+        {
+            while (model = model.$parent)
+            {
+                if (name in model)
+                {
+                    break;
+                }
+            }
+        }
+
+        // 最后一个是绑定的字段
+        name = tokens.pop();
+
+        if (model && (!tokens[0] || (model = findSubmodel(model, tokens, name))))
+        {
+            return {
+                model: model,
+                name: name 
+            };
+        }
+
+        throw 'binding expression "' + expression + '" is invalid!';
+    }
+
+
+    function findSubmodel(model, tokens, name) {
+
+        var index = 0;
+
+        while (any = tokens[index++])
+        {
+            if (model = model[any])
+            {
+                continue;
+            }
+
+            return;
+        }
+
+        if (name in model)
+        {
+            return model;
+        }
+    }
+
+
     // 编译绑定
-    function compileBinding(model, observe, name, expression) {
+    function compileBinding(observe, model, name, expression) {
     
         var index = expression.indexOf('|'),
             tokens,
-            pipe;
+            binding,
+            pipe,
+            value;
 
         if (index > 0)
         {
@@ -2232,44 +2216,29 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (tokens = expression.match(/\w+/g))
         {
-            var binding = bindingTarget = { observe: observe },
-                index = 0,
-                value;
+            binding = bindingTarget = createBinding(model, tokens, expression);
+            binding.observe = observe;
 
-            binding.name = tokens.pop(); // 最后一个是绑定的字段
-
-            while (value = tokens[index++])
-            {
-                if ((model = model[value]) && model.__model_type === 1)
-                {
-                    continue;
-                }
-
-                throw 'binding expression is invalid! "' + value + '" is not a model!';
-            }
-
-            binding.model = model;
+            value = binding.model[binding.name];
 
             if (pipe)
             {
                 binding.pipe = pipe = compile(pipe);
+                value = pipe(value);
             }
 
-            value = model[binding.name];
-            observe[binding.property = name] = pipe ? pipe(value) : value;
-    
-            return binding;
+            observe[binding.property = name] = value;
+            (observe.__bindings || (observe.__bindings = {}))[name] = binding;
         }
-
-        throw 'binding expression is invalid! no binding name!';
     }
 
 
     // 编译推送
-    function compilePush(model, expression) {
+    function compilePush(observe, model, expression) {
     
         var index = expression.indexOf('|'),
             tokens,
+            binding,
             pipe;
 
         if (index > 0)
@@ -2280,56 +2249,37 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         if (tokens = expression.match(/\w+/g))
         {
-            var binding = {},
-                index = 0,
-                value;
-
-            binding.name = tokens.pop(); // 最后一个是绑定的字段
-
-            while (value = tokens[index++])
-            {
-                if ((model = model[value]) && model.__model_type === 1)
-                {
-                    continue;
-                }
-
-                throw 'binding expression is invalid! "' + value + '" is not a model!';
-            }
-
-            binding.model = model;
+            binding = createBinding(model, tokens, expression);
 
             if (pipe)
             {
-                binding.pipe = pipe = compile(pipe);
+                binding.pipe = compile(pipe);
             }
 
-            return binding;
+            observe.__binding_push = binding;
         }
-
-        throw 'binding expression is invalid! no binding name!';
     }
 
 
 
     // 绑定
-    this.$bind = function (observe, bindings) {
+    this.$bind = yaxi.__bind_model = function (observe, bindings) {
 
         try
         {
-            var keys = observe.__bindings || (observe.__bindings = {}),
-                any;
+            var expression;
 
             for (var name in bindings)
             {
-                if (any = bindings[name])
+                if (expression = bindings[name])
                 {
                     if (name === 'change')
                     {
-                        observe.__binding_push = compilePush(this, any);
+                        compilePush(observe, this, expression);
                     }
                     else
                     {
-                        keys[name] = compileBinding(this, observe, name, any);
+                        compileBinding(observe, this, name, expression);
                     }
                 }
             }
@@ -2358,26 +2308,6 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
                     break;
                 }
             }
-        }
-
-        return this;
-    }
-
-
-    // 推送绑定
-    this.$push = function (observe, value) {
-
-        var binding = observe.__binding_push,
-            pipe;
-
-        if (binding)
-        {
-            if (pipe = binding.pipe)
-            {
-                value = pipe(value);
-            }
-
-            this[binding.name] = value;
         }
 
         return this;
@@ -3649,6 +3579,15 @@ window.require || (function () {
                 modules[url] = { exports: text };
                 return text;
 
+            case '.html':
+                if (flags === false || text.substring(0, 100).indexOf('<html') >= 0)
+                {
+                    modules[url] = { exports: text };
+                    return text;
+                }
+
+                return (modules[url] = require.template(text, file)).exports;
+
 			default:
                 modules[url] = { exports: text };
                 return text;
@@ -3703,7 +3642,7 @@ window.require || (function () {
     
         document.head.appendChild(dom);
 
-        return { exports: true };
+        return { exports: text };
 	}
 
 
@@ -3730,6 +3669,8 @@ window.require || (function () {
 
 		return module;
     }
+
+
     
 
 
@@ -3753,6 +3694,9 @@ window.require || (function () {
 
 
     global.load = load;
+
+
+    global.absouteUrl = absouteUrl;
 
 
     global.switchLanguage = function (language) {
@@ -3948,6 +3892,315 @@ window.require || (function () {
 
 
 
+;(function () {
+
+    
+    function parse(array, node, space) {
+
+        var attributes = node.attributes,
+            item,
+            name,
+            value,
+            bindings,
+            events,
+            any;
+
+        switch (name = node.tagName)
+        {
+            case 'Require':
+                array.push(space, 'Class: require.load(baseURL, "', node.getAttribute('src'), '")');
+                node.removeAttribute('src');
+                break;
+
+            case 'HtmlControl':
+                array.push(space, 'Class: classes.', name, ',\n');
+                array.push(space, 'html: \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
+                node = null;
+                break;
+
+            default:
+                array.push(space, 'Class: classes.', name);
+                break;
+        }
+
+        if (attributes && attributes[0])
+        {
+            bindings = events = null;
+
+            for (var i = 0, l = attributes.length; i < l; i++)
+            {
+                item = attributes[i];
+                name = item.nodeName;
+                value = item.nodeValue;
+
+                if (name === 'style')
+                {
+                    array.push(',\n', space, 'style: {');
+                    parseStyle(array, value, space + '\t');
+                    array.push('\n', space, '}');
+
+                    continue;
+                }
+                
+                if (name[1] === '-')
+                {
+                    any = name[0];
+                    name = name.substring(2);
+
+                    // 赋值
+                    if (any === 'v')
+                    {
+                        array.push(',\n', space, name, ': values.' + value);
+                        continue;
+                    }
+
+                    // 绑定
+                    if (any === 'b')
+                    {
+                        if (bindings)
+                        {
+                            bindings.push(name, value);
+                        }
+                        else
+                        {
+                            bindings = [name, value];
+                        }
+                        
+                        continue;
+                    }
+
+                    // 事件
+                    if (any === 'e')
+                    {
+                        if (events)
+                        {
+                            events.push(name, value);
+                        }
+                        else
+                        {
+                            events = [name, value];
+                        }
+
+                        continue;
+                    }
+                }
+            }
+
+            if (bindings)
+            {
+                array.push(',\n', space, 'bindings: {');
+                parseBindings(array, bindings, space + '\t');
+                array.push('\n', space, '}');
+            }
+
+            if (events)
+            {
+                array.push(',\n', space, 'events: {');
+                parseEvents(array, events, space + '\t');
+                array.push('\n', space, '}');
+            }
+        }
+
+        if (node = node && node.firstChild)
+        {
+            any = 0;
+            array.push(',\n', space, 'children: [');
+
+            do
+            {
+                if (node.nodeType === 1)
+                {
+                    if (any)
+                    {
+                        array.push(',');
+                    }
+                    else
+                    {
+                        any = 1;
+                    }
+
+                    array.push('\n', space, '\t{\n');
+                    parse(array, node, space + '\t\t'),
+                    array.push('\n', space, '\t}');
+                }
+            }
+            while (node = node.nextSibling);
+
+            array.push('\n', space, ']');
+        }
+    }
+
+
+    function parseBindings(array, bindings, space) {
+
+        var index = 0,
+            name;
+
+        while (name = bindings[index++])
+        {
+            if (index > 1)
+            {
+                array.push(',');
+            }
+
+            array.push('\n', space, name, ': "', bindings[index++], '"');
+        }
+    }
+
+
+    function parseEvents(array, events, space) {
+
+        var index = 0,
+            name;
+
+        while (name = events[index++])
+        {
+            if (index > 1)
+            {
+                array.push(',');
+            }
+
+            array.push('\n', space, name, ': events.', events[index++]);
+        }
+    }
+
+
+
+    var styles = Object.create(null);
+
+    var values = Object.create(null);
+
+
+    function parseStyle(array, text, space) {
+
+        var map = styles,
+            cache = values,
+            tokens = text.replace(/\s*([:;])\s*/g, '$1').split(';'),
+            token,
+            index,
+            name,
+            flag,
+            bindings;
+
+        for (var i = 0, l = tokens.length; i < l; i++)
+        {
+            if ((token = tokens[i]) && (index = token.indexOf(':')) > 0)
+            {
+                name = token.substring(0, index);
+                name = map[name] || (map[name] = name.replace(/-([\w])/g, camelize));
+
+                if (!(token = token.substring(index + 1)))
+                {
+                    continue;
+                }
+
+                token = cache[token] || (cache[token] = styleValue(token));
+
+                if (token[0])
+                {
+                    if (bindings)
+                    {
+                        bindings.push(name, token[1]);
+                    }
+                    else
+                    {
+                        bindings = [name, token[1]];
+                    }
+                }
+                else
+                {
+                    if (flag)
+                    {
+                        array.push(',');
+                    }
+                    else
+                    {
+                        flag = 1;
+                    }
+    
+                    array.push('\n', space, name, ': ', token[1]);
+                }
+            }
+        }
+
+        if (bindings)
+        {
+            array.push(flag ? ',\n' : '\n', space, 'bindings: {');
+            parseBindings(array, bindings, space + '\t');
+            array.push('\n', space, '}');
+        }
+    }
+
+
+    function styleValue(text) {
+
+        // 绑定
+        if (text[0] === 'b' && text[1] === '-')
+        {
+            return [1, text.substring(2)];
+        }
+
+        var list = text.split(/\s+/);
+
+        for (var i = list.length; i--;)
+        {
+            text = list[i];
+
+            if (text[1] === '-')
+            {
+                var key = text[0];
+
+                // 绑定值
+                if (key === 'v')
+                {
+                    list[i] = 'values.' + text.substring(2) + '';
+                    continue;
+                }
+                
+                // 系统颜色
+                if (key === 'c')
+                {
+                    list[i] = 'color["' + text.substring(2) + '"]';
+                    continue;
+                }
+            }
+
+            list[i] = '"' + text + '"';
+        }
+
+        return [0, list[1] ? list.join(' + ') : list[0]];
+    }
+
+
+    function camelize(_, key) {
+
+        return key.toUpperCase();
+    }
+
+
+    
+    require.template = function (text, url) {
+
+        var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
+            array = ['var baseURL = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n\n',
+                'if (!color) color = yaxi.color;\n',
+                'if (!classes) classes = yaxi.classes;\n\n',
+                'return {\n'];
+
+        parse(array, node, '\t');
+
+        array.push('\n};\n\n//# sourceURL=', url);
+
+        return { exports: new Function(['values', 'events', 'color', 'classes'], array.join('')) };
+    }
+
+
+
+})();
+
+
+
+
 !function(h){var c,o='<svg><symbol id="icon-yaxi-pulldown" viewBox="0 0 1024 1024"><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128C300.256 128 128 300.256 128 512c0 211.744 172.256 384 384 384 211.744 0 384-172.256 384-384C896 300.256 723.744 128 512 128z"  ></path><path d="M694.56 522.144c-12.544-12.608-33.376-12.64-45.952-0.064L544 625.984 544 319.328c0-17.76-14.208-32.16-32-32.16-17.76 0-32 14.4-32 32.16l0 308.32-105.216-106.688c-12.48-12.608-32.704-12.736-45.312-0.256C316.832 533.216 316.8 553.6 329.28 566.208l159.36 161.056c6.272 6.336 14.592 9.568 22.88 9.568 8.16 0 16.384-3.168 22.624-9.312 0.032-0.064 0.032-0.064 0.064-0.128 0.032 0 0.064 0 0.096-0.064l160.192-159.68C707.072 555.104 707.104 534.72 694.56 522.144z"  ></path></symbol><symbol id="icon-yaxi-back" viewBox="0 0 1024 1024"><path d="M395.21518 513.604544l323.135538-312.373427c19.052938-18.416442 19.052938-48.273447 0-66.660212-19.053961-18.416442-49.910737-18.416442-68.964698 0L291.75176 480.290811c-19.052938 18.416442-19.052938 48.273447 0 66.660212l357.633237 345.688183c9.525957 9.207709 22.01234 13.796214 34.497699 13.796214 12.485359 0 24.971741-4.588505 34.466999-13.82896 19.052938-18.416442 19.052938-48.242747 0-66.660212L395.21518 513.604544z"  ></path></symbol><symbol id="icon-yaxi-radio-checked" viewBox="0 0 1024 1024"><path d="M512 259.56503703c-138.83922963 0-252.43496297 113.59573333-252.43496297 252.43496297s113.59573333 252.43496297 252.43496297 252.43496297 252.43496297-113.59573333 252.43496297-252.43496297S650.83922963 259.56503703 512 259.56503703zM512 7.13007408C234.323968 7.13007408 7.13007408 234.323968 7.13007408 512s227.19389392 504.86992592 504.86992592 504.86992592 504.86992592-227.19389392 504.86992592-504.86992592S789.676032 7.13007408 512 7.13007408zM512 915.89594075c-222.13791289 0-403.89594075-181.76045511-403.89594075-403.89594075S289.86208711 108.10405925 512 108.10405925 915.89594075 289.86208711 915.89594075 512 734.13791289 915.89594075 512 915.89594075z"  ></path></symbol><symbol id="icon-yaxi-checkbox-unchecked" viewBox="0 0 1024 1024"><path d="M892.24735231 1012.51492048l-760.49638045 0c-66.35446257 0-120.26589234-53.91310559-120.26589234-120.26589234l0-760.56676528c0-66.35446257 53.91310559-120.26589234 120.26589234-120.26589236l760.49638045 0c66.35446257 0 120.26589234 53.91310559 120.26589235 120.26589236l0 760.56676528c0 66.35446257-53.91310559 120.26589234-120.26589235 120.26589234zM131.75264769 82.98768981c-26.88533005 0-48.76495786 21.95168848-48.76495788 48.76495788l0 760.56676528c0 26.81326939 21.87962782 48.76495786 48.76495788 48.76495787l760.49638045 0c26.81326939 0 48.76495786-21.95168848 48.76495787-48.76495787l0-760.56676528c0-26.81326939-21.95168848-48.76495786-48.76495787-48.76495788l-760.49638045 0z"  ></path></symbol><symbol id="icon-yaxi-checkbox-checked" viewBox="0 0 1024 1024"><path d="M892.24735231 1012.51492048l-760.49638045 0c-66.35446257 0-120.26589234-53.91310559-120.26589234-120.26589234l0-760.56676528c0-66.35446257 53.91310559-120.26589234 120.26589234-120.26589236l760.49638045 0c66.35446257 0 120.26589234 53.91310559 120.26589235 120.26589236l0 760.56676528c0 66.35446257-53.91310559 120.26589234-120.26589235 120.26589234zM131.75264769 82.98768981c-26.88533005 0-48.76495786 21.95168848-48.76495788 48.76495788l0 760.56676528c0 26.81326939 21.87962782 48.76495786 48.76495788 48.76495787l760.49638045 0c26.81326939 0 48.76495786-21.95168848 48.76495787-48.76495787l0-760.56676528c0-26.81326939-21.95168848-48.76495786-48.76495787-48.76495788l-760.49638045 0z"  ></path><path d="M449.57870885 836.76231882l-274.13886619-274.21092687 101.10445971-101.10445972 154.87344396 154.80138332 308.38779037-431.80089021 116.40478156 83.08594269z"  ></path></symbol><symbol id="icon-yaxi-circle" viewBox="0 0 1024 1024"><path d="M32 512c0 265.09653333 214.90346667 480 480 480s480-214.90346667 480-480c0-265.09653333-214.90346667-480-480-480-265.09653333 0-480 214.90346667-480 480z"  ></path></symbol><symbol id="icon-yaxi-number-plus" viewBox="0 0 1024 1024"><path d="M740.828151 485.179145 538.820344 485.179145 538.820344 283.185664c0-14.81645-11.989055-26.820855-26.820855-26.820855-14.769378 0-26.790156 12.004405-26.790156 26.820855l-0.013303 201.99348L283.200502 485.179145c-14.801101 0-26.820855 12.019755-26.820855 26.820855 0 14.81645 12.019755 26.819832 26.820855 26.819832l201.991434 0-0.013303 201.994504c0 14.800078 12.051477 26.821879 26.820855 26.821879 14.8318 0 26.820855-12.021801 26.820855-26.821879L538.820344 538.819832l201.979154 0c14.8318 0 26.820855-12.003382 26.820855-26.819832S755.631298 485.179145 740.828151 485.179145z"  ></path></symbol><symbol id="icon-yaxi-number-minus" viewBox="0 0 1024 1024"><path d="M768.440022 485.814618c0 14.475689-11.743462 26.185382-26.200732 26.185382l-460.467323 0c-14.458293 0-26.167986-11.70867-26.167986-26.185382l0 0c0-14.458293 11.70867-26.183336 26.167986-26.183336l460.467323 0C756.697583 459.631282 768.440022 471.356324 768.440022 485.814618L768.440022 485.814618z"  ></path></symbol><symbol id="icon-yaxi-ring" viewBox="0 0 1024 1024"><path d="M512.00582201 1020.25554034C231.74603093 1020.25554034 3.74329458 792.25396907 3.74329458 511.99301405c0-280.24698311 228.00273635-508.24971947 508.26252629-508.24971947 280.24698311 0 508.24971947 228.00273635 508.24971947 508.24971947C1020.25554034 792.25396907 792.25396907 1020.25554034 512.00582201 1020.25554034zM512.00582201 122.55727616c-214.7425792 0-389.44970979 174.7001435-389.4497098 389.43573789 0 214.7425792 174.70712946 389.44970979 389.4497098 389.44970979 214.73675833 0 389.43690183-174.70712946 389.43690183-389.44970979C901.44272384 297.2574208 726.7425792 122.55727616 512.00582201 122.55727616z"  ></path></symbol><symbol id="icon-yaxi-radio-unchecked" viewBox="0 0 1024 1024"><path d="M512 7.13007408C234.323968 7.13007408 7.13007408 234.323968 7.13007408 512s227.19389392 504.86992592 504.86992592 504.86992592 504.86992592-227.19389392 504.86992592-504.86992592S789.676032 7.13007408 512 7.13007408zM512 915.89351348c-222.13791287 0-403.89351348-181.75802787-403.89351348-403.89351348S289.86208713 108.10405925 512 108.10405925 915.89594075 289.86208713 915.89594075 512 734.13791287 915.89351348 512 915.89351348z"  ></path></symbol><symbol id="icon-yaxi-eye-open" viewBox="0 0 1024 1024"><path d="M515.2 224C208 224 22.4 537.6 22.4 537.6s214.4 304 492.8 304 492.8-304 492.8-304S822.4 224 515.2 224zM832 652.8c-102.4 86.4-211.2 140.8-320 140.8s-217.6-51.2-320-140.8c-35.2-32-70.4-64-99.2-99.2-6.4-6.4-9.6-12.8-16-19.2 3.2-6.4 9.6-12.8 12.8-19.2 25.6-35.2 57.6-70.4 92.8-102.4 99.2-89.6 208-144 329.6-144s230.4 54.4 329.6 144c35.2 32 64 67.2 92.8 102.4 3.2 6.4 9.6 12.8 12.8 19.2-3.2 6.4-9.6 12.8-16 19.2-28.8 32-60.8 67.2-99.2 99.2z" fill="" ></path><path d="M512 345.6c-96 0-169.6 76.8-169.6 169.6 0 96 76.8 169.6 169.6 169.6 96 0 169.6-76.8 169.6-169.6S604.8 345.6 512 345.6z m0 294.4c-67.2 0-121.6-54.4-121.6-121.6 0-67.2 54.4-121.6 121.6-121.6 67.2 0 121.6 54.4 121.6 121.6 0 64-54.4 121.6-121.6 121.6z" fill="" ></path></symbol><symbol id="icon-yaxi-bankcard" viewBox="0 0 1024 1024"><path d="M823.5 598.4L237.8 864.6c-14.5 6.6-31.6 0.2-38.2-14.3L19.2 453.4c-6.6-14.5-0.2-31.6 14.3-38.2L597.2 159c14.5-6.6 31.6-0.2 38.2 14.3l190.4 418.9c1.1 2.4 0 5.1-2.3 6.2z" fill="#FFD858" ></path><path d="M823.5 598.4L519.6 736.5 315.3 287.1 619.2 149c2.4-1.1 5.1 0 6.2 2.3l200.4 440.9c1.1 2.4 0 5.1-2.3 6.2z" fill="#FDC223" ></path><path d="M58.317 539.506l616.25-280.102 42.828 94.227-616.25 280.101zM231.012 640.378l163.143-74.153 16.47 36.234-163.144 74.153zM260.634 705.552L487.87 602.268l16.47 36.234-227.237 103.284z" fill="#1A7FC0" ></path><path d="M981.1 805.3H362c-15.9 0-28.9-12.9-28.9-28.9v-436c0-15.9 12.9-28.9 28.9-28.9h619.1c15.9 0 28.9 12.9 28.9 28.9v436c0 16-12.9 28.9-28.9 28.9z" fill="#83C6EF" ></path><path d="M1005.3 805.3H671.6V311.6h333.7c2.6 0 4.7 2.1 4.7 4.7v484.3c0 2.6-2.1 4.7-4.7 4.7z" fill="#429BCF" ></path><path d="M333.1 435H1010v103.5H333.1zM448.6 598.2h179.2V638H448.6zM448.6 669.9h249.6v39.8H448.6z" fill="#1A7FC0" ></path><path d="M942.9 638.1h-35.1c-10.9 0-19.9-9-19.9-19.9 0-10.9 9-19.9 19.9-19.9h35.1c10.9 0 19.9 9 19.9 19.9 0 10.9-9 19.9-19.9 19.9z" fill="#FFD858" ></path></symbol><symbol id="icon-yaxi-eye-close" viewBox="0 0 1024 1024"><path d="M515.49297778 629.18428445c-203.28106667 0-392.82460445-109.44284445-494.81500445-285.59587556-14.90261333-25.73084445-6.05297778-58.56256 19.55953778-73.46631111 25.73084445-14.90147555 58.67975111-6.05297778 73.46631111 19.56067555C196.48284445 432.65592889 350.39914667 521.48906667 515.37692445 521.48906667S834.26986667 432.65479111 917.04888889 289.56672c14.90261333-25.73084445 47.73546667-34.57934222 73.46631111-19.67672889s34.46215111 47.73546667 19.67559111 73.46631111C908.31758222 519.74144 718.77404445 629.18314667 515.49297778 629.18314667z m-278.72597333 53.5552c-9.43104 0-19.09418667-2.44394667-27.70944-7.68341334-25.4976-15.36796445-33.64750222-48.43406222-18.27953778-73.81447111l59.37720888-98.26417778c15.36910222-25.4976 48.4352-33.53144889 73.8156089-18.27953777 25.4976 15.36796445 33.64750222 48.43406222 18.2784 73.8144711l-59.3772089 98.26417778c-10.12963555 16.64910222-27.82663111 25.96408889-46.1050311 25.96408889z m554.5415111 0c-18.16234667 0-35.97653333-9.19665778-46.1050311-25.96295112l-59.37834667-98.26417778c-15.36796445-25.4976-7.21806222-58.44650667 18.16234667-73.8144711 25.4976-15.36796445 58.44764445-7.21806222 73.81560888 18.16234666l59.37720889 98.26417778c15.36796445 25.4976 7.21806222 58.44764445-18.16234667 73.81560889-8.61525333 5.23832889-18.27953778 7.80060445-27.70944 7.80060444z m-275.81553777 69.97333333c-29.68917333 0-53.78958222-24.10040889-53.78958223-53.78958223v-123.52853333c0-29.68917333 24.10040889-53.78958222 53.78958223-53.78958222 29.68917333 0 53.78958222 24.10040889 53.78958222 53.78958222v123.52853333c0 29.68917333-24.10040889 53.78958222-53.78958222 53.78958223z" fill="#707070" ></path></symbol><symbol id="icon-yaxi-checkbox-three" viewBox="0 0 1024 1024"><path d="M1012.51436242 941.01231019V82.98768981a71.50205225 71.50205225 0 0 0-71.50205223-71.50205223H82.98768981a71.50205225 71.50205225 0 0 0-71.50205223 71.50205223v858.02462038a71.50205225 71.50205225 0 0 0 71.50205223 71.50205223h858.02462038a71.50205225 71.50205225 0 0 0 71.50205223-71.50205223z m-143.00410448-71.50205225H154.48974206V154.48974206h715.02051588v715.02051588z"  ></path><path d="M297.49384493 297.49384493h429.01231014v429.01231014H297.49384493z"  ></path></symbol><symbol id="icon-yaxi-copy" viewBox="0 0 1024 1024"><path d="M733.86666667 170.66666667h-580.26666667A85.43573333 85.43573333 0 0 0 68.26666667 256v648.53333333C68.26666667 951.6032 106.56426667 989.86666667 153.6 989.86666667h580.26666667c47.06986667 0 85.33333333-38.26346667 85.33333333-85.33333334v-648.53333333C819.2 208.96426667 780.93653333 170.66666667 733.86666667 170.66666667z m17.06666666 733.86666666c0 9.38666667-7.68 17.06666667-17.06666666 17.06666667h-580.26666667a17.06666667 17.06666667 0 0 1-17.06666667-17.06666667v-648.53333333a17.06666667 17.06666667 0 0 1 17.06666667-17.06666667h580.26666667a17.06666667 17.06666667 0 0 1 17.06666666 17.06666667v648.53333333z"  ></path><path d="M870.4 34.13333333h-580.26666667a34.13333333 34.13333333 0 0 0 0 68.26666667h580.26666667a17.06666667 17.06666667 0 0 1 17.06666667 17.06666667v648.53333333a34.13333333 34.13333333 0 1 0 68.26666666 0v-648.53333333C955.73333333 72.43093333 917.46986667 34.13333333 870.4 34.13333333z"  ></path><path d="M614.4 349.86666667H273.06666667a34.13333333 34.13333333 0 0 0 0 68.26666666h341.33333333a34.13333333 34.13333333 0 1 0 0-68.26666666zM614.4 520.53333333H273.06666667a34.13333333 34.13333333 0 1 0 0 68.26666667h341.33333333a34.13333333 34.13333333 0 1 0 0-68.26666667zM477.86666667 689.7664H273.06666667a34.13333333 34.13333333 0 1 0 0 68.26666667h204.8a34.13333333 34.13333333 0 1 0 0-68.26666667z"  ></path></symbol><symbol id="icon-yaxi-alipay" viewBox="0 0 1325 1024"><path d="M171.9595514 512c0 265.57071929 214.16993451 479.74065379 479.7406538 479.74065379s479.74065379-214.16993451 479.74065378-479.74065379S917.27092449 32.25934621 651.7002052 32.25934621 171.9595514 246.42928071 171.9595514 512z" fill="#5A9EF7" ></path><path d="M752.78841455 571.9675813s17.13359531-23.98703275 34.26718948-71.96109711c18.84695438-47.97406549 20.56031346-75.38781753 20.56031345-75.38781752l-137.0687579-1.71335908v-46.26070642l166.195869-1.71335907v-34.26718948H668.83380051v-75.38781753h-82.24125499V340.66405262H428.96347303v34.26718948l155.91571343-1.71336021v51.40078478h-123.36188303v27.41375203h257.00392164c-1.71335907 17.13359531-6.85343744 32.5538304-11.9935158 47.97406549-10.28015673 25.70039182-20.56031346 49.68742457-20.5603146 49.68742458s-119.93516373-42.83398713-185.0428234-42.83398714c-63.39430059 0-140.49547719 25.70039182-149.0622737 99.37484914-6.85343744 73.67445731 35.98054855 114.79508537 97.66149005 128.50196139 59.9675813 13.70687602 116.50844445 0 166.19586903-23.98703275 49.68742457-23.98703275 97.66149006-78.81453568 97.66149006-78.81453568l255.29056256 125.07524096s15.42023509-23.98703275 27.41375091-46.26070528c8.56679765-15.42023509 15.42023509-32.5538304 22.27367365-47.97406549l-265.57071928-90.80805262z m-263.85735908 121.64852281c-90.80805262 0-107.94164679-44.54734621-107.94164678-75.3878164 0-30.84047019 18.84695438-66.82101987 95.94812984-71.96109824 75.38781753-5.14007837 179.90274503 54.82750293 179.90274502 54.82750294s-77.10117661 92.5214117-167.90922808 92.5214117z" fill="#FFFFFF" ></path></symbol><symbol id="icon-yaxi-weixin" viewBox="0 0 1024 1024"><path d="M1010.8 628c0-141.2-141.3-256.2-299.9-256.2-168 0-300.3 115.1-300.3 256.2 0 141.4 132.3 256.2 300.3 256.2 35.2 0 70.7-8.9 106-17.7l96.8 53-26.6-88.2c70.9-53.2 123.7-123.7 123.7-203.3zM618 588.8c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40c0 22-17.9 40-40 40z m194.3-0.3c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40z" fill="#00C800" ></path><path d="M366.3 106.9c-194.1 0-353.1 132.3-353.1 300.3 0 97 52.9 176.6 141.3 238.4l-35.3 106.2 123.4-61.9c44.2 8.7 79.6 17.7 123.7 17.7 11.1 0 22.1-0.5 33-1.4-6.9-23.6-10.9-48.3-10.9-74 0-154.3 132.5-279.5 300.2-279.5 11.5 0 22.8 0.8 34 2.1C692 212.6 539.9 106.9 366.3 106.9zM247.7 349.2c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z m246.6 0c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z" fill="#00C800" ></path></symbol></svg>',t=(c=document.getElementsByTagName("script"))[c.length-1].getAttribute("data-injectcss");if(t&&!h.__iconfont__svg__cssinject__){h.__iconfont__svg__cssinject__=!0;try{document.write("<style>.svgfont {display: inline-block;width: 1em;height: 1em;fill: currentColor;vertical-align: -0.1em;font-size:16px;}</style>")}catch(c){console&&console.log(c)}}!function(c){if(document.addEventListener)if(~["complete","loaded","interactive"].indexOf(document.readyState))setTimeout(c,0);else{var t=function(){document.removeEventListener("DOMContentLoaded",t,!1),c()};document.addEventListener("DOMContentLoaded",t,!1)}else document.attachEvent&&(l=c,e=h.document,i=!1,a=function(){i||(i=!0,l())},(o=function(){try{e.documentElement.doScroll("left")}catch(c){return void setTimeout(o,50)}a()})(),e.onreadystatechange=function(){"complete"==e.readyState&&(e.onreadystatechange=null,a())});var l,e,i,a,o}(function(){var c,t,l,e,i,a;(c=document.createElement("div")).innerHTML=o,o=null,(t=c.getElementsByTagName("svg")[0])&&(t.setAttribute("aria-hidden","true"),t.style.position="absolute",t.style.width=0,t.style.height=0,t.style.overflow="hidden",l=t,(e=document.body).firstChild?(i=l,(a=e.firstChild).parentNode.insertBefore(i,a)):e.appendChild(l))})}(window);
 
 
@@ -4041,7 +4294,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var eventTarget = yaxi.EventTarget.prototype;
 
     // 注册的控件类集合
-    var Controls = yaxi.Controls = create(null);
+    var classes = yaxi.classes = create(null);
 
 
     var host = yaxi.__dom_host = document.createElement('div');
@@ -4066,7 +4319,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (name)
         {
-            Controls[this.typeName = this.prototype.typeName = name] = this;
+            classes[this.typeName = this.prototype.typeName = name] = this;
         }
 
         return this;
@@ -4074,7 +4327,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -4083,11 +4336,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
     }
 
@@ -4384,7 +4632,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 return this.key === value;
 
             case '&':
-                return this instanceof (Controls[value] || Boolean);
+                return this instanceof (classes[value] || Boolean);
 
             case '#':
                 return this.id === value;
@@ -4429,14 +4677,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    // 查找存在指定属性值的控件
+    // 从当前控件开始往上查找存在指定属性名的控件
     this.exists = function (name, to) {
 
         var target = this;
 
         while (target && target !== to)
         {
-            if (target[name])
+            if (name in target)
             {
                 return target;
             }
@@ -4446,7 +4694,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找key属性
+    // 从当前控件开始往上查找具有指定属性名的属性值
+    this.findValue = function (name, to) {
+        
+        var target = this;
+
+        while (target && target !== to)
+        {
+            if (name in target)
+            {
+                return target[name];
+            }
+
+            target = target.parent;
+        }
+    }
+
+
+    // 从当前控件开始往上查找key属性值
     this.findKey = function (to) {
 
         var target = this,
@@ -4466,7 +4731,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找url属性
+    // 从当前控件开始往上查找url属性值
     this.findURL = function (to) {
 
         var target = this,
@@ -4484,7 +4749,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         return '';
     }
-
 
 
 
@@ -5300,7 +5564,7 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     
-    Class.ctor = function (values) {
+    Class.ctor = function () {
  
         var init;
         
@@ -5311,11 +5575,6 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 		{
 			init.apply(this, arguments);
 		}
-
-        if (values)
-        {
-            this.assign(values);
-        }
     }
 
 
@@ -5434,7 +5693,7 @@ yaxi.Canvas = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         
@@ -7083,7 +7342,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         
@@ -7093,11 +7352,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
     }
 
@@ -7109,18 +7363,18 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
      
         defaultValue: null,
 
-        set: function (value) {
+        set: function (template) {
 
             var storage = this.$storage;
 
-            if (value && typeof value !== 'object')
+            if (template && typeof template !== 'object')
             {
-                value = null;
+                template = null;
             }
 
-            if (storage.template !== value)
+            if (storage.template !== template)
             {
-                storage.template = value;
+                storage.template = template;
 
                 this.__children.clear();
 
@@ -7140,45 +7394,48 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         defaultValue: null,
 
-        converter: function (value) {
+        converter: function (store) {
 
-            if (value)
+            if (store)
             {
-                if (value.__model_type !== 2)
+                if (typeof store === 'string')
                 {
-                    value = this.__find_store('' + value);
+                    store = this.__find_store(store);
                 }
 
-                value.$bind(this);;
+                if (store.$bind)
+                {
+                    store.$bind(this);
+                }
             }
             else
             {
-                if (value = this.store)
+                if ((store = this.store) && store.$bind)
                 {
-                    value.$unbind(this);
+                    store.$unbind(this);
                 }
 
-                value = null;
+                store = null;
             }
 
-            return value;
+            return store;
         },
 
-        set: function (value) {
+        set: function (store) {
 
             var storage = this.$storage;
 
-            value = this.$converter.store.fn.call(this, value);
+            store = this.$converter.store.fn.call(this, store);
 
-            if (storage.store !== value)
+            if (storage.store !== store)
             {
-                storage.store = value;
+                storage.store = store;
 
                 this.__children.clear();
 
-                if (value && storage.template)
+                if (store && storage.template)
                 {
-                    this.__model_insert(-1, value);
+                    this.__model_insert(-1, store);
                 }
             }
         }
@@ -7322,9 +7579,9 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
     
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
-        base.constructor.ctor.call(this, values);
+        base.constructor.ctor.call(this);
         this.on('tap', handleTap);
     }
 
@@ -7618,6 +7875,10 @@ yaxi.TextBox = yaxi.Control.extend(function () {
             {
                 dom.firstChild.value = value;
             }
+            else
+            {
+                this.value = value;
+            }
         }
     });
 
@@ -7709,19 +7970,15 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
     
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var value = this.$dom.firstChild.value,
-            binding;
+        var value = this.value;
 
-        this.value = value;
+        this.value = dom.value;
 
         if (this.value !== value)
         {
-            if (binding = this.__binding_push)
-            {
-                binding.model.$push(this, this.value);
-            }
+            this.$push(this.value);
         }
         else
         {
@@ -7795,15 +8052,7 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
 
     this.__on_tap = function () {
 
-        var binding = this.__binding_push;
-
-        this.checked = !this.checked;
-
-        if (binding)
-        {
-            binding.model.$push(this, this.checked);
-        }
-        
+        this.$push(this.checked = !this.checked);
         this.trigger('change');
     }
 
@@ -7842,7 +8091,7 @@ yaxi.Memo = yaxi.Control.extend(function () {
                 return any.firstChild.value;
             }
 
-            return (any = this.__format) ? any(this.value) : this.value;
+            return this.value;
         },
         set: function (value) {
 
@@ -7851,6 +8100,10 @@ yaxi.Memo = yaxi.Control.extend(function () {
             if (dom = this.$dom)
             {
                 dom.firstChild.value = value;
+            }
+            else
+            {
+                this.value = value;
             }
         }
     });
@@ -7897,15 +8150,19 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
 
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var binding = this.__binding_push;
+        var value = this.value;
 
-        this.text = this.$dom.firstChild.value;
-        
-        if (binding)
+        this.value = dom.value;
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.checked);
+            this.$push(this.value);
+        }
+        else
+        {
+            this.renderer.value(this.$dom, value);
         }
     }
 
@@ -8066,10 +8323,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
         if ((value = control.value) !== any)
         {
-            if (binding = control.__binding_push)
-            {
-                binding.model.$push(control, value);
-            }
+            control.$push(value);
 
             any = new yaxi.Event();
             any.type = 'change';
@@ -8078,25 +8332,23 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
             return control.trigger(any);
         }
-        
-        control.renderer.value(control.$dom, value);
+        else
+        {
+            control.renderer.value(control.$dom, value);
+        }
     }
 
 
 
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var value = this.value,
-            binding;
+        var value = this.value;
 
-        this.value = +this.$dom.firstChild.value || 0;
+        this.value = +dom.value || 0;
 
         if (this.value !== value)
         {
-            if (binding = this.__binding_push)
-            {
-                binding.model.$push(this, this.value);
-            }
+            this.$push(this.value);
         }
         else
         {
@@ -8234,15 +8486,7 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
 
         if (!this.checked)
         {
-            var binding = this.__binding_push;
-
-            this.checked = true;
-    
-            if (binding)
-            {
-                binding.model.$push(this, true);
-            }
-    
+            this.$push(this.checked = true);
             this.trigger('change');
 
             // 同一容器内的组件互斥
@@ -8318,15 +8562,7 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
     this.__on_tap = function () {
 
-        var binding = this.__binding_push;
-
-        this.checked = !this.checked;
-
-        if (binding)
-        {
-            binding.model.$push(this, this.checked);
-        }
-
+        this.$push(this.checked = !this.checked);
         this.trigger('change');
     }
 
@@ -8416,7 +8652,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	Class.ctor = function (values) {
+	Class.ctor = function () {
 
 		var init;
 
@@ -8429,26 +8665,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		{
 			init.apply(this, arguments);
         }
-
-		if (values)
-		{
-			this.assign(values);
-		}
 	}
-
-	
-
-
-	// 页头
-	this.header = null;
-
-
-	// 页体
-	this.content = null;
-
-
-	// 页脚
-	this.footer = null;
 
 
 
@@ -8456,6 +8673,61 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	this.$property('autoDestroy', true, false);
 
 		
+
+	// 页头
+	Object.defineProperty(this, 'header', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'header')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
+	// 页内容区
+	Object.defineProperty(this, 'content', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'content')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
+	// 页脚
+	Object.defineProperty(this, 'footer', {
+
+		get: function () {
+
+			var children = this.__children;
+
+			for (var i = children.length; i--;)
+			{
+				if (children[i].key === 'footer')
+				{
+					return children[i];
+				}
+			}
+		}
+	});
+
+
 
 
 	this.$converter.header = {
@@ -8467,17 +8739,20 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			if (!values || typeof values !== 'object')
 			{
 				values = this.__template_header(values);
+				control = new yaxi.Header();
 			}
-			
-			values.key = values.key || 'page-header';
-			values.className = 'yx-header ' + (values.className || '');
+			else
+			{
+				values.key = values.key || 'header';
+				values.className = 'yx-header ' + (values.className || '');
 
-			control = new (values.Class || yaxi.Panel)();
+				control = new (values.Class || yaxi.Panel)();
+			}
+
 			control.parent = this;
-
 			control.assign(values);
 
-			this.__children.push(this.header = control);
+			this.__children.push(control);
 		}
 	};
 
@@ -8512,14 +8787,14 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'page-content';
+			values.key = values.key || 'content';
 			values.className = 'yx-content ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();
 			control.parent = this;
 			control.assign(values);
 
-			this.__children.push(this.content = control);
+			this.__children.push(control);
 		}
 	};
 	
@@ -8538,7 +8813,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'page-footer';
+			values.key = values.key || 'footer';
 			values.className = 'yx-footer ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();
@@ -8546,9 +8821,29 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			control.assign(values);
 
-			this.__children.push(this.footer = control);
+			this.__children.push(control);
 		}
 	};
+
+
+	this.$converter.children = {
+
+		fn: function (values) {
+
+			var children = this.__children,
+				control,
+				options;
+
+			for (var i = 0, l = values.length; i < l; i++)
+			{
+				options = values[i];
+				control = new (options.Class || yaxi.Panel)();
+				control.parent = this;
+
+				children.push(control.assign(options));
+			}
+		}
+	}
 
 
 
@@ -8737,7 +9032,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         
@@ -8748,11 +9043,6 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
         
-        if (values)
-        {
-            this.assign(values);
-        }
-
         this.on('tap', handleTap.bind(this));
     }
 
@@ -8788,6 +9078,22 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
     
 }).register('BackButton');
+
+
+
+
+yaxi.Content = yaxi.Panel.extend(function (Class, base) {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-panel yx-content"></div>');
+
+
+    this.$defaults.key = 'content';
+    
+
+
+}).register('Content');
 
 
 
@@ -9096,10 +9402,35 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 
 
 
+yaxi.Content = yaxi.Panel.extend(function (Class, base) {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-panel yx-footer"></div>');
+
+
+
+    this.$defaults.key = 'footer';
+    
+
+
+}).register('Footer');
 
 
 
 
+yaxi.Header = yaxi.Panel.extend(function (Class, base) {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-panel yx-header"></div>');
+
+
+    this.$defaults.key = 'header';
+    
+
+
+}).register('Header');
 
 
 
@@ -9679,7 +10010,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -9689,11 +10020,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
 
         this.on('touchstart', touchstart);
@@ -10399,7 +10725,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -10411,11 +10737,6 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
         
-        if (values)
-        {
-            this.assign(values);
-        }
-
         this.on('touchstart', touchstart);
         this.on('touchmove', touchmove);
         this.on('touchend', touchend);

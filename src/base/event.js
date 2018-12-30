@@ -507,7 +507,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
 
-    document.addEventListener('change', function () {
+    document.addEventListener('change', function (event) {
 
         var control, fn, e;
 
@@ -515,7 +515,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             if (fn = control.__on_change)
             {
-                fn.call(control);
+                fn.call(control, event.target);
             }
 
             e = new Event();

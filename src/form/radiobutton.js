@@ -62,15 +62,7 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
 
         if (!this.checked)
         {
-            var binding = this.__binding_push;
-
-            this.checked = true;
-    
-            if (binding)
-            {
-                binding.model.$push(this, true);
-            }
-    
+            this.$push(this.checked = true);
             this.trigger('change');
 
             // 同一容器内的组件互斥

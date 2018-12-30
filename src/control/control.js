@@ -8,7 +8,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var eventTarget = yaxi.EventTarget.prototype;
 
     // 注册的控件类集合
-    var Controls = yaxi.Controls = create(null);
+    var classes = yaxi.classes = create(null);
 
 
     var host = yaxi.__dom_host = document.createElement('div');
@@ -33,7 +33,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (name)
         {
-            Controls[this.typeName = this.prototype.typeName = name] = this;
+            classes[this.typeName = this.prototype.typeName = name] = this;
         }
 
         return this;
@@ -41,7 +41,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
 
@@ -50,11 +50,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
     }
 
@@ -351,7 +346,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 return this.key === value;
 
             case '&':
-                return this instanceof (Controls[value] || Boolean);
+                return this instanceof (classes[value] || Boolean);
 
             case '#':
                 return this.id === value;
@@ -396,14 +391,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    // 查找存在指定属性值的控件
+    // 从当前控件开始往上查找存在指定属性名的控件
     this.exists = function (name, to) {
 
         var target = this;
 
         while (target && target !== to)
         {
-            if (target[name])
+            if (name in target)
             {
                 return target;
             }
@@ -413,7 +408,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找key属性
+    // 从当前控件开始往上查找具有指定属性名的属性值
+    this.findValue = function (name, to) {
+        
+        var target = this;
+
+        while (target && target !== to)
+        {
+            if (name in target)
+            {
+                return target[name];
+            }
+
+            target = target.parent;
+        }
+    }
+
+
+    // 从当前控件开始往上查找key属性值
     this.findKey = function (to) {
 
         var target = this,
@@ -433,7 +445,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找url属性
+    // 从当前控件开始往上查找url属性值
     this.findURL = function (to) {
 
         var target = this,
@@ -451,7 +463,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         return '';
     }
-
 
 
 

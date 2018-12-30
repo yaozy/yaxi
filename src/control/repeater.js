@@ -11,7 +11,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         
@@ -21,11 +21,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         if (init = this.init)
 		{
 			init.apply(this, arguments);
-        }
-        
-        if (values)
-        {
-            this.assign(values);
         }
     }
 
@@ -37,18 +32,18 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
      
         defaultValue: null,
 
-        set: function (value) {
+        set: function (template) {
 
             var storage = this.$storage;
 
-            if (value && typeof value !== 'object')
+            if (template && typeof template !== 'object')
             {
-                value = null;
+                template = null;
             }
 
-            if (storage.template !== value)
+            if (storage.template !== template)
             {
-                storage.template = value;
+                storage.template = template;
 
                 this.__children.clear();
 
@@ -68,45 +63,48 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         defaultValue: null,
 
-        converter: function (value) {
+        converter: function (store) {
 
-            if (value)
+            if (store)
             {
-                if (value.__model_type !== 2)
+                if (typeof store === 'string')
                 {
-                    value = this.__find_store('' + value);
+                    store = this.__find_store(store);
                 }
 
-                value.$bind(this);;
+                if (store.$bind)
+                {
+                    store.$bind(this);
+                }
             }
             else
             {
-                if (value = this.store)
+                if ((store = this.store) && store.$bind)
                 {
-                    value.$unbind(this);
+                    store.$unbind(this);
                 }
 
-                value = null;
+                store = null;
             }
 
-            return value;
+            return store;
         },
 
-        set: function (value) {
+        set: function (store) {
 
             var storage = this.$storage;
 
-            value = this.$converter.store.fn.call(this, value);
+            store = this.$converter.store.fn.call(this, store);
 
-            if (storage.store !== value)
+            if (storage.store !== store)
             {
-                storage.store = value;
+                storage.store = store;
 
                 this.__children.clear();
 
-                if (value && storage.template)
+                if (store && storage.template)
                 {
-                    this.__model_insert(-1, value);
+                    this.__model_insert(-1, store);
                 }
             }
         }

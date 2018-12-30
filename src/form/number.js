@@ -148,10 +148,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
         if ((value = control.value) !== any)
         {
-            if (binding = control.__binding_push)
-            {
-                binding.model.$push(control, value);
-            }
+            control.$push(value);
 
             any = new yaxi.Event();
             any.type = 'change';
@@ -160,25 +157,23 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
             return control.trigger(any);
         }
-        
-        control.renderer.value(control.$dom, value);
+        else
+        {
+            control.renderer.value(control.$dom, value);
+        }
     }
 
 
 
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var value = this.value,
-            binding;
+        var value = this.value;
 
-        this.value = +this.$dom.firstChild.value || 0;
+        this.value = +dom.value || 0;
 
         if (this.value !== value)
         {
-            if (binding = this.__binding_push)
-            {
-                binding.model.$push(this, this.value);
-            }
+            this.$push(this.value);
         }
         else
         {

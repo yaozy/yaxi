@@ -6,7 +6,7 @@ yaxi.Canvas = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         

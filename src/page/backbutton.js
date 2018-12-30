@@ -10,7 +10,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         var init;
         
@@ -21,11 +21,6 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
         
-        if (values)
-        {
-            this.assign(values);
-        }
-
         this.on('tap', handleTap.bind(this));
     }
 

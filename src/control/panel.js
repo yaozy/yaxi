@@ -11,7 +11,7 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     
-    Class.ctor = function (values) {
+    Class.ctor = function () {
  
         var init;
         
@@ -22,11 +22,6 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 		{
 			init.apply(this, arguments);
 		}
-
-        if (values)
-        {
-            this.assign(values);
-        }
     }
 
 

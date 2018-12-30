@@ -1,0 +1,16 @@
+<Page>
+    <Header>
+        <Panel>
+            <BackButton text="header" />
+        </Panel>
+    </Header>
+    <Content>
+        <Panel v-pulldown="onpulldown">
+            <TextBox style="background-color:#888888;color:c-default3;width:b-width;" v-model="" b-value="value" b-change="value" v-text="i18n.text" />
+        </Panel>
+        <Require src=""></Require>
+    </Content>
+    <Footer>
+        <Text text="footer" style="background-color:c-default5;text-align:center;"></Text>
+    </Footer>
+</Page>

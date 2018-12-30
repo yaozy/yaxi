@@ -219,12 +219,66 @@
 
     
 
+    // 创建绑定对象
+    function createBinding(model, tokens, expression) {
+
+        var name = tokens[0];
+
+        if (!model[name])
+        {
+            while (model = model.$parent)
+            {
+                if (name in model)
+                {
+                    break;
+                }
+            }
+        }
+
+        // 最后一个是绑定的字段
+        name = tokens.pop();
+
+        if (model && (!tokens[0] || (model = findSubmodel(model, tokens, name))))
+        {
+            return {
+                model: model,
+                name: name 
+            };
+        }
+
+        throw 'binding expression "' + expression + '" is invalid!';
+    }
+
+
+    function findSubmodel(model, tokens, name) {
+
+        var index = 0;
+
+        while (any = tokens[index++])
+        {
+            if (model = model[any])
+            {
+                continue;
+            }
+
+            return;
+        }
+
+        if (name in model)
+        {
+            return model;
+        }
+    }
+
+
     // 编译绑定
-    function compileBinding(model, observe, name, expression) {
+    function compileBinding(observe, model, name, expression) {
     
         var index = expression.indexOf('|'),
             tokens,
-            pipe;
+            binding,
+            pipe,
+            value;
 
         if (index > 0)
         {
@@ -234,44 +288,29 @@
 
         if (tokens = expression.match(/\w+/g))
         {
-            var binding = bindingTarget = { observe: observe },
-                index = 0,
-                value;
+            binding = bindingTarget = createBinding(model, tokens, expression);
+            binding.observe = observe;
 
-            binding.name = tokens.pop(); // 最后一个是绑定的字段
-
-            while (value = tokens[index++])
-            {
-                if ((model = model[value]) && model.__model_type === 1)
-                {
-                    continue;
-                }
-
-                throw 'binding expression is invalid! "' + value + '" is not a model!';
-            }
-
-            binding.model = model;
+            value = binding.model[binding.name];
 
             if (pipe)
             {
                 binding.pipe = pipe = compile(pipe);
+                value = pipe(value);
             }
 
-            value = model[binding.name];
-            observe[binding.property = name] = pipe ? pipe(value) : value;
-    
-            return binding;
+            observe[binding.property = name] = value;
+            (observe.__bindings || (observe.__bindings = {}))[name] = binding;
         }
-
-        throw 'binding expression is invalid! no binding name!';
     }
 
 
     // 编译推送
-    function compilePush(model, expression) {
+    function compilePush(observe, model, expression) {
     
         var index = expression.indexOf('|'),
             tokens,
+            binding,
             pipe;
 
         if (index > 0)
@@ -282,56 +321,37 @@
 
         if (tokens = expression.match(/\w+/g))
         {
-            var binding = {},
-                index = 0,
-                value;
-
-            binding.name = tokens.pop(); // 最后一个是绑定的字段
-
-            while (value = tokens[index++])
-            {
-                if ((model = model[value]) && model.__model_type === 1)
-                {
-                    continue;
-                }
-
-                throw 'binding expression is invalid! "' + value + '" is not a model!';
-            }
-
-            binding.model = model;
+            binding = createBinding(model, tokens, expression);
 
             if (pipe)
             {
-                binding.pipe = pipe = compile(pipe);
+                binding.pipe = compile(pipe);
             }
 
-            return binding;
+            observe.__binding_push = binding;
         }
-
-        throw 'binding expression is invalid! no binding name!';
     }
 
 
 
     // 绑定
-    this.$bind = function (observe, bindings) {
+    this.$bind = yaxi.__bind_model = function (observe, bindings) {
 
         try
         {
-            var keys = observe.__bindings || (observe.__bindings = {}),
-                any;
+            var expression;
 
             for (var name in bindings)
             {
-                if (any = bindings[name])
+                if (expression = bindings[name])
                 {
                     if (name === 'change')
                     {
-                        observe.__binding_push = compilePush(this, any);
+                        compilePush(observe, this, expression);
                     }
                     else
                     {
-                        keys[name] = compileBinding(this, observe, name, any);
+                        compileBinding(observe, this, name, expression);
                     }
                 }
             }
@@ -360,26 +380,6 @@
                     break;
                 }
             }
-        }
-
-        return this;
-    }
-
-
-    // 推送绑定
-    this.$push = function (observe, value) {
-
-        var binding = observe.__binding_push,
-            pipe;
-
-        if (binding)
-        {
-            if (pipe = binding.pipe)
-            {
-                value = pipe(value);
-            }
-
-            this[binding.name] = value;
         }
 
         return this;

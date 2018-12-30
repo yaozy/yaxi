@@ -6,14 +6,9 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     
 
 
-    Class.ctor = function (values) {
+    Class.ctor = function () {
 
         this.$storage = create(this.$defaults);
-
-        if (values)
-        {
-            this.assign(values);
-        }
     }
 
 
@@ -120,16 +115,56 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     this.model = null;
 
 
+
+    // 不转换Class
+    this.$converter.Class = false;
+
+
+    // 转换bindings
+    this.$converter.bindings = {
+
+        fn: function (values) {
+
+            var model;
+
+            if (values && (model = this.model = this.__find_model()))
+            {
+                yaxi.__bind_model.call(model, this, values);
+            }
+        }
+    };
+
+
+    
+    // 推送绑定
+    this.$push = function (value) {
+
+        var binding = this.__binding_push,
+            pipe;
+
+        if (binding)
+        {
+            if (pipe = binding.pipe)
+            {
+                value = pipe(value);
+            }
+
+            binding.model[binding.name] = value;
+        }
+    }
+
+
     // 查找关联的模型
     this.__find_model = function () {
     
-        var target = this;
+        var target = this,
+            model;
 
         while (target)
         {
-            if (target.model)
+            if (model = target.model)
             {
-                return target.model;
+                return typeof model === 'object' ? model : nulll
             }
 
             target = target.parent;
@@ -152,36 +187,14 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 model = model[key];
             }
 
-            if (model && model.__model_type === 2)
+            if (model && typeof model === 'object')
             {
                 return model;
             }
-
-            throw '"' + name + '" is not a store!';
         }
 
-        throw 'can not find any model!';
+        throw 'can not find model "' + name + '"!';
     }
-
-
-
-    // 不转换Class
-    this.$converter.Class = false;
-
-
-    // 转换bindings
-    this.$converter.bindings = {
-
-        fn: function (data) {
-
-            var model;
-
-            if (data && (model = this.model = this.__find_model()))
-            {
-                model.$bind(this, data);
-            }
-        }
-    };
 
 
 

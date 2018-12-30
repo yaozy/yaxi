@@ -26,7 +26,7 @@ yaxi.Memo = yaxi.Control.extend(function () {
                 return any.firstChild.value;
             }
 
-            return (any = this.__format) ? any(this.value) : this.value;
+            return this.value;
         },
         set: function (value) {
 
@@ -35,6 +35,10 @@ yaxi.Memo = yaxi.Control.extend(function () {
             if (dom = this.$dom)
             {
                 dom.firstChild.value = value;
+            }
+            else
+            {
+                this.value = value;
             }
         }
     });
@@ -81,15 +85,19 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
 
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var binding = this.__binding_push;
+        var value = this.value;
 
-        this.text = this.$dom.firstChild.value;
-        
-        if (binding)
+        this.value = dom.value;
+
+        if (this.value !== value)
         {
-            binding.model.$push(this, this.checked);
+            this.$push(this.value);
+        }
+        else
+        {
+            this.renderer.value(this.$dom, value);
         }
     }
 

@@ -31,6 +31,10 @@ yaxi.TextBox = yaxi.Control.extend(function () {
             {
                 dom.firstChild.value = value;
             }
+            else
+            {
+                this.value = value;
+            }
         }
     });
 
@@ -122,19 +126,15 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
     
-    this.__on_change = function () {
+    this.__on_change = function (dom) {
 
-        var value = this.$dom.firstChild.value,
-            binding;
+        var value = this.value;
 
-        this.value = value;
+        this.value = dom.value;
 
         if (this.value !== value)
         {
-            if (binding = this.__binding_push)
-            {
-                binding.model.$push(this, this.value);
-            }
+            this.$push(this.value);
         }
         else
         {

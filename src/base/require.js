@@ -129,6 +129,15 @@ window.require || (function () {
                 modules[url] = { exports: text };
                 return text;
 
+            case '.html':
+                if (flags === false || text.substring(0, 100).indexOf('<html') >= 0)
+                {
+                    modules[url] = { exports: text };
+                    return text;
+                }
+
+                return (modules[url] = require.template(text, file)).exports;
+
 			default:
                 modules[url] = { exports: text };
                 return text;
@@ -183,7 +192,7 @@ window.require || (function () {
     
         document.head.appendChild(dom);
 
-        return { exports: true };
+        return { exports: text };
 	}
 
 
@@ -210,6 +219,8 @@ window.require || (function () {
 
 		return module;
     }
+
+
     
 
 
@@ -233,6 +244,9 @@ window.require || (function () {
 
 
     global.load = load;
+
+
+    global.absouteUrl = absouteUrl;
 
 
     global.switchLanguage = function (language) {
