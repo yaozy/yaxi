@@ -33,7 +33,7 @@
         });
 
 
-        var model = {
+        var model = new Model({
 
             text: 11111.1222223,
             submodel: {
@@ -44,7 +44,7 @@
                 { name: 2222, age: 2 },
                 { name: 3333, age: 3 }
             ]
-        };
+        });
 
 
 
@@ -67,7 +67,7 @@
                     {
                         Class: yaxi.Segment,
                         value: 50,
-                        segments: 2
+                        segments: 4
                     },
                     {
                         Class: yaxi.Repeater,
@@ -169,9 +169,14 @@
     </Footer>
 </Page>`;
 
-        template = require.template(template, 'dev/git/test.html').exports(
-            {
+        var time = performance.now();
 
+        template = require.template(template, 'dev/git/test.html');
+
+        alert(performance.now() - time);
+
+        template = template.exports(
+            {
                 header: '模板窗口',
 
                 model: {
@@ -191,7 +196,6 @@
 
                     }, 3000);
                 }
-
             },
             {
                 change: function () {
@@ -199,7 +203,7 @@
                 }
             });
 
-            new yaxi.Page().assign(template).open();
+            new template.Class().assign(template).open();
         }
 
     

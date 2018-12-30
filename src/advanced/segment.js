@@ -54,7 +54,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
                 {
                     var array = [0],
                         decimal = Decimal.singleton,
-                        split = decimal(100).div(value);
+                        split = decimal(100).div(value).value;
 
                     array[value] = 100;
 
@@ -201,7 +201,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
     function touchend(event) {
 
-        var value = Decimal.singleton(event.clientX).plus(-state.left).pow(2).div(state.width),
+        var value = Decimal.singleton(event.clientX).plus(-state.left).pow10(2).div(state.width),
             any;
 
         state.thumb = null;

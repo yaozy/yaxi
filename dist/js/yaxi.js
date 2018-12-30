@@ -534,7 +534,7 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
     }
 
 
-    prototype.pow = function (value) {
+    prototype.pow10 = function (value) {
 
         if (value |= 0)
         {
@@ -2228,7 +2228,11 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             }
 
             observe[binding.property = name] = value;
-            (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+
+            if (binding.model.__model_type === 1)
+            {
+                (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+            }
         }
     }
 
@@ -4964,7 +4968,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (bindings = this.__bindings)
         {
-            this.__bindings = this.__binding_push = null;
+            this.__bindings = null;
 
             for (var name in bindings)
             {
@@ -4998,7 +5002,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = null;
+        this.parent = this.__binding_push = null;
         this.destroyed = true;
     }
 
@@ -10767,7 +10771,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
                 {
                     var array = [0],
                         decimal = Decimal.singleton,
-                        split = decimal(100).div(value);
+                        split = decimal(100).div(value).value;
 
                     array[value] = 100;
 
@@ -10914,7 +10918,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
     function touchend(event) {
 
-        var value = Decimal.singleton(event.clientX).plus(-state.left).pow(2).div(state.width),
+        var value = Decimal.singleton(event.clientX).plus(-state.left).pow10(2).div(state.width),
             any;
 
         state.thumb = null;

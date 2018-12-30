@@ -678,7 +678,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (bindings = this.__bindings)
         {
-            this.__bindings = this.__binding_push = null;
+            this.__bindings = null;
 
             for (var name in bindings)
             {
@@ -712,7 +712,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = null;
+        this.parent = this.__binding_push = null;
         this.destroyed = true;
     }
 

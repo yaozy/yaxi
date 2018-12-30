@@ -300,7 +300,11 @@
             }
 
             observe[binding.property = name] = value;
-            (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+
+            if (binding.model.__model_type === 1)
+            {
+                (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+            }
         }
     }
 

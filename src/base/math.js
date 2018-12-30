@@ -250,7 +250,7 @@
     }
 
 
-    prototype.pow = function (value) {
+    prototype.pow10 = function (value) {
 
         if (value |= 0)
         {
