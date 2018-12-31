@@ -53,10 +53,10 @@
                     any = name[0];
                     name = name.substring(2);
 
-                    // 赋值
-                    if (any === 'v')
+                    // 传入的数据
+                    if (any === 'd')
                     {
-                        array.push(',\n', space, name, ': values.' + value);
+                        array.push(',\n', space, name, ': data.' + value);
                         continue;
                     }
 
@@ -166,7 +166,7 @@
                 array.push(',');
             }
 
-            array.push('\n', space, name, ': events.', events[index++]);
+            array.push('\n', space, name, ': data.', events[index++]);
         }
     }
 
@@ -256,10 +256,10 @@
             {
                 var key = text[0];
 
-                // 绑定值
-                if (key === 'v')
+                // 传入的数据
+                if (key === 'd')
                 {
-                    list[i] = 'values.' + text.substring(2) + '';
+                    list[i] = 'data.' + text.substring(2) + '';
                     continue;
                 }
                 
@@ -297,7 +297,7 @@
 
         array.push('\n};\n\n//# sourceURL=', url);
 
-        return { exports: new Function(['values', 'events', 'color', 'classes'], array.join('')) };
+        return array.join('');
     }
 
 

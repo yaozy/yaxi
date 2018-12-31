@@ -5,152 +5,75 @@ window.require || (function () {
     // 全局require
     var global = window.require = factory(location.href.substring(0, location.href.lastIndexOf('/')));
 
-
 	// 已加载缓存集合
 	var modules = global.modules = Object.create(null);
 
     // 已加载的多语言资源
     var languages = global.languages = Object.create(null);
 
-    // 文件集合
-    var files = global.files = Object.create(null);
+    // 相对url缓存
+    var urls = Object.create(null);
 
 
 
 
     function factory(base) {
 
-        var last = base.length - 1;
-
         function require(url, flags) {
 
-            return load(require.baseURL, url, flags);
-        }
-
-        if (base[last] === '/')
-        {
-            base = base.substring(0, last);
+            return global.load(require.baseURL, url, flags);
         }
 
         require.baseURL = base;
-        require.worker = worker;
+        require.runAsThread = runAsThread;
 
         return require;
     }
 
 
-    
-    // 创建webworker工作线程
-    function worker(files, fn) {
+    // 作为线程运行
+    function runAsThread(fn) {
 
-        return new WebWorker(this.baseURL, files, fn);
+        return new global.Thread(this.baseURL, fn);
     }
 
 
+    function execute(url, ext, flags) {
 
-    function load(base, url, flags) {
-
-        var ext = url.match(/\.\w+$/),
-            any;
-
-        if (ext)
-        {
-            ext = ext[0].toLowerCase();
-        }
-        else
-        {
-            url += '.js';
-            ext = '.js';
-        }
-
-        url = url[0] === '/' ? global.baseURL + url : absouteUrl(base, url);
-
-        if (flags !== 'content' && (any = modules[url]))
-        {
-            return any.exports;
-        }
-
-        if (url.indexOf('{{language}}') >= 0)
-        {
-            languages[url] = ext;
-            any = url.replace('{{language}}', yaxi.language);
-        }
-        else
-        {
-            any = url;
-        }
-
-        switch (flags)
-        {
-            case 'content':
-                return files[any] || ajax(any);
-
-            default:
-                return execute(url, ext, flags, any);
-        }
-    }
-
-    
-	function absouteUrl(base, url) {
-		
-		url = base + '/' + url;
-		
-		while (true)
-		{
-			base = url.replace(/[^/]*\/\.\.\//, '');
-			
-			if (base === url)
-			{
-				break;
-			}
-			
-			url = base;
-		}
-		
-		return url.replace(/[.]+\//g, '');
-	}
-
-
-    function execute(url, ext, flags, file) {
-
-        var text = files[file] || ajax(file);
+        var text = ajax(url);
 		
 		switch (ext)
 		{
 			case '.css':
-                modules[url] = loadCss(text);
-                return true;
+                return loadCss(text);
 
 			case '.js':
-                return (modules[url] = loadJs(text, file, flags)).exports;
+                return loadJs(text, url, flags);
 
             case '.json':
                 text = text ? JSON.parse(text) : null;
-                modules[url] = { exports: text };
-                return text;
+                return { exports: text };
 
             case '.html':
                 if (flags === false || text.substring(0, 100).indexOf('<html') >= 0)
                 {
-                    modules[url] = { exports: text };
-                    return text;
+                    return { exports: text };
                 }
 
-                return (modules[url] = require.template(text, file)).exports;
+                return { exports: new Function(['data', 'color', 'classes'], global.template(text, url)) };
 
 			default:
-                modules[url] = { exports: text };
-                return text;
+                return { exports: text };
 		}
     }
 
 
-    function ajax(file) {
+    function ajax(url) {
 
         var xhr = new XMLHttpRequest(),
             text;
 						
-		xhr.open('GET', file, false);
+		xhr.open('GET', url, false);
 
         xhr.onreadystatechange = function () {
 
@@ -171,7 +94,7 @@ window.require || (function () {
 
         xhr.send(null);
 
-        return files[file] = text;
+        return text;
     }
 
 
@@ -202,11 +125,12 @@ window.require || (function () {
 
         if (text)
         {
-            text = text + '\r\n//# sourceURL=' + url;
+            text = text + '\n//# sourceURL=' + url;
 
+            // 全局执行
             if (flags === false)
             {
-                eval.call(window, text);
+                eval.call(window, module.exports.text = text);
             }
             else
             {
@@ -219,9 +143,6 @@ window.require || (function () {
 
 		return module;
     }
-
-
-    
 
 
     function mixin(target, source) {
@@ -242,13 +163,78 @@ window.require || (function () {
     }
 
 
+    function absolute(url) {
 
-    global.load = load;
+        var last;
+
+        while (true)
+        {
+            last = url.replace(/[^/]*\/\.\.\//, '');
+            
+            if (last === url)
+            {
+                break;
+            }
+            
+            url = last;
+        }
+        
+        return url.replace(/[.]+\//g, '');
+    }
 
 
-    global.absouteUrl = absouteUrl;
+    global.absoluteUrl = function (base, url) {
+
+        // 相对根目录
+        if (url[0] === '/')
+        {
+            base = global.baseURL;
+            return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
+        }
+
+        // 相对当前目录
+        url = (base[base.length - 1] === '/' ? base : base + '/') + url;
+
+        return urls[url] || (urls[url] = absolute(url));
+    }
 
 
+    global.load = function (base, url, flags) {
+
+        var ext = url.match(/\.\w+$/),
+            any;
+
+        if (ext)
+        {
+            ext = ext[0].toLowerCase();
+        }
+        else
+        {
+            url += '.js';
+            ext = '.js';
+        }
+
+        url = global.absoluteUrl(base, url);
+
+        if (any = modules[url])
+        {
+            return any.exports;
+        }
+
+        if (url.indexOf('{{language}}') >= 0)
+        {
+            languages[url] = ext;
+            any = url.replace('{{language}}', yaxi.language);
+        }
+        else
+        {
+            any = url;
+        }
+
+        return (modules[url] = execute(any, ext, flags)).exports;
+    }
+
+    
     global.switchLanguage = function (language) {
 
         yaxi.language = language;
@@ -271,168 +257,6 @@ window.require || (function () {
 
             mixin(modules[key].exports, data);
         }
-    }
-
-
-
-
-    
-    var seed = 1;
-
-
-    var code = '(' + (function (self) {
-
-        self.addEventListener('message', function (event) {
-            
-            var target = this,
-                data = event.data,
-                uuid = data.uuid,
-                method = data.method,
-                index = 0,
-                list = method.split('.'),
-                name,
-                fn;
-
-            try
-            {
-                name = list.pop();
-
-                while (target && (fn = list[index++]))
-                {
-                    target = target[fn];
-                }
-
-                if (target && (fn = target[name]))
-                {
-                    list = data.args || [];
-
-                    if (data.async)
-                    {
-                        list.push(function (value, e) {
-
-                            _(uuid, value, e);
-                        });
-
-                        fn.apply(target, list);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            _(uuid, fn.apply(target, list));
-                        }
-                        catch (e)
-                        {
-                            _(uuid, null, e);
-                        }
-                    }
-                }
-                else
-                {
-                    _(uuid, null, 'not support method "' + method + '"!');
-                }
-            }
-            catch (e)
-            {
-                _(uuid, null, e);
-            }
-        });
-
-        
-        function _(uuid, value, e) {
-
-            self.postMessage(JSON.stringify([uuid, value, e]));
-        }
-
-
-    }) + ')(this);\n\n\n\n\n\n';
-
-    
-
-    function WebWorker(base, files, fn) {
-
-        var list = [code];
-
-        for (var key in files)
-        {
-            var text = load(base, key, 'content');
-
-            if (files[key])
-            {
-                list.push('var ', files[key], ' = (function (require, module, exports) {\nexports = moudle.exports = {};\n\n\n\n',
-                        text,
-                    'return module;\n\n\n\n})(function () { throw "Can not use require in require.worker!" }, {});');
-            }
-            else
-            {
-                list.push(text);
-            }
-        }
-
-        if (fn)
-        {
-            if (typeof fn === 'function')
-            {
-                fn = '\n\n\n\n\n\n;(' + fn + ').call(this, this);';
-            }
-
-            list.push(fn);
-        }
-
-        this.queue = [];
-        this.worker = new Worker(URL.createObjectURL(new Blob(list)));
-        this.worker.onmessage = onmessage.bind(this);
-    }
-
-    
-    
-    function onmessage(event) {
-
-        var data;
-
-        if (data = event.data)
-        {
-            var queue = this.queue,
-                index = 0,
-                uuid = (data = JSON.parse(data))[0],
-                item;
-
-            while (item = queue[index])
-            {
-                if (item === uuid)
-                {
-                    queue[index + 1].call(this, data[1], data[2]);
-                    queue.splice(index, 2);
-                    return;
-                }
-
-                index += 2;
-            }
-        }
-    }
-
-
-    WebWorker.prototype.exec = function (method, args, callback, async) {
-
-        if (method)
-        {
-            var uuid = seed++;
-
-            this.queue.push(uuid, callback);
-
-            this.worker.postMessage({
-                uuid: uuid,
-                method: method,
-                args: args,
-                async: async
-            });
-        }
-    }
-
-
-    WebWorker.prototype.terminate = function () {
-
-        this.worker.terminate();
     }
 
 

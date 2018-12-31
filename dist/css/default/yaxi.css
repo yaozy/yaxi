@@ -228,82 +228,16 @@ textarea::-webkit-input-placeholder {
   border-width: 1px;
   border-style: solid;
 }
-.yx-panel {
-  position: relative;
-}
-[layout="block"] > div,
-[layout="block"] > span,
-[layout="block"] > * {
-  display: block;
-}
-[layout="inline"] > div,
-[layout="inline"] > span,
-[layout="inline"] > * {
-  display: inline;
-}
-[layout="inline-block"] > div,
-[layout="inline-block"] > span,
-[layout="inline-block"] > * {
-  display: inline-block;
-}
-[layout="row"] {
-  display: -webkit-flex;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-[layout="row-center"] {
-  display: -webkit-flex;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-[layout="row-fill"] {
-  display: -webkit-flex;
-  display: flex;
-  align-items: center;
-}
-[layout="row-fill"] > div,
-[layout="row-fill"] > span,
-[layout="row-fill"] > * {
-  height: 100%;
-  flex-grow: 1;
-}
-[layout="column"] {
-  display: -webkit-flex;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: space-between;
-}
-[layout="column-center"] {
-  display: -webkit-flex;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-}
-[layout="column-fill"] {
-  display: -webkit-flex;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-}
-[layout="column-fill"] > div,
-[layout="column-fill"] > span,
-[layout="column-fill"] > * {
-  width: 100%;
-  flex-grow: 1;
-}
 .yx-button {
+  height: 0.35rem;
   margin: 0;
-  outline: none;
   border: none;
+  outline: none;
   white-space: nowrap;
   text-align: center;
   transition: 0.1s;
   color: #000000;
-  background-color: #c0c4cc;
+  background-color: #f8f8f8;
   cursor: pointer;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -430,6 +364,68 @@ textarea::-webkit-input-placeholder {
 .yx-gap {
   background-color: #f8f8f8;
   height: 0.1rem;
+}
+.yx-panel {
+  position: relative;
+}
+[layout="block"] > * {
+  display: block;
+}
+[layout="block-fill"] > * {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.05rem;
+}
+[layout="inline"] > * {
+  display: inline;
+}
+[layout="inline-block"] > * {
+  display: inline-block;
+}
+[layout="row"] {
+  display: -webkit-flex;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+[layout="row-center"] {
+  display: -webkit-flex;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[layout="row-fill"] {
+  display: -webkit-flex;
+  display: flex;
+  align-items: center;
+}
+[layout="row-fill"] > * {
+  height: 100%;
+  flex-grow: 1;
+}
+[layout="column"] {
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-between;
+}
+[layout="column-center"] {
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+}
+[layout="column-fill"] {
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+[layout="column-fill"] > * {
+  width: 100%;
+  flex-grow: 1;
 }
 .yx-textbox {
   display: inline-block;
