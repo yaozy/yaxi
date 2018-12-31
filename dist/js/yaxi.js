@@ -3488,7 +3488,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new global.Thread(this.baseURL, fn);
+        return new global.Thread(global.baseURL, this.baseURL, fn);
     }
 
 
@@ -3509,7 +3509,7 @@ window.require || (function () {
                 return { exports: text };
 
             case '.html':
-                if (flags === false || text.substring(0, 100).indexOf('<html') >= 0)
+                if (flags === false)
                 {
                     return { exports: text };
                 }
@@ -4104,7 +4104,7 @@ window.require || (function () {
 
 
 
-        var global = factory(baseURL);
+        var global = factory(base);
 
         var modules = global.modules = Object.create(null);
 
@@ -4115,8 +4115,7 @@ window.require || (function () {
             // 相对根目录
             if (url[0] === '/')
             {
-                base = global.baseURL;
-                return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
+                return root + url;
             }
     
             // 相对当前目录
@@ -4262,9 +4261,14 @@ window.require || (function () {
 
     
 
-    function Thread(base, url) {
+    function Thread(root, base, url) {
 
-        var list = ['var require = function (self, baseURL) {\n' + inject + '\n}(self, "' + base + '");\n\n\n\n\n'];
+        var list = ['var require = function (self, root, base) {\n', 
+            inject, 
+            '\n}(self, "', 
+                root[root.length - 1] !== '/' ? root : root.slice(0, -1),  '", "', 
+                base,
+            '");\n\n\n\n\n'];
 
         if (typeof url === 'string')
         {

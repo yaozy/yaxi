@@ -1,6 +1,7 @@
 module.exports = yaxi.Page.extend(function () {
 
 
+
     var Store = yaxi.store({
         name: '',
         age: 0

@@ -30,11 +30,11 @@ module.exports = yaxi.Page.extend(function () {
 
     this.init = function () {
 
-        var time = performance.now();
+        // var time = performance.now();
 
         var template = require('template.html')(data);
     
-        alert(performance.now() - time);
+        // alert(performance.now() - time);
 
         this.assign(template);
     }

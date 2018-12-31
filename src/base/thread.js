@@ -73,7 +73,7 @@
 
 
 
-        var global = factory(baseURL);
+        var global = factory(base);
 
         var modules = global.modules = Object.create(null);
 
@@ -84,8 +84,7 @@
             // 相对根目录
             if (url[0] === '/')
             {
-                base = global.baseURL;
-                return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
+                return root + url;
             }
     
             // 相对当前目录
@@ -231,9 +230,14 @@
 
     
 
-    function Thread(base, url) {
+    function Thread(root, base, url) {
 
-        var list = ['var require = function (self, baseURL) {\n' + inject + '\n}(self, "' + base + '");\n\n\n\n\n'];
+        var list = ['var require = function (self, root, base) {\n', 
+            inject, 
+            '\n}(self, "', 
+                root[root.length - 1] !== '/' ? root : root.slice(0, -1),  '", "', 
+                base,
+            '");\n\n\n\n\n'];
 
         if (typeof url === 'string')
         {

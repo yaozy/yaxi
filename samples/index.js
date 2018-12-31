@@ -1,6 +1,7 @@
 module.exports = yaxi.Page.extend(function () {
 
 
+
     this.init = function () {
 
         this.assign({
@@ -38,18 +39,18 @@ module.exports = yaxi.Page.extend(function () {
 
         var thread = require.runAsThread('thread.js');
 
-        // 调用线程内的同步方法
-        thread.exec('syncCall', ['sync call: ', ' value'], function (value, error) {
-            
-            alert(value);
-        });
-
         // 调用线程内的异步方法
-        thread.exec('asyncCall', ['async call: ', ' value'], function (value, error) {
+        thread.exec('asyncCall', ['async call: get thread ', ' value'], function (value, error) {
             
             alert(value);
 
         }, true);
+
+        // 调用线程内的同步方法
+        thread.exec('syncCall', ['sync call: get thread ', ' value'], function (value, error) {
+            
+            alert(value);
+        });
     }
 
 

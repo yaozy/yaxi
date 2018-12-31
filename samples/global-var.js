@@ -1,0 +1,1 @@
+var globalValue = 'global';

@@ -34,7 +34,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new global.Thread(this.baseURL, fn);
+        return new global.Thread(global.baseURL, this.baseURL, fn);
     }
 
 
@@ -55,7 +55,7 @@ window.require || (function () {
                 return { exports: text };
 
             case '.html':
-                if (flags === false || text.substring(0, 100).indexOf('<html') >= 0)
+                if (flags === false)
                 {
                     return { exports: text };
                 }

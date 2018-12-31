@@ -1,10 +1,11 @@
-var test = require('thread-test.js');
+var data = require('thread-data.js');
 
+require('global-var.js', false);
 
 
 self.syncCall = function (arg1, arg2) {
 
-    return arg1 + test.value + arg2;
+    return arg1 + data.value + arg2;
 }
 
 
@@ -12,7 +13,7 @@ self.asyncCall = function (arg1, arg2, callback) {
 
     setTimeout(function () {
 
-        callback(arg1 + test.value + arg2);
+        callback(arg1 + globalValue + arg2);
 
     }, 0);
 }
