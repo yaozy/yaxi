@@ -108,7 +108,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			for (var i = children.length; i--;)
 			{
-				if (children[i].key === 'header')
+				if (children[i].key === 'page-header')
 				{
 					return children[i];
 				}
@@ -126,7 +126,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			for (var i = children.length; i--;)
 			{
-				if (children[i].key === 'content')
+				if (children[i].key === 'page-content')
 				{
 					return children[i];
 				}
@@ -144,7 +144,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			for (var i = children.length; i--;)
 			{
-				if (children[i].key === 'footer')
+				if (children[i].key === 'page-footer')
 				{
 					return children[i];
 				}
@@ -168,7 +168,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			else
 			{
-				values.key = values.key || 'header';
+				values.key = values.key || 'page-header';
 				values.className = 'yx-header ' + (values.className || '');
 
 				control = new (values.Class || yaxi.Panel)();
@@ -212,7 +212,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'content';
+			values.key = values.key || 'page-content';
 			values.className = 'yx-content ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();
@@ -238,7 +238,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				};
 			}
 
-			values.key = values.key || 'footer';
+			values.key = values.key || 'page-footer';
 			values.className = 'yx-footer ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Panel)();

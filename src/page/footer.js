@@ -6,7 +6,7 @@ yaxi.Content = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.$defaults.key = 'footer';
+    this.$defaults.key = 'page-footer';
     
 
 
