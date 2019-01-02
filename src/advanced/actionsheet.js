@@ -242,7 +242,7 @@ yaxi.Control.extend(function (Class, base) {
             };
         }
 
-        return new Class(data).show();
+        return new Class().assign(data).show();
     }
     
 

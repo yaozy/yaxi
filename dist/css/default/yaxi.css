@@ -237,7 +237,7 @@ textarea::-webkit-input-placeholder {
   text-align: center;
   transition: 0.1s;
   color: #000000;
-  background-color: #f8f8f8;
+  background-color: #e0e0e0;
   cursor: pointer;
   -moz-user-select: none;
   -webkit-user-select: none;

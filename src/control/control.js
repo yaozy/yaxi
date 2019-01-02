@@ -391,14 +391,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    // 从当前控件开始往上查找存在指定属性名的控件
+    // 从当前控件开始往上查找存在指定属性名的控件(忽略null或0,false等值)
     this.exists = function (name, to) {
 
         var target = this;
 
         while (target && target !== to)
         {
-            if (name in target)
+            if (target[name])
             {
                 return target;
             }
@@ -408,16 +408,17 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找具有指定属性名的属性值
+    // 从当前控件开始往上查找具有指定属性名的属性值(忽略null或0,false等值)
     this.findValue = function (name, to) {
         
-        var target = this;
+        var target = this,
+            value;
 
         while (target && target !== to)
         {
-            if (name in target)
+            if (value = target[name])
             {
-                return target[name];
+                return value;
             }
 
             target = target.parent;

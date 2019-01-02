@@ -1,4 +1,4 @@
-yaxi.Content = yaxi.Panel.extend(function (Class, base) {
+yaxi.Footer = yaxi.Panel.extend(function (Class, base) {
 
 
 

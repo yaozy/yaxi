@@ -43,7 +43,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	this.__template_header = function (text) {
 
 		return {
-
 			Class: yaxi.Title,
 			text: text
 		};

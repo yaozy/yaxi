@@ -3769,6 +3769,12 @@ window.require || (function () {
 
                     continue;
                 }
+
+                if (name === 'class')
+                {
+                    array.push(',\n', space, 'className: "', value, '"');
+                    continue;
+                }
                 
                 if (name[1] === '-')
                 {
@@ -3813,7 +3819,7 @@ window.require || (function () {
                     }
                 }
 
-                array.push(',\n', space, name === 'class' ? 'className' : name, ': "', value, '"');
+                array.push(',\n', space, name, ': "', value, '"');
             }
 
             if (bindings)
@@ -4829,14 +4835,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    // 从当前控件开始往上查找存在指定属性名的控件
+    // 从当前控件开始往上查找存在指定属性名的控件(忽略null或0,false等值)
     this.exists = function (name, to) {
 
         var target = this;
 
         while (target && target !== to)
         {
-            if (name in target)
+            if (target[name])
             {
                 return target;
             }
@@ -4846,16 +4852,17 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    // 从当前控件开始往上查找具有指定属性名的属性值
+    // 从当前控件开始往上查找具有指定属性名的属性值(忽略null或0,false等值)
     this.findValue = function (name, to) {
         
-        var target = this;
+        var target = this,
+            value;
 
         while (target && target !== to)
         {
-            if (name in target)
+            if (value = target[name])
             {
-                return target[name];
+                return value;
             }
 
             target = target.parent;
@@ -8831,15 +8838,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			var children = this.__children;
-
-			for (var i = children.length; i--;)
-			{
-				if (children[i].key === 'page-header')
-				{
-					return children[i];
-				}
-			}
+			return this.__header || (this.__header = find(this.__children, 'page-header'));
 		}
 	});
 
@@ -8849,15 +8848,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			var children = this.__children;
-
-			for (var i = children.length; i--;)
-			{
-				if (children[i].key === 'page-content')
-				{
-					return children[i];
-				}
-			}
+			return this.__content || (this.__content = find(this.__children, 'page-content'));
 		}
 	});
 
@@ -8867,17 +8858,21 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			var children = this.__children;
-
-			for (var i = children.length; i--;)
-			{
-				if (children[i].key === 'page-footer')
-				{
-					return children[i];
-				}
-			}
+			return this.__footer || (this.__footer = find(this.__children, 'page-footer'));
 		}
 	});
+
+
+	function find(children, key) {
+
+		for (var i = children.length; i--;)
+		{
+			if (children[i].key === key)
+			{
+				return children[i];
+			}
+		}
+	}
 
 
 
@@ -8891,20 +8886,18 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			if (!values || typeof values !== 'object')
 			{
 				values = this.__template_header(values);
-				control = new yaxi.Header();
 			}
 			else
 			{
 				values.key = values.key || 'page-header';
 				values.className = 'yx-header ' + (values.className || '');
-
-				control = new (values.Class || yaxi.Panel)();
 			}
 
+			control = new (values.Class || yaxi.Header)();
 			control.parent = this;
 			control.assign(values);
 
-			this.__children.push(control);
+			this.__children.push(this.__header = control);
 		}
 	};
 
@@ -8912,6 +8905,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	this.__template_header = function (text) {
 	
 		return {
+			Class: yaxi.Header,
 			children: [
 				{
 					Class: yaxi.BackButton
@@ -8942,11 +8936,11 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			values.key = values.key || 'page-content';
 			values.className = 'yx-content ' + (values.className || '');
 
-			control = new (values.Class || yaxi.Panel)();
+			control = new (values.Class || yaxi.Content)();
 			control.parent = this;
 			control.assign(values);
 
-			this.__children.push(control);
+			this.__children.push(this.__content = control);
 		}
 	};
 	
@@ -8968,12 +8962,12 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			values.key = values.key || 'page-footer';
 			values.className = 'yx-footer ' + (values.className || '');
 
-			control = new (values.Class || yaxi.Panel)();
+			control = new (values.Class || yaxi.Footer)();
 			control.parent = this;
 
 			control.assign(values);
 
-			this.__children.push(control);
+			this.__children.push(this.__footer = control);
 		}
 	};
 
@@ -9295,7 +9289,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	this.__template_header = function (text) {
 
 		return {
-
 			Class: yaxi.Title,
 			text: text
 		};
@@ -9554,7 +9547,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 
 
 
-yaxi.Content = yaxi.Panel.extend(function (Class, base) {
+yaxi.Footer = yaxi.Panel.extend(function (Class, base) {
 
 
 
@@ -10140,7 +10133,7 @@ yaxi.Control.extend(function (Class, base) {
             };
         }
 
-        return new Class(data).show();
+        return new Class().assign(data).show();
     }
     
 
