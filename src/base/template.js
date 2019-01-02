@@ -47,6 +47,12 @@
 
                     continue;
                 }
+
+                if (name === 'class')
+                {
+                    array.push(',\n', space, 'className: "', value, '"');
+                    continue;
+                }
                 
                 if (name[1] === '-')
                 {
@@ -91,7 +97,7 @@
                     }
                 }
 
-                array.push(',\n', space, name === 'class' ? 'className' : name, ': "', value, '"');
+                array.push(',\n', space, name, ': "', value, '"');
             }
 
             if (bindings)
