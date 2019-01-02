@@ -3812,6 +3812,8 @@ window.require || (function () {
                         continue;
                     }
                 }
+
+                array.push(',\n', space, name === 'class' ? 'className' : name, ': "', value, '"');
             }
 
             if (bindings)
@@ -3832,7 +3834,6 @@ window.require || (function () {
         if (node = node && node.firstChild)
         {
             any = 0;
-            array.push(',\n', space, 'children: [');
 
             do
             {
@@ -3844,6 +3845,7 @@ window.require || (function () {
                     }
                     else
                     {
+                        array.push(',\n', space, 'children: [');
                         any = 1;
                     }
 
@@ -3854,7 +3856,10 @@ window.require || (function () {
             }
             while (node = node.nextSibling);
 
-            array.push('\n', space, ']');
+            if (any)
+            {
+                array.push('\n', space, ']');
+            }
         }
     }
 

@@ -90,6 +90,8 @@
                         continue;
                     }
                 }
+
+                array.push(',\n', space, name === 'class' ? 'className' : name, ': "', value, '"');
             }
 
             if (bindings)
@@ -110,7 +112,6 @@
         if (node = node && node.firstChild)
         {
             any = 0;
-            array.push(',\n', space, 'children: [');
 
             do
             {
@@ -122,6 +123,7 @@
                     }
                     else
                     {
+                        array.push(',\n', space, 'children: [');
                         any = 1;
                     }
 
@@ -132,7 +134,10 @@
             }
             while (node = node.nextSibling);
 
-            array.push('\n', space, ']');
+            if (any)
+            {
+                array.push('\n', space, ']');
+            }
         }
     }
 
