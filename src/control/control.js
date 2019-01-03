@@ -40,19 +40,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-
-    Class.ctor = function () {
-
-        var init;
-
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-    }
-
     
 
     // id
@@ -722,11 +709,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     
     this.__class_init = function (Class, base) {
 
+        Class.register = Class.superclass.register;
+
         this.$defaults = create(base.$defaults);
         this.$converter = create(base.$converter);
         this.renderer = create(base.renderer);
     }
 
 
+
+}, function Control() {
+ 
+    var init;
+
+    this.$storage = Object.create(this.$defaults);
+
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Control');

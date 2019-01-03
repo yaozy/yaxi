@@ -2,30 +2,9 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    var create = Object.create;
-
-
-
-
     yaxi.template(this, '<div class="yx-control yx-repeater"></div>');
 
     
-
-    Class.ctor = function () {
-
-        var init;
-        
-        this.$storage = create(this.$defaults);
-        this.__children = new yaxi.ControlCollection(this);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-    }
-
-
-
 
     // 模板
     this.$property('template', {
@@ -111,6 +90,14 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     }, false);
 
+    
+
+    // 子模型名称
+    this.$property('submodel', 'item', false);
+
+
+    // 子模型索引名
+    this.$property('submodelIndex', 'index', false);
 
 
 
@@ -234,5 +221,17 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
     
+
+}, function Repeater() {
+
+    var init;
+    
+    this.$storage = Object.create(this.$defaults);
+    this.__children = new yaxi.ControlCollection(this);
+
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Repeater');

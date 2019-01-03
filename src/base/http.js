@@ -274,5 +274,5 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-});
+}, function HTTP() {});
 

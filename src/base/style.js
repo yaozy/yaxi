@@ -2,21 +2,11 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
     
 
-    var create = Object.create;
-
-    var defaults = this.$defaults = create(null);
+    this.$defaults = Object.create(null);
     
 
 
-    Class.ctor = function (parent) {
-
-        this.parent = parent;
-        this.$storage = create(defaults);
-    }
-    
-
-
-    ;(function () {
+    (function () {
 
         var keys = {},
             style = document.createElement('div').style,
@@ -87,4 +77,8 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+}, function Style(control) {
+
+    this.parent = control;
+    this.$storage = Object.create(this.$defaults);
 });

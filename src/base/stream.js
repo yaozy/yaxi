@@ -101,23 +101,6 @@ yaxi.Stream = Object.extend(function (Class) {
 
 
 
-    Class.ctor = function (value) {
-
-        if (arguments.length > 0)
-        {
-            if (typeof value === 'function')
-            {
-                value(this);
-            }
-            else
-            {
-                this.__cache = [value];
-            }
-        }
-    }
-
-
-
     this.registry = function (fn) {
 
         var next = this.__next = new Class();
@@ -373,4 +356,17 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
     
+}, function Stream(value) {
+ 
+    if (arguments.length > 0)
+    {
+        if (typeof value === 'function')
+        {
+            value(this);
+        }
+        else
+        {
+            this.__cache = [value];
+        }
+    }
 });

@@ -150,8 +150,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
         {
             control.$push(value);
 
-            any = new yaxi.Event();
-            any.type = 'change';
+            any = new yaxi.Event('change');
             any.dom = control.$dom.firstChild;
             any.value = value;
 

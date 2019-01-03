@@ -13,27 +13,34 @@ document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 1
 
 
 // 对象继承实现
-Object.extend = function (fn) {
+Object.extend = function (fn, Class) {
 	
     var base = this.prototype || null,
         prototype = Object.create(base),
         ctor;
 
-    function Class() {
+    if (Class)
+    {
+        Class.ctor = Class;
+    }
+    else
+    {
+        Class = function Class() {
 
-		if (ctor)
-		{
-			ctor.apply(this, arguments);
-		}
-	}
+            if (ctor)
+            {
+                ctor.apply(this, arguments);
+            }
+        }
+
+        Class.ctor = this.ctor;
+    }
 	
-    prototype.constructor = Class;
-
-    Class.ctor = this.ctor;
-    Class.superclass = this;
-    Class.register = this.register;
+    Class.superclass = base ? this : null;
     Class.extend = this.extend || Object.extend;
     Class.prototype = prototype;
+
+    prototype.constructor = Class;
 
     // 类初始化
     if (prototype.__class_init)

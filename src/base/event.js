@@ -1,5 +1,5 @@
 
-yaxi.Event = Object.extend(function (Class) {
+yaxi.Event = Object.extend.call({}, function (Class) {
 
 
     
@@ -28,6 +28,9 @@ yaxi.Event = Object.extend(function (Class) {
     }
 
     
+}, function Event(type) {
+
+    this.type = type;
 });
 
 
@@ -166,7 +169,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 {
                     if (!event)
                     {
-                        event = new Event();
+                        event = new Event(type);
                         event.target = this;
 
                         if (payload)
@@ -297,11 +300,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 		if (control && start.longTap)
 		{
-            var e = new Event();
+            var e = new Event('longTap');
 
-            e.type = 'longTap';
             e.dom = start.dom;
-
             return control.trigger(e);
         }
     }
@@ -322,11 +323,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var e = new Event();
+        var e = new Event(event.type);
 
         touch = touch || event.changedTouches[0];
 
-        e.type = event.type;
         e.dom = event.target;
         e.start = start;
         e.original = event;
@@ -495,8 +495,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            e = new Event();
-            e.type = 'input';
+            e = new Event('input');
             e.dom = event.target;
             e.original = event;
             e.value = e.dom.value;
@@ -518,8 +517,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 fn.call(control, event.target);
             }
 
-            e = new Event();
-            e.type = 'change';
+            e = new Event('change');
             e.dom = event.target;
             e.value = e.dom.value;
 
@@ -553,8 +551,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(target))
         {
-            e = new Event();
-            e.type = 'focus';
+            e = new Event('focus');
             e.dom = event.target;
             e.original = event;
 
@@ -589,8 +586,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            e = new Event();
-            e.type = event.type;
+            e = new Event(event.type);
             e.dom = event.target;
             e.original = event;
 

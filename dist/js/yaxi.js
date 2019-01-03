@@ -13,27 +13,34 @@ document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 1
 
 
 // 对象继承实现
-Object.extend = function (fn) {
+Object.extend = function (fn, Class) {
 	
     var base = this.prototype || null,
         prototype = Object.create(base),
         ctor;
 
-    function Class() {
+    if (Class)
+    {
+        Class.ctor = Class;
+    }
+    else
+    {
+        Class = function Class() {
 
-		if (ctor)
-		{
-			ctor.apply(this, arguments);
-		}
-	}
+            if (ctor)
+            {
+                ctor.apply(this, arguments);
+            }
+        }
+
+        Class.ctor = this.ctor;
+    }
 	
-    prototype.constructor = Class;
-
-    Class.ctor = this.ctor;
-    Class.superclass = this;
-    Class.register = this.register;
+    Class.superclass = base ? this : null;
     Class.extend = this.extend || Object.extend;
     Class.prototype = prototype;
+
+    prototype.constructor = Class;
 
     // 类初始化
     if (prototype.__class_init)
@@ -826,7 +833,7 @@ yaxi.__extend_properties = function (get, set) {
 
 
 
-yaxi.Event = Object.extend(function (Class) {
+yaxi.Event = Object.extend.call({}, function (Class) {
 
 
     
@@ -855,6 +862,9 @@ yaxi.Event = Object.extend(function (Class) {
     }
 
     
+}, function Event(type) {
+
+    this.type = type;
 });
 
 
@@ -993,7 +1003,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 {
                     if (!event)
                     {
-                        event = new Event();
+                        event = new Event(type);
                         event.target = this;
 
                         if (payload)
@@ -1124,11 +1134,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 		if (control && start.longTap)
 		{
-            var e = new Event();
+            var e = new Event('longTap');
 
-            e.type = 'longTap';
             e.dom = start.dom;
-
             return control.trigger(e);
         }
     }
@@ -1149,11 +1157,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     function touchEvent(event, touch) {
 
-        var e = new Event();
+        var e = new Event(event.type);
 
         touch = touch || event.changedTouches[0];
 
-        e.type = event.type;
         e.dom = event.target;
         e.start = start;
         e.original = event;
@@ -1322,8 +1329,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            e = new Event();
-            e.type = 'input';
+            e = new Event('input');
             e.dom = event.target;
             e.original = event;
             e.value = e.dom.value;
@@ -1345,8 +1351,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 fn.call(control, event.target);
             }
 
-            e = new Event();
-            e.type = 'change';
+            e = new Event('change');
             e.dom = event.target;
             e.value = e.dom.value;
 
@@ -1380,8 +1385,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(target))
         {
-            e = new Event();
-            e.type = 'focus';
+            e = new Event('focus');
             e.dom = event.target;
             e.original = event;
 
@@ -1416,8 +1420,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            e = new Event();
-            e.type = event.type;
+            e = new Event(event.type);
             e.dom = event.target;
             e.original = event;
 
@@ -1555,15 +1558,8 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     
 
 
-    Class.ctor = function () {
-
-        this.$storage = create(this.$defaults);
-    }
-
-
-
     // 赋值
-    this.assign = function (values) {
+    this.assign = function (values, model) {
 
         var converters = this.$converter,
             converter,
@@ -1585,7 +1581,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 }
                 else // 自定义转换器
                 {
-                    converter.fn.call(this, values[name]);
+                    converter.fn.call(this, values[name], model);
                 }
             }
             else if (converter !== false)
@@ -1672,11 +1668,9 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     // 转换bindings
     this.$converter.bindings = {
 
-        fn: function (values) {
+        fn: function (values, model) {
 
-            var model;
-
-            if (values && (model = this.model = this.__find_model()))
+            if (values && (model || (model = this.__find_model())))
             {
                 yaxi.__bind_model.call(model, this, values);
             }
@@ -1827,6 +1821,9 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
+}, function Observe() {
+ 
+    this.$storage = Object.create(this.$defaults);
 });
 
 
@@ -1836,21 +1833,11 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
     
 
-    var create = Object.create;
-
-    var defaults = this.$defaults = create(null);
+    this.$defaults = Object.create(null);
     
 
 
-    Class.ctor = function (parent) {
-
-        this.parent = parent;
-        this.$storage = create(defaults);
-    }
-    
-
-
-    ;(function () {
+    (function () {
 
         var keys = {},
             style = document.createElement('div').style,
@@ -1921,6 +1908,10 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+}, function Style(control) {
+
+    this.parent = control;
+    this.$storage = Object.create(this.$defaults);
 });
 
 
@@ -2893,23 +2884,6 @@ yaxi.Stream = Object.extend(function (Class) {
 
 
 
-    Class.ctor = function (value) {
-
-        if (arguments.length > 0)
-        {
-            if (typeof value === 'function')
-            {
-                value(this);
-            }
-            else
-            {
-                this.__cache = [value];
-            }
-        }
-    }
-
-
-
     this.registry = function (fn) {
 
         var next = this.__next = new Class();
@@ -3165,6 +3139,19 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
     
+}, function Stream(value) {
+ 
+    if (arguments.length > 0)
+    {
+        if (typeof value === 'function')
+        {
+            value(this);
+        }
+        else
+        {
+            this.__cache = [value];
+        }
+    }
 });
 
 
@@ -3446,7 +3433,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-});
+}, function HTTP() {});
 
 
 
@@ -4484,19 +4471,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-
-    Class.ctor = function () {
-
-        var init;
-
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-    }
-
     
 
     // id
@@ -5166,12 +5140,25 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     
     this.__class_init = function (Class, base) {
 
+        Class.register = Class.superclass.register;
+
         this.$defaults = create(base.$defaults);
         this.$converter = create(base.$converter);
         this.renderer = create(base.renderer);
     }
 
 
+
+}, function Control() {
+ 
+    var init;
+
+    this.$storage = Object.create(this.$defaults);
+
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Control');
 
@@ -5713,28 +5700,9 @@ yaxi.__extend_pulldown = function () {
 yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     
-    
-    var create = Object.create;
-
-    
 
     yaxi.template(this, '<div class="yx-control yx-panel"></div>');
 
-
-
-    
-    Class.ctor = function () {
- 
-        var init;
-        
-        this.$storage = create(this.$defaults);
-        this.__children = new yaxi.ControlCollection(this);
-        
-		if (init = this.init)
-		{
-			init.apply(this, arguments);
-		}
-    }
 
 
 
@@ -5764,11 +5732,11 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     this.$converter.children = {
         
-        fn: function (values) {
+        fn: function (values, model) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.assign(values, model);
             }
         }
     };
@@ -5789,6 +5757,18 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
 
+
+}, function Panel() {
+ 
+    var init;
+    
+    this.$storage = Object.create(this.$defaults);
+    this.__children = new yaxi.ControlCollection(this);
+    
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Panel');
 
@@ -5906,20 +5886,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
     var patch = yaxi.__add_patch;
-
-
-
-
-    Class.ctor = function (owner, values) {
-
-        this.owner = owner;
-
-        if (values && values.length > 0)
-        {
-            this.assign(values);
-        }
-    }
-
 
 
 
@@ -6407,6 +6373,9 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
+}, function ControlCollection(owner) {
+
+    this.owner = owner;
 });
 
 
@@ -7492,30 +7461,9 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    var create = Object.create;
-
-
-
-
     yaxi.template(this, '<div class="yx-control yx-repeater"></div>');
 
     
-
-    Class.ctor = function () {
-
-        var init;
-        
-        this.$storage = create(this.$defaults);
-        this.__children = new yaxi.ControlCollection(this);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-    }
-
-
-
 
     // 模板
     this.$property('template', {
@@ -7724,6 +7672,18 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
     
+
+}, function Repeater() {
+
+    var init;
+    
+    this.$storage = Object.create(this.$defaults);
+    this.__children = new yaxi.ControlCollection(this);
+
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Repeater');
 
@@ -8484,8 +8444,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
         {
             control.$push(value);
 
-            any = new yaxi.Event();
-            any.type = 'change';
+            any = new yaxi.Event('change');
             any.dom = control.$dom.firstChild;
             any.value = value;
 
@@ -8736,10 +8695,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	var create = Object.create;
-
-
-
 	Class.all = function () {
 
 		var list = [],
@@ -8811,23 +8766,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	Class.ctor = function () {
-
-		var init;
-
-		this.$storage = create(this.$defaults);
-
-		this.key = 'page';
-		this.__children = [];
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-	}
-
-
-
 	// 是否自动销毁
 	this.$property('autoDestroy', true, false);
 
@@ -8838,7 +8776,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__header || (this.__header = find(this.__children, 'page-header'));
+			return this.__header || (this.__header = find(this.__children, 'Header'));
 		}
 	});
 
@@ -8848,7 +8786,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__content || (this.__content = find(this.__children, 'page-content'));
+			return this.__content || (this.__content = find(this.__children, 'Content'));
 		}
 	});
 
@@ -8858,16 +8796,16 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__footer || (this.__footer = find(this.__children, 'page-footer'));
+			return this.__footer || (this.__footer = find(this.__children, 'Footer'));
 		}
 	});
 
 
-	function find(children, key) {
+	function find(children, name) {
 
 		for (var i = children.length; i--;)
 		{
-			if (children[i].key === key)
+			if (children[i].typeName === name)
 			{
 				return children[i];
 			}
@@ -9161,6 +9099,20 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 
     
+}, function Page() {
+
+	var init;
+
+	this.$storage = Object.create(this.$defaults);
+
+	this.key = 'page';
+	this.__children = [];
+
+	if (init = this.init)
+	{
+		init.apply(this, arguments);
+	}
+
 }).register('Page');
 
 
@@ -10248,7 +10200,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.assign(values, model);
             }
         }
     };

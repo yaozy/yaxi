@@ -2,10 +2,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	var create = Object.create;
-
-
-
 	Class.all = function () {
 
 		var list = [],
@@ -77,23 +73,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
-	Class.ctor = function () {
-
-		var init;
-
-		this.$storage = create(this.$defaults);
-
-		this.key = 'page';
-		this.__children = [];
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-	}
-
-
-
 	// 是否自动销毁
 	this.$property('autoDestroy', true, false);
 
@@ -104,7 +83,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__header || (this.__header = find(this.__children, 'page-header'));
+			return this.__header || (this.__header = find(this.__children, 'Header'));
 		}
 	});
 
@@ -114,7 +93,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__content || (this.__content = find(this.__children, 'page-content'));
+			return this.__content || (this.__content = find(this.__children, 'Content'));
 		}
 	});
 
@@ -124,16 +103,16 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		get: function () {
 
-			return this.__footer || (this.__footer = find(this.__children, 'page-footer'));
+			return this.__footer || (this.__footer = find(this.__children, 'Footer'));
 		}
 	});
 
 
-	function find(children, key) {
+	function find(children, name) {
 
 		for (var i = children.length; i--;)
 		{
-			if (children[i].key === key)
+			if (children[i].typeName === name)
 			{
 				return children[i];
 			}
@@ -427,4 +406,18 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 
     
+}, function Page() {
+
+	var init;
+
+	this.$storage = Object.create(this.$defaults);
+
+	this.key = 'page';
+	this.__children = [];
+
+	if (init = this.init)
+	{
+		init.apply(this, arguments);
+	}
+
 }).register('Page');

@@ -104,7 +104,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.assign(values, model);
             }
         }
     };

@@ -1,28 +1,9 @@
 yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     
-    
-    var create = Object.create;
-
-    
 
     yaxi.template(this, '<div class="yx-control yx-panel"></div>');
 
-
-
-    
-    Class.ctor = function () {
- 
-        var init;
-        
-        this.$storage = create(this.$defaults);
-        this.__children = new yaxi.ControlCollection(this);
-        
-		if (init = this.init)
-		{
-			init.apply(this, arguments);
-		}
-    }
 
 
 
@@ -52,11 +33,11 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     this.$converter.children = {
         
-        fn: function (values) {
+        fn: function (values, model) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.assign(values, model);
             }
         }
     };
@@ -77,6 +58,18 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
 
+
+}, function Panel() {
+ 
+    var init;
+    
+    this.$storage = Object.create(this.$defaults);
+    this.__children = new yaxi.ControlCollection(this);
+    
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
 
 }).register('Panel');
 

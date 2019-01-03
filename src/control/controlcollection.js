@@ -13,20 +13,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-
-    Class.ctor = function (owner, values) {
-
-        this.owner = owner;
-
-        if (values && values.length > 0)
-        {
-            this.assign(values);
-        }
-    }
-
-
-
-
     this.length = 0;
 
 
@@ -511,4 +497,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
+}, function ControlCollection(owner) {
+
+    this.owner = owner;
 });
