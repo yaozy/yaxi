@@ -253,10 +253,10 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 	this.open = function () {
 				
-		var opener = Class.current || null;
-		
 		if (this.onopening() !== false)
 		{
+			var opener = Class.current || null;
+			
 			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
@@ -290,7 +290,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			this.onclosed(closeType);
 			this.opener = null;
 			
-			if (dom.parentNode)
+			if (dom && dom.parentNode)
 			{
 				dom.parentNode.removeChild(dom);
 			}

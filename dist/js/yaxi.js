@@ -1670,7 +1670,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
         fn: function (values, model) {
 
-            if (values && (model || (model = this.__find_model())))
+            if (values && (model || (model = this.model = this.__find_model())))
             {
                 yaxi.__bind_model.call(model, this, values);
             }
@@ -7549,6 +7549,14 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     }, false);
 
+    
+
+    // 子模型名称
+    this.$property('submodel', 'item', false);
+
+
+    // 子模型索引名
+    this.$property('submodelIndex', 'index', false);
 
 
 
@@ -8946,10 +8954,10 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 	this.open = function () {
 				
-		var opener = Class.current || null;
-		
 		if (this.onopening() !== false)
 		{
+			var opener = Class.current || null;
+			
 			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
@@ -8983,7 +8991,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			this.onclosed(closeType);
 			this.opener = null;
 			
-			if (dom.parentNode)
+			if (dom && dom.parentNode)
 			{
 				dom.parentNode.removeChild(dom);
 			}
