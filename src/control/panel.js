@@ -33,11 +33,11 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
     this.$converter.children = {
         
-        fn: function (values, model) {
+        fn: function (values) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values, model);
+                this.__children.assign(values);
             }
         }
     };

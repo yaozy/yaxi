@@ -7,7 +7,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     // 赋值
-    this.assign = function (values, model) {
+    this.assign = function (values) {
 
         var converters = this.$converter,
             converter,
@@ -29,7 +29,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 }
                 else // 自定义转换器
                 {
-                    converter.fn.call(this, values[name], model);
+                    converter.fn.call(this, values[name]);
                 }
             }
             else if (converter !== false)
@@ -116,9 +116,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     // 转换bindings
     this.$converter.bindings = {
 
-        fn: function (values, model) {
+        fn: function (values) {
 
-            if (values && (model || (model = this.model = this.__find_model())))
+            var model;
+
+            if (values && (model = this.model || (this.model = this.__find_model())))
             {
                 yaxi.__bind_model.call(model, this, values);
             }
