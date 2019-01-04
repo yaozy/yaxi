@@ -1099,6 +1099,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
     // 上次tap事件触发时的时间
     var tapTime = new Date();
 
+
+    var bind = document.addEventListener.bind(document);
+
  
 
 
@@ -1195,7 +1198,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
 
 
-	document.addEventListener('touchstart', function (event) {
+	bind('touchstart', function (event) {
 		
         var control;
 
@@ -1228,7 +1231,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchmove', function (event) {
+	bind('touchmove', function (event) {
         
         var control;
 
@@ -1258,7 +1261,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchend', function (event) {
+	bind('touchend', function (event) {
         
         var control = start.control,
             any;
@@ -1303,7 +1306,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchcancel', function (event) {
+	bind('touchcancel', function (event) {
         
         var control;
 
@@ -1323,7 +1326,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    document.addEventListener('input', function (event) {
+    bind('input', function (event) {
 
         var control, e;
 
@@ -1340,7 +1343,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
 
-    document.addEventListener('change', function (event) {
+    bind('change', function (event) {
 
         var control, fn, e;
 
@@ -1363,14 +1366,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     
-    document.addEventListener('keydown', listener, true);
+    bind('keydown', listener, true);
 
-    document.addEventListener('keypress', listener, true);
+    bind('keypress', listener, true);
 
-    document.addEventListener('keyup', listener, true);
+    bind('keyup', listener, true);
 
 
-    document.addEventListener('focus', function (event) {
+
+    bind('mousedown', listener, true);
+
+    bind('mousemove', listener, true);
+
+    bind('mouseup', listener, true);
+
+    bind('click', listener, true);
+
+    bind('dblclick', listener, true);
+
+
+
+    bind('focus', function (event) {
      
         var target = event.target,
             control,
@@ -1395,22 +1411,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
     
-    document.addEventListener('blur', listener, true);
+    bind('blur', listener, true);
 
 
-    document.addEventListener('scroll', listener, true);
-
-
-    window.addEventListener('resize', function () {
-
-        var dom = document.activeElement;
-
-        // 打开输入法时把焦点控件移动可视区
-        if (dom && this.innerHeight / this.innerWidth < 1.2)
-        {
-            dom.scrollIntoViewIfNeeded();
-        }
-    });
+    bind('scroll', listener, true);
 
 
 
@@ -1430,6 +1434,18 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     
     
+    window.addEventListener('resize', function () {
+
+        var dom = document.activeElement;
+
+        // 打开输入法时把焦点控件移动可视区
+        if (dom && this.innerHeight / this.innerWidth < 1.2)
+        {
+            dom.scrollIntoViewIfNeeded();
+        }
+    });
+
+
 
 })();
 
@@ -3457,6 +3473,9 @@ window.require || (function () {
     // 相对url缓存
     var urls = Object.create(null);
 
+    // 扩展名缓存
+    var exts = Object.create(null);
+
 
 
 
@@ -3464,7 +3483,7 @@ window.require || (function () {
 
         function require(url, flags) {
 
-            return global.load(require.baseURL, url, flags);
+            return yaxi.loadModule(require.baseURL, url, flags);
         }
 
         require.baseURL = base;
@@ -3477,7 +3496,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new global.Thread(global.baseURL, this.baseURL, fn);
+        return new yaxi.Thread(global.baseURL, this.baseURL, fn);
     }
 
 
@@ -3487,8 +3506,9 @@ window.require || (function () {
 		
 		switch (ext)
 		{
-			case '.css':
-                return loadCss(text);
+            case '.css':
+                loadCss(text);
+                return { exports: text };
 
 			case '.js':
                 return loadJs(text, url, flags);
@@ -3543,9 +3563,15 @@ window.require || (function () {
 
 	function loadCss(text) {
 
-        var dom = document.createElement('style');  
+        var dom = document.createElement('style'),
+            color = yaxi.color;  
 			
         dom.setAttribute('type', 'text/css');  
+
+        text = text.replace(/c-([\w-]+)/g, function (text, key) {
+
+            return color[key] || text;
+        });
     
         if (dom.styleSheet) // IE  
         {
@@ -3557,8 +3583,6 @@ window.require || (function () {
         }
     
         document.head.appendChild(dom);
-
-        return { exports: text };
 	}
 
 
@@ -3606,7 +3630,7 @@ window.require || (function () {
     }
 
 
-    function absolute(url) {
+    function relative(url) {
 
         var last;
 
@@ -3626,7 +3650,7 @@ window.require || (function () {
     }
 
 
-    global.absoluteUrl = function (base, url) {
+    function absolute(base, url) {
 
         // 相对根目录
         if (url[0] === '/')
@@ -3638,26 +3662,37 @@ window.require || (function () {
         // 相对当前目录
         url = (base[base.length - 1] === '/' ? base : base + '/') + url;
 
-        return urls[url] || (urls[url] = absolute(url));
+        return urls[url] || (urls[url] = relative(url));
     }
 
 
-    global.load = function (base, url, flags) {
 
-        var ext = url.match(/\.\w+$/),
+    yaxi.absoluteUrl = absolute;
+
+    
+    yaxi.loadModule = function (base, url, flags) {
+
+        var ext = exts[url],
             any;
 
         if (ext)
         {
-            ext = ext[0].toLowerCase();
+            url = ext[1];
+            ext = ext[0];
         }
         else
         {
-            url += '.js';
-            ext = '.js';
+            if (ext = url.match(/\.\w+$/))
+            {
+                exts[url] = [ext = ext[0].toLowerCase(), url];
+            }
+            else
+            {
+                exts[url] = [ext = '.js', url += '.js'];
+            }
         }
 
-        url = global.absoluteUrl(base, url);
+        url = absolute(base, url);
 
         if (any = modules[url])
         {
@@ -3678,7 +3713,7 @@ window.require || (function () {
     }
 
     
-    global.switchLanguage = function (language) {
+    yaxi.switchLanguage = function (language) {
 
         yaxi.language = language;
 
@@ -3723,6 +3758,7 @@ window.require || (function () {
     function parse(array, node, space) {
 
         var attributes = node.attributes,
+            tagName = node.tagName,
             item,
             name,
             value,
@@ -3731,21 +3767,23 @@ window.require || (function () {
             events,
             any;
 
-        switch (name = node.tagName)
+        switch (tagName)
         {
+            case 'R':
             case 'Require':
-                array.push(space, 'Class: require.load(__b, "', node.getAttribute('src'), '")');
+                array.push(space, 'Class: yaxi.loadModule(__b, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
+            case 'HTML':
             case 'HtmlControl':
-                array.push(space, 'Class: __k.', name, ',\n');
+                array.push(space, 'Class: __k.HtmlControl,\n');
                 array.push(space, 'html: \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
                 node = null;
                 break;
 
             default:
-                array.push(space, 'Class: __k.', name);
+                array.push(space, 'Class: __k.', tagName);
                 break;
         }
 
@@ -3877,35 +3915,65 @@ window.require || (function () {
             }
         }
 
-        if (node = node && node.firstChild)
+        if (node && (node = node.firstChild))
         {
-            any = 0;
-
-            do
+            if (tagName === 'Repeater')
             {
-                if (node.nodeType === 1)
+                parseTemplate(array, node, space);
+            }
+            else
+            {
+                parseChildren(array, node, space);
+            }
+        }
+    }
+
+
+    function parseTemplate(array, node, space) {
+
+        do
+        {
+            if (node.nodeType === 1)
+            {
+                array.push(',\n', space, '\ttemplate: {\n');
+                parse(array, node, space + '\t\t'),
+                array.push('\n', space, '\t}');
+
+                return;
+            }
+        }
+        while (node = node.nextSibling);
+    }
+
+
+    function parseChildren(array, node, space) {
+
+        var flag;
+
+        do
+        {
+            if (node.nodeType === 1)
+            {
+                if (flag)
                 {
-                    if (any)
-                    {
-                        array.push(',');
-                    }
-                    else
-                    {
-                        array.push(',\n', space, 'children: [');
-                        any = 1;
-                    }
-
-                    array.push('\n', space, '\t{\n');
-                    parse(array, node, space + '\t\t'),
-                    array.push('\n', space, '\t}');
+                    array.push(',');
                 }
-            }
-            while (node = node.nextSibling);
+                else
+                {
+                    array.push(',\n', space, 'children: [');
+                    flag = 1;
+                }
 
-            if (any)
-            {
-                array.push('\n', space, ']');
+                array.push('\n', space, '\t{\n');
+                parse(array, node, space + '\t\t'),
+                array.push('\n', space, '\t}');
             }
+        }
+        while (node = node.nextSibling);
+
+        if (flag)
+        {
+            array.push('\n', space, ']');
         }
     }
 
@@ -4028,10 +4096,10 @@ window.require || (function () {
 
 
 
-;(function () {
+yaxi.Thread = (function () {
 
 
-    
+
     var seed = 1;
 
 
@@ -4039,74 +4107,35 @@ window.require || (function () {
     var inject = '' + function () {
 
 
-        self.addEventListener('message', function (event) {
-            
-            var target = this,
-                data = event.data,
-                uuid = data.uuid,
-                method = data.method,
-                index = 0,
-                list = method.split('.'),
-                name,
-                fn;
-
-            try
-            {
-                name = list.pop();
-
-                while (target && (fn = list[index++]))
-                {
-                    target = target[fn];
-                }
-
-                if (target && (fn = target[name]))
-                {
-                    list = data.args || [];
-
-                    if (data.async)
-                    {
-                        list.push(function (value, e) {
-
-                            reply(uuid, value, e);
-                        });
-
-                        fn.apply(target, list);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            reply(uuid, fn.apply(target, list));
-                        }
-                        catch (e)
-                        {
-                            reply(uuid, null, e);
-                        }
-                    }
-                }
-                else
-                {
-                    reply(uuid, null, 'not support method "' + method + '"!');
-                }
-            }
-            catch (e)
-            {
-                reply(uuid, null, e);
-            }
-        });
-
-        
-        function reply(uuid, value, e) {
-
-            self.postMessage(JSON.stringify([uuid, value, e]));
-        }
-
-
-
         var global = factory(base);
 
         var modules = global.modules = Object.create(null);
 
+        // 相对url缓存
+        var urls = Object.create(null);
+
+        // 扩展名缓存
+        var exts = Object.create(null);
+
+
+        function relative(url) {
+
+            var last;
+    
+            while (true)
+            {
+                last = url.replace(/[^/]*\/\.\.\//, '');
+                
+                if (last === url)
+                {
+                    break;
+                }
+                
+                url = last;
+            }
+            
+            return url.replace(/[.]+\//g, '');
+        }
 
 
         function absolute(base, url) {
@@ -4119,20 +4148,41 @@ window.require || (function () {
     
             // 相对当前目录
             url = (base[base.length - 1] === '/' ? base : base + '/') + url;
-            
-            while (true)
+
+            return urls[url] || (urls[url] = relative(url));
+        }
+
+
+        function load(base, url, flags) {
+
+            var ext = exts[url],
+                any;
+
+            if (ext)
             {
-                base = url.replace(/[^/]*\/\.\.\//, '');
-                
-                if (base === url)
-                {
-                    break;
-                }
-                
-                url = base;
+                url = ext[1];
+                ext = ext[0];
             }
-            
-            return url.replace(/[.]+\//g, '');
+            else
+            {
+                if (ext = url.match(/\.\w+$/))
+                {
+                    exts[url] = [ext = ext[0].toLowerCase(), url];
+                }
+                else
+                {
+                    exts[url] = [ext = '.js', url += '.js'];
+                }
+            }
+
+            url = absolute(base, url);
+
+            if (any = modules[url])
+            {
+                return any.exports;
+            }
+
+            return (modules[url] = execute(url, ext, flags)).exports;
         }
 
 
@@ -4215,7 +4265,7 @@ window.require || (function () {
 
             function require(url, flags) {
     
-                return global.load(require.baseURL, url, flags);
+                return load(require.baseURL, url, flags);
             }
     
             require.baseURL = base;
@@ -4223,30 +4273,68 @@ window.require || (function () {
         }
 
 
-        global.load = function (base, url, flags) {
+        
+        function reply(uuid, value, e) {
 
-            var ext = url.match(/\.\w+$/),
-                any;
-
-            if (ext)
-            {
-                ext = ext[0].toLowerCase();
-            }
-            else
-            {
-                url += '.js';
-                ext = '.js';
-            }
-
-            url = absolute(base, url);
-
-            if (any = modules[url])
-            {
-                return any.exports;
-            }
-
-            return (modules[url] = execute(url, ext, flags)).exports;
+            self.postMessage(JSON.stringify([uuid, value, e]));
         }
+        
+
+        self.addEventListener('message', function (event) {
+            
+            var target = this,
+                data = event.data,
+                uuid = data.uuid,
+                method = data.method,
+                index = 0,
+                list = method.split('.'),
+                name,
+                fn;
+
+            try
+            {
+                name = list.pop();
+
+                while (target && (fn = list[index++]))
+                {
+                    target = target[fn];
+                }
+
+                if (target && (fn = target[name]))
+                {
+                    list = data.args || [];
+
+                    if (data.async)
+                    {
+                        list.push(function (value, e) {
+
+                            reply(uuid, value, e);
+                        });
+
+                        fn.apply(target, list);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            reply(uuid, fn.apply(target, list));
+                        }
+                        catch (e)
+                        {
+                            reply(uuid, null, e);
+                        }
+                    }
+                }
+                else
+                {
+                    reply(uuid, null, 'not support method "' + method + '"!');
+                }
+            }
+            catch (e)
+            {
+                reply(uuid, null, e);
+            }
+        });
 
 
         return global;
@@ -4338,7 +4426,7 @@ window.require || (function () {
 
 
 
-    require.Thread = Thread;
+    return Thread;
     
 
 
@@ -4762,19 +4850,20 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         switch (key)
         {
             case '@':
-                return this.key === value;
+                return this.$storage.key === value;
 
-            case '&':
+            case '':
                 return this instanceof (classes[value] || Boolean);
 
             case '#':
-                return this.id === value;
+                return this.$storage.id === value;
 
             case '.':
-                return (this.$className + (this.$storage.className || '') + ' ').indexOf(value + ' ') >= 0;
-        }
+                return (this.$className + ' ' + (this.$storage.className || '') + ' ').indexOf(value + ' ') >= 0;
 
-        return false;
+            default:
+                return this[key] === value;
+        }
     }
 
 
@@ -5215,7 +5304,7 @@ yaxi.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = require.load(this.baseURL, url),
+                var Class = yaxi.loadModule(this.baseURL, url),
                     args = control.args;
 
                 if (args && args.length > 0)
@@ -7158,47 +7247,46 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
 
     function parse(selector) {
 
-        var tokens = selector.match(/\"[^"]*\"|\<{1,2}|\>{1,2}|[#.@=\[\]]|[^<>#.@=\[\]\s]+/g),
+        var tokens = selector.match(/\<{1,2}|\>{1,2}|[#.@=]|\w+/g),
             index = 0,
             token,
-            any;
+            key;
 
         while (token = tokens[index++])
         {
-            switch (token)
+            if ((key = token[0]) === '<' || key === '>')
             {
-                case '<':
-                case '<<':
-                case '>':
-                case '>>':
-                    if (token = tokens[index++])
+                if (token = tokens[index++])
+                {
+                    switch (token)
                     {
-                        if ('#.@'.indexOf(token[0]) < 0)
-                        {
-                            tokens.splice(index - 1, 0, '&');
-                        }
-                        
-                        if (token = tokens[index++])
-                        {
-                            if (/\W/.test(token[0]))
-                            {
-                                raise(tokens, index);
-                            }
-                        }
-                        else
-                        {
-                            raise(tokens, index);
-                        }
-                    }
-                    else
-                    {
-                        raise(tokens, index);
-                    }
-                    break;
+                        case '@':
+                        case '#':
+                        case '.':
+                            index++;
+                            break;
 
-                default:
+                        default:
+                            if (tokens[index] === '=')
+                            {
+                                tokens.splice(index++, 1);
+                            }
+                            else
+                            {
+                                tokens.splice(index - 1, 0, '');
+                                index++;
+                            }
+                            break;
+                    }
+                }
+                else
+                {
                     raise(tokens, index);
-                    break;
+                }
+            }
+            else
+            {
+                raise(tokens, index);
             }
         }
 
@@ -7222,22 +7310,14 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
     
     this.find = function (selector) {
     
-        var key = selector[0];
-
-        switch (key)
+        if (selector = cache[selector] || parse(selector))
         {
-            case '@':
-            case '#':
-            case '.':
-                selector = selector.substring(1);
-                break;
-        }
-        
-        for (var i = this.length; i--;)
-        {
-            if (!this[i].__find_value(key, selector))
+            for (var i = this.length; i--;)
             {
-                this.splice(i, 1);
+                if (!this[i].__find_value(key, selector))
+                {
+                    this.splice(i, 1);
+                }
             }
         }
 
@@ -7786,7 +7866,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = require.load(base, url),
+        var Class = yaxi.loadModule(base, url),
             control,
             style;
 

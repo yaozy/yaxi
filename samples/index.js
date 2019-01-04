@@ -12,6 +12,7 @@ module.exports = yaxi.Page.extend(function () {
                         Class: yaxi.BackButton
                     },
                     {
+                        Class: yaxi.Text,
                         text: 'samples'
                     }
                 ]

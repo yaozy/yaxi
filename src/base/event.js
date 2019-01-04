@@ -265,6 +265,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
     // 上次tap事件触发时的时间
     var tapTime = new Date();
 
+
+    var bind = document.addEventListener.bind(document);
+
  
 
 
@@ -361,7 +364,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
 
 
-	document.addEventListener('touchstart', function (event) {
+	bind('touchstart', function (event) {
 		
         var control;
 
@@ -394,7 +397,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchmove', function (event) {
+	bind('touchmove', function (event) {
         
         var control;
 
@@ -424,7 +427,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchend', function (event) {
+	bind('touchend', function (event) {
         
         var control = start.control,
             any;
@@ -469,7 +472,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	}, true);
 
 
-	document.addEventListener('touchcancel', function (event) {
+	bind('touchcancel', function (event) {
         
         var control;
 
@@ -489,7 +492,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    document.addEventListener('input', function (event) {
+    bind('input', function (event) {
 
         var control, e;
 
@@ -506,7 +509,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
 
-    document.addEventListener('change', function (event) {
+    bind('change', function (event) {
 
         var control, fn, e;
 
@@ -529,14 +532,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     
-    document.addEventListener('keydown', listener, true);
+    bind('keydown', listener, true);
 
-    document.addEventListener('keypress', listener, true);
+    bind('keypress', listener, true);
 
-    document.addEventListener('keyup', listener, true);
+    bind('keyup', listener, true);
 
 
-    document.addEventListener('focus', function (event) {
+
+    bind('mousedown', listener, true);
+
+    bind('mousemove', listener, true);
+
+    bind('mouseup', listener, true);
+
+    bind('click', listener, true);
+
+    bind('dblclick', listener, true);
+
+
+
+    bind('focus', function (event) {
      
         var target = event.target,
             control,
@@ -561,22 +577,10 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
     
-    document.addEventListener('blur', listener, true);
+    bind('blur', listener, true);
 
 
-    document.addEventListener('scroll', listener, true);
-
-
-    window.addEventListener('resize', function () {
-
-        var dom = document.activeElement;
-
-        // 打开输入法时把焦点控件移动可视区
-        if (dom && this.innerHeight / this.innerWidth < 1.2)
-        {
-            dom.scrollIntoViewIfNeeded();
-        }
-    });
+    bind('scroll', listener, true);
 
 
 
@@ -596,5 +600,17 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     
     
+    window.addEventListener('resize', function () {
+
+        var dom = document.activeElement;
+
+        // 打开输入法时把焦点控件移动可视区
+        if (dom && this.innerHeight / this.innerWidth < 1.2)
+        {
+            dom.scrollIntoViewIfNeeded();
+        }
+    });
+
+
 
 })();

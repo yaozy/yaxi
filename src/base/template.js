@@ -12,6 +12,7 @@
     function parse(array, node, space) {
 
         var attributes = node.attributes,
+            tagName = node.tagName,
             item,
             name,
             value,
@@ -20,21 +21,23 @@
             events,
             any;
 
-        switch (name = node.tagName)
+        switch (tagName)
         {
+            case 'R':
             case 'Require':
-                array.push(space, 'Class: require.load(__b, "', node.getAttribute('src'), '")');
+                array.push(space, 'Class: yaxi.loadModule(__b, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
+            case 'HTML':
             case 'HtmlControl':
-                array.push(space, 'Class: __k.', name, ',\n');
+                array.push(space, 'Class: __k.HtmlControl,\n');
                 array.push(space, 'html: \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
                 node = null;
                 break;
 
             default:
-                array.push(space, 'Class: __k.', name);
+                array.push(space, 'Class: __k.', tagName);
                 break;
         }
 
@@ -166,35 +169,65 @@
             }
         }
 
-        if (node = node && node.firstChild)
+        if (node && (node = node.firstChild))
         {
-            any = 0;
-
-            do
+            if (tagName === 'Repeater')
             {
-                if (node.nodeType === 1)
+                parseTemplate(array, node, space);
+            }
+            else
+            {
+                parseChildren(array, node, space);
+            }
+        }
+    }
+
+
+    function parseTemplate(array, node, space) {
+
+        do
+        {
+            if (node.nodeType === 1)
+            {
+                array.push(',\n', space, '\ttemplate: {\n');
+                parse(array, node, space + '\t\t'),
+                array.push('\n', space, '\t}');
+
+                return;
+            }
+        }
+        while (node = node.nextSibling);
+    }
+
+
+    function parseChildren(array, node, space) {
+
+        var flag;
+
+        do
+        {
+            if (node.nodeType === 1)
+            {
+                if (flag)
                 {
-                    if (any)
-                    {
-                        array.push(',');
-                    }
-                    else
-                    {
-                        array.push(',\n', space, 'children: [');
-                        any = 1;
-                    }
-
-                    array.push('\n', space, '\t{\n');
-                    parse(array, node, space + '\t\t'),
-                    array.push('\n', space, '\t}');
+                    array.push(',');
                 }
-            }
-            while (node = node.nextSibling);
+                else
+                {
+                    array.push(',\n', space, 'children: [');
+                    flag = 1;
+                }
 
-            if (any)
-            {
-                array.push('\n', space, ']');
+                array.push('\n', space, '\t{\n');
+                parse(array, node, space + '\t\t'),
+                array.push('\n', space, '\t}');
             }
+        }
+        while (node = node.nextSibling);
+
+        if (flag)
+        {
+            array.push('\n', space, ']');
         }
     }
 

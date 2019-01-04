@@ -14,6 +14,9 @@ window.require || (function () {
     // 相对url缓存
     var urls = Object.create(null);
 
+    // 扩展名缓存
+    var exts = Object.create(null);
+
 
 
 
@@ -21,7 +24,7 @@ window.require || (function () {
 
         function require(url, flags) {
 
-            return global.load(require.baseURL, url, flags);
+            return yaxi.loadModule(require.baseURL, url, flags);
         }
 
         require.baseURL = base;
@@ -34,7 +37,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new global.Thread(global.baseURL, this.baseURL, fn);
+        return new yaxi.Thread(global.baseURL, this.baseURL, fn);
     }
 
 
@@ -44,8 +47,9 @@ window.require || (function () {
 		
 		switch (ext)
 		{
-			case '.css':
-                return loadCss(text);
+            case '.css':
+                loadCss(text);
+                return { exports: text };
 
 			case '.js':
                 return loadJs(text, url, flags);
@@ -100,9 +104,15 @@ window.require || (function () {
 
 	function loadCss(text) {
 
-        var dom = document.createElement('style');  
+        var dom = document.createElement('style'),
+            color = yaxi.color;  
 			
         dom.setAttribute('type', 'text/css');  
+
+        text = text.replace(/c-([\w-]+)/g, function (text, key) {
+
+            return color[key] || text;
+        });
     
         if (dom.styleSheet) // IE  
         {
@@ -114,8 +124,6 @@ window.require || (function () {
         }
     
         document.head.appendChild(dom);
-
-        return { exports: text };
 	}
 
 
@@ -163,7 +171,7 @@ window.require || (function () {
     }
 
 
-    function absolute(url) {
+    function relative(url) {
 
         var last;
 
@@ -183,7 +191,7 @@ window.require || (function () {
     }
 
 
-    global.absoluteUrl = function (base, url) {
+    function absolute(base, url) {
 
         // 相对根目录
         if (url[0] === '/')
@@ -195,26 +203,37 @@ window.require || (function () {
         // 相对当前目录
         url = (base[base.length - 1] === '/' ? base : base + '/') + url;
 
-        return urls[url] || (urls[url] = absolute(url));
+        return urls[url] || (urls[url] = relative(url));
     }
 
 
-    global.load = function (base, url, flags) {
 
-        var ext = url.match(/\.\w+$/),
+    yaxi.absoluteUrl = absolute;
+
+    
+    yaxi.loadModule = function (base, url, flags) {
+
+        var ext = exts[url],
             any;
 
         if (ext)
         {
-            ext = ext[0].toLowerCase();
+            url = ext[1];
+            ext = ext[0];
         }
         else
         {
-            url += '.js';
-            ext = '.js';
+            if (ext = url.match(/\.\w+$/))
+            {
+                exts[url] = [ext = ext[0].toLowerCase(), url];
+            }
+            else
+            {
+                exts[url] = [ext = '.js', url += '.js'];
+            }
         }
 
-        url = global.absoluteUrl(base, url);
+        url = absolute(base, url);
 
         if (any = modules[url])
         {
@@ -235,7 +254,7 @@ window.require || (function () {
     }
 
     
-    global.switchLanguage = function (language) {
+    yaxi.switchLanguage = function (language) {
 
         yaxi.language = language;
 

@@ -1,7 +1,7 @@
-;(function () {
+yaxi.Thread = (function () {
 
 
-    
+
     var seed = 1;
 
 
@@ -9,74 +9,35 @@
     var inject = '' + function () {
 
 
-        self.addEventListener('message', function (event) {
-            
-            var target = this,
-                data = event.data,
-                uuid = data.uuid,
-                method = data.method,
-                index = 0,
-                list = method.split('.'),
-                name,
-                fn;
-
-            try
-            {
-                name = list.pop();
-
-                while (target && (fn = list[index++]))
-                {
-                    target = target[fn];
-                }
-
-                if (target && (fn = target[name]))
-                {
-                    list = data.args || [];
-
-                    if (data.async)
-                    {
-                        list.push(function (value, e) {
-
-                            reply(uuid, value, e);
-                        });
-
-                        fn.apply(target, list);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            reply(uuid, fn.apply(target, list));
-                        }
-                        catch (e)
-                        {
-                            reply(uuid, null, e);
-                        }
-                    }
-                }
-                else
-                {
-                    reply(uuid, null, 'not support method "' + method + '"!');
-                }
-            }
-            catch (e)
-            {
-                reply(uuid, null, e);
-            }
-        });
-
-        
-        function reply(uuid, value, e) {
-
-            self.postMessage(JSON.stringify([uuid, value, e]));
-        }
-
-
-
         var global = factory(base);
 
         var modules = global.modules = Object.create(null);
 
+        // 相对url缓存
+        var urls = Object.create(null);
+
+        // 扩展名缓存
+        var exts = Object.create(null);
+
+
+        function relative(url) {
+
+            var last;
+    
+            while (true)
+            {
+                last = url.replace(/[^/]*\/\.\.\//, '');
+                
+                if (last === url)
+                {
+                    break;
+                }
+                
+                url = last;
+            }
+            
+            return url.replace(/[.]+\//g, '');
+        }
 
 
         function absolute(base, url) {
@@ -89,20 +50,41 @@
     
             // 相对当前目录
             url = (base[base.length - 1] === '/' ? base : base + '/') + url;
-            
-            while (true)
+
+            return urls[url] || (urls[url] = relative(url));
+        }
+
+
+        function load(base, url, flags) {
+
+            var ext = exts[url],
+                any;
+
+            if (ext)
             {
-                base = url.replace(/[^/]*\/\.\.\//, '');
-                
-                if (base === url)
-                {
-                    break;
-                }
-                
-                url = base;
+                url = ext[1];
+                ext = ext[0];
             }
-            
-            return url.replace(/[.]+\//g, '');
+            else
+            {
+                if (ext = url.match(/\.\w+$/))
+                {
+                    exts[url] = [ext = ext[0].toLowerCase(), url];
+                }
+                else
+                {
+                    exts[url] = [ext = '.js', url += '.js'];
+                }
+            }
+
+            url = absolute(base, url);
+
+            if (any = modules[url])
+            {
+                return any.exports;
+            }
+
+            return (modules[url] = execute(url, ext, flags)).exports;
         }
 
 
@@ -185,7 +167,7 @@
 
             function require(url, flags) {
     
-                return global.load(require.baseURL, url, flags);
+                return load(require.baseURL, url, flags);
             }
     
             require.baseURL = base;
@@ -193,30 +175,68 @@
         }
 
 
-        global.load = function (base, url, flags) {
+        
+        function reply(uuid, value, e) {
 
-            var ext = url.match(/\.\w+$/),
-                any;
-
-            if (ext)
-            {
-                ext = ext[0].toLowerCase();
-            }
-            else
-            {
-                url += '.js';
-                ext = '.js';
-            }
-
-            url = absolute(base, url);
-
-            if (any = modules[url])
-            {
-                return any.exports;
-            }
-
-            return (modules[url] = execute(url, ext, flags)).exports;
+            self.postMessage(JSON.stringify([uuid, value, e]));
         }
+        
+
+        self.addEventListener('message', function (event) {
+            
+            var target = this,
+                data = event.data,
+                uuid = data.uuid,
+                method = data.method,
+                index = 0,
+                list = method.split('.'),
+                name,
+                fn;
+
+            try
+            {
+                name = list.pop();
+
+                while (target && (fn = list[index++]))
+                {
+                    target = target[fn];
+                }
+
+                if (target && (fn = target[name]))
+                {
+                    list = data.args || [];
+
+                    if (data.async)
+                    {
+                        list.push(function (value, e) {
+
+                            reply(uuid, value, e);
+                        });
+
+                        fn.apply(target, list);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            reply(uuid, fn.apply(target, list));
+                        }
+                        catch (e)
+                        {
+                            reply(uuid, null, e);
+                        }
+                    }
+                }
+                else
+                {
+                    reply(uuid, null, 'not support method "' + method + '"!');
+                }
+            }
+            catch (e)
+            {
+                reply(uuid, null, e);
+            }
+        });
 
 
         return global;
@@ -308,7 +328,7 @@
 
 
 
-    require.Thread = Thread;
+    return Thread;
     
 
 

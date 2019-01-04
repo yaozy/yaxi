@@ -330,19 +330,20 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         switch (key)
         {
             case '@':
-                return this.key === value;
+                return this.$storage.key === value;
 
-            case '&':
+            case '':
                 return this instanceof (classes[value] || Boolean);
 
             case '#':
-                return this.id === value;
+                return this.$storage.id === value;
 
             case '.':
-                return (this.$className + (this.$storage.className || '') + ' ').indexOf(value + ' ') >= 0;
-        }
+                return (this.$className + ' ' + (this.$storage.className || '') + ' ').indexOf(value + ' ') >= 0;
 
-        return false;
+            default:
+                return this[key] === value;
+        }
     }
 
 

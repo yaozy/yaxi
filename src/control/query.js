@@ -9,47 +9,46 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
 
     function parse(selector) {
 
-        var tokens = selector.match(/\"[^"]*\"|\<{1,2}|\>{1,2}|[#.@=\[\]]|[^<>#.@=\[\]\s]+/g),
+        var tokens = selector.match(/\<{1,2}|\>{1,2}|[#.@=]|\w+/g),
             index = 0,
             token,
-            any;
+            key;
 
         while (token = tokens[index++])
         {
-            switch (token)
+            if ((key = token[0]) === '<' || key === '>')
             {
-                case '<':
-                case '<<':
-                case '>':
-                case '>>':
-                    if (token = tokens[index++])
+                if (token = tokens[index++])
+                {
+                    switch (token)
                     {
-                        if ('#.@'.indexOf(token[0]) < 0)
-                        {
-                            tokens.splice(index - 1, 0, '&');
-                        }
-                        
-                        if (token = tokens[index++])
-                        {
-                            if (/\W/.test(token[0]))
-                            {
-                                raise(tokens, index);
-                            }
-                        }
-                        else
-                        {
-                            raise(tokens, index);
-                        }
-                    }
-                    else
-                    {
-                        raise(tokens, index);
-                    }
-                    break;
+                        case '@':
+                        case '#':
+                        case '.':
+                            index++;
+                            break;
 
-                default:
+                        default:
+                            if (tokens[index] === '=')
+                            {
+                                tokens.splice(index++, 1);
+                            }
+                            else
+                            {
+                                tokens.splice(index - 1, 0, '');
+                                index++;
+                            }
+                            break;
+                    }
+                }
+                else
+                {
                     raise(tokens, index);
-                    break;
+                }
+            }
+            else
+            {
+                raise(tokens, index);
             }
         }
 
@@ -73,22 +72,14 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
     
     this.find = function (selector) {
     
-        var key = selector[0];
-
-        switch (key)
+        if (selector = cache[selector] || parse(selector))
         {
-            case '@':
-            case '#':
-            case '.':
-                selector = selector.substring(1);
-                break;
-        }
-        
-        for (var i = this.length; i--;)
-        {
-            if (!this[i].__find_value(key, selector))
+            for (var i = this.length; i--;)
             {
-                this.splice(i, 1);
+                if (!this[i].__find_value(key, selector))
+                {
+                    this.splice(i, 1);
+                }
             }
         }
 
