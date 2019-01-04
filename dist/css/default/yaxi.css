@@ -274,12 +274,11 @@ textarea::-webkit-input-placeholder {
   display: -webkit-inline-flex;
   display: inline-flex;
   overflow: hidden;
-  font-size: 0.2rem;
   align-items: center;
   justify-content: center;
 }
 .yx-icon-svg {
-  margin: 0 0.02rem;
+  margin: 0 0.2em;
   width: 1em;
   height: 1em;
   vertical-align: text-bottom;

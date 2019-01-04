@@ -7925,6 +7925,9 @@ yaxi.Text = yaxi.Control.extend(function () {
     this.$property('text', '');
 
 
+    this.$property('security', '');
+
+
     this.$property('format', {
     
         defaultValue: null,
@@ -7940,14 +7943,27 @@ yaxi.Text = yaxi.Control.extend(function () {
 
     this.renderer.text = function (dom, value) {
 
-        var format = this.__format;
+        var format;
 
-        if (format)
+        if (!this.__security)
         {
-            value = format(value);
+            dom.textContent = (format = this.__format) ? format(value) : value;
         }
+    }
 
-        dom.textContent = value;
+
+    this.renderer.security = function (dom, value) {
+
+        var format;
+
+        if (this.__security = value)
+        {
+            dom.textContent = value;
+        }
+        else
+        {
+            dom.textContent = (format = this.__format) ? format(this.text) : this.text;
+        }
     }
 
 
