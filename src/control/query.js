@@ -9,7 +9,7 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
 
     function parse(selector) {
 
-        var tokens = selector.match(/\<{1,2}|\>{1,2}|[#.@=]|\w+/g),
+        var tokens = selector.match(/\<{1,2}|\>{1,2}|[#.@=]|[\w-]+/g),
             index = 0,
             token,
             key;
@@ -43,12 +43,12 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
                 }
                 else
                 {
-                    raise(tokens, index);
+                    raise(selector);
                 }
             }
             else
             {
-                raise(tokens, index);
+                raise(selector);
             }
         }
 
@@ -56,9 +56,9 @@ yaxi.Query = Object.extend.call(Array, function (Class, base) {
     }
 
 
-    function raise(tokens, index) {
+    function raise(selector) {
 
-        throw 'selector is invalid! at "' + tokens.slice(0, index).join('') + '"';
+        throw 'selector "' + selector + '" is invalid!';
     }
 
 
