@@ -73,7 +73,14 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
             if (parent === this)
             {
-                this.selectedIndex = this.__children.indexOf(target);
+                var children = this.__children,
+                    index = children.indexOf(target);
+
+                if (this.selectedIndex !== index && 
+                    this.trigger('changing', { index: index, item: children[index] }) !== false)
+                {
+                    this.selectedIndex = index;
+                }
                 break;
             }
 

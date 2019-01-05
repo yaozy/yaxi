@@ -7951,7 +7951,14 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
             if (parent === this)
             {
-                this.selectedIndex = this.__children.indexOf(target);
+                var children = this.__children,
+                    index = children.indexOf(target);
+
+                if (this.selectedIndex !== index && 
+                    this.trigger('changing', { index: index, item: children[index] }) !== false)
+                {
+                    this.selectedIndex = index;
+                }
                 break;
             }
 
@@ -9190,6 +9197,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				dom.parentNode.removeChild(dom);
 			}
 			
+			this.trigger('closed', { closeType: closeType });
+
 			if (opener)
 			{
 				opener.$dom.style.display = '';
@@ -9198,8 +9207,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			Class.current = opener;
 			
-			this.trigger('closed', { closeType: closeType });
-
 			yaxi.toast.hide();
 			
 			if (this.autoDestroy)

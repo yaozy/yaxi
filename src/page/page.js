@@ -295,6 +295,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				dom.parentNode.removeChild(dom);
 			}
 			
+			this.trigger('closed', { closeType: closeType });
+
 			if (opener)
 			{
 				opener.$dom.style.display = '';
@@ -303,8 +305,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			Class.current = opener;
 			
-			this.trigger('closed', { closeType: closeType });
-
 			yaxi.toast.hide();
 			
 			if (this.autoDestroy)
