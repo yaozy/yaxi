@@ -96,10 +96,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     this.$property('submodel', 'item', false);
 
 
-    // 子模型索引名
-    this.$property('submodelIndex', 'index', false);
-
-
 
     this.assign = function (values) {
 
@@ -126,9 +122,14 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         {
             base.__update_patch.call(this);
 
-            if ((changes.template || changes.store) && (changes = this.store) && changes.length > 0)
+            if (changes.template || changes.store)
             {
-                this.__model_insert(0, changes);
+                this.__children.clear();
+
+                if ((changes = this.store) && changes.length > 0)
+                {
+                    this.__model_insert(0, changes);
+                }
             }
         }
     }

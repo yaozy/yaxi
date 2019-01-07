@@ -263,12 +263,6 @@ yaxi.container = function (base) {
             dom.appendChild(control.render());
         }
 
-        if ((control = this.__loading) && control.status === 'loading')
-        {
-            control.show();
-            control.onload.call(this, control, true);
-        }
-
         return dom;
     }
 

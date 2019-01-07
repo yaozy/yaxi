@@ -3867,8 +3867,10 @@ window.require || (function () {
         switch (tagName)
         {
             case 'R':
+            case 'Ref':
             case 'Require':
-                array.push(space, 'Class: yaxi.loadModule(__b, "', node.getAttribute('src'), '")');
+            case 'Reference':
+                array.push(space, 'Class: yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
@@ -4173,7 +4175,7 @@ window.require || (function () {
     require.template = function (text, url) {
 
         var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
-            array = ['var __b = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
+            array = ['var __dirname = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
                 'var __c = color || yaxi.color;\n',
                 'var __k = classes || yaxi.classes;\n\n',
                 'with(data)\n{\n',
@@ -5615,12 +5617,6 @@ yaxi.container = function (base) {
         while (control = children[index++])
         {
             dom.appendChild(control.render());
-        }
-
-        if ((control = this.__loading) && control.status === 'loading')
-        {
-            control.show();
-            control.onload.call(this, control, true);
         }
 
         return dom;
@@ -7733,10 +7729,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     this.$property('submodel', 'item', false);
 
 
-    // 子模型索引名
-    this.$property('submodelIndex', 'index', false);
-
-
 
     this.assign = function (values) {
 
@@ -7763,9 +7755,14 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         {
             base.__update_patch.call(this);
 
-            if ((changes.template || changes.store) && (changes = this.store) && changes.length > 0)
+            if (changes.template || changes.store)
             {
-                this.__model_insert(0, changes);
+                this.__children.clear();
+
+                if ((changes = this.store) && changes.length > 0)
+                {
+                    this.__model_insert(0, changes);
+                }
             }
         }
     }
@@ -8055,13 +8052,13 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.onshow = function () {
+    this.onshow = function (first) {
 
         var host = this.selectedHost;
 
         if (host && host.onshow)
         {
-            host.onshow(false);
+            host.onshow(first || false);
         }
     }
 
@@ -9198,15 +9195,23 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('closed', { closeType: closeType });
-
-			if (opener)
+			
+			// 没有在关闭事件中打开新窗口则把上一个窗口设置成当前窗口
+			if (Class.current === this)
 			{
-				opener.$dom.style.display = '';
-				opener.onshow();
+				if (opener && opener.$dom)
+				{
+					opener.$dom.style.display = '';
+					opener.onshow();
+				}
+				else
+				{
+					opener = null;
+				}
+
+				Class.current = opener;
 			}
 
-			Class.current = opener;
-			
 			yaxi.toast.hide();
 			
 			if (this.autoDestroy)
@@ -10664,6 +10669,145 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
 
+yaxi.DataPanel = yaxi.Panel.extend(function (Class, base) {
+
+
+
+    Class.ctor = function (data) {
+
+        base.constructor.ctor.call(this, data);
+
+        this.loading = onloading;
+        this.pulldown = onpulldown;
+    }
+
+
+
+    // 当前页码
+    Object.defineProperty(this, 'pageIndex', {
+
+        get: function () {
+
+            return this.loading.index || 0;
+        }
+    });
+
+
+
+    // 每页显示的记录数
+    this.pageSize = 50;
+
+
+    // 是否自动加载
+    this.autoLoading = true;
+
+    
+
+
+    function onloading(loading) {
+
+        var size = this.pageSize;
+
+        this.load(loading.index, size).then(function (data) {
+
+            if (data && data.length < size)
+            {
+                loading.complete(!data.length);
+            }
+
+        }).catch(function () {
+
+            loading.fail();
+        });
+    }
+
+
+    function onpulldown(pulldown) {
+
+        var loading = this.loading,
+            size = this.pageSize;
+
+        this.load(loading.index = 0, size).then(function (data) {
+
+            if (data && loading && data.length < size)
+            {
+                loading.complete(!data.length, false);
+            }
+
+            pulldown.hide(false, loading);
+
+        }).catch(function () {
+
+            pulldown.hide(true, loading);
+        });
+    }
+
+
+
+
+    this.refresh = function () {
+
+        var loading = this.loading;
+
+        if (loading)
+        {
+            var size = this.pageSize;
+            
+            loading.load(200);
+
+            this.load(loading.index = 0, size).then(function (data) {
+
+                if (data && data.length < size)
+                {
+                    loading.complete(!data.length);
+                }
+
+            }).catch(function () {
+
+                loading.fail();
+            });
+        }
+        else
+        {
+            this.load(0);
+        }
+    }
+
+
+
+    this.setData = function (data, page) {
+
+        if (page > 1)
+        {
+            this.children.push.apply(this.children, data);
+        }
+        else
+        {
+            this.children = data;
+        }
+    }
+
+
+
+    this.render = function () {
+
+        var dom = base.render.call(this);
+
+        if (this.autoLoading)
+        {
+            this.refresh();
+        }
+
+        return dom;
+    }
+
+
+
+});
+
+
+
+
 yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
 
@@ -11013,6 +11157,165 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
 
 }).register('GestureInput');
+
+
+
+
+yaxi.GroupView = yaxi.Control.extend(function (Class, base) {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-groupview">' +
+            '<div class="yx-groupview-body"></div>' + 
+            '<div class="yx-groupview-nav"></div>' + 
+            '<div class="yx-groupview-show"></div>' + 
+        '</div>');
+
+    
+
+    // 模板
+    this.$property('template', {
+     
+        defaultValue: null,
+
+        set: function (template) {
+
+            var storage = this.$storage;
+
+            if (template && typeof template !== 'object')
+            {
+                template = null;
+            }
+
+            if (storage.template !== template)
+            {
+                storage.template = template;
+                update.call(this);
+            }
+        }
+
+    }, false);
+
+
+
+    // 数据集合
+    this.$property('store', {
+
+        defaultValue: null,
+
+        converter: function (store) {
+
+            if (store)
+            {
+                if (typeof store === 'string')
+                {
+                    store = this.__find_store(store);
+                }
+            }
+            else
+            {
+                store = null;
+            }
+
+            return store;
+        },
+
+        set: function (store) {
+
+            var storage = this.$storage;
+
+            store = this.$converter.store.fn.call(this, store);
+
+            if (storage.store !== store)
+            {
+                storage.store = store;
+                this.update();
+            }
+        }
+
+    }, false);
+
+
+
+    // 分组设置
+    this.$property('groups', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    
+
+
+    this.assign = function (values) {
+
+        base.assign.call(this, values);
+        
+        if (values.template && (values = this.store))
+        {
+            update.call(this);
+        }
+    }
+
+
+    this.update = function () {
+
+        var children = this.__children,
+            template,
+            store;
+
+        if (children.length > 0)
+        {
+            children.clear();
+        }
+
+        if ((template = this.template) && (store = this.store) && store.length > 0)
+        {
+            // 
+        }
+    }
+
+
+
+    this.group = function (data) {
+
+
+    }
+
+
+
+    this.__update_patch = function () {
+
+        var changes;
+
+        if (changes = this.__changes)
+        {
+            base.__update_patch.call(this);
+
+            if (changes.template || changes.store)
+            {
+                update.call(this);
+            }
+        }
+    }
+
+
+
+    this.$converter.groups = function (dom, value) {
+
+        
+    }
+
+
+
+}, function GroupView() {
+
+    var init;
+    
+    this.$storage = Object.create(this.$defaults);
+    this.__children = new yaxi.ControlCollection(this);
+
+    if (init = this.init)
+    {
+        init.apply(this, arguments);
+    }
+
+}).register('GroupView');
 
 
 

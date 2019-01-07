@@ -296,15 +296,23 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('closed', { closeType: closeType });
-
-			if (opener)
+			
+			// 没有在关闭事件中打开新窗口则把上一个窗口设置成当前窗口
+			if (Class.current === this)
 			{
-				opener.$dom.style.display = '';
-				opener.onshow();
+				if (opener && opener.$dom)
+				{
+					opener.$dom.style.display = '';
+					opener.onshow();
+				}
+				else
+				{
+					opener = null;
+				}
+
+				Class.current = opener;
 			}
 
-			Class.current = opener;
-			
 			yaxi.toast.hide();
 			
 			if (this.autoDestroy)

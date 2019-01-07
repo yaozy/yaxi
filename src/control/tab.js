@@ -177,13 +177,13 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.onshow = function () {
+    this.onshow = function (first) {
 
         var host = this.selectedHost;
 
         if (host && host.onshow)
         {
-            host.onshow(false);
+            host.onshow(first || false);
         }
     }
 

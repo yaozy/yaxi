@@ -24,8 +24,10 @@
         switch (tagName)
         {
             case 'R':
+            case 'Ref':
             case 'Require':
-                array.push(space, 'Class: yaxi.loadModule(__b, "', node.getAttribute('src'), '")');
+            case 'Reference':
+                array.push(space, 'Class: yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
@@ -330,7 +332,7 @@
     require.template = function (text, url) {
 
         var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
-            array = ['var __b = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
+            array = ['var __dirname = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
                 'var __c = color || yaxi.color;\n',
                 'var __k = classes || yaxi.classes;\n\n',
                 'with(data)\n{\n',
