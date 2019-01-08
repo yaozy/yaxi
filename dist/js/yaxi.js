@@ -45,7 +45,7 @@ Object.extend = function (fn, Class) {
     // 类初始化
     if (prototype.__class_init)
     {
-        prototype.__class_init(Class, base);
+        prototype.__class_init(Class);
     }
 
     if (fn)
@@ -1831,10 +1831,10 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
-    this.__class_init = function (Class, base) {
+    this.__class_init = function (Class) {
 
-        this.$defaults = create(base.$defaults);
-        this.$converter = create(base.$converter);
+        this.$defaults = create(this.$defaults);
+        this.$converter = create(this.$converter);
     }
 
 
@@ -5327,13 +5327,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     
-    this.__class_init = function (Class, base) {
+    this.__class_init = function (Class) {
 
         Class.register = Class.superclass.register;
 
-        this.$defaults = create(base.$defaults);
-        this.$converter = create(base.$converter);
-        this.renderer = create(base.renderer);
+        this.$defaults = create(this.$defaults);
+        this.$converter = create(this.$converter);
+        this.renderer = create(this.renderer);
     }
 
 
@@ -6482,7 +6482,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.__insert_patch = function (owner, controls, dom) {
 
-        var last = dom.lastChild;
+        var last = owner.__loading && dom.lastChild;
 
         for (var i = 0, l = controls.length; i < l; i++)
         {
@@ -6883,6 +6883,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // loading: 正在加载
     // completed: 已完成
     // failed: 失败
+    // hidden: 隐藏
     this.$property('status', 'loading', false);
 
 
@@ -6907,42 +6908,64 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // 显示loading
     this.show = function () {
 
-        var parent = this.parent;
+        var status = this.status || 'loading',
+            dom = this.$dom,
+            parent;
 
-        if (parent && (parent = parent.$dom))
+        if (status === 'hidden')
         {
-            var i18n = Class[yaxi.language] || Class['en-US'],
-                dom = this.$dom || (this.$dom = this.render()),
-                display = 'none',
-                text;
-
-            switch (this.status || 'loading')
+            if ((dom = this.$dom) && (parent = dom.parentNode))
             {
-                case 'loading':
-                    display = '';
-                    text = this.loadingText || i18n.loading;
-                    break;
-
-                case 'completed':
-                    text = this.empty ? this.emptyText || i18n.empty : this.completedText || i18n.completed;
-                    break;
-
-                case 'failed':
-                    text = this.failedText || i18n.failed;
-                    break;
+                parent.removeChild(dom);
             }
 
-            dom.firstChild.style.display = display;
-            dom.lastChild.innerHTML = text;
-            
-            if (this.before)
+            return;
+        }
+
+        var i18n = Class[yaxi.language] || Class['en-US'],
+            display = 'none',
+            text;
+
+        switch (status)
+        {
+            case 'loading':
+                display = '';
+                text = this.loadingText || i18n.loading;
+                break;
+
+            case 'completed':
+                text = this.empty ? this.emptyText || i18n.empty : this.completedText || i18n.completed;
+                break;
+
+            case 'failed':
+                text = this.failedText || i18n.failed;
+                break;
+        }
+
+        dom = dom || (this.$dom = this.render());
+        dom.firstChild.style.display = display;
+        dom.lastChild.innerHTML = text;
+        
+        if (parent = this.parent)
+        {
+            parent = parent.$dom;
+        }
+
+        if (this.before)
+        {
+            dom.$loading = 1;
+
+            if (parent)
             {
-                dom.$loading = 1;
                 parent.insertBefore(dom, parent.firstChild || null);
             }
-            else
+        }
+        else
+        {
+            dom.$loading = 2;
+
+            if (parent)
             {
-                dom.$loading = 2;
                 parent.appendChild(dom);
             }
         }
@@ -7019,12 +7042,32 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
         var parent, dom;
 
+        this.stop();
+        
+        if (this.$storage)
+        {
+            this.status = 'hidden';
+        }
+
         if ((dom = this.$dom) && (parent = dom.parentNode))
         {
             parent.removeChild(dom);
         }
     }
 
+
+
+    this.render = function () {
+
+        var dom = base.render.call(this);
+
+        if (this.status !== 'hidden')
+        {
+            this.show();
+        }
+
+        return dom;
+    }
 
 
 
@@ -9182,38 +9225,31 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onclosing(closeType || (closeType = 'OK')) !== false)
 		{
-			var opener = this.opener || null,
-				dom = this.$dom;
+			var dom = this.$dom,
+				opener = this.opener;
 			
 			this.onhide();
 			this.onclosed(closeType);
-			this.opener = null;
-			
+
 			if (dom && dom.parentNode)
 			{
 				dom.parentNode.removeChild(dom);
 			}
 			
-			this.trigger('closed', { closeType: closeType });
-			
-			// 没有在关闭事件中打开新窗口则把上一个窗口设置成当前窗口
-			if (Class.current === this)
-			{
-				if (opener && opener.$dom)
-				{
-					opener.$dom.style.display = '';
-					opener.onshow();
-				}
-				else
-				{
-					opener = null;
-				}
-
-				Class.current = opener;
-			}
+			Class.current = opener;
 
 			yaxi.toast.hide();
-			
+
+			this.trigger('closed', { closeType: closeType }) !== false;
+			this.opener = null;
+
+			// 如果当前窗口是隐藏状态则显示当前窗口
+			if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+			{
+				dom.style.display = '';
+				opener.onshow();
+			}
+
 			if (this.autoDestroy)
 			{
 				// 延时销毁以加快页面切换速度
@@ -9309,6 +9345,33 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		}
 
 		base.destroy.call(this);
+	}
+
+
+
+	
+    this.__class_init = function (Class) {
+
+		base.__class_init.call(this, Class);
+		Class.open = open;
+	}
+
+
+	function open() {
+
+		var page;
+
+		if (arguments.length > 0)
+		{
+			page = Object.create(this.prototype);
+			this.apply(page, arguments);
+		}
+		else
+		{
+			page = new this();
+		}
+
+		return page.open();
 	}
 	
 

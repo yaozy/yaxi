@@ -283,38 +283,31 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		
 		if (this.onclosing(closeType || (closeType = 'OK')) !== false)
 		{
-			var opener = this.opener || null,
-				dom = this.$dom;
+			var dom = this.$dom,
+				opener = this.opener;
 			
 			this.onhide();
 			this.onclosed(closeType);
-			this.opener = null;
-			
+
 			if (dom && dom.parentNode)
 			{
 				dom.parentNode.removeChild(dom);
 			}
 			
-			this.trigger('closed', { closeType: closeType });
-			
-			// 没有在关闭事件中打开新窗口则把上一个窗口设置成当前窗口
-			if (Class.current === this)
-			{
-				if (opener && opener.$dom)
-				{
-					opener.$dom.style.display = '';
-					opener.onshow();
-				}
-				else
-				{
-					opener = null;
-				}
-
-				Class.current = opener;
-			}
+			Class.current = opener;
 
 			yaxi.toast.hide();
-			
+
+			this.trigger('closed', { closeType: closeType }) !== false;
+			this.opener = null;
+
+			// 如果当前窗口是隐藏状态则显示当前窗口
+			if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+			{
+				dom.style.display = '';
+				opener.onshow();
+			}
+
 			if (this.autoDestroy)
 			{
 				// 延时销毁以加快页面切换速度
@@ -410,6 +403,33 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		}
 
 		base.destroy.call(this);
+	}
+
+
+
+	
+    this.__class_init = function (Class) {
+
+		base.__class_init.call(this, Class);
+		Class.open = open;
+	}
+
+
+	function open() {
+
+		var page;
+
+		if (arguments.length > 0)
+		{
+			page = Object.create(this.prototype);
+			this.apply(page, arguments);
+		}
+		else
+		{
+			page = new this();
+		}
+
+		return page.open();
 	}
 	
 

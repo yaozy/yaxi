@@ -45,7 +45,7 @@ Object.extend = function (fn, Class) {
     // 类初始化
     if (prototype.__class_init)
     {
-        prototype.__class_init(Class, base);
+        prototype.__class_init(Class);
     }
 
     if (fn)

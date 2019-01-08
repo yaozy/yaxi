@@ -263,10 +263,10 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
-    this.__class_init = function (Class, base) {
+    this.__class_init = function (Class) {
 
-        this.$defaults = create(base.$defaults);
-        this.$converter = create(base.$converter);
+        this.$defaults = create(this.$defaults);
+        this.$converter = create(this.$converter);
     }
 
 

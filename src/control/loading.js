@@ -51,6 +51,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // loading: 正在加载
     // completed: 已完成
     // failed: 失败
+    // hidden: 隐藏
     this.$property('status', 'loading', false);
 
 
@@ -75,42 +76,64 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // 显示loading
     this.show = function () {
 
-        var parent = this.parent;
+        var status = this.status || 'loading',
+            dom = this.$dom,
+            parent;
 
-        if (parent && (parent = parent.$dom))
+        if (status === 'hidden')
         {
-            var i18n = Class[yaxi.language] || Class['en-US'],
-                dom = this.$dom || (this.$dom = this.render()),
-                display = 'none',
-                text;
-
-            switch (this.status || 'loading')
+            if ((dom = this.$dom) && (parent = dom.parentNode))
             {
-                case 'loading':
-                    display = '';
-                    text = this.loadingText || i18n.loading;
-                    break;
-
-                case 'completed':
-                    text = this.empty ? this.emptyText || i18n.empty : this.completedText || i18n.completed;
-                    break;
-
-                case 'failed':
-                    text = this.failedText || i18n.failed;
-                    break;
+                parent.removeChild(dom);
             }
 
-            dom.firstChild.style.display = display;
-            dom.lastChild.innerHTML = text;
-            
-            if (this.before)
+            return;
+        }
+
+        var i18n = Class[yaxi.language] || Class['en-US'],
+            display = 'none',
+            text;
+
+        switch (status)
+        {
+            case 'loading':
+                display = '';
+                text = this.loadingText || i18n.loading;
+                break;
+
+            case 'completed':
+                text = this.empty ? this.emptyText || i18n.empty : this.completedText || i18n.completed;
+                break;
+
+            case 'failed':
+                text = this.failedText || i18n.failed;
+                break;
+        }
+
+        dom = dom || (this.$dom = this.render());
+        dom.firstChild.style.display = display;
+        dom.lastChild.innerHTML = text;
+        
+        if (parent = this.parent)
+        {
+            parent = parent.$dom;
+        }
+
+        if (this.before)
+        {
+            dom.$loading = 1;
+
+            if (parent)
             {
-                dom.$loading = 1;
                 parent.insertBefore(dom, parent.firstChild || null);
             }
-            else
+        }
+        else
+        {
+            dom.$loading = 2;
+
+            if (parent)
             {
-                dom.$loading = 2;
                 parent.appendChild(dom);
             }
         }
@@ -187,12 +210,32 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
         var parent, dom;
 
+        this.stop();
+        
+        if (this.$storage)
+        {
+            this.status = 'hidden';
+        }
+
         if ((dom = this.$dom) && (parent = dom.parentNode))
         {
             parent.removeChild(dom);
         }
     }
 
+
+
+    this.render = function () {
+
+        var dom = base.render.call(this);
+
+        if (this.status !== 'hidden')
+        {
+            this.show();
+        }
+
+        return dom;
+    }
 
 
 

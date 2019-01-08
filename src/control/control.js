@@ -708,13 +708,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     
-    this.__class_init = function (Class, base) {
+    this.__class_init = function (Class) {
 
         Class.register = Class.superclass.register;
 
-        this.$defaults = create(base.$defaults);
-        this.$converter = create(base.$converter);
-        this.renderer = create(base.renderer);
+        this.$defaults = create(this.$defaults);
+        this.$converter = create(this.$converter);
+        this.renderer = create(this.renderer);
     }
 
 

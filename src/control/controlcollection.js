@@ -423,7 +423,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.__insert_patch = function (owner, controls, dom) {
 
-        var last = dom.lastChild;
+        var last = owner.__loading && dom.lastChild;
 
         for (var i = 0, l = controls.length; i < l; i++)
         {
