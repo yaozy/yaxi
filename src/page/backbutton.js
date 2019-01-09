@@ -6,7 +6,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
     
 
 
-    yaxi.template(this, '<span class="yx-control yx-backbutton"><svg class="yx-icon-svg" aria-hidden="true"><use xlink:href="#icon-yaxi-back"></use></svg><span></span></span>');
+    yaxi.template(this, '<span class="yx-control yx-backbutton"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-back"></use></svg><span></span></span>');
 
 
 

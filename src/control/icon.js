@@ -44,7 +44,7 @@ yaxi.Icon = yaxi.Control.extend(function () {
 
         if (value)
         {
-            dom.innerHTML = '<svg class="yx-icon-svg" aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>';
+            dom.innerHTML = '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>';
 
             if (value = this.fill)
             {

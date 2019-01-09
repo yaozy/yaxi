@@ -197,11 +197,11 @@ textarea::-webkit-input-placeholder {
   color: #dd6161;
   fill: #5daf34;
 }
+.yx-control[disabled],
 .yx-control[theme="disabled"] {
-  border-color: #a6a9ad;
-  background-color: #d3d4d6;
+  border-color: #72747a;
   color: #72747a;
-  fill: #5daf34;
+  fill: #72747a;
   cursor: not-allowed;
 }
 .yx-control[line="top"] {
@@ -277,15 +277,19 @@ textarea::-webkit-input-placeholder {
   align-items: center;
   justify-content: center;
 }
-.yx-icon-svg {
+.yx-icon > svg {
   margin: 0 0.2em;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: text-bottom;
+}
+.yx-iconbutton {
+  text-align: center;
+}
+.yx-iconbutton svg {
   width: 1em;
   height: 1em;
   vertical-align: text-bottom;
-}
-.yx-iconbutton > span {
-  width: 100%;
-  height: 100%;
 }
 .yx-iframe {
   border: 0;
@@ -696,8 +700,10 @@ textarea::-webkit-input-placeholder {
   margin-top: 0.02rem;
 }
 .yx-backbutton > svg {
+  margin: 0 0.2em;
   width: 1.2em;
   height: 1.2em;
+  vertical-align: text-bottom;
 }
 .yx-title {
   width: 100%;

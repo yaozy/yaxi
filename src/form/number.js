@@ -52,6 +52,19 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
+    this.clear = function () {
+
+        var dom;
+
+        if (dom = this.$dom)
+        {
+            dom.firstChild.value = '';
+        }
+
+        this.$storage.value = 0;
+    }
+
+
 
     var renderer = this.renderer;
 
