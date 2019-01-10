@@ -5796,22 +5796,16 @@ yaxi.__extend_pulldown = function () {
             }
         }
 
-        if (!this.pulldown || (loading = this.__loading) && loading.shown && loading.status === 'loading')
-        {
-            loading = null;
-            return;
-        }
-
         if (this.$dom.scrollTop < 1 && (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
         {
             var start = event.start,
                 style = this.$dom.style;
 
-            if (loading)
+            if (loading = this.__loading)
             {
                 if (loading.shown)
                 {
-                    // loading.hide();
+                    loading.load();
                     loading.style.visibility = 'hidden';
                 }
                 else
@@ -7089,7 +7083,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
         if (value)
         {
-            var list = yaxi.html.encode(value).split('\n');
+            var list = yaxi.html.encode(value).replace(/ /g, '&nbsp;').split('\n');
 
             for (var i = list.length; i--;)
             {
@@ -11271,6 +11265,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         this.loading = onloading;
         this.pulldown = onpulldown;
+        this.style.overflowY = 'auto';
     }
 
 

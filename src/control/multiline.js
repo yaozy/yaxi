@@ -14,7 +14,7 @@ yaxi.Multiline = yaxi.Control.extend(function () {
 
         if (value)
         {
-            var list = yaxi.html.encode(value).split('\n');
+            var list = yaxi.html.encode(value).replace(/ /g, '&nbsp;').split('\n');
 
             for (var i = list.length; i--;)
             {

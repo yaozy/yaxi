@@ -440,22 +440,16 @@ yaxi.__extend_pulldown = function () {
             }
         }
 
-        if (!this.pulldown || (loading = this.__loading) && loading.shown && loading.status === 'loading')
-        {
-            loading = null;
-            return;
-        }
-
         if (this.$dom.scrollTop < 1 && (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
         {
             var start = event.start,
                 style = this.$dom.style;
 
-            if (loading)
+            if (loading = this.__loading)
             {
                 if (loading.shown)
                 {
-                    // loading.hide();
+                    loading.load();
                     loading.style.visibility = 'hidden';
                 }
                 else
