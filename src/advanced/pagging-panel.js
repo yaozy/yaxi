@@ -8,7 +8,8 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         this.loading = onloading;
         this.pulldown = onpulldown;
-        this.style.overflowY = 'auto';
+
+        this.style.overflowY = 'scroll';
     }
 
 
