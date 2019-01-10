@@ -331,7 +331,6 @@ yaxi.__extend_pulldown = function () {
                 }
 
                 loading.parent = this;
-                loading.on('tap', reload);
 
                 this.__loading = loading;
                 this.on('scroll', scroll);
@@ -423,23 +422,6 @@ yaxi.__extend_pulldown = function () {
     }
 
 
-    function reload() {
-
-        if (this.status === 'failed')
-        {
-            // 显示loading
-            this.load();
-
-            // 最少显示500msloading
-            setTimeout(function () {
-
-                this.onload.call(this.parent, this);
-
-            }.bind(this), 500);
-        }
-    }
-
-
 
     function touchmove(event) {
 
@@ -473,7 +455,8 @@ yaxi.__extend_pulldown = function () {
             {
                 if (loading.shown)
                 {
-                    loading.hide();
+                    // loading.hide();
+                    loading.style.visibility = 'hidden';
                 }
                 else
                 {

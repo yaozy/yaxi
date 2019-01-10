@@ -108,7 +108,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             parent.removeChild(dom);
         }
 
-        loading && loading.show();
+        if (loading)
+        {
+            loading.style.visibility = '';
+        }
     }
 
 
@@ -220,7 +223,11 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             else
             {
                 parent.removeChild(dom);
-                loading && loading.show();
+                
+                if (loading)
+                {
+                    loading.style.visibility = '';
+                }
             }
         }
     }

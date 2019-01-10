@@ -32,18 +32,18 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
     
 
-    this.$property('loadingText', '', false);
+    this.loadingText = '';
 
-    this.$property('emptyText', '', false);
+    this.emptyText = '';
 
-    this.$property('completedText', '', false);
+    this.completedText = '';
     
-    this.$property('failedText', '', false);
+    this.failedText = '';
 
 
-    this.$property('empty', false, false);
+    this.empty = false;
 
-    this.$property('before', false, false);
+    this.before = false;
 
 
 
@@ -52,7 +52,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // completed: 已完成
     // failed: 失败
     // hidden: 隐藏
-    this.$property('status', 'loading', false);
+    this.status = 'loading';
 
 
 
@@ -235,6 +235,20 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
         }
 
         return dom;
+    }
+
+
+
+    this.__on_tap = function () {
+
+        if (this.status === 'failed')
+        {
+            // 显示loading
+            this.load();
+
+            // 最少显示500msloading
+            setTimeout(this.onload.bind(this.parent, this), 500);
+        }
     }
 
 

@@ -5687,7 +5687,6 @@ yaxi.__extend_pulldown = function () {
                 }
 
                 loading.parent = this;
-                loading.on('tap', reload);
 
                 this.__loading = loading;
                 this.on('scroll', scroll);
@@ -5779,23 +5778,6 @@ yaxi.__extend_pulldown = function () {
     }
 
 
-    function reload() {
-
-        if (this.status === 'failed')
-        {
-            // 显示loading
-            this.load();
-
-            // 最少显示500msloading
-            setTimeout(function () {
-
-                this.onload.call(this.parent, this);
-
-            }.bind(this), 500);
-        }
-    }
-
-
 
     function touchmove(event) {
 
@@ -5829,7 +5811,8 @@ yaxi.__extend_pulldown = function () {
             {
                 if (loading.shown)
                 {
-                    loading.hide();
+                    // loading.hide();
+                    loading.style.visibility = 'hidden';
                 }
                 else
                 {
@@ -6864,18 +6847,18 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
     
 
-    this.$property('loadingText', '', false);
+    this.loadingText = '';
 
-    this.$property('emptyText', '', false);
+    this.emptyText = '';
 
-    this.$property('completedText', '', false);
+    this.completedText = '';
     
-    this.$property('failedText', '', false);
+    this.failedText = '';
 
 
-    this.$property('empty', false, false);
+    this.empty = false;
 
-    this.$property('before', false, false);
+    this.before = false;
 
 
 
@@ -6884,7 +6867,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // completed: 已完成
     // failed: 失败
     // hidden: 隐藏
-    this.$property('status', 'loading', false);
+    this.status = 'loading';
 
 
 
@@ -7071,6 +7054,20 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
 
 
+    this.__on_tap = function () {
+
+        if (this.status === 'failed')
+        {
+            // 显示loading
+            this.load();
+
+            // 最少显示500msloading
+            setTimeout(this.onload.bind(this.parent, this), 500);
+        }
+    }
+
+
+
 }).register('Loading');
 
 
@@ -7248,7 +7245,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             parent.removeChild(dom);
         }
 
-        loading && loading.show();
+        if (loading)
+        {
+            loading.style.visibility = '';
+        }
     }
 
 
@@ -7360,7 +7360,11 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             else
             {
                 parent.removeChild(dom);
-                loading && loading.show();
+                
+                if (loading)
+                {
+                    loading.style.visibility = '';
+                }
             }
         }
     }
