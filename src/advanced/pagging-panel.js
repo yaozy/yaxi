@@ -9,7 +9,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
         this.loading = onloading;
         this.pulldown = onpulldown;
 
-        this.style.overflowY = 'scroll';
+        this.style.overflowY = 'auto';
     }
 
 
@@ -19,14 +19,10 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         get: function () {
 
-            return this.loading.index || this.startIndex || 0;
+            return this.loading.index || 1;
         }
     });
 
-
-
-    // 开始页码
-    this.startIndex = 1;
 
 
     // 每页显示的记录数
@@ -62,7 +58,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
         var loading = this.loading,
             size = this.pageSize;
 
-        this.load(loading.index = this.startIndex || 0, size).then(function (data) {
+        this.load(loading.index = 1, size).then(function (data) {
 
             if (data && loading && data.length < size)
             {
@@ -90,7 +86,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
             
             loading.load(200);
 
-            this.load(loading.index = this.startIndex || 0, size).then(function (data) {
+            this.load(loading.index = 1, size).then(function (data) {
 
                 if (data && data.length < size)
                 {
@@ -112,7 +108,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
     this.setData = function (data, page) {
 
-        if (page > this.startIndex || 0)
+        if (page > 1)
         {
             this.children.push.apply(this.children, data);
         }

@@ -333,11 +333,11 @@ yaxi.__extend_pulldown = function () {
                 loading.parent = this;
 
                 this.__loading = loading;
-                this.on('scroll', scroll);
+                this.__on_scroll = scroll;
             }
             else
             {
-                this.off('scroll', scroll);
+                this.__on_scroll = null;
             }
         }
     });
@@ -371,17 +371,22 @@ yaxi.__extend_pulldown = function () {
                     pulldown = value instanceof pulldown ? value : new pulldown(value);
                 }
 
-                this.__pulldown = pulldown;
+                if (!this.__pulldown)
+                {
+                    this.on('touchmove', touchmove);
+                    this.on('touchend', touchend);
+                    this.on('touchcancel', touchend);
+                }
 
-                this.on('touchmove', touchmove);
-                this.on('touchend', touchend);
-                this.on('touchcancel', touchend);
+                this.__pulldown = pulldown;
             }
             else
             {
                 this.off('touchmove', touchmove);
                 this.off('touchend', touchend);
                 this.off('touchcancel', touchend);
+
+                this.__pulldown = null;
             }
         }
     });
@@ -415,7 +420,7 @@ yaxi.__extend_pulldown = function () {
                 return;
             }
 
-            loading.index++;
+            loading.index++ || (loading.index = 1);
             loading.__time = time;
             loading.onload.call(this, loading);
         }
@@ -449,7 +454,7 @@ yaxi.__extend_pulldown = function () {
             {
                 if (loading.shown)
                 {
-                    loading.load();
+                    loading.status = 'loading';
                     loading.style.visibility = 'hidden';
                 }
                 else

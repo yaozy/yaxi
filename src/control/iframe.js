@@ -33,11 +33,12 @@ yaxi.IFrame = yaxi.Control.extend(function (Class, base) {
 
     window.addEventListener('message', function (event) {
 
-        var control = findControl(event.source);
+        var control;
 
-        if (control)
+        if (control = findControl(event.source))
         {
-            control.trigger('message', {
+            control.trigger({
+                type: 'message',
                 data: event.data
             });
         }

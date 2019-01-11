@@ -32,17 +32,23 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
     
 
+    // 加载时提示文字
     this.loadingText = '';
 
+    // 无数据时提示文字
     this.emptyText = '';
 
+    // 加载完毕时提示文字
     this.completedText = '';
     
+    // 失败时提示文字
     this.failedText = '';
 
 
+    // 是否无数据
     this.empty = false;
 
+    // 是否前置loading
     this.before = false;
 
 
@@ -70,7 +76,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
 
     // 当前索引
-    this.index = 0;
+    this.index = 1;
 
 
     // 显示loading
@@ -146,15 +152,11 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     this.load = function (show) {
 
         this.stop();
-        
-        if (this.$storage)
-        {
-            this.status = 'loading';
+        this.status = 'loading';
 
-            if (show !== false)
-            {
-                this.__delay = setTimeout(this.show.bind(this), show || 0);
-            }
+        if (show !== false)
+        {
+            this.__delay = setTimeout(this.show.bind(this), show || 0);
         }
     }
 
@@ -164,15 +166,12 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
         this.stop();
         
-        if (this.$storage)
-        {
-            this.empty = empty;
-            this.status = 'completed';
+        this.empty = empty;
+        this.status = 'completed';
 
-            if (show !== false)
-            {
-                this.__delay = setTimeout(this.show.bind(this), show || 0);
-            }
+        if (show !== false)
+        {
+            this.__delay = setTimeout(this.show.bind(this), show || 0);
         }
     }
 
@@ -181,15 +180,11 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     this.fail = function (show) {
 
         this.stop();
+        this.status = 'failed';
 
-        if (this.$storage)
+        if (show !== false)
         {
-            this.status = 'failed';
-
-            if (show !== false)
-            {
-                this.__delay = setTimeout(this.show.bind(this), show || 0);
-            }
+            this.__delay = setTimeout(this.show.bind(this), show || 0);
         }
     }
 
@@ -211,11 +206,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
         var parent, dom;
 
         this.stop();
-        
-        if (this.$storage)
-        {
-            this.status = 'hidden';
-        }
+        this.status = 'hidden';
 
         if ((dom = this.$dom) && (parent = dom.parentNode))
         {

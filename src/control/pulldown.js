@@ -50,12 +50,14 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
 
 
+    // 下拉时显示文字
+    this.pulldownText = '';
 
-    this.$property('pulldownText', '', false);
-
-    this.$property('releaseText', '', false);
+    // 可释放刷新时显示文字
+    this.releaseText = '';
     
-    this.$property('loadingText', '', false);
+    // 加载时显示文字
+    this.loadingText = '';
 
 
 
@@ -110,6 +112,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
         if (loading)
         {
+            loading.show();
             loading.style.visibility = '';
         }
     }
@@ -214,7 +217,6 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
                 if (loading)
                 {
-                    loading.stop();
                     loading.status = fail ? 'failed' : 'completed';
                 }
 
@@ -226,6 +228,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
                 
                 if (loading)
                 {
+                    loading.show();
                     loading.style.visibility = '';
                 }
             }

@@ -146,20 +146,27 @@ yaxi.Control.extend(function (Class, base) {
         if (stack.indexOf(this) < 0)
         {
             var dom = this.$dom,
+                header,
+                content,
                 any;
             
             if (!dom)
             {
                 dom = this.render();
 
-                if (any = this.header)
+                if (header = this.header)
                 {
-                    dom.appendChild(any.$dom || any.render());
+                    dom.appendChild(header.$dom || header.render());
                 }
 
-                if (any = this.content)
+                if (content = this.content)
                 {
-                    dom.appendChild(any.$dom || any.render());
+                    dom.appendChild(any = content.$dom || content.render());
+
+                    if (!header)
+                    {
+                        any.style.paddingTop = 0;
+                    }
                 }
 
                 if (any = this.cancel)

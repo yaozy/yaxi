@@ -266,8 +266,13 @@ yaxi.EventTarget = Object.extend(function (Class) {
     var tapTime = new Date();
 
 
-    var bind = document.addEventListener.bind(document);
+    // var bind = document.addEventListener.bind(document);
 
+
+    var bind = function (name, fn) {
+
+        document['on' + name] = fn;
+    }
  
 
 
@@ -361,7 +366,22 @@ yaxi.EventTarget = Object.extend(function (Class) {
         layer.close();
         return true;
     }
+
     
+    function handler(event) {
+
+        var control, e;
+
+        if (control = findControl(event.target))
+        {
+            e = new Event(event.type);
+            e.dom = event.target;
+            e.original = event;
+
+            return control.trigger(e);
+        }
+    }
+
 
 
 	bind('touchstart', function (event) {
@@ -532,25 +552,31 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     
-    bind('keydown', listener, true);
+    bind('keydown', handler, true);
 
-    bind('keypress', listener, true);
+    bind('keypress', handler, true);
 
-    bind('keyup', listener, true);
-
-
-
-    bind('mousedown', listener, true);
-
-    bind('mousemove', listener, true);
-
-    bind('mouseup', listener, true);
-
-    bind('click', listener, true);
-
-    bind('dblclick', listener, true);
+    bind('keyup', handler, true);
 
 
+
+    // PC平台启用鼠标事件
+    if (!/Mobile|Android|iOS|iPad|iPhone/.test(navigator.userAgent))
+    {
+        bind('mousedown', handler, true);
+
+        bind('mousemove', handler, true);
+
+        bind('mouseup', handler, true);
+
+        bind('click', handler, true);
+
+        bind('dblclick', handler, true);
+    }
+
+
+
+    bind('blur', handler, true);
 
     bind('focus', function (event) {
      
@@ -577,28 +603,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }, true);
 
     
-    bind('blur', listener, true);
 
+    bind('scroll', function (event) {
 
-    bind('scroll', listener, true);
-
-
-
-    function listener(event) {
-
-        var control, e;
+        var control, fn, e;
 
         if (control = findControl(event.target))
         {
-            e = new Event(event.type);
+            if (fn = control.__on_scroll)
+            {
+                fn.call(control, event.target);
+            }
+
+            e = new Event('scroll');
             e.dom = event.target;
-            e.original = event;
 
             return control.trigger(e);
         }
-    }
 
-    
+    }, true);
+
+
     
     window.addEventListener('resize', function () {
 

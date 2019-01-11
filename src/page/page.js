@@ -253,7 +253,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 	this.open = function () {
 				
-		if (this.onopening() !== false)
+		if (this.onopening() !== false && this.trigger('opening') !== false)
 		{
 			var opener = Class.current || null;
 			
@@ -262,6 +262,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			Class.current = this;
 		    this.opener = opener;
 
+			this.openTime = new Date();
 			this.onopened();
 			this.onshow(true);
 
@@ -272,7 +273,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
-			this.openTime = new Date();
 		}
 
 		return this;
@@ -281,7 +281,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType) {
 		
-		if (this.onclosing(closeType || (closeType = 'OK')) !== false)
+		if (this.onclosing(closeType || (closeType = 'OK')) !== false && 
+			this.trigger('closing', { closeType: closeType }) !== false)
 		{
 			var dom = this.$dom,
 				opener = this.opener;
@@ -318,7 +319,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	
 	this.onopening = function () {
-		
 	}
 	
 	
@@ -328,7 +328,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	
 	this.onclosing = function (closeType) {
-		
 	}
 	
 	
@@ -415,6 +414,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 
 
+
 	function open() {
 
 		var page;
@@ -431,6 +431,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		return page.open();
 	}
+
+
+	Class.open = open;
 	
 
     
