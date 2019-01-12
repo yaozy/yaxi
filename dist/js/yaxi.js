@@ -1100,14 +1100,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
     var tapTime = new Date();
 
 
-    // var bind = document.addEventListener.bind(document);
+    var bind = document.addEventListener.bind(document);
 
 
-    var bind = function (name, fn) {
-
-        document['on' + name] = fn;
-    }
- 
 
 
     function findControl(dom) {
