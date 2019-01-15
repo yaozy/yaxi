@@ -30,12 +30,20 @@ module.exports = yaxi.Page.extend(function () {
                     { text: '模型开发演示', url: 'model.js' },
                     { text: '多线程开发演示', events: { tap: runThread } },
                     {
-                        Class: yaxi.ClipImage,
-                        src: 'http://img5.imgtn.bdimg.com/it/u=49764040,3750999451&fm=26&gp=0.jpg',
-                        style: {
-                            height: '4rem'
-                        }
+                        Class: yaxi.Tab,
+                        subtype: yaxi.TabItem,
+                        children: [
+                            { text: 'abc' },
+                            { text: 'def' }
+                        ]
                     }
+                    // {
+                    //     Class: yaxi.ClipImage,
+                    //     src: 'http://img5.imgtn.bdimg.com/it/u=49764040,3750999451&fm=26&gp=0.jpg',
+                    //     style: {
+                    //         height: '4rem'
+                    //     }
+                    // }
                 ]
             }
         });

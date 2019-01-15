@@ -8156,6 +8156,30 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
+yaxi.TabItem = yaxi.Control.extend(function () {
+
+
+
+    yaxi.template(this, '<span class="yx-control yx-tabitem"><span></span></span>');
+
+
+    
+    this.$property('text', '');
+
+
+    
+    this.renderer.text = function (dom, value) {
+
+        dom.firstChild.textContent = value;
+    }
+
+
+
+}).register('TabItem');
+
+
+
+
 yaxi.Text = yaxi.Control.extend(function () {
 
 
@@ -9487,6 +9511,19 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
     
 }).register('BackButton');
+
+
+
+
+yaxi.Block = yaxi.Panel.extend(function () {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-panel yx-block"></div>');
+
+
+
+}).register('Block');
 
 
 

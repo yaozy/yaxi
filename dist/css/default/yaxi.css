@@ -36,7 +36,7 @@ a {
   background: transparent;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  color: #ff6a48;
+  color: #2d4a63;
 }
 table {
   border-collapse: collapse;
@@ -153,7 +153,7 @@ input::-moz-placeholder,
 textarea::-moz-placeholder,
 input::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
-  color: #c0c4cc;
+  color: #cccccc;
 }
 @keyframes rotating {
   0% {
@@ -171,37 +171,35 @@ textarea::-webkit-input-placeholder {
   height: 200%;
   transform-origin: 0 0;
   transform: scale(0.5, 0.5);
+  background-color: #ffffff;
+  color: #2d4a63;
+  fill: #2d4a63;
 }
 .yx-control[theme="primary"] {
-  border-color: #ff6a48;
-  color: #ff6a48;
-  fill: #ff6a48;
-}
-.yx-control[theme="second"] {
-  border-color: #66b1ff;
-  color: #66b1ff;
-  fill: #66b1ff;
+  border-color: #d0ae75;
+  color: #d0ae75;
+  fill: #d0ae75;
 }
 .yx-control[theme="success"] {
-  border-color: #5daf34;
-  color: #5daf34;
-  fill: #5daf34;
+  border-color: #71c04a;
+  color: #71c04a;
+  fill: #71c04a;
 }
 .yx-control[theme="warning"] {
-  border-color: #cf9236;
-  color: #cf9236;
-  fill: #5daf34;
+  border-color: #e89518;
+  color: #e89518;
+  fill: #e89518;
 }
 .yx-control[theme="danger"] {
   border-color: #dd6161;
   color: #dd6161;
-  fill: #5daf34;
+  fill: #e89518;
 }
 .yx-control[disabled],
 .yx-control[theme="disabled"] {
-  border-color: #72747a;
-  color: #72747a;
-  fill: #72747a;
+  border-color: #666666;
+  color: #666666;
+  fill: #666666;
   cursor: not-allowed;
 }
 .yx-control[line="top"] {
@@ -236,8 +234,6 @@ textarea::-webkit-input-placeholder {
   white-space: nowrap;
   text-align: center;
   transition: 0.1s;
-  color: #000000;
-  background-color: #e0e0e0;
   cursor: pointer;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -245,19 +241,15 @@ textarea::-webkit-input-placeholder {
   user-select: none;
 }
 .yx-button[theme="primary"] {
-  background-color: #ff6a48;
-  color: #ffffff;
-}
-.yx-button[theme="second"] {
-  background-color: #66b1ff;
+  background-color: #d0ae75;
   color: #ffffff;
 }
 .yx-button[theme="success"] {
-  background-color: #5daf34;
+  background-color: #71c04a;
   color: #ffffff;
 }
 .yx-button[theme="warning"] {
-  background-color: #cf9236;
+  background-color: #e89518;
   color: #ffffff;
 }
 .yx-button[theme="danger"] {
@@ -266,8 +258,8 @@ textarea::-webkit-input-placeholder {
 }
 .yx-button[disabled],
 .yx-button[theme][disabled] {
-  background-color: #d3d4d6;
-  color: #72747a;
+  background-color: #666666;
+  color: #666666;
   cursor: not-allowed;
 }
 .yx-icon {
@@ -300,7 +292,7 @@ textarea::-webkit-input-placeholder {
   line-height: 0.6rem;
   text-align: center;
   font-size: 0.14rem;
-  color: #c0c4cc;
+  color: #b9ced4;
 }
 .yx-loading-img {
   display: inline-block;
@@ -315,14 +307,14 @@ textarea::-webkit-input-placeholder {
 .yx-progressbar {
   position: relative;
   height: 0.1rem;
-  background-color: #e0e0e0;
+  background-color: #cccccc;
 }
 .yx-progressbar > div {
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  background-color: #ff6a48;
+  background-color: #d0ae75;
 }
 .yx-pulldown {
   position: relative;
@@ -330,8 +322,8 @@ textarea::-webkit-input-placeholder {
   overflow: hidden;
   text-align: center;
   font-size: 0.14rem;
-  background-color: #f8f8f8;
-  fill: #c0c4cc;
+  background-color: #ffffff;
+  fill: #b9ced4;
 }
 .yx-pulldown-body {
   position: absolute;
@@ -341,7 +333,7 @@ textarea::-webkit-input-placeholder {
   top: 50%;
   left: 0;
   margin-top: -0.1rem;
-  color: #c0c4cc;
+  color: #b9ced4;
 }
 .yx-pulldown-body > svg {
   margin-right: 0.02rem;
@@ -361,11 +353,15 @@ textarea::-webkit-input-placeholder {
   height: 100%;
   flex-shrink: 1;
 }
+.yx-tabitem {
+  display: inline-block;
+  text-align: center;
+}
 .yx-text {
   display: inline-block;
 }
 .yx-gap {
-  background-color: #f8f8f8;
+  background-color: #ffffff;
   height: 0.1rem;
 }
 .yx-panel {
@@ -375,7 +371,6 @@ textarea::-webkit-input-placeholder {
   display: block;
 }
 [layout="block-fill"] > * {
-  display: block;
   width: 100%;
   margin-bottom: 0.05rem;
 }
@@ -435,7 +430,7 @@ textarea::-webkit-input-placeholder {
   width: 2rem;
   height: 0.3rem;
   line-height: 0.3rem;
-  border: 1px solid #c0c4cc;
+  border: 1px solid #8094a5;
   padding: 0 0.05rem;
   background-color: #ffffff;
   font-size: 0.16rem;
@@ -449,9 +444,9 @@ textarea::-webkit-input-placeholder {
 }
 .yx-textbox[disabled],
 .yx-textbox[theme="disabled"] {
-  border-color: #a6a9ad;
-  background-color: #d3d4d6;
-  color: #72747a;
+  border-color: #8094a5;
+  background-color: #666666;
+  color: #666666;
   cursor: not-allowed;
 }
 .yx-checkbox {
@@ -477,7 +472,7 @@ textarea::-webkit-input-placeholder {
   display: inline-block;
   width: 2rem;
   height: 0.5rem;
-  border: 1px solid #c0c4cc;
+  border: 1px solid #8094a5;
   background-color: #ffffff;
 }
 .yx-memo > textarea {
@@ -512,22 +507,22 @@ textarea::-webkit-input-placeholder {
   text-align: center;
   font-family: serif;
   font-weight: lighter;
-  color: #606266;
+  color: #8094a5;
   cursor: default;
 }
 .yx-number-plus {
   right: 0;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid #8094a5;
   font-size: 0.16rem;
 }
 .yx-number-minus {
   left: 0;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #8094a5;
   font-size: 0.2rem;
 }
 .yx-number-plus[disabled],
 .yx-number-minus[disabled] {
-  color: #e0e0e0;
+  color: #666666;
 }
 .yx-password {
   position: relative;
@@ -585,7 +580,7 @@ textarea::-webkit-input-placeholder {
   height: 0.25rem;
   margin-top: -0.125rem;
   border-radius: 0.125rem;
-  background-color: #c0c4cc;
+  background-color: #b9ced4;
 }
 .yx-switchbutton-button {
   position: absolute;
@@ -595,17 +590,21 @@ textarea::-webkit-input-placeholder {
   width: 0.25rem;
   height: 0.25rem;
   margin-top: -0.125rem;
-  border: 1px solid #c0c4cc;
+  border: 1px solid #8094a5;
   border-radius: 0.125rem;
   background-color: white;
 }
 .yx-switchbutton-checked > .yx-switchbutton-bar {
-  background-color: #ff6a48;
+  background-color: #b9ced4;
 }
 .yx-switchbutton-checked > .yx-switchbutton-button {
   left: auto;
   right: 0;
   transition: right 1s;
+}
+.yx-block {
+  margin-top: 0.07rem;
+  padding: 0.15rem;
 }
 .yx-dialog {
   position: absolute;
@@ -671,19 +670,18 @@ textarea::-webkit-input-placeholder {
   line-height: 0.45rem;
   text-align: center;
   overflow: hidden;
-  border-bottom: 1px solid #202833;
-  background-color: #202833;
-  color: #ffffff;
-  fill: #ffffff;
+  background-color: #ffffff;
 }
 .yx-content {
   flex-grow: 1;
   overflow-x: hidden;
   overflow-y: auto;
+  background-color: #f7f7f7;
 }
 .yx-footer {
   flex-shrink: 0;
   overflow: hidden;
+  background-color: #ffffff;
 }
 .yx-backbutton {
   position: absolute;
@@ -692,7 +690,6 @@ textarea::-webkit-input-placeholder {
   width: 0.45rem;
   height: 100%;
   z-index: 10;
-  color: #ffffff;
   font-size: 0.18rem;
 }
 .yx-backbutton > span {
@@ -713,11 +710,9 @@ textarea::-webkit-input-placeholder {
 }
 .yx-toast {
   position: absolute;
-  border: 1px solid #606060;
+  border: 1px solid #8094a5;
   padding: 0.1rem;
   border-radius: 0.05rem;
-  background-color: #606060;
-  color: #ffffff;
   z-index: 30;
 }
 .yx-toast > * {
@@ -742,7 +737,7 @@ textarea::-webkit-input-placeholder {
 .yx-actionsheet-cancel {
   display: block;
   background-color: #ffffff;
-  border: 1px solid #c0c4cc;
+  border: 1px solid #8094a5;
   text-align: center;
 }
 .yx-actionsheet-header {
@@ -752,31 +747,28 @@ textarea::-webkit-input-placeholder {
   right: 0;
   height: 0.5rem;
   line-height: 0.52rem;
-  color: #606060;
   text-align: center;
   z-index: 1;
 }
 .yx-actionsheet-content {
   padding-top: 0.5rem;
   border-radius: 0.05rem;
-  color: #000000;
-  box-shadow: 0 0 8px #c0c4cc;
+  box-shadow: 0 0 8px #8094a5;
 }
 .yx-actionsheet-content > * {
   display: block;
   height: 0.5rem;
   line-height: 0.5rem;
-  border-top: 0.5px solid #c0c4cc;
+  border-top: 0.5px solid #8094a5;
 }
 .yx-actionsheet-cancel {
   margin-top: 0.1rem;
   height: 0.5rem;
   line-height: 0.5rem;
   border-radius: 0.05rem;
-  color: #606060;
   font-size: 0.14rem;
   font-weight: bold;
-  box-shadow: 0 0 8px #c0c4cc;
+  box-shadow: 0 0 8px #8094a5;
 }
 .yx-carousel {
   position: relative;
@@ -806,7 +798,7 @@ textarea::-webkit-input-placeholder {
   width: 0.2rem;
   height: 0.2rem;
   line-height: 0.2rem;
-  fill: #c0c4cc;
+  fill: #ffffff;
 }
 .yx-carousel-dot > svg {
   width: 0.1rem;
@@ -814,7 +806,7 @@ textarea::-webkit-input-placeholder {
   vertical-align: middle;
 }
 .yx-carousel-selected {
-  fill: #ff6a48;
+  fill: #d0ae75;
 }
 .yx-clipimage {
   position: relative;
@@ -857,8 +849,8 @@ textarea::-webkit-input-placeholder {
 .yx-clipimage-bl,
 .yx-clipimage-br {
   position: absolute;
-  width: 0.2rem;
-  height: 0.2rem;
+  width: 0.3rem;
+  height: 0.3rem;
   border: 6px solid #00ff00;
 }
 .yx-clipimage-tl {
@@ -908,7 +900,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-gestureinput-point {
   position: absolute;
-  background-color: #c0c4cc;
+  background-color: #b9ced4;
 }
 .yx-gestureinput-point[choose] {
   animation: yx-gestureinput-choose 1s linear;
@@ -927,7 +919,7 @@ textarea::-webkit-input-placeholder {
 .yx-segment {
   position: relative;
   height: 0.4rem;
-  fill: #ff6a48;
+  fill: #d0ae75;
 }
 .yx-segment-line {
   position: absolute;
@@ -936,7 +928,7 @@ textarea::-webkit-input-placeholder {
   right: 0.15rem;
   height: 4px;
   margin-top: -2px;
-  background-color: #c0c4cc;
+  background-color: #b9ced4;
 }
 .yx-segment-body {
   position: absolute;
@@ -957,7 +949,7 @@ textarea::-webkit-input-placeholder {
   transform: translateX(-0.1rem);
 }
 .yx-segment-node > circle:first-child {
-  fill: #c0c4cc;
+  fill: #ffffff;
 }
 .yx-segment-node > circle:last-child {
   fill: #ffffff;

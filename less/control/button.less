@@ -6,8 +6,6 @@
     white-space: nowrap;
     text-align: center;
     transition: .1s;
-    color: @default-color-1;
-    background-color: @default-color-4;
     cursor: pointer;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -16,33 +14,28 @@
 }
 
 .yx-button[theme="primary"] {
-    background-color: @primary-color-1;
-    color: @back-color;
-}
-
-.yx-button[theme="second"] {
-    background-color: @second-color-1;
+    background-color: @font-primary-color;
     color: @back-color;
 }
 
 .yx-button[theme="success"] {
-    background-color: @success-color-1;
+    background-color: @back-success-color;
     color: @back-color;
 }
 
 .yx-button[theme="warning"] {
-    background-color: @warning-color-1;
+    background-color: @back-warning-color;
     color: @back-color;
 }
 
 .yx-button[theme="danger"] {
-    background-color: @danger-color-1;
+    background-color: @back-danger-color;
     color: @back-color;
 }
 
 .yx-button[disabled],
 .yx-button[theme][disabled] {
-    background-color: @disabled-color-5;
-	color: @disabled-color-1;
+    background-color: @back-disabled-color;
+	color: @font-disabled-color;
     cursor: not-allowed;
 }
