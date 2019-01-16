@@ -6,6 +6,22 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
 
+    // 布局类型
+    this.$property('layout', '');
+
+
+    // 布局详细数据(仅对layout === row || column有效)
+    this.$property('detail', '');
+
+
+    // 布局间隙(仅对layout === row || column有效)
+    this.$property('gap', 0);
+
+
+    // url基础路径(没置了此路径点击时将打开子项绑定的url)
+    this.$property('baseURL', '');
+
+
 
     // 子控件集合
     Object.defineProperty(this, 'children', {
@@ -50,11 +66,11 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     // 扩展容器功能
-    yaxi.container.call(this, base);
+    yaxi.impl.container.call(this, base);
 
 
     // 扩展下拉刷新功能
-    yaxi.__extend_pulldown.call(this);
+    yaxi.impl.pulldown.call(this);
 
 
 

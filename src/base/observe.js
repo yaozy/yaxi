@@ -3,6 +3,8 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     var create = Object.create;
+
+    var patch = yaxi.__observe_patch;
     
 
 
@@ -53,7 +55,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
     
     // 定义属性
-    this.$property = yaxi.__extend_properties(function (name, change) {
+    this.$property = yaxi.impl.properties(function (name, change) {
 
         return change ? function () {
 
@@ -190,52 +192,6 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     }
 
 
-
-
-    var patches = yaxi.__patches = [];
-
-    var delay = 0;
-
-
-    yaxi.__add_patch = function (target) {
-
-        if (!delay)
-        {
-            delay = setTimeout(update);
-        }
-
-        patches.push(target);
-    }
-
-
-    function update() {
-
-        var list = patches,
-            index = 0,
-            item;
-
-        while (item = list[index++])
-        {
-            item.__update_patch();
-        }
-
-        list.length = delay = 0;
-    }
-
-
-    function patch(target) {
-
-        if (!delay)
-        {
-            delay = setTimeout(update);
-        }
-
-        patches.push(target);
-
-        return target.__changes = {};
-    }
-
-
     
     this.__update_patch = function () {
 
@@ -253,13 +209,6 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
             }
         }
     }
-
-
-
-    // 更新变更
-    yaxi.__patch_update = update;
-
-    
 
 
 

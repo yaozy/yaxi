@@ -12,6 +12,25 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	mask.className = 'yx-mask';
 	
 
+	
+	// 注册检查布局事件
+	yaxi.on('yaxi-check-layout', function () {
+
+		var list = stack,
+			index = 0,
+			item;
+
+		while (item = list[index++])
+		{
+			if (item.$dom)
+			{
+				item.__check_layout();
+			}
+		}
+
+	});
+
+
 
     yaxi.template(this, '<div class="yx-control yx-dialog"></div>');
 	
@@ -130,12 +149,14 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	}
 
 
-	
+
 	this.open = function () {
 		
-		if (stack.indexOf(this) >= 0 || this.onopening() === false)
+		if (stack.indexOf(this) >= 0 ||
+			this.onopening() === false ||
+			this.trigger('opening') === false)
 		{
-			return false;
+			return this;
 		}
 
 		var host = yaxi.__dom_host;
@@ -143,10 +164,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		host.appendChild(mask);
 		host.appendChild(this.$dom || this.render());
 
+		this.onmounted();
+
 		this.onopened();
 		this.onshow();
-
-		this.trigger('opened');
 
 		stack.push(this);
 		computePosition.call(this);
@@ -157,64 +178,66 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 			window.addEventListener('resize', computePosition, true);
 		}
 
+		this.trigger('opened');
+		this.__check_layout();
+
 		return this;
 	}
 	
 	
 	
-	this.close = function (closeType) {
+	this.close = function (closeType, payload) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 || this.onclosing(closeType || (closeType = 'OK')) === false)
+		if (index < 0 && (payload = this.__check_close(closeType, payload)))
 		{
-			return false;
-		}
+			var dom = this.$dom;
 
-		stack.splice(index, 1);
+			stack.splice(index, 1);
 
-		var dom = this.$dom;
+			if (dom && dom.parentNode)
+			{
+				dom.parentNode.removeChild(dom);
+			}
 
-		if (dom && dom.parentNode)
-		{
-			dom.parentNode.removeChild(dom);
-		}
+			if (dom = mask.parentNode)
+			{
+				if (stack[0])
+				{
+					dom = stack[status.length - 1].$dom;
+					dom.parentNode.insertBefore(mask, dom);
+				}
+				else
+				{
+					dom.removeChild(mask);
+				}
+			}
 
-		if (dom = mask.parentNode)
-		{
 			if (stack[0])
 			{
-				dom = stack[status.length - 1].$dom;
-				dom.parentNode.insertBefore(mask, dom);
+				computePosition();
 			}
 			else
 			{
-				dom.removeChild(mask);
+				document.removeEventListener(eventName, checkTap, true);
+				window.removeEventListener('resize', computePosition, true);
 			}
+
+			this.onhide();
+			this.onclosed(closeType, payload);
+
+			this.trigger('closed', payload);
+
+			if (this.autoDestroy)
+			{
+				this.destroy();
+			}
+
+			return true;
 		}
 
-		if (stack[0])
-		{
-			computePosition();
-		}
-		else
-		{
-			document.removeEventListener(eventName, checkTap, true);
-			window.removeEventListener('resize', computePosition, true);
-		}
-
-		this.onhide();
-		this.onclosed(closeType);
-
-		this.trigger('closed', {
-
-			closeType: closeType
-		});
-
-		if (this.autoDestroy)
-		{
-			this.destroy();
-		}
+		return false;
 	}
 	
 

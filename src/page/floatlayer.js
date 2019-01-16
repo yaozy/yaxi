@@ -9,6 +9,25 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 	yaxi.template(this, '<div class="yx-control yx-floatlayer"></div>');
 
 
+		
+	// 注册检查布局事件
+	yaxi.on('yaxi-check-layout', function () {
+
+		var list = stack,
+			index = 0,
+			item;
+
+		while (item = list[index++])
+		{
+			if (item.$dom)
+			{
+				item.__check_layout();
+			}
+		}
+		
+	});
+	
+
 	
 	
 	this.show = function () {

@@ -1,4 +1,4 @@
-yaxi.__extend_properties = function (get, set) {
+yaxi.impl.properties = function (get, set) {
 
 
 

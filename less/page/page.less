@@ -1,16 +1,17 @@
 .yx-page {
     position: absolute;
-    display: -webkit-flex;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    flex-flow: column;
-    align-items: stretch;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: @back-color;
 }
 
 .yx-header {
-    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     height: .45rem;
     line-height: .45rem;
     text-align: center;
@@ -19,14 +20,21 @@
 }
 
 .yx-content {
-    flex-grow: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
     background-color: @back-content-color;
 }
 
 .yx-footer {
-    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     background-color: @back-footer-color;
 }

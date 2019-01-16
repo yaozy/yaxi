@@ -19,7 +19,7 @@ module.exports = yaxi.Page.extend(function () {
             },
             content: {
                 subtype: yaxi.Button,
-                layout: 'block-fill',
+                layout: 'block',
                 baseURL: require.baseURL,
                 openURL: true,
                 style: {
@@ -45,6 +45,11 @@ module.exports = yaxi.Page.extend(function () {
                     //     }
                     // }
                 ]
+            },
+            footer: {
+                style: {
+                    height: '.5rem'
+                }
             }
         });
     }

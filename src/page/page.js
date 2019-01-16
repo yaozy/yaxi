@@ -73,6 +73,10 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
+    // url基础路径(没置了此路径点击时将打开子项绑定的url)
+	this.$property('baseURL', '');
+	
+
 	// 是否自动销毁
 	this.$property('autoDestroy', true, false);
 
@@ -106,6 +110,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			return this.__footer || (this.__footer = find(this.__children, 'Footer'));
 		}
 	});
+	
 
 
 	function find(children, name) {
@@ -246,8 +251,20 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 	
 	// 扩展容器功能
-	yaxi.container.call(this, base);
+	yaxi.impl.container.call(this, base);
 
+
+
+	// 注册检查布局事件
+	yaxi.on('yaxi-check-layout', function () {
+
+		var page;
+
+		if ((page = this.Page.current) && page.$dom)
+		{
+			page.__check_layout();
+		}
+	});
 
 
 
@@ -260,7 +277,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
-		    this.opener = opener;
+			this.opener = opener;
+			
+			this.onmounted();
 
 			this.openTime = new Date();
 			this.onopened();
@@ -273,22 +292,53 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
+			this.__check_layout();
 		}
 
 		return this;
 	}
 	
+
+	this.__check_close = function (closeType, payload) {
+
+		if (closeType)
+		{
+			if (typeof closeType !== 'string')
+			{
+				payload = closeType;
+				closeType = 'OK';
+			}
+		}
+		else
+		{
+			closeType = 'OK';
+		}
+
+		if (this.onclosing(closeType, payload) === false)
+		{
+			return false;
+		}
+
+		(payload || (payload = {})).closeType = closeType;
+
+		if (this.trigger('closing', payload) === false)
+		{
+			return false;
+		}
+
+		return payload;
+	}
+
 	
-	this.close = function (closeType) {
+	this.close = function (closeType, payload) {
 		
-		if (this.onclosing(closeType || (closeType = 'OK')) !== false && 
-			this.trigger('closing', { closeType: closeType }) !== false)
+		if (payload = this.__check_close(closeType, payload))
 		{
 			var dom = this.$dom,
 				opener = this.opener;
 			
 			this.onhide();
-			this.onclosed(closeType);
+			this.onclosed(closeType, payload);
 
 			if (dom && dom.parentNode)
 			{
@@ -299,14 +349,16 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 			yaxi.toast.hide();
 
-			this.trigger('closed', { closeType: closeType }) !== false;
+			this.trigger('closed', payload) !== false;
 			this.opener = null;
 
 			// 如果当前窗口是隐藏状态则显示当前窗口
 			if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
 			{
 				dom.style.display = '';
+
 				opener.onshow();
+				opener.__check_layout();
 			}
 
 			if (this.autoDestroy)
@@ -314,7 +366,11 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				// 延时销毁以加快页面切换速度
 				setTimeout(this.destroy.bind(this), 100);
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 	
 	
@@ -327,11 +383,11 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	}
 	
 	
-	this.onclosing = function (closeType) {
+	this.onclosing = function (closeType, payload) {
 	}
 	
 	
-	this.onclosed = function (closeType) {
+	this.onclosed = function (closeType, payload) {
 		
 	}
 
@@ -380,7 +436,39 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
         return dom;
     }
 	
+
+
+	this.__check_layout = function () {
+
+		if (this.$dom)
+		{
+			var children = this.__children,
+				style = this.content.$dom.style,
+				control;
+
+			if (control = this.header)
+			{
+				style.top = control.$dom.offsetHeight + 'px';
+			}
+
+			if (control = this.footer)
+			{
+				style.bottom = control.$dom.offsetHeight + 'px';
+			}
+
+			for (var i = 0, l = children.length; i < l; i++)
+			{
+				control = children[i];
+
+				if (control.$dom && control.__check_layout)
+				{
+					control.__check_layout();
+				}
+			}
+		}
+    }
 	
+
 	
 	this.destroy = function () {
 
@@ -402,6 +490,11 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		}
 
 		base.destroy.call(this);
+
+		if (any = this.$dom)
+		{
+			any.innerHTML = '';
+		}
 	}
 
 

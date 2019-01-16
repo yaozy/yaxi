@@ -369,10 +369,7 @@ textarea::-webkit-input-placeholder {
 }
 [layout="block"] > * {
   display: block;
-}
-[layout="block-fill"] > * {
   width: 100%;
-  margin-bottom: 0.05rem;
 }
 [layout="inline"] > * {
   display: inline;
@@ -656,16 +653,17 @@ textarea::-webkit-input-placeholder {
 }
 .yx-page {
   position: absolute;
-  display: -webkit-flex;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-flow: column;
-  align-items: stretch;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #ffffff;
 }
 .yx-header {
-  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 0.45rem;
   line-height: 0.45rem;
   text-align: center;
@@ -673,13 +671,20 @@ textarea::-webkit-input-placeholder {
   background-color: #ffffff;
 }
 .yx-content {
-  flex-grow: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: #f7f7f7;
 }
 .yx-footer {
-  flex-shrink: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
   background-color: #ffffff;
 }

@@ -72,6 +72,10 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     this.$property('pagination', 'dot');
 
 
+    // url基础路径(没置了此路径点击时将打开子项绑定的url)
+    this.$property('baseURL', '');
+
+
 
     // 子控件集合
     Object.defineProperty(this, 'children', {
@@ -118,7 +122,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
     // 扩展容器功能
-    yaxi.container.call(this, base);
+    yaxi.impl.container.call(this, base);
 
 
 

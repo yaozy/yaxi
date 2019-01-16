@@ -1,75 +1,4 @@
-yaxi.container = function (base) {
-
-
-
-    // 布局类型
-    this.$property('layout', '');
-
-
-    // url基础路径
-    this.$property('baseURL', '', false);
-
-
-    // 是否在点击时打开子项绑定的url
-    this.$property('openURL', {
-    
-        defaultValue: false,
-
-        converter: function (value) {
-
-            value = !!value;
-
-            if (value !== this.openURL)
-            {
-                if (value)
-                {
-                    this.on('tap', openURL);
-                }
-                else
-                {
-                    this.off('tap', openURL);
-                }
-            }
-            
-            return value;
-        }
-
-    }, false);
-
-
-
-    function openURL(event) {
-
-        var control = event.target,
-            url;
-
-        while (control && control !== this)
-        {
-            if (url = control.url)
-            {
-                var Class = yaxi.loadModule(this.baseURL, url),
-                    args = control.args;
-
-                if (args && args.length > 0)
-                {
-                    control = Object.create(Class.prototype);
-
-                    Class.apply(control, args);
-                    control.open();
-                }
-                else
-                {
-                    new Class().open();
-                }
-                
-                event.stop();
-                return false;
-            }
-
-            control = control.parent;
-        }
-    }
-
+yaxi.impl.container = function (base) {
 
 
 
@@ -86,7 +15,6 @@ yaxi.container = function (base) {
             }
         }
     }
-
 
 
     // 查找符合指定选择器的子对象
@@ -242,9 +170,202 @@ yaxi.container = function (base) {
 
 
 
+    this.onmounted = function () {
+
+        if (this.$dom)
+        {
+            var children = this.__children;
+    
+            for (var i = 0, l = children.length; i < l; i++)
+            {
+                children[i].onmounted();
+            }
+        }
+    }
+
+
+
+    var layouts = Object.create(null);
+
+    var defaultLayout = parseLayout('? * ?');
+
+
+
+    function parseLayout(data) {
+
+        var list = data.match(/\S/g),
+            length = list.length,
+            result;
+
+        if (length > 0)
+        {
+            result = [];
+            
+            for (var i = 0; i < length; i++)
+            {
+                var text = list[i],
+                    last = text[text.length - 1],
+                    none = 0;
+
+                if (last === '?')
+                {
+                    result.push([3]);
+                    continue;
+                }
+                
+                if (last === '!')
+                {
+                    none = 1;
+                    last = text[text.length - 2];
+                }
+
+                if (last === '*') // 权重
+                {
+                    result.push([2, parseInt(text) || 100, none]);
+                }
+                else if (last === '%') // 百分比
+                {
+                    result.push([1, parseFloat(text), none]);
+                }
+                else if (last === 'x') // px
+                {
+                    result.push([0, parseInt(text), none]);
+                }
+                else // rem
+                {
+                    result.push([0, parseFloat(text) * yaxi.rem + .5 | 0, none]);
+                }
+            }
+        }
+        else
+        {
+            result = defaultLayout;
+        }
+
+        return layouts[data] = result;
+    }
+
+
+
+    this.__check_layout = function () {
+
+        var children = this.__children;
+            storage = this.$storage,
+            layout = storage.layout;
+
+        if (layout === 'row' || layout === 'column')
+        {
+            var last = this.__layout,
+                data = this.$dom,
+                width = data.clientWidth,
+                height = data.clientHeight;
+
+            // 布局发生变化或容器发生变化则重新排列
+            if (!last || last.width !== width || last.height !== height)
+            {
+                data = storage.detail;
+                data = layouts[data] || parseLayout(data) || defaultLayout;
+
+                arrange(this, width, height, layout, data, storage.gap);
+            }
+        }
+
+        for (var i = 0, l = children.length; i < l; i++)
+        {
+            var control = children[i];
+
+            if (control.__check_layout && control.$dom)
+            {
+                control.__check_layout();
+            }
+        }
+    }
+
+
+    function arrange(self, width, height, layout, detail, gap) {
+
+        
+    }
+
+
+    
+    // 窗口变化时检查布局
+    window.addEventListener('resize', function () {
+
+        yaxi.trigger('yaxi-check-layout');
+        
+    });
+
+
+
+
     this.renderer.layout = function (dom, value) {
 
+        // 标记布局发生了变化
+        this.__layout = null;
+
         dom.setAttribute('layout', value);
+    }
+
+
+    this.renderer.detail = this.renderer.gap = function () {
+
+        // 标记布局发生了变化
+        this.__layout = null;
+    }
+
+    
+    this.renderer.baseURL = function (dom, value) {
+
+        if (value)
+        {
+            if (!this.hasEvent('tap', openURL))
+            {
+                this.on('tap', openURL);
+            }
+        }
+        else
+        {
+            this.off('tap', openURL);
+        }
+    }
+
+
+    function openURL(event) {
+
+        var control = event.target,
+            url;
+
+        while (control && control !== this)
+        {
+            if (url = control.url)
+            {
+                var Class = yaxi.loadModule(this.baseURL, url),
+                    args = control.args;
+
+                if (!Class.prototype.open)
+                {
+                    continue;
+                }
+
+                if (args && args.length > 0)
+                {
+                    control = Object.create(Class.prototype);
+
+                    Class.apply(control, args);
+                    control.open();
+                }
+                else
+                {
+                    new Class().open();
+                }
+                
+                event.stop();
+                return false;
+            }
+
+            control = control.parent;
+        }
     }
 
 
@@ -295,7 +416,7 @@ yaxi.container = function (base) {
 
 
 
-yaxi.__extend_pulldown = function () {
+yaxi.impl.pulldown = function () {
 
     
     var pulldown, loading, overflowY;

@@ -56,3 +56,7 @@ Object.extend = function (fn, Class) {
 
 	return Class;
 }
+
+
+// 接口实现
+yaxi.impl = Object.create(null);

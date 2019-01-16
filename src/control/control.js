@@ -525,6 +525,11 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+    // 挂载处理
+    this.onmounted = function () {
+    }
+
+
 
     this.__update_patch = function () {
 

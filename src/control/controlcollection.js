@@ -432,6 +432,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
             if (control.parent === owner)
             {
                 dom.appendChild(control.$dom || control.render());
+                control.onmounted();
             }
         }
 
