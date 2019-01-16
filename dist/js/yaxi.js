@@ -5629,7 +5629,8 @@ yaxi.impl.container = function (base) {
 
 
 
-    this.__check_layout = function () {
+    // 重算布局
+    this.invalidate = function () {
 
         var children = this.__children;
             storage = this.$storage,
@@ -5656,9 +5657,9 @@ yaxi.impl.container = function (base) {
         {
             var control = children[i];
 
-            if (control.__check_layout && control.$dom)
+            if (control.invalidate && control.$dom)
             {
-                control.__check_layout();
+                control.invalidate();
             }
         }
     }
@@ -5718,13 +5719,23 @@ yaxi.impl.container = function (base) {
             style = styleSheet = style.sheet;
         }
 
-        if (value && !style[value])
+        if (value && (value = value.split(' ', 2))[0])
         {
-            style.addRule('.yx-control[gap="' + value + '"]>*', 'margin: ' + value + ' 0 0');
-            style[value] = 1;
-        }
+            var type = value[1] !== 'top' ? 'left' : 'top',
+                key = type + ':' + (value = value[0]);
 
-        dom.setAttribute('gap', value);
+            if (!style[key])
+            {
+                style.addRule('.yx-control[gap="' + key + '"]>*', 'margin-' + type + ': ' + value);
+                style[key] = 1;
+            }
+            
+            dom.setAttribute('gap', key);
+        }
+        else
+        {
+            dom.removeAttribute('gap');
+        }
     }
 
 
@@ -5733,9 +5744,10 @@ yaxi.impl.container = function (base) {
 
         if (value)
         {
-            if (!this.hasEvent('tap', openURL))
+            if (!this.__baseURL)
             {
                 this.on('tap', openURL);
+                this.__baseURL = value;
             }
         }
         else
@@ -5754,7 +5766,7 @@ yaxi.impl.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = yaxi.loadModule(this.baseURL, url),
+                var Class = yaxi.loadModule(this.__baseURL, url),
                     args = control.args;
 
                 if (!Class.prototype.open)
@@ -6929,7 +6941,14 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     renderer.vertical = function (dom, value) {
 
-        dom.setAttribute('layout', value ? 'column-center' : 'row-center');
+        if (value)
+        {
+            dom.setAttribute('vertical', '1');
+        }
+        else
+        {
+            dom.removeAttribute('vertical');
+        }
     }
 
 
@@ -9463,7 +9482,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		if ((page = this.Page.current) && page.$dom)
 		{
-			page.__check_layout();
+			page.invalidate();
 		}
 	});
 
@@ -9495,7 +9514,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
-			this.__check_layout();
+			this.invalidate();
 
 			console.log('open page time: ' + (performance.now() - time) + 'ms');
 		}
@@ -9536,7 +9555,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			dom.style.display = '';
 
 			opener.onshow();
-			opener.__check_layout();
+			opener.invalidate();
 		}
 
 		if (this.autoDestroy)
@@ -9613,7 +9632,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 
 
-	this.__check_layout = function () {
+	this.invalidate = function () {
 
 		if (this.$dom)
 		{
@@ -9635,9 +9654,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			{
 				control = children[i];
 
-				if (control.$dom && control.__check_layout)
+				if (control.$dom && control.invalidate)
 				{
-					control.__check_layout();
+					control.invalidate();
 				}
 			}
 		}
@@ -9841,7 +9860,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		{
 			if (item.$dom)
 			{
-				item.__check_layout();
+				item.invalidate();
 			}
 		}
 
@@ -9996,7 +10015,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		}
 
 		this.trigger('opened');
-		this.__check_layout();
+		this.invalidate();
 
 		return this;
 	}
@@ -10089,7 +10108,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 		{
 			if (item.$dom)
 			{
-				item.__check_layout();
+				item.invalidate();
 			}
 		}
 		

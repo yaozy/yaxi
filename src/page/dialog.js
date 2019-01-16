@@ -24,7 +24,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		{
 			if (item.$dom)
 			{
-				item.__check_layout();
+				item.invalidate();
 			}
 		}
 
@@ -179,7 +179,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		}
 
 		this.trigger('opened');
-		this.__check_layout();
+		this.invalidate();
 
 		return this;
 	}

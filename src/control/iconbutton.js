@@ -80,7 +80,14 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     renderer.vertical = function (dom, value) {
 
-        dom.setAttribute('layout', value ? 'column-center' : 'row-center');
+        if (value)
+        {
+            dom.setAttribute('vertical', '1');
+        }
+        else
+        {
+            dom.removeAttribute('vertical');
+        }
     }
 
 

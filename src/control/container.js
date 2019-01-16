@@ -194,12 +194,11 @@ yaxi.impl.container = function (base) {
     function parseLayout(data) {
 
         var list = data.match(/\S/g),
-            length = list.length,
-            result;
+            length = list.length;
 
         if (length > 0)
         {
-            result = [];
+            var weight, size;
             
             for (var i = 0; i < length; i++)
             {
@@ -209,7 +208,8 @@ yaxi.impl.container = function (base) {
 
                 if (last === '?')
                 {
-                    result.push([3]);
+                    list[i] = [3];
+                    size = 1;
                     continue;
                 }
                 
@@ -221,33 +221,41 @@ yaxi.impl.container = function (base) {
 
                 if (last === '*') // 权重
                 {
-                    result.push([2, parseInt(text) || 100, none]);
+                    list[i] = [2, parseFloat(text) || 100, none];
+                    weight = 1;
                 }
                 else if (last === '%') // 百分比
                 {
-                    result.push([1, parseFloat(text), none]);
+                    list[i] = [1, parseFloat(text), none];
+                    size = 1;
                 }
                 else if (last === 'x') // px
                 {
-                    result.push([0, parseInt(text), none]);
+                    list[i] = [0, parseInt(text), none];
+                    size = 1;
                 }
                 else // rem
                 {
-                    result.push([0, parseFloat(text) * yaxi.rem + .5 | 0, none]);
+                    list[i] = [0, parseFloat(text) * yaxi.rem + .5 | 0, none];
+                    size = 1;
                 }
             }
+
+            list.weight = weight;
+            list.size = size;
         }
         else
         {
-            result = defaultLayout;
+            list = defaultLayout;
         }
 
-        return layouts[data] = result;
+        return layouts[data] = list;
     }
 
 
 
-    this.__check_layout = function () {
+    // 重算布局
+    this.invalidate = function () {
 
         var children = this.__children;
             storage = this.$storage,
@@ -266,7 +274,14 @@ yaxi.impl.container = function (base) {
                 data = storage.detail;
                 data = layouts[data] || parseLayout(data) || defaultLayout;
 
-                arrange(this, width, height, layout, data, storage.gap);
+                if (layout === 'row')
+                {
+                    arrangeRow(this, width, data, storage.gap);
+                }
+                else
+                {
+                    arrangeColumn(this, height, data, storage.gap);
+                }
             }
         }
 
@@ -274,17 +289,35 @@ yaxi.impl.container = function (base) {
         {
             var control = children[i];
 
-            if (control.__check_layout && control.$dom)
+            if (control.invalidate && control.$dom)
             {
-                control.__check_layout();
+                control.invalidate();
             }
         }
     }
 
 
-    function arrange(self, width, height, layout, detail, gap) {
+    function arrangeRow(self, width, list, gap) {
 
-        
+        var fixed;
+
+        if (list.size)
+        {
+            for (var i = 0, l = list.length; i < l; i++)
+            {
+                var item = list[i];
+
+                // switch (item[0])
+                // {
+                //     // case 
+                // }
+            }
+        }
+    }
+
+
+    function arrangeColumn(self, height, list, gap) {
+
     }
 
 
@@ -336,13 +369,23 @@ yaxi.impl.container = function (base) {
             style = styleSheet = style.sheet;
         }
 
-        if (value && !style[value])
+        if (value && (value = value.split(' ', 2))[0])
         {
-            style.addRule('.yx-control[gap="' + value + '"]>*', 'margin: ' + value + ' 0 0');
-            style[value] = 1;
-        }
+            var type = value[1] !== 'top' ? 'left' : 'top',
+                key = type + ':' + (value = value[0]);
 
-        dom.setAttribute('gap', value);
+            if (!style[key])
+            {
+                style.addRule('.yx-control[gap="' + key + '"]>*', 'margin-' + type + ': ' + value);
+                style[key] = 1;
+            }
+            
+            dom.setAttribute('gap', key);
+        }
+        else
+        {
+            dom.removeAttribute('gap');
+        }
     }
 
 
@@ -351,9 +394,10 @@ yaxi.impl.container = function (base) {
 
         if (value)
         {
-            if (!this.hasEvent('tap', openURL))
+            if (!this.__baseURL)
             {
                 this.on('tap', openURL);
+                this.__baseURL = value;
             }
         }
         else
@@ -372,7 +416,7 @@ yaxi.impl.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = yaxi.loadModule(this.baseURL, url),
+                var Class = yaxi.loadModule(this.__baseURL, url),
                     args = control.args;
 
                 if (!Class.prototype.open)

@@ -21,7 +21,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 		{
 			if (item.$dom)
 			{
-				item.__check_layout();
+				item.invalidate();
 			}
 		}
 		

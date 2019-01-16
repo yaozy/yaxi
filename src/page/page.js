@@ -262,7 +262,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		if ((page = this.Page.current) && page.$dom)
 		{
-			page.__check_layout();
+			page.invalidate();
 		}
 	});
 
@@ -294,7 +294,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 			
 			this.trigger('opened');
-			this.__check_layout();
+			this.invalidate();
 
 			console.log('open page time: ' + (performance.now() - time) + 'ms');
 		}
@@ -335,7 +335,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			dom.style.display = '';
 
 			opener.onshow();
-			opener.__check_layout();
+			opener.invalidate();
 		}
 
 		if (this.autoDestroy)
@@ -412,7 +412,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 
 
-	this.__check_layout = function () {
+	this.invalidate = function () {
 
 		if (this.$dom)
 		{
@@ -434,9 +434,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			{
 				control = children[i];
 
-				if (control.$dom && control.__check_layout)
+				if (control.$dom && control.invalidate)
 				{
-					control.__check_layout();
+					control.invalidate();
 				}
 			}
 		}

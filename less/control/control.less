@@ -77,7 +77,6 @@
 
 
 
-
 .yx-control[layout="block"]>* {
     display: block;
     width: 100%;
@@ -91,9 +90,18 @@
     display: inline-block;
 }
 
+.yx-control[layout="row"]>* {
+    position: absolute;
+    height: 100%;
+}
+
+.yx-control[layout="column"]>* {
+    position: absolute;
+    width: 100%;
+}
+
+
 
 .yx-control[gap]>*:first-child {
     margin: 0;
 }
-
-
