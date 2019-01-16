@@ -14,8 +14,8 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     this.$property('detail', '');
 
 
-    // 布局间隙(仅对layout === row || column有效)
-    this.$property('gap', 0);
+    // 组件间隙
+    this.$property('gap', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)

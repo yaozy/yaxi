@@ -190,54 +190,56 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 && (payload = this.__check_close(closeType, payload)))
+		if (index < 0 ||
+			this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
+			this.trigger('closing', payload) === false)
 		{
-			var dom = this.$dom;
+			return false;
+		}
 
-			stack.splice(index, 1);
+		var dom = this.$dom;
 
-			if (dom && dom.parentNode)
-			{
-				dom.parentNode.removeChild(dom);
-			}
+		stack.splice(index, 1);
 
-			if (dom = mask.parentNode)
-			{
-				if (stack[0])
-				{
-					dom = stack[status.length - 1].$dom;
-					dom.parentNode.insertBefore(mask, dom);
-				}
-				else
-				{
-					dom.removeChild(mask);
-				}
-			}
+		if (dom && dom.parentNode)
+		{
+			dom.parentNode.removeChild(dom);
+		}
 
+		if (dom = mask.parentNode)
+		{
 			if (stack[0])
 			{
-				computePosition();
+				dom = stack[status.length - 1].$dom;
+				dom.parentNode.insertBefore(mask, dom);
 			}
 			else
 			{
-				document.removeEventListener(eventName, checkTap, true);
-				window.removeEventListener('resize', computePosition, true);
+				dom.removeChild(mask);
 			}
-
-			this.onhide();
-			this.onclosed(closeType, payload);
-
-			this.trigger('closed', payload);
-
-			if (this.autoDestroy)
-			{
-				this.destroy();
-			}
-
-			return true;
 		}
 
-		return false;
+		if (stack[0])
+		{
+			computePosition();
+		}
+		else
+		{
+			document.removeEventListener(eventName, checkTap, true);
+			window.removeEventListener('resize', computePosition, true);
+		}
+
+		this.onhide();
+		this.onclosed(closeType, payload);
+
+		this.trigger('closed', payload);
+
+		if (this.autoDestroy)
+		{
+			this.destroy();
+		}
+
+		return true;
 	}
 	
 

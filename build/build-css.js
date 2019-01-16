@@ -6,9 +6,8 @@ webminify()
     .load('less', [
         'theme/' + theme + '/color.less',
         'base/(reset|animation).less',
-        'control/control.less',
+        'control/(control|panel).less',
         'control/*.less',
-        'layout/*.less',
         'form/textbox.less',
         'form/*.less',
         'page/*.less',

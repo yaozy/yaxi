@@ -185,8 +185,12 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
     function touchend() {
 
+        var event = new yaxi.Event('change');
+
         draw.call(this);
-        this.trigger('change', { value: this.value });
+
+        event.value = this.value;
+        this.trigger(event);
     }
 
 

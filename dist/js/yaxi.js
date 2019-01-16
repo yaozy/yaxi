@@ -994,6 +994,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
             event = type;
             event.target = this;
             
+            if (payload)
+            {
+                event.payload = payload;
+            }
+
             type = event.type;
         }
 
@@ -1012,10 +1017,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
                         if (payload)
                         {
-                            for (var name in payload)
-                            {
-                                event[name] = payload[name];
-                            }
+                            event.payload = payload;
                         }
                     }
 
@@ -5688,11 +5690,43 @@ yaxi.impl.container = function (base) {
     }
 
 
-    this.renderer.detail = this.renderer.gap = function () {
+    this.renderer.detail = function () {
 
         // 标记布局发生了变化
         this.__layout = null;
     }
+
+
+    
+    var styleSheet;
+
+
+    this.renderer.gap = function (dom, value) {
+
+        var style = styleSheet || document.styleSheets[0];
+
+        // 标记布局发生了变化
+        this.__layout = null;
+
+        // 动态添加样式
+        if (!style)
+        {
+            style = document.createElement('style');
+            style.setAttribute('type', 'text/css');
+
+            document.head.appendChild(style);
+            style = styleSheet = style.sheet;
+        }
+
+        if (value && !style[value])
+        {
+            style.addRule('.yx-control[gap="' + value + '"]>*', 'margin: ' + value + ' 0 0');
+            style[value] = 1;
+        }
+
+        dom.setAttribute('gap', value);
+    }
+
 
     
     this.renderer.baseURL = function (dom, value) {
@@ -6023,8 +6057,8 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     this.$property('detail', '');
 
 
-    // 布局间隙(仅对layout === row || column有效)
-    this.$property('gap', 0);
+    // 组件间隙
+    this.$property('gap', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
@@ -6940,14 +6974,14 @@ yaxi.IFrame = yaxi.Control.extend(function (Class, base) {
 
     window.addEventListener('message', function (event) {
 
-        var control;
+        var control, e;
 
         if (control = findControl(event.source))
         {
-            control.trigger({
-                type: 'message',
-                data: event.data
-            });
+            e = new yaxi.Event('message');
+            e.data = event.data;
+            
+            control.trigger(e);
         }
     });
 
@@ -8171,11 +8205,19 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
                 var children = this.__children,
                     index = children.indexOf(target);
 
-                if (this.selectedIndex !== index && 
-                    this.trigger('changing', { index: index, item: children[index] }) !== false)
+                if (this.selectedIndex !== index)
                 {
-                    this.selectedIndex = index;
+                    var event = new yaxi.Event('changing');
+
+                    event.index = index;
+                    event.item = children[index];
+
+                    if (this.trigger(event) !== false)
+                    {
+                        this.selectedIndex = index;
+                    }
                 }
+
                 break;
             }
 
@@ -8220,16 +8262,16 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
-            privious,
+            previous,
             item,
             host,
             start;
 
-        if (privious = children[this.__index])
+        if (previous = children[this.__index])
         {
-            privious.theme = '';
+            previous.theme = '';
 
-            if (host = privious.host)
+            if (host = previous.host)
             {
                 host.style.display = 'none';
                 host.onhide && host.onhide();
@@ -8255,19 +8297,22 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
                 start = true;
             }
         }
-        else if (privious)
+        else if (previous)
         {
             value = -1;
         }
 
         this.__index = value;
 
-        this.trigger('change', {
-            last: privious,
-            privious: privious,
-            selected: item,
-            start: start || false
-        });
+        
+        var event = new yaxi.Event('change');
+
+        event.last = previous;
+        event.previous = previous;
+        event.selected = item;
+        event.start = start || false;
+
+        this.trigger(event);
     }
 
 
@@ -9430,6 +9475,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		{
 			var opener = Class.current || null;
 			
+			var time = performance.now();
+
 			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
@@ -9449,84 +9496,56 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			
 			this.trigger('opened');
 			this.__check_layout();
+
+			console.log('open page time: ' + (performance.now() - time) + 'ms');
 		}
 
 		return this;
 	}
 	
-
-	this.__check_close = function (closeType, payload) {
-
-		if (closeType)
-		{
-			if (typeof closeType !== 'string')
-			{
-				payload = closeType;
-				closeType = 'OK';
-			}
-		}
-		else
-		{
-			closeType = 'OK';
-		}
-
-		if (this.onclosing(closeType, payload) === false)
-		{
-			return false;
-		}
-
-		(payload || (payload = {})).closeType = closeType;
-
-		if (this.trigger('closing', payload) === false)
-		{
-			return false;
-		}
-
-		return payload;
-	}
-
 	
 	this.close = function (closeType, payload) {
 		
-		if (payload = this.__check_close(closeType, payload))
+		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
+			this.trigger('closing', payload) === false)
 		{
-			var dom = this.$dom,
-				opener = this.opener;
-			
-			this.onhide();
-			this.onclosed(closeType, payload);
-
-			if (dom && dom.parentNode)
-			{
-				dom.parentNode.removeChild(dom);
-			}
-			
-			Class.current = opener;
-
-			yaxi.toast.hide();
-
-			this.trigger('closed', payload) !== false;
-			this.opener = null;
-
-			// 如果当前窗口是隐藏状态则显示当前窗口
-			if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
-			{
-				dom.style.display = '';
-
-				opener.onshow();
-				opener.__check_layout();
-			}
-
-			if (this.autoDestroy)
-			{
-				// 延时销毁以加快页面切换速度
-				setTimeout(this.destroy.bind(this), 100);
-			}
-
-			return true;
+			return false;
 		}
 
-		return false;
+		var dom = this.$dom,
+			opener = this.opener;
+		
+		this.onhide();
+		this.onclosed(closeType, payload);
+
+		if (dom && dom.parentNode)
+		{
+			dom.parentNode.removeChild(dom);
+		}
+		
+		Class.current = opener;
+
+		yaxi.toast.hide();
+
+		this.trigger('closed', payload) !== false;
+		this.opener = null;
+
+		// 如果当前窗口是隐藏状态则显示当前窗口
+		if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+		{
+			dom.style.display = '';
+
+			opener.onshow();
+			opener.__check_layout();
+		}
+
+		if (this.autoDestroy)
+		{
+			// 延时销毁以加快页面切换速度
+			setTimeout(this.destroy.bind(this), 100);
+		}
+
+		return true;
 	}
 	
 	
@@ -9988,54 +10007,56 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 && (payload = this.__check_close(closeType, payload)))
+		if (index < 0 ||
+			this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
+			this.trigger('closing', payload) === false)
 		{
-			var dom = this.$dom;
+			return false;
+		}
 
-			stack.splice(index, 1);
+		var dom = this.$dom;
 
-			if (dom && dom.parentNode)
-			{
-				dom.parentNode.removeChild(dom);
-			}
+		stack.splice(index, 1);
 
-			if (dom = mask.parentNode)
-			{
-				if (stack[0])
-				{
-					dom = stack[status.length - 1].$dom;
-					dom.parentNode.insertBefore(mask, dom);
-				}
-				else
-				{
-					dom.removeChild(mask);
-				}
-			}
+		if (dom && dom.parentNode)
+		{
+			dom.parentNode.removeChild(dom);
+		}
 
+		if (dom = mask.parentNode)
+		{
 			if (stack[0])
 			{
-				computePosition();
+				dom = stack[status.length - 1].$dom;
+				dom.parentNode.insertBefore(mask, dom);
 			}
 			else
 			{
-				document.removeEventListener(eventName, checkTap, true);
-				window.removeEventListener('resize', computePosition, true);
+				dom.removeChild(mask);
 			}
-
-			this.onhide();
-			this.onclosed(closeType, payload);
-
-			this.trigger('closed', payload);
-
-			if (this.autoDestroy)
-			{
-				this.destroy();
-			}
-
-			return true;
 		}
 
-		return false;
+		if (stack[0])
+		{
+			computePosition();
+		}
+		else
+		{
+			document.removeEventListener(eventName, checkTap, true);
+			window.removeEventListener('resize', computePosition, true);
+		}
+
+		this.onhide();
+		this.onclosed(closeType, payload);
+
+		this.trigger('closed', payload);
+
+		if (this.autoDestroy)
+		{
+			this.destroy();
+		}
+
+		return true;
 	}
 	
 
@@ -10112,7 +10133,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 	
 	
 	
-	this.close = function () {
+	this.close = function (payload) {
 		
 		var parent, dom;
 
@@ -10125,7 +10146,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
                 parent.removeChild(dom);
 			}
 
-			this.trigger('closed');
+			this.trigger('closed', payload);
 
 			if (this.autoDestroy !== false)
             {
@@ -10682,7 +10703,11 @@ yaxi.Control.extend(function (Class, base) {
                 parent.removeChild(dom);
             }
 
-            this.trigger('closed', { selected: selected || this.cancel });
+            var event = new yaxi.Event('closed');
+
+            event.selected = selected;
+
+            this.trigger(event);
             
             if (this.autoDestroy !== false)
             {
@@ -11633,8 +11658,12 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
     function touchend() {
 
+        var event = new yaxi.Event('change');
+
         draw.call(this);
-        this.trigger('change', { value: this.value });
+
+        event.value = this.value;
+        this.trigger(event);
     }
 
 
@@ -12333,12 +12362,14 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
         if (this.$storage.value !== value)
         {
+            var event = new yaxi.Event('change');
+
             this.value = value;
 
-            this.trigger('change', {
-                index: this.index,
-                value: value
-            });
+            event.index = this.index;
+            event.value = this.value = value;
+            
+            this.trigger(event);
         }
         else
         {

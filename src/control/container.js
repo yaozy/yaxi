@@ -308,11 +308,43 @@ yaxi.impl.container = function (base) {
     }
 
 
-    this.renderer.detail = this.renderer.gap = function () {
+    this.renderer.detail = function () {
 
         // 标记布局发生了变化
         this.__layout = null;
     }
+
+
+    
+    var styleSheet;
+
+
+    this.renderer.gap = function (dom, value) {
+
+        var style = styleSheet || document.styleSheets[0];
+
+        // 标记布局发生了变化
+        this.__layout = null;
+
+        // 动态添加样式
+        if (!style)
+        {
+            style = document.createElement('style');
+            style.setAttribute('type', 'text/css');
+
+            document.head.appendChild(style);
+            style = styleSheet = style.sheet;
+        }
+
+        if (value && !style[value])
+        {
+            style.addRule('.yx-control[gap="' + value + '"]>*', 'margin: ' + value + ' 0 0');
+            style[value] = 1;
+        }
+
+        dom.setAttribute('gap', value);
+    }
+
 
     
     this.renderer.baseURL = function (dom, value) {

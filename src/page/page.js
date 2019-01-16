@@ -274,6 +274,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		{
 			var opener = Class.current || null;
 			
+			var time = performance.now();
+
 			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			Class.current = this;
@@ -293,84 +295,56 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			
 			this.trigger('opened');
 			this.__check_layout();
+
+			console.log('open page time: ' + (performance.now() - time) + 'ms');
 		}
 
 		return this;
 	}
 	
-
-	this.__check_close = function (closeType, payload) {
-
-		if (closeType)
-		{
-			if (typeof closeType !== 'string')
-			{
-				payload = closeType;
-				closeType = 'OK';
-			}
-		}
-		else
-		{
-			closeType = 'OK';
-		}
-
-		if (this.onclosing(closeType, payload) === false)
-		{
-			return false;
-		}
-
-		(payload || (payload = {})).closeType = closeType;
-
-		if (this.trigger('closing', payload) === false)
-		{
-			return false;
-		}
-
-		return payload;
-	}
-
 	
 	this.close = function (closeType, payload) {
 		
-		if (payload = this.__check_close(closeType, payload))
+		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
+			this.trigger('closing', payload) === false)
 		{
-			var dom = this.$dom,
-				opener = this.opener;
-			
-			this.onhide();
-			this.onclosed(closeType, payload);
-
-			if (dom && dom.parentNode)
-			{
-				dom.parentNode.removeChild(dom);
-			}
-			
-			Class.current = opener;
-
-			yaxi.toast.hide();
-
-			this.trigger('closed', payload) !== false;
-			this.opener = null;
-
-			// 如果当前窗口是隐藏状态则显示当前窗口
-			if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
-			{
-				dom.style.display = '';
-
-				opener.onshow();
-				opener.__check_layout();
-			}
-
-			if (this.autoDestroy)
-			{
-				// 延时销毁以加快页面切换速度
-				setTimeout(this.destroy.bind(this), 100);
-			}
-
-			return true;
+			return false;
 		}
 
-		return false;
+		var dom = this.$dom,
+			opener = this.opener;
+		
+		this.onhide();
+		this.onclosed(closeType, payload);
+
+		if (dom && dom.parentNode)
+		{
+			dom.parentNode.removeChild(dom);
+		}
+		
+		Class.current = opener;
+
+		yaxi.toast.hide();
+
+		this.trigger('closed', payload) !== false;
+		this.opener = null;
+
+		// 如果当前窗口是隐藏状态则显示当前窗口
+		if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+		{
+			dom.style.display = '';
+
+			opener.onshow();
+			opener.__check_layout();
+		}
+
+		if (this.autoDestroy)
+		{
+			// 延时销毁以加快页面切换速度
+			setTimeout(this.destroy.bind(this), 100);
+		}
+
+		return true;
 	}
 	
 	

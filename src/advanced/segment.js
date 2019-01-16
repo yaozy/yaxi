@@ -232,12 +232,14 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
         if (this.$storage.value !== value)
         {
+            var event = new yaxi.Event('change');
+
             this.value = value;
 
-            this.trigger('change', {
-                index: this.index,
-                value: value
-            });
+            event.index = this.index;
+            event.value = this.value = value;
+            
+            this.trigger(event);
         }
         else
         {

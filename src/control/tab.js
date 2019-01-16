@@ -76,11 +76,19 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
                 var children = this.__children,
                     index = children.indexOf(target);
 
-                if (this.selectedIndex !== index && 
-                    this.trigger('changing', { index: index, item: children[index] }) !== false)
+                if (this.selectedIndex !== index)
                 {
-                    this.selectedIndex = index;
+                    var event = new yaxi.Event('changing');
+
+                    event.index = index;
+                    event.item = children[index];
+
+                    if (this.trigger(event) !== false)
+                    {
+                        this.selectedIndex = index;
+                    }
                 }
+
                 break;
             }
 
@@ -125,16 +133,16 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.renderer.selectedIndex = function (dom, value) {
 
         var children = this.__children,
-            privious,
+            previous,
             item,
             host,
             start;
 
-        if (privious = children[this.__index])
+        if (previous = children[this.__index])
         {
-            privious.theme = '';
+            previous.theme = '';
 
-            if (host = privious.host)
+            if (host = previous.host)
             {
                 host.style.display = 'none';
                 host.onhide && host.onhide();
@@ -160,19 +168,22 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
                 start = true;
             }
         }
-        else if (privious)
+        else if (previous)
         {
             value = -1;
         }
 
         this.__index = value;
 
-        this.trigger('change', {
-            last: privious,
-            privious: privious,
-            selected: item,
-            start: start || false
-        });
+        
+        var event = new yaxi.Event('change');
+
+        event.last = previous;
+        event.previous = previous;
+        event.selected = item;
+        event.start = start || false;
+
+        this.trigger(event);
     }
 
 

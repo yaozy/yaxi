@@ -65,7 +65,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 	
 	
 	
-	this.close = function () {
+	this.close = function (payload) {
 		
 		var parent, dom;
 
@@ -78,7 +78,7 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
                 parent.removeChild(dom);
 			}
 
-			this.trigger('closed');
+			this.trigger('closed', payload);
 
 			if (this.autoDestroy !== false)
             {

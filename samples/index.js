@@ -21,7 +21,7 @@ module.exports = yaxi.Page.extend(function () {
                 subtype: yaxi.Button,
                 layout: 'block',
                 baseURL: require.baseURL,
-                openURL: true,
+                gap: '4px',
                 style: {
                     padding: '.1rem'
                 },

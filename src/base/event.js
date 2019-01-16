@@ -156,6 +156,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
             event = type;
             event.target = this;
             
+            if (payload)
+            {
+                event.payload = payload;
+            }
+
             type = event.type;
         }
 
@@ -174,10 +179,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
                         if (payload)
                         {
-                            for (var name in payload)
-                            {
-                                event[name] = payload[name];
-                            }
+                            event.payload = payload;
                         }
                     }
 

@@ -197,7 +197,11 @@ yaxi.Control.extend(function (Class, base) {
                 parent.removeChild(dom);
             }
 
-            this.trigger('closed', { selected: selected || this.cancel });
+            var event = new yaxi.Event('closed');
+
+            event.selected = selected;
+
+            this.trigger(event);
             
             if (this.autoDestroy !== false)
             {
