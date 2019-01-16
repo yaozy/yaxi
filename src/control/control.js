@@ -4,6 +4,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     var create = Object.create;
 
+    var patch = yaxi.__observe_patch;
+
     
     var eventTarget = yaxi.EventTarget.prototype;
 
@@ -41,6 +43,66 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     
+    
+    // 定义属性
+    this.$property = yaxi.impl.properties(function (name, change) {
+
+        return change ? function () {
+
+            var value = this.__changes;
+            return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
+
+        } : function () {
+
+            return this.$storage[name];
+        }
+
+    }, function (name, converter, change) {
+
+        return change ? function (value) {
+
+            var changes = this.__changes,
+                storage = this.$storage;
+
+            value = converter.call(this, value);
+
+            if (changes)
+            {
+                if (value === changes[name])
+                {
+                    return;
+                }
+
+                if (value !== storage[name])
+                {
+                    changes[name] = value;
+                }
+                else
+                {
+                    delete changes[name];
+                }
+            }
+            else if (this.$dom)
+            {
+                if (value !== storage[name])
+                {
+                    patch(this)[name] = value;
+                    storage[name] = value;
+                }
+            }
+            else
+            {
+                storage[name] = value;
+            }
+
+        } : function (value) {
+
+            this.$storage[name] = converter.call(this, value);
+        }
+
+    });
+
+
 
     // id
     this.$property('id', '');
@@ -97,6 +159,20 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     // svg填充色
     this.$property('fill', '');
+
+
+
+    // 布局权重(仅在父容器layout === row || column时有效)
+    this.$property('weight', {
+     
+        defaultValue: 0,
+
+        converter: function (value) {
+
+            return (value = +value) > 0 ? value : 0;
+        }
+
+    }, false);
 
 
 

@@ -90,14 +90,24 @@
     display: inline-block;
 }
 
+
+.yx-control[layout="row"] {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .yx-control[layout="row"]>* {
-    position: absolute;
-    height: 100%;
+    position: relative;
+    display: inline-block;
+}
+
+.yx-control[layout="column"] {
+    overflow: hidden;
 }
 
 .yx-control[layout="column"]>* {
-    position: absolute;
-    width: 100%;
+    position: relative;
+    display: block;
 }
 
 

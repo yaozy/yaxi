@@ -34,7 +34,8 @@ module.exports = yaxi.Page.extend(function () {
                         subtype: yaxi.TabItem,
                         children: [
                             { text: 'abc' },
-                            { text: 'def' }
+                            { text: 'def' },
+                            { text: 'abc' }
                         ]
                     }
                     // {

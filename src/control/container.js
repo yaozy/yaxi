@@ -185,143 +185,99 @@ yaxi.impl.container = function (base) {
 
 
 
-    var layouts = Object.create(null);
-
-    var defaultLayout = parseLayout('? * ?');
-
-
-
-    function parseLayout(data) {
-
-        var list = data.match(/\S/g),
-            length = list.length;
-
-        if (length > 0)
-        {
-            var weight, size;
-            
-            for (var i = 0; i < length; i++)
-            {
-                var text = list[i],
-                    last = text[text.length - 1],
-                    none = 0;
-
-                if (last === '?')
-                {
-                    list[i] = [3];
-                    size = 1;
-                    continue;
-                }
-                
-                if (last === '!')
-                {
-                    none = 1;
-                    last = text[text.length - 2];
-                }
-
-                if (last === '*') // 权重
-                {
-                    list[i] = [2, parseFloat(text) || 100, none];
-                    weight = 1;
-                }
-                else if (last === '%') // 百分比
-                {
-                    list[i] = [1, parseFloat(text), none];
-                    size = 1;
-                }
-                else if (last === 'x') // px
-                {
-                    list[i] = [0, parseInt(text), none];
-                    size = 1;
-                }
-                else // rem
-                {
-                    list[i] = [0, parseFloat(text) * yaxi.rem + .5 | 0, none];
-                    size = 1;
-                }
-            }
-
-            list.weight = weight;
-            list.size = size;
-        }
-        else
-        {
-            list = defaultLayout;
-        }
-
-        return layouts[data] = list;
-    }
-
-
-
     // 重算布局
     this.invalidate = function () {
 
-        var children = this.__children;
-            storage = this.$storage,
-            layout = storage.layout;
+        var children = this.__children,
+            length,
+            size,
+            dom,
+            any;
 
-        if (layout === 'row' || layout === 'column')
+        if ((length = children.length) > 0 && (dom = this.$dom) && (any = dom.lastChild))
         {
-            var last = this.__layout,
-                data = this.$dom,
-                width = data.clientWidth,
-                height = data.clientHeight;
-
-            // 布局发生变化或容器发生变化则重新排列
-            if (!last || last.width !== width || last.height !== height)
+            switch (this.$storage.layout)
             {
-                data = storage.detail;
-                data = layouts[data] || parseLayout(data) || defaultLayout;
+                case 'row':var time = performance.now();
+                    size = dom.clientWidth;
+                    any = any.offsetLeft + any.offsetWidth + parseInt(window.getComputedStyle(any).marginRight);;
 
-                if (layout === 'row')
+                    if (size !== any && (any = computeWeight(children, size - any, 'offsetWidth')))
+                    {
+                        arrange(children, any[0], any[1], 'width');
+                    }
+                    console.log(performance.now() - time);
+                    break;
+
+                case 'column':
+                    size = dom.clientHeight;
+                    any = any.offsetTop + any.offsetHeight + parseInt(window.getComputedStyle(any).marginBottom);
+
+                    if (size !== any && (any = computeWeight(children, size - any, 'offsetHeight')))
+                    {
+                        arrange(children, any[0], any[1], 'height');
+                    }
+                    break;
+            }
+
+            for (var i = 0; i < length; i++)
+            {
+                if ((any = children[i]) && any.invalidate && any.$dom)
                 {
-                    arrangeRow(this, width, data, storage.gap);
-                }
-                else
-                {
-                    arrangeColumn(this, height, data, storage.gap);
+                    any.invalidate();
                 }
             }
         }
+    }
 
-        for (var i = 0, l = children.length; i < l; i++)
+
+    function computeWeight(children, size, name) {
+
+        var total = 0,
+            control,
+            dom,
+            style,
+            weight;
+
+        for (var i = children.length; i--;)
         {
-            var control = children[i];
-
-            if (control.invalidate && control.$dom)
+            if ((control = children[i]) && (dom = control.$dom) && 
+                (weight = control.$storage.weight) > 0 &&
+                (!(style = control.__style) || style.display !== 'none'))
             {
-                control.invalidate();
+                total += weight;
+                size += dom[name];
             }
-        }
-    }
-
-
-    function arrangeRow(self, width, list, gap) {
-
-        var fixed;
-
-        if (list.size)
-        {
-            for (var i = 0, l = list.length; i < l; i++)
+            else
             {
-                var item = list[i];
-
-                // switch (item[0])
-                // {
-                //     // case 
-                // }
+                weight = 0;
             }
+
+            control.__weight = weight;
         }
+
+        return total ? [size, total] : null;
     }
-
-
-    function arrangeColumn(self, height, list, gap) {
-
-    }
-
 
     
+    function arrange(children, size, total, name) {
+
+        var control, weight, value;
+
+        for (var i = children.length; i--;)
+        {
+            if ((control = children[i]) && (weight = control.__weight))
+            {
+                value = weight * size / total + .5 | 0;
+                size -= value;
+                total -= weight;
+
+                control.$dom.style[name] = value + 'px';
+            }
+        }
+    }
+
+
     // 窗口变化时检查布局
     window.addEventListener('resize', function () {
 
@@ -331,28 +287,20 @@ yaxi.impl.container = function (base) {
 
 
 
+    
+    var styleSheet;
 
-    this.renderer.layout = function (dom, value) {
+    var renderer = this.renderer;
 
-        // 标记布局发生了变化
-        this.__layout = null;
+
+
+    renderer.layout = function (dom, value) {
 
         dom.setAttribute('layout', value);
     }
 
 
-    this.renderer.detail = function () {
-
-        // 标记布局发生了变化
-        this.__layout = null;
-    }
-
-
-    
-    var styleSheet;
-
-
-    this.renderer.gap = function (dom, value) {
+    renderer.gap = function (dom, value) {
 
         var style = styleSheet || document.styleSheets[0];
 
@@ -390,7 +338,7 @@ yaxi.impl.container = function (base) {
 
 
     
-    this.renderer.baseURL = function (dom, value) {
+    renderer.baseURL = function (dom, value) {
 
         if (value)
         {
