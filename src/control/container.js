@@ -190,34 +190,14 @@ yaxi.impl.container = function (base) {
 
         var children = this.__children,
             length,
-            size,
             dom,
             any;
 
-        if ((length = children.length) > 0 && (dom = this.$dom) && (any = dom.lastChild))
+        if ((length = children.length) > 0 && (dom = this.$dom))
         {
-            switch (this.$storage.layout)
+            if (any = layouts[this.$storage.layout])
             {
-                case 'row':var time = performance.now();
-                    size = dom.clientWidth;
-                    any = any.offsetLeft + any.offsetWidth + parseInt(window.getComputedStyle(any).marginRight);;
-
-                    if (size !== any && (any = computeWeight(children, size - any, 'offsetWidth')))
-                    {
-                        arrange(children, any[0], any[1], 'width');
-                    }
-                    console.log(performance.now() - time);
-                    break;
-
-                case 'column':
-                    size = dom.clientHeight;
-                    any = any.offsetTop + any.offsetHeight + parseInt(window.getComputedStyle(any).marginBottom);
-
-                    if (size !== any && (any = computeWeight(children, size - any, 'offsetHeight')))
-                    {
-                        arrange(children, any[0], any[1], 'height');
-                    }
-                    break;
+                any(children, dom, this.__gap);
             }
 
             for (var i = 0; i < length; i++)
@@ -229,6 +209,11 @@ yaxi.impl.container = function (base) {
             }
         }
     }
+
+
+
+    var layouts = Object.create(null);
+    
 
 
     function computeWeight(children, size, name) {
@@ -262,7 +247,7 @@ yaxi.impl.container = function (base) {
     
     function arrange(children, size, total, name) {
 
-        var control, weight, value;
+        var control, style, weight, value;
 
         for (var i = children.length; i--;)
         {
@@ -272,10 +257,103 @@ yaxi.impl.container = function (base) {
                 size -= value;
                 total -= weight;
 
-                control.$dom.style[name] = value + 'px';
+                value += 'px';
+                style = control.$dom.style;
+                
+                if (style[name] !== value)
+                {
+                    style[name] = value;
+                }
             }
         }
     }
+
+
+    layouts.row = function (children, dom) {
+
+        var time = performance.now();
+
+        var width = dom.clientWidth,
+            last = dom.lastChild,
+            size = last.offsetLeft + last.offsetWidth;
+
+        if (width !== size && (size = computeWeight(children, width - size, 'offsetWidth')))
+        {
+            arrange(children, size[0], size[1], 'width');
+        }
+
+        console.log(performance.now() - time);
+    }
+
+
+    layouts.column = function (children, dom) {
+
+        var height = dom.clientHeight,
+            last = dom.lastChild,
+            size = last.offsetTop + last.offsetHeight;
+
+        if (height !== size && (size = computeWeight(children, height - size, 'offsetHeight')))
+        {
+            arrange(children, size[0], size[1], 'height');
+        }
+    }
+
+
+    layouts['same-width'] = function (children, dom, gap) {
+
+        var length = children.length,
+            width;
+
+        if (gap > 0)
+        {
+            gap = gap * length - 1;
+            width = (1000000 - gap * 100 / dom.clientWidth) / length;
+        }
+        else
+        {
+            width = 1000000 / length;
+        }
+
+        width = (width | 0) / 10000 + '%';
+
+        for (var i = 0; i < length; i++)
+        {
+            var style = children[i].$dom.style;
+
+            if (style.width !== width)
+            {
+                style.width = width;
+            }
+        }
+    }
+
+
+    layouts['same-height'] = function (children, dom, gap) {
+
+        var length = children.length,
+            height;
+
+        if (gap > 0)
+        {
+            gap = gap * length - 1;
+            height = (1000000 - gap * 100 / dom.clientHeight) / length;
+        }
+        else
+        {
+            height = 1000000 / length;
+        }
+
+        for (var i = 0; i < length; i++)
+        {
+            var style = children[i].$dom.style;
+
+            if (style.height !== height)
+            {
+                style.height = height;
+            }
+        }
+    }
+
 
 
     // 窗口变化时检查布局
@@ -324,15 +402,30 @@ yaxi.impl.container = function (base) {
 
             if (!style[key])
             {
-                style.addRule('.yx-control[gap="' + key + '"]>*', 'margin-' + type + ': ' + value);
+                style.addRule('[gap="' + key + '"]>*', 'margin-' + type + ': ' + value + ' !important');
                 style[key] = 1;
             }
             
+            this.__gap = value.indexOf('px') > 0 ? parseInt(value) : parseFloat(value) * yaxi.rem + .5 | 0;
             dom.setAttribute('gap', key);
         }
         else
         {
+            this.__gap = 0;
             dom.removeAttribute('gap');
+        }
+    }
+
+
+    renderer.full = function (dom, value) {
+
+        if (value)
+        {
+            dom.setAttribute('full', value);
+        }
+        else
+        {
+            dom.removeAttribute('full');
         }
     }
 

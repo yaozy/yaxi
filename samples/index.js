@@ -30,12 +30,14 @@ module.exports = yaxi.Page.extend(function () {
                     { text: '模型开发演示', url: 'model.js' },
                     { text: '多线程开发演示', events: { tap: runThread } },
                     {
-                        Class: yaxi.Tab,
-                        subtype: yaxi.TabItem,
+                        Class: yaxi.Panel,
+                        subtype: yaxi.Button,
+                        layout: 'same-width',
+                        gap: '1px',
                         children: [
-                            { text: 'abc' },
-                            { text: 'def' },
-                            { text: 'abc' }
+                            { text: 'abc', style: { width: '1rem' } },
+                            { text: 'def', weight: 1 },
+                            { text: 'abc', style: { width: '.5rem' } }
                         ]
                     }
                     // {

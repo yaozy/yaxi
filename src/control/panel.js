@@ -10,12 +10,12 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     this.$property('layout', '');
 
 
-    // 布局详细数据(仅对layout === row || column有效)
-    this.$property('detail', '');
-
-
     // 组件间隙
     this.$property('gap', '');
+
+
+    // 子组件组件充满
+    this.$property('full', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)

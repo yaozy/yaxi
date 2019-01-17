@@ -161,6 +161,9 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('fill', '');
 
 
+    // 绝对定位设置
+    this.$property('absolute', '');
+
 
     // 布局权重(仅在父容器layout === row || column时有效)
     this.$property('weight', {
@@ -701,6 +704,27 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.line = function (dom, value) {
 
         dom.setAttribute('line', value);
+    }
+
+
+    renderer.absolute = function (dom, value) {
+
+        var style = dom.style;
+
+        if (value)
+        {
+            value = value.split(' ');
+
+            style.position = 'absolute';
+            style.top = value[0] || 0;
+            style.right = value[1] || 0;
+            style.bottom = value[2] || 0;
+            style.left = value[3] || 0;
+        }
+        else
+        {
+            style.position = '';
+        }
     }
 
     
