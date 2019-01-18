@@ -175,7 +175,35 @@ textarea::-webkit-input-placeholder {
   color: #2d4a63;
   fill: #2d4a63;
 }
+.yx-tab > .yx-control {
+  border-color: transparent;
+}
+.yx-control[theme="default"] {
+  border-color: #8094a5;
+  color: #2d4a63;
+  fill: #2d4a63;
+}
+.yx-control[theme="light"] {
+  border-color: #8094a5;
+  color: #8094a5;
+  fill: #8094a5;
+}
+.yx-control[theme="info"] {
+  border-color: #b9ced4;
+  color: #b9ced4;
+  fill: #b9ced4;
+}
+.yx-control[theme="explain"] {
+  border-color: #cccccc;
+  color: #cccccc;
+  fill: #cccccc;
+}
 .yx-control[theme="primary"] {
+  border-color: #d0ae75;
+  color: #d0ae75;
+  fill: #d0ae75;
+}
+.yx-control[theme="second"] {
   border-color: #d0ae75;
   color: #d0ae75;
   fill: #d0ae75;
@@ -202,30 +230,6 @@ textarea::-webkit-input-placeholder {
   fill: #666666;
   cursor: not-allowed;
 }
-.yx-control[line="top"] {
-  border-top-width: 1px;
-  border-top-style: solid;
-}
-.yx-control[line="left"] {
-  border-left-width: 1px;
-  border-left-style: solid;
-}
-.yx-control[line="right"] {
-  border-right-width: 1px;
-  border-right-style: solid;
-}
-.yx-control[line="top"] {
-  border-right-width: 1px;
-  border-right-style: solid;
-}
-.yx-control[line="bottom"] {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-}
-.yx-control[line="all"] {
-  border-width: 1px;
-  border-style: solid;
-}
 [layout="block"] > * {
   display: block;
   width: 100%;
@@ -233,9 +237,11 @@ textarea::-webkit-input-placeholder {
 [layout="inline"] > * {
   display: inline-block;
 }
+[layout="inline-nowrap"] {
+  white-space: nowrap;
+}
 [layout="inline-nowrap"] > * {
   display: inline-block;
-  white-space: nowrap;
 }
 [layout="row"] {
   overflow: hidden;
@@ -272,14 +278,70 @@ textarea::-webkit-input-placeholder {
 [gap] > *:first-child {
   margin: 0 !important;
 }
-[full="width"] {
+.yx-control[full="width"] > * {
   width: 100%;
 }
-[full="height"] {
+.yx-control[full="height"] > * {
+  height: 100%;
+}
+.yx-control[full="all"] > * {
+  width: 100%;
   height: 100%;
 }
 .yx-panel {
   position: relative;
+}
+.yx-panel[theme="default"] {
+  background-color: #2d4a63;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="light"] {
+  background-color: #8094a5;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="info"] {
+  background-color: #b9ced4;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="explain"] {
+  background-color: #cccccc;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="primary"] {
+  background-color: #d0ae75;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="second"] {
+  background-color: #d0ae75;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="success"] {
+  background-color: #71c04a;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="warning"] {
+  background-color: #e89518;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[theme="danger"] {
+  background-color: #dd6161;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-panel[disabled],
+.yx-panel[theme="disabled"] {
+  background-color: #666666;
+  color: #ffffff;
+  fill: #ffffff;
+  cursor: not-allowed;
 }
 .yx-button {
   height: 0.35rem;
@@ -318,19 +380,24 @@ textarea::-webkit-input-placeholder {
   cursor: not-allowed;
 }
 .yx-icon {
-  display: -webkit-inline-flex;
-  display: inline-flex;
+  position: relative;
+  display: inline-block;
   overflow: hidden;
-  align-items: center;
-  justify-content: center;
+  width: 0.3rem;
+  height: 0.3rem;
+  vertical-align: middle;
 }
 .yx-icon > svg {
-  margin: 0 0.2em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 1.2em;
   height: 1.2em;
-  vertical-align: text-bottom;
+  margin-top: -0.65em;
+  margin-left: -0.6em;
 }
 .yx-iconbutton {
+  display: inline-block;
   text-align: center;
 }
 .yx-iconbutton svg {
@@ -402,10 +469,6 @@ textarea::-webkit-input-placeholder {
 }
 .yx-tab > * {
   height: 100%;
-}
-.yx-tabitem {
-  display: inline-block;
-  text-align: center;
 }
 .yx-text {
   display: inline-block;
@@ -590,6 +653,7 @@ textarea::-webkit-input-placeholder {
 .yx-block {
   margin-top: 0.07rem;
   padding: 0.15rem;
+  background-color: #ffffff;
 }
 .yx-dialog {
   position: absolute;
@@ -671,6 +735,7 @@ textarea::-webkit-input-placeholder {
   bottom: 0;
   overflow: hidden;
   background-color: #ffffff;
+  box-shadow: 0 0 4px #8094a5;
 }
 .yx-backbutton {
   position: absolute;

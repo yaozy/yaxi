@@ -276,10 +276,10 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			
 			var time = performance.now();
 
-			yaxi.__dom_host.appendChild(this.$dom || this.render());
-			
 			Class.current = this;
 			this.opener = opener;
+			
+			yaxi.__dom_host.appendChild(this.$dom || this.render());
 			
 			this.onmounted();
 

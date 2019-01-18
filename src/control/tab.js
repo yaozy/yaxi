@@ -2,7 +2,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
     
-    yaxi.template(this, '<div class="yx-control yx-panel yx-tab"></div>');
+    yaxi.template(this, '<div class="yx-control yx-panel yx-tab" layout="same-width"></div>');
 
 
     
@@ -15,11 +15,10 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.$property('selectedIndex', {
+    this.$defaults.layout = 'same-width';
 
-        type: 'int',
-        defaultValue: -1
-    });
+
+    this.$converter.openURL = false;
 
 
 
@@ -28,7 +27,11 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    this.$converter.openURL = false;
+    this.$property('selectedIndex', {
+
+        type: 'int',
+        defaultValue: -1
+    });
 
 
 
@@ -122,12 +125,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     }
 
 
-
-
-    this.renderer.selectedLine = function (dom, value) {
-
-        dom.setAttribute('line', value);
-    }
 
 
     this.renderer.selectedIndex = function (dom, value) {

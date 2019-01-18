@@ -8,9 +8,12 @@
     display: inline-block;
 }
 
+[layout="inline-nowrap"] {
+    white-space: nowrap;
+}
+
 [layout="inline-nowrap"]>* {
     display: inline-block;
-    white-space: nowrap;
 }
 
 
@@ -61,10 +64,15 @@
     margin: 0 !important;
 }
 
-[full="width"] {
+.yx-control[full="width"]>* {
     width: 100%;
 }
 
-[full="height"] {
+.yx-control[full="height"]>* {
+    height: 100%;
+}
+
+.yx-control[full="all"]>* {
+    width: 100%;
     height: 100%;
 }

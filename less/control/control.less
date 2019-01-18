@@ -6,16 +6,51 @@
     height: 200%;
     transform-origin: 0 0;
     transform: scale(.5, .5);
-    background-color: @back-color;
-    color: @font-color;
-    fill: @icon-color;
+    background-color: @back-default-color;
+    color: @font-default-color;
+    fill: @icon-default-color;
 }
 
+
+.yx-tab>.yx-control {
+    border-color: transparent;
+}
+
+
+.yx-control[theme="default"] {
+    border-color: @border-default-color;
+    color: @font-default-color;
+    fill: @icon-default-color;
+}
+
+.yx-control[theme="light"] {
+    border-color: @border-light-color;
+    color: @font-light-color;
+    fill: @icon-light-color;
+}
+
+.yx-control[theme="info"] {
+    border-color: @border-info-color;
+    color: @font-info-color;
+    fill: @icon-info-color;
+}
+
+.yx-control[theme="explain"] {
+    border-color: @border-explain-color;
+    color: @font-explain-color;
+    fill: @icon-explain-color;
+}
 
 .yx-control[theme="primary"] {
     border-color: @border-primary-color;
     color: @font-primary-color;
     fill: @icon-primary-color;
+}
+
+.yx-control[theme="second"] {
+    border-color: @border-second-color;
+    color: @font-second-color;
+    fill: @icon-second-color;
 }
 
 .yx-control[theme="success"] {
@@ -42,35 +77,4 @@
     color: @font-disabled-color;
     fill: @icon-disabled-color;
     cursor: not-allowed;
-}
-
-
-.yx-control[line="top"] {
-    border-top-width: 1px;
-    border-top-style: solid;
-}
-
-.yx-control[line="left"] {
-    border-left-width: 1px;
-    border-left-style: solid;
-}
-
-.yx-control[line="right"] {
-    border-right-width: 1px;
-    border-right-style: solid;
-}
-
-.yx-control[line="top"] {
-    border-right-width: 1px;
-    border-right-style: solid;
-}
-
-.yx-control[line="bottom"] {
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-}
-
-.yx-control[line="all"] {
-    border-width: 1px;
-    border-style: solid;
 }

@@ -153,16 +153,108 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    // 线条 top|left|right|bottom
+    // 线条 top|left|right|bottom|all
     this.$property('line', '');
 
 
-    // svg填充色
+
+    // css overflow-x
+    this.$property('overflowX', '');
+
+
+    // css overflow-y
+    this.$property('overflowY', '');
+
+
+    // css position
+    this.$property('position', '');
+
+
+    // css display
+    this.$property('display', '');
+
+
+    // css top
+    this.$property('top', '');
+
+
+    // css left
+    this.$property('left', '');
+
+
+    // css right
+    this.$property('right', '');
+
+    
+    // css bottom
+    this.$property('bottom', '');
+
+    
+    // css width
+    this.$property('width', '');
+
+
+    // css height
+    this.$property('height', '');
+
+
+    // css margin
+    this.$property('margin', '');
+
+
+    // css border
+    this.$property('border', '');
+
+    
+    // css border-width
+    this.$property('borderWidth', '');
+
+
+    // css border-style
+    this.$property('borderStyle', '');
+
+
+    // css border-color
+    this.$property('borderColor', '');
+
+
+    // css border-radius
+    this.$property('borderRadius', '');
+
+
+    // css padding
+    this.$property('padding', '');
+
+
+    // css line-height
+    this.$property('lineHeight', '');
+
+
+    // css font-size
+    this.$property('fontSize', '');
+
+
+    // css text-align
+    this.$property('textAlign', '');
+
+    
+    // css vertical-align
+    this.$property('verticalAlign', '');
+
+
+
+    // css background-color
+    this.$property('backgroundColor', '');
+
+
+    // css color
+    this.$property('color', '');
+
+
+    // css svg fill
     this.$property('fill', '');
 
 
-    // 绝对定位设置
-    this.$property('absolute', '');
 
 
     // 布局权重(仅在父容器layout === row || column时有效)
@@ -703,31 +795,171 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     renderer.line = function (dom, value) {
 
-        dom.setAttribute('line', value);
-    }
-
-
-    renderer.absolute = function (dom, value) {
-
-        var style = dom.style;
-
         if (value)
         {
-            value = value.split(' ');
+            var style = dom.style,
+                name = (value = value.split(' '))[0];
 
-            style.position = 'absolute';
-            style.top = value[0] || 0;
-            style.right = value[1] || 0;
-            style.bottom = value[2] || 0;
-            style.left = value[3] || 0;
+            if (name === 'all')
+            {
+                style.borderWidth = value[1] || '1px';
+                style.borderStyle = value[2] || 'solid';
+            }
+            else
+            {
+                name = 'border' + name[0].toUpperCase() + name.substring(1);
+
+                style[name + 'Width'] = value[1] || '1px';
+                style[name + 'Style'] = value[2] || 'solid';
+            }
         }
         else
         {
-            style.position = '';
+            dom.style.border = '';
         }
     }
 
     
+
+    renderer.overflowX = function (dom, value) {
+
+        dom.style.overflowX = value;
+    }
+
+
+    renderer.overflowY = function (dom, value) {
+
+        dom.style.overflowY = value;
+    }
+
+
+    renderer.position = function (dom, value) {
+
+        dom.style.position = value;
+    }
+
+
+    renderer.display = function (dom, value) {
+
+        dom.style.display = value;
+    }
+
+
+    renderer.top = function (dom, value) {
+
+        dom.style.top = value;
+    }
+
+
+    renderer.left = function (dom, value) {
+
+        dom.style.left = value;
+    }
+
+
+    renderer.right = function (dom, value) {
+
+        dom.style.right = value;
+    }
+
+
+    renderer.bottom = function (dom, value) {
+
+        dom.style.bottom = value;
+    }
+
+
+    renderer.width = function (dom, value) {
+
+        dom.style.width = value;
+    }
+
+
+    renderer.height = function (dom, value) {
+
+        dom.style.height = value;
+    }
+
+
+    renderer.margin = function (dom, value) {
+
+        dom.style.margin = value;
+    }
+
+
+    renderer.border = function (dom, value) {
+
+        dom.style.border = value;
+    }
+
+
+    renderer.borderWidth = function (dom, value) {
+
+        dom.style.borderWidth = value;
+    }
+
+
+    renderer.borderRadius = function (dom, value) {
+
+        dom.style.borderRadius = value;
+    }
+
+
+    renderer.padding = function (dom, value) {
+
+        dom.style.padding = value;
+    }
+
+
+    renderer.lineHeight = function (dom, value) {
+
+        dom.style.lineHeight = value;
+    }
+
+
+    renderer.fontSize = function (dom, value) {
+
+        dom.style.fontSize = value;
+    }
+
+
+    renderer.textAlign = function (dom, value) {
+
+        dom.style.textAlign = value;
+    }
+
+
+    renderer.verticalAlign = function (dom, value) {
+
+        dom.style.verticalAlign = value;
+    }
+
+
+
+    renderer.borderStyle = function (dom, value) {
+
+        dom.style.borderStyle = value;
+    }
+
+
+    renderer.borderColor = function (dom, value) {
+
+        dom.style.borderColor = value;
+    }
+
+
+    renderer.backgroundColor = function (dom, value) {
+
+        dom.style.backgroundColor = value;
+    }
+
+
+    renderer.color = function (dom, value) {
+
+        dom.style.color = value;
+    }
+
+
     renderer.fill = function (dom, value) {
 
         dom.style.fill = value;

@@ -462,6 +462,7 @@ yaxi.impl.container = function (base) {
 
                 if (!Class.prototype.open)
                 {
+                    control = control.parent;
                     continue;
                 }
 
