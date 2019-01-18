@@ -178,54 +178,120 @@ textarea::-webkit-input-placeholder {
 .yx-tab > .yx-control {
   border-color: transparent;
 }
-.yx-control[theme="default"] {
+.yx-control[theme="level1"] {
+  background-color: #ffffff;
   border-color: #8094a5;
   color: #2d4a63;
   fill: #2d4a63;
 }
-.yx-control[theme="light"] {
+.yx-control[theme="level2"] {
+  background-color: #ffffff;
   border-color: #8094a5;
   color: #8094a5;
   fill: #8094a5;
 }
-.yx-control[theme="info"] {
+.yx-control[theme="level3"] {
+  background-color: #ffffff;
   border-color: #b9ced4;
   color: #b9ced4;
   fill: #b9ced4;
 }
-.yx-control[theme="explain"] {
+.yx-control[theme="level4"] {
+  background-color: #ffffff;
   border-color: #cccccc;
   color: #cccccc;
   fill: #cccccc;
 }
+.yx-control[theme="level5"] {
+  background-color: #ffffff;
+  border-color: #f7f7f7;
+  color: #f7f7f7;
+  fill: #f7f7f7;
+}
 .yx-control[theme="primary"] {
+  background-color: #ffffff;
   border-color: #d0ae75;
   color: #d0ae75;
   fill: #d0ae75;
 }
 .yx-control[theme="second"] {
+  background-color: #ffffff;
   border-color: #d0ae75;
   color: #d0ae75;
   fill: #d0ae75;
 }
 .yx-control[theme="success"] {
+  background-color: #ffffff;
   border-color: #71c04a;
   color: #71c04a;
   fill: #71c04a;
 }
 .yx-control[theme="warning"] {
+  background-color: #ffffff;
   border-color: #e89518;
   color: #e89518;
   fill: #e89518;
 }
 .yx-control[theme="danger"] {
+  background-color: #ffffff;
   border-color: #dd6161;
   color: #dd6161;
   fill: #e89518;
 }
+.yx-control[theme="level1-reverse"] {
+  background-color: #2d4a63;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="level2-reverse"] {
+  background-color: #8094a5;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="level3-reverse"] {
+  background-color: #b9ced4;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="level4-reverse"] {
+  background-color: #cccccc;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="level5-reverse"] {
+  background-color: #cccccc;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="primary-reverse"] {
+  background-color: #d0ae75;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="second-reverse"] {
+  background-color: #d0ae75;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="success-reverse"] {
+  background-color: #71c04a;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="warning-reverse"] {
+  background-color: #e89518;
+  color: #ffffff;
+  fill: #ffffff;
+}
+.yx-control[theme="danger-reverse"] {
+  background-color: #dd6161;
+  color: #ffffff;
+  fill: #ffffff;
+}
 .yx-control[disabled],
 .yx-control[theme="disabled"] {
   border-color: #666666;
+  background-color: #cccccc;
   color: #666666;
   fill: #666666;
   cursor: not-allowed;
@@ -291,58 +357,6 @@ textarea::-webkit-input-placeholder {
 .yx-panel {
   position: relative;
 }
-.yx-panel[theme="default"] {
-  background-color: #2d4a63;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="light"] {
-  background-color: #8094a5;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="info"] {
-  background-color: #b9ced4;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="explain"] {
-  background-color: #cccccc;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="primary"] {
-  background-color: #d0ae75;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="second"] {
-  background-color: #d0ae75;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="success"] {
-  background-color: #71c04a;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="warning"] {
-  background-color: #e89518;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[theme="danger"] {
-  background-color: #dd6161;
-  color: #ffffff;
-  fill: #ffffff;
-}
-.yx-panel[disabled],
-.yx-panel[theme="disabled"] {
-  background-color: #666666;
-  color: #ffffff;
-  fill: #ffffff;
-  cursor: not-allowed;
-}
 .yx-button {
   height: 0.35rem;
   margin: 0;
@@ -356,28 +370,6 @@ textarea::-webkit-input-placeholder {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-.yx-button[theme="primary"] {
-  background-color: #d0ae75;
-  color: #ffffff;
-}
-.yx-button[theme="success"] {
-  background-color: #71c04a;
-  color: #ffffff;
-}
-.yx-button[theme="warning"] {
-  background-color: #e89518;
-  color: #ffffff;
-}
-.yx-button[theme="danger"] {
-  background-color: #dd6161;
-  color: #ffffff;
-}
-.yx-button[disabled],
-.yx-button[theme][disabled] {
-  background-color: #666666;
-  color: #666666;
-  cursor: not-allowed;
 }
 .yx-icon {
   position: relative;
@@ -493,7 +485,7 @@ textarea::-webkit-input-placeholder {
 .yx-textbox[disabled],
 .yx-textbox[theme="disabled"] {
   border-color: #8094a5;
-  background-color: #666666;
+  background-color: #cccccc;
   color: #666666;
   cursor: not-allowed;
 }

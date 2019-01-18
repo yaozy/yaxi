@@ -4567,10 +4567,10 @@ yaxi.Thread = (function () {
     color['back-footer'] = '#ffffff';
 
 
-    color['back-default'] = '#ffffff';
-    color['back-light'] = '#cccccc';
-    color['back-info'] = '#b9ced4';
-    color['back-explain'] = '#cccccc';
+    color['back-level1'] = '#ffffff';
+    color['back-level2'] = '#cccccc';
+    color['back-level3'] = '#b9ced4';
+    color['back-level4'] = '#cccccc';
     color['back-reverse'] = '#f7f7f7';
 
     color['back-primary'] = '#d0ae75';
@@ -4581,10 +4581,10 @@ yaxi.Thread = (function () {
     color['back-disabled'] = '#666666';
 
 
-    color['font-default'] = '#2d4a63';
-    color['font-light'] = '#8094a5';
-    color['font-info'] = '#b9ced4';
-    color['font-explain'] = '#cccccc';
+    color['font-level1'] = '#2d4a63';
+    color['font-level2'] = '#8094a5';
+    color['font-level3'] = '#b9ced4';
+    color['font-level4'] = '#cccccc';
     color['font-reverse'] = '#ffffff';
 
     color['font-primary'] = '#d0ae75';
@@ -4595,10 +4595,10 @@ yaxi.Thread = (function () {
     color['font-disabled'] = '#666666';
 
 
-    color['border-default'] = '#8094a5';
-    color['border-light'] = '#8094a5';
-    color['border-info'] = '#b9ced4';
-    color['border-explain'] = '#cccccc';
+    color['border-level1'] = '#8094a5';
+    color['border-level2'] = '#8094a5';
+    color['border-level3'] = '#b9ced4';
+    color['border-level4'] = '#cccccc';
     color['border-reverse'] = '#ffffff';
 
     color['border-primary'] = '#d0ae75';
@@ -4609,10 +4609,10 @@ yaxi.Thread = (function () {
     color['border-disabled'] = '#666666';
 
 
-    color['icon-default'] = '#2d4a63';
-    color['icon-light'] = '#8094a5';
-    color['icon-info'] = '#b9ced4';
-    color['icon-explain'] = '#cccccc';
+    color['icon-level1'] = '#2d4a63';
+    color['icon-level2'] = '#8094a5';
+    color['icon-level3'] = '#b9ced4';
+    color['icon-level4'] = '#cccccc';
     color['icon-reverse'] = '#ffffff';
 
     color['icon-primary'] = '#d0ae75';
@@ -4879,10 +4879,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('lineHeight', '');
 
 
-    // css font-size
-    this.$property('fontSize', '');
-
-
     // css text-align
     this.$property('textAlign', '');
 
@@ -4890,6 +4886,17 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     // css vertical-align
     this.$property('verticalAlign', '');
 
+
+    // css font-size
+    this.$property('fontSize', '');
+
+    
+    // css font-family
+    this.$property('fontFamily', '');
+
+    
+    // css font-weight
+    this.$property('fontWeight', '');
 
 
     // css background-color
@@ -5569,6 +5576,18 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.fontSize = function (dom, value) {
 
         dom.style.fontSize = value;
+    }
+
+
+    renderer.fontFamily = function (dom, value) {
+
+        dom.style.fontFamily = value;
+    }
+
+
+    renderer.fontWeight = function (dom, value) {
+
+        dom.style.fontWeight = value;
     }
 
 

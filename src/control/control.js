@@ -230,10 +230,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('lineHeight', '');
 
 
-    // css font-size
-    this.$property('fontSize', '');
-
-
     // css text-align
     this.$property('textAlign', '');
 
@@ -241,6 +237,17 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     // css vertical-align
     this.$property('verticalAlign', '');
 
+
+    // css font-size
+    this.$property('fontSize', '');
+
+    
+    // css font-family
+    this.$property('fontFamily', '');
+
+    
+    // css font-weight
+    this.$property('fontWeight', '');
 
 
     // css background-color
@@ -920,6 +927,18 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.fontSize = function (dom, value) {
 
         dom.style.fontSize = value;
+    }
+
+
+    renderer.fontFamily = function (dom, value) {
+
+        dom.style.fontFamily = value;
+    }
+
+
+    renderer.fontWeight = function (dom, value) {
+
+        dom.style.fontWeight = value;
     }
 
 
