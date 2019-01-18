@@ -199,8 +199,24 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('width', '');
 
 
+    // css min-width
+    this.$property('minWidth', '');
+
+
+    // css max-width
+    this.$property('maxWidth', '');
+
+
     // css height
     this.$property('height', '');
+
+
+    // css min-height
+    this.$property('minHeight', '');
+
+
+    // css max-height
+    this.$property('maxHeight', '');
 
 
     // css margin
@@ -894,9 +910,33 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+    renderer.minWidth = function (dom, value) {
+
+        dom.style.minWidth = value;
+    }
+
+
+    renderer.maxWidth = function (dom, value) {
+
+        dom.style.maxWidth = value;
+    }
+
+
     renderer.height = function (dom, value) {
 
         dom.style.height = value;
+    }
+
+    
+    renderer.minHeight = function (dom, value) {
+
+        dom.style.minHeight = value;
+    }
+
+    
+    renderer.maxHeight = function (dom, value) {
+
+        dom.style.maxHeight = value;
     }
 
 

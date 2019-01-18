@@ -390,6 +390,8 @@ textarea::-webkit-input-placeholder {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  border-width: 1px;
+  border-style: solid;
 }
 .yx-icon {
   position: relative;
@@ -758,6 +760,10 @@ textarea::-webkit-input-placeholder {
   overflow: hidden;
   background-color: #ffffff;
   box-shadow: 0 0 4px #d8dce4;
+}
+.yx-footer.yx-control,
+.yx-footer > .yx-control {
+  border: 0;
 }
 .yx-backbutton {
   position: absolute;
