@@ -4,16 +4,6 @@ yaxi.Control.extend(function (Class, base) {
 
     var stack = yaxi.__layer_stack;
 
-
-
-    Class['en-US'] = 'Cancel';
-
-
-    Class['zh-CN'] = '取消';
-
-
-    Class['zh-TW'] = '取消';
-
     
 
 
@@ -249,7 +239,7 @@ yaxi.Control.extend(function (Class, base) {
         {
             data.cancel = {
                 Class: yaxi.Text,
-                text: Class[yaxi.language]
+                text: yaxi.i18n.Cancel
             };
         }
 

@@ -1,7 +1,6 @@
 yaxi.showMessage = function (options) {
 
-    var Button = yaxi.Button,
-        i18n = Button[yaxi.language] || Button['en-US'],
+    var i18n = yaxi.i18n,
         buttons,
         callback;
 
@@ -66,7 +65,7 @@ yaxi.showMessage = function (options) {
     options.className = 'yx-messagebox';
 
     options.footer = {
-        subtype: Button,
+        subtype: yaxi.Button,
         layout: 'same-width',
         gap: '1px',
         children: options.buttons || [

@@ -6,36 +6,9 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class['en-US'] = {
-        pulldown: 'pulldown to refresh',
-        release: 'release refresh',
-        loading: 'loading, please wait...',
-        success: 'refresh success',
-        fail: 'refresh fail' 
-    };
-
-
-    Class['zh-CN'] = {
-        pulldown: '下拉刷新',
-        release: '放开刷新',
-        loading: '正在加载, 请稍候...',
-        success: '刷新成功',
-        fail: '刷新失败'
-    };
-
-
-    Class['zh-TW'] = {
-        pulldown: '下拉重繪',
-        release: '放開重繪',
-        loading: '正在加載, 請稍候...',
-        success: '重繪成功',
-        fail: '重繪失敗'
-    };
-
-
     function i18n(key) {
     
-        return (Class[yaxi.language] || Class['en-US'])[key];
+        return yaxi.i18n.pulldown[key];
     }
 
 

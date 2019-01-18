@@ -1,30 +1,6 @@
 yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
 
-    Class['en-US'] = {
-        loading: 'loading, please wait...',
-        empty: 'no data',
-        completed: 'no more data',
-        failed: 'load fail, please click to retry'
-    };
-
-
-    Class['zh-CN'] = {
-        loading: '正在加载, 请稍候...',
-        empty: '无数据',
-        completed: '没有更多数据了',
-        failed: '加载失败, 请点击重试'
-    };
-
-
-    Class['zh-TW'] = {
-        loading: '正在加載, 請稍候...',
-        empty: '無數據',
-        completed: '沒有更多數據了',
-        failed: '加載失敗, 請點擊重試'
-    };
-
-
     
 
     yaxi.template(this, '<div class="yx-loading"><span class="yx-loading-img"></span><span></span></div>');
@@ -96,7 +72,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
             return;
         }
 
-        var i18n = Class[yaxi.language] || Class['en-US'],
+        var i18n = yaxi.i18n.loading,
             display = 'none',
             text;
 

@@ -64,6 +64,86 @@ yaxi.impl = Object.create(null);
 
 
 
+yaxi.languages = {
+
+    'en-US': {
+        OK: 'OK',
+        Cancel: 'Cancel',
+        Yes: 'Yes',
+        No: 'No',
+
+        loading: {
+            loading: 'loading, please wait...',
+            empty: 'no data',
+            completed: 'no more data',
+            failed: 'load fail, please click to retry'
+        },
+
+        pulldown: {
+            pulldown: 'pulldown to refresh',
+            release: 'release refresh',
+            loading: 'loading, please wait...',
+            success: 'refresh success',
+            fail: 'refresh fail' 
+        }
+
+    },
+
+    'zh-CN': {
+        OK: '确定',
+        Cancel: '取消',
+        Yes: '是',
+        No: '否',
+
+        loading: {
+            loading: '正在加载, 请稍候...',
+            empty: '无数据',
+            completed: '没有更多数据了',
+            failed: '加载失败, 请点击重试'
+        },
+
+        pulldown: {
+            pulldown: '下拉刷新',
+            release: '放开刷新',
+            loading: '正在加载, 请稍候...',
+            success: '刷新成功',
+            fail: '刷新失败'
+        }
+
+    },
+
+
+    'zh-TW': {
+        OK: '確定',
+        Cancel: '取消',
+        Yes: '是',
+        No: '否',
+
+        loading: {
+            loading: '正在加載, 請稍候...',
+            empty: '無數據',
+            completed: '沒有更多數據了',
+            failed: '加載失敗, 請點擊重試'
+        },
+
+        pulldown: {
+            pulldown: '下拉重繪',
+            release: '放開重繪',
+            loading: '正在加載, 請稍候...',
+            success: '重繪成功',
+            fail: '重繪失敗'
+        }
+
+    }
+
+};
+
+
+yaxi.i18n = yaxi.languages[yaxi.language] || yaxi.languages['en-US'];
+
+
+
+
 Function.prototype.bind || (Function.prototype.bind = function (context) {
 
     var fn = this;
@@ -3834,6 +3914,7 @@ window.require || (function () {
     yaxi.switchLanguage = function (language) {
 
         yaxi.language = language;
+        yaxi.i18n = yaxi.languages[language] || yaxi.languages['en-US'];
 
         for (var key in languages)
         {
@@ -4571,13 +4652,15 @@ yaxi.Thread = (function () {
     color['back-level2'] = '#cccccc';
     color['back-level3'] = '#b9ced4';
     color['back-level4'] = '#cccccc';
+    color['back-level5'] = '#f7f7f7';
+
     color['back-reverse'] = '#f7f7f7';
 
     color['back-primary'] = '#d0ae75';
     color['back-second'] = '#d0ae75';
     color['back-success'] = '#71c04a';
     color['back-warning'] = '#e89518';
-    color['back-danger'] = '#dd6161';
+    color['back-danger'] = '#ff6c6c';
     color['back-disabled'] = '#666666';
 
 
@@ -4585,13 +4668,15 @@ yaxi.Thread = (function () {
     color['font-level2'] = '#8094a5';
     color['font-level3'] = '#b9ced4';
     color['font-level4'] = '#cccccc';
+    color['font-level5'] = '#cccccc';
+
     color['font-reverse'] = '#ffffff';
 
     color['font-primary'] = '#d0ae75';
     color['font-second'] = '#d0ae75';
     color['font-success'] = '#71c04a';
     color['font-warning'] = '#e89518';
-    color['font-danger'] = '#dd6161';
+    color['font-danger'] = '#ff6c6c';
     color['font-disabled'] = '#666666';
 
 
@@ -4599,6 +4684,8 @@ yaxi.Thread = (function () {
     color['border-level2'] = '#8094a5';
     color['border-level3'] = '#b9ced4';
     color['border-level4'] = '#cccccc';
+    color['border-level5'] = '#cccccc';
+
     color['border-reverse'] = '#ffffff';
 
     color['border-primary'] = '#d0ae75';
@@ -4613,13 +4700,15 @@ yaxi.Thread = (function () {
     color['icon-level2'] = '#8094a5';
     color['icon-level3'] = '#b9ced4';
     color['icon-level4'] = '#cccccc';
+    color['icon-level5'] = '#cccccc';
+
     color['icon-reverse'] = '#ffffff';
 
     color['icon-primary'] = '#d0ae75';
     color['icon-second'] = '#d0ae75';
     color['icon-success'] = '#71c04a';
     color['icon-warning'] = '#e89518';
-    color['icon-danger'] = '#dd6161';
+    color['icon-danger'] = '#ff6c6c';
     color['icon-disabled'] = '#666666';
 
 
@@ -6597,30 +6686,6 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 yaxi.Button = yaxi.Control.extend(function (Class, base) {
 
 
-    Class['en-US'] = {
-        OK: 'OK',
-        Cancel: 'Cancel',
-        Yes: 'Yes',
-        No: 'No'
-    };
-
-
-    Class['zh-CN'] = {
-        OK: '确定',
-        Cancel: '取消',
-        Yes: '是',
-        No: '否'
-    };
-
-
-    Class['zh-TW'] = {
-        OK: '確定',
-        Cancel: '取消',
-        Yes: '是',
-        No: '否'
-    };
-
-
 
     yaxi.template(this, '<button type="button" class="yx-control yx-button"></button>');
 
@@ -7477,30 +7542,6 @@ yaxi.Image = yaxi.Control.extend(function () {
 yaxi.Loading = yaxi.Control.extend(function (Class, base) {
 
 
-    Class['en-US'] = {
-        loading: 'loading, please wait...',
-        empty: 'no data',
-        completed: 'no more data',
-        failed: 'load fail, please click to retry'
-    };
-
-
-    Class['zh-CN'] = {
-        loading: '正在加载, 请稍候...',
-        empty: '无数据',
-        completed: '没有更多数据了',
-        failed: '加载失败, 请点击重试'
-    };
-
-
-    Class['zh-TW'] = {
-        loading: '正在加載, 請稍候...',
-        empty: '無數據',
-        completed: '沒有更多數據了',
-        failed: '加載失敗, 請點擊重試'
-    };
-
-
     
 
     yaxi.template(this, '<div class="yx-loading"><span class="yx-loading-img"></span><span></span></div>');
@@ -7572,7 +7613,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
             return;
         }
 
-        var i18n = Class[yaxi.language] || Class['en-US'],
+        var i18n = yaxi.i18n.loading,
             display = 'none',
             text;
 
@@ -7795,36 +7836,9 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class['en-US'] = {
-        pulldown: 'pulldown to refresh',
-        release: 'release refresh',
-        loading: 'loading, please wait...',
-        success: 'refresh success',
-        fail: 'refresh fail' 
-    };
-
-
-    Class['zh-CN'] = {
-        pulldown: '下拉刷新',
-        release: '放开刷新',
-        loading: '正在加载, 请稍候...',
-        success: '刷新成功',
-        fail: '刷新失败'
-    };
-
-
-    Class['zh-TW'] = {
-        pulldown: '下拉重繪',
-        release: '放開重繪',
-        loading: '正在加載, 請稍候...',
-        success: '重繪成功',
-        fail: '重繪失敗'
-    };
-
-
     function i18n(key) {
     
-        return (Class[yaxi.language] || Class['en-US'])[key];
+        return yaxi.i18n.pulldown[key];
     }
 
 
@@ -10655,8 +10669,7 @@ yaxi.Header = yaxi.Panel.extend(function (Class, base) {
 
 yaxi.showMessage = function (options) {
 
-    var Button = yaxi.Button,
-        i18n = Button[yaxi.language] || Button['en-US'],
+    var i18n = yaxi.i18n,
         buttons,
         callback;
 
@@ -10721,7 +10734,7 @@ yaxi.showMessage = function (options) {
     options.className = 'yx-messagebox';
 
     options.footer = {
-        subtype: Button,
+        subtype: yaxi.Button,
         layout: 'same-width',
         gap: '1px',
         children: options.buttons || [
@@ -10953,16 +10966,6 @@ yaxi.Control.extend(function (Class, base) {
 
 
     var stack = yaxi.__layer_stack;
-
-
-
-    Class['en-US'] = 'Cancel';
-
-
-    Class['zh-CN'] = '取消';
-
-
-    Class['zh-TW'] = '取消';
 
     
 
@@ -11199,7 +11202,7 @@ yaxi.Control.extend(function (Class, base) {
         {
             data.cancel = {
                 Class: yaxi.Text,
-                text: Class[yaxi.language]
+                text: yaxi.i18n.Cancel
             };
         }
 

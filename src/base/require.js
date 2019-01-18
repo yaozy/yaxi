@@ -257,6 +257,7 @@ window.require || (function () {
     yaxi.switchLanguage = function (language) {
 
         yaxi.language = language;
+        yaxi.i18n = yaxi.languages[language] || yaxi.languages['en-US'];
 
         for (var key in languages)
         {
