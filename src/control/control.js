@@ -104,13 +104,18 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    // 控件风格
+    this.$property('theme', '');
+    
+
+    // 背景风格
+    this.$property('back', '');
+
+
+
     // id
     this.$property('id', '');
 
-    
-    // 风格
-    this.$property('theme', '');
-    
 
     // class
     this.$property('className', '');
@@ -745,15 +750,22 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var renderer = this.renderer = create(null);
 
 
-    renderer.id = function (dom, value) {
-
-        dom.id = value;
-    }
-
 
     renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
+    }
+
+    renderer.back = function (dom, value) {
+
+        dom.setAttribute('back', value);
+    }
+
+
+
+    renderer.id = function (dom, value) {
+
+        dom.id = value;
     }
 
 

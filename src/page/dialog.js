@@ -241,6 +241,26 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 		return true;
 	}
+
+
+
+	this.invalidate = function () {
+
+		if (this.$dom)
+		{
+			var children = this.__children;
+
+			for (var i = 0, l = children.length; i < l; i++)
+			{
+				var control = children[i];
+
+				if (control.$dom && control.invalidate)
+				{
+					control.invalidate();
+				}
+			}
+		}
+    }
 	
 
 

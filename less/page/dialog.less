@@ -9,14 +9,22 @@
     z-index: 30;
 }
 
+
 .yx-dialog>.yx-header {
+    position: relative;
     height: .4rem;
     line-height: .4rem;
+    text-align: center;
+    font-weight: bold;
 }
 
 .yx-dialog>.yx-content {
-    min-height: .8rem;
-    padding: .1rem;
+    position: relative;
+    background-color: @back-level1-color;
+}
+
+.yx-dialog>.yx-footer {
+    position: relative;
 }
 
 
@@ -35,16 +43,20 @@
 
 
 
+.yx-messagebox>.yx-content {
+    min-height: .9rem;
+    max-height: 60%;
+    padding: .15rem;
+}
 
 .yx-messagebox>.yx-footer {
-    height: .6rem;
+    height: .4rem;
     line-height: .3rem;
-    padding: .1rem;
     text-align: right;
+    background-color: @border-level1-color;
 }
 
 .yx-messagebox>.yx-footer>.yx-control {
-    margin: 0 .1rem;
-    min-width: .8rem;
-    border-radius: .05rem;
+    height: .4rem;
+    background-color: @back-level1-color;
 }

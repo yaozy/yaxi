@@ -4753,13 +4753,18 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+    // 控件风格
+    this.$property('theme', '');
+    
+
+    // 背景风格
+    this.$property('back', '');
+
+
+
     // id
     this.$property('id', '');
 
-    
-    // 风格
-    this.$property('theme', '');
-    
 
     // class
     this.$property('className', '');
@@ -5394,15 +5399,22 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var renderer = this.renderer = create(null);
 
 
-    renderer.id = function (dom, value) {
-
-        dom.id = value;
-    }
-
 
     renderer.theme = function (dom, value) {
 
         dom.setAttribute('theme', value);
+    }
+
+    renderer.back = function (dom, value) {
+
+        dom.setAttribute('back', value);
+    }
+
+
+
+    renderer.id = function (dom, value) {
+
+        dom.id = value;
     }
 
 
@@ -10484,6 +10496,26 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 		return true;
 	}
+
+
+
+	this.invalidate = function () {
+
+		if (this.$dom)
+		{
+			var children = this.__children;
+
+			for (var i = 0, l = children.length; i < l; i++)
+			{
+				var control = children[i];
+
+				if (control.$dom && control.invalidate)
+				{
+					control.invalidate();
+				}
+			}
+		}
+    }
 	
 
 
@@ -10633,11 +10665,7 @@ yaxi.showMessage = function (options) {
         options = {
             header: yaxi.showMessage.header || '',
             content: {
-                layout: 'row',
-                style: {
-                    alignItems: 'center',
-                    wordBreak: 'break-word'
-                },
+                textAlign: 'center',
                 children: [
                     {
                         Class: yaxi.Text,
@@ -10654,11 +10682,7 @@ yaxi.showMessage = function (options) {
         if (typeof options.content === 'string')
         {
             options.content = {
-                layout: 'row',
-                style: {
-                    alignItems: 'center',
-                    wordBreak: 'break-word'
-                },
+                wordBreak: 'break-word',
                 children: [
                     {
                         Class: yaxi.Multiline,
@@ -10698,6 +10722,8 @@ yaxi.showMessage = function (options) {
 
     options.footer = {
         subtype: Button,
+        layout: 'same-width',
+        gap: '1px',
         children: options.buttons || [
             {
                 key: 'OK',
@@ -10734,32 +10760,24 @@ yaxi.prompt = function (options) {
     });
 
     options.content = {
-        layout: 'row',
-        style: {
-            alignItems: 'center',
-            wordBreak: 'break-word'
-        },
         children: [
             {
                 Class: options.control || (options.password ? yaxi.Password : yaxi.TextBox),
                 key: 'input',
                 value: options.value || '',
                 placeholder: options.placeholder || '',
-                style: {
-                    width: '100%',
-                    margin: '.3rem 0.1rem .2rem',
-                    borderStyle: 'none none solid none'
-                }
+                width: '100%',
+                borderStyle: 'none none solid none'
             }
         ]
     };
 
     options.buttons || (options.buttons = [
+        'Cancel',
         {
             theme: 'primary',
             key: 'OK'
-        },
-        'Cancel'
+        }
     ]);
 
     return yaxi.showMessage(options);

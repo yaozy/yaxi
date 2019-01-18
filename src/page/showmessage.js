@@ -10,11 +10,7 @@ yaxi.showMessage = function (options) {
         options = {
             header: yaxi.showMessage.header || '',
             content: {
-                layout: 'row',
-                style: {
-                    alignItems: 'center',
-                    wordBreak: 'break-word'
-                },
+                textAlign: 'center',
                 children: [
                     {
                         Class: yaxi.Text,
@@ -31,11 +27,7 @@ yaxi.showMessage = function (options) {
         if (typeof options.content === 'string')
         {
             options.content = {
-                layout: 'row',
-                style: {
-                    alignItems: 'center',
-                    wordBreak: 'break-word'
-                },
+                wordBreak: 'break-word',
                 children: [
                     {
                         Class: yaxi.Multiline,
@@ -75,6 +67,8 @@ yaxi.showMessage = function (options) {
 
     options.footer = {
         subtype: Button,
+        layout: 'same-width',
+        gap: '1px',
         children: options.buttons || [
             {
                 key: 'OK',
@@ -111,32 +105,24 @@ yaxi.prompt = function (options) {
     });
 
     options.content = {
-        layout: 'row',
-        style: {
-            alignItems: 'center',
-            wordBreak: 'break-word'
-        },
         children: [
             {
                 Class: options.control || (options.password ? yaxi.Password : yaxi.TextBox),
                 key: 'input',
                 value: options.value || '',
                 placeholder: options.placeholder || '',
-                style: {
-                    width: '100%',
-                    margin: '.3rem 0.1rem .2rem',
-                    borderStyle: 'none none solid none'
-                }
+                width: '100%',
+                borderStyle: 'none none solid none'
             }
         ]
     };
 
     options.buttons || (options.buttons = [
+        'Cancel',
         {
             theme: 'primary',
             key: 'OK'
-        },
-        'Cancel'
+        }
     ]);
 
     return yaxi.showMessage(options);

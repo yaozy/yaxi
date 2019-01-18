@@ -179,64 +179,84 @@ textarea::-webkit-input-placeholder {
   border-color: transparent;
 }
 .yx-control[theme="level1"] {
-  background-color: #ffffff;
-  border-color: #8094a5;
+  border-color: #d8dce4;
   color: #2d4a63;
   fill: #2d4a63;
 }
 .yx-control[theme="level2"] {
-  background-color: #ffffff;
-  border-color: #8094a5;
+  border-color: #cccccc;
   color: #8094a5;
   fill: #8094a5;
 }
 .yx-control[theme="level3"] {
-  background-color: #ffffff;
-  border-color: #b9ced4;
-  color: #b9ced4;
-  fill: #b9ced4;
+  border-color: #cccccc;
+  color: #bac1d2;
+  fill: #bac1d2;
 }
 .yx-control[theme="level4"] {
-  background-color: #ffffff;
   border-color: #cccccc;
   color: #cccccc;
   fill: #cccccc;
 }
 .yx-control[theme="level5"] {
-  background-color: #ffffff;
-  border-color: #f7f7f7;
+  border-color: #cccccc;
   color: #f7f7f7;
   fill: #f7f7f7;
 }
 .yx-control[theme="primary"] {
-  background-color: #ffffff;
   border-color: #d0ae75;
   color: #d0ae75;
   fill: #d0ae75;
 }
 .yx-control[theme="second"] {
-  background-color: #ffffff;
   border-color: #d0ae75;
   color: #d0ae75;
   fill: #d0ae75;
 }
 .yx-control[theme="success"] {
-  background-color: #ffffff;
   border-color: #71c04a;
   color: #71c04a;
   fill: #71c04a;
 }
 .yx-control[theme="warning"] {
-  background-color: #ffffff;
   border-color: #e89518;
   color: #e89518;
   fill: #e89518;
 }
 .yx-control[theme="danger"] {
-  background-color: #ffffff;
-  border-color: #dd6161;
-  color: #dd6161;
+  border-color: #ff6c6c;
+  color: #ff6c6c;
   fill: #e89518;
+}
+.yx-control[back="level1"] {
+  background-color: #ffffff;
+}
+.yx-control[back="level2"] {
+  background-color: #cccccc;
+}
+.yx-control[back="level3"] {
+  background-color: #b9ced4;
+}
+.yx-control[back="level4"] {
+  background-color: #cccccc;
+}
+.yx-control[back="level5"] {
+  background-color: #f7f7f7;
+}
+.yx-control[back="primary"] {
+  background-color: #d0ae75;
+}
+.yx-control[back="second"] {
+  background-color: #d0ae75;
+}
+.yx-control[back="success"] {
+  background-color: #71c04a;
+}
+.yx-control[back="warning"] {
+  background-color: #e89518;
+}
+.yx-control[back="danger"] {
+  background-color: #ff6c6c;
 }
 .yx-control[theme="level1-reverse"] {
   background-color: #2d4a63;
@@ -249,7 +269,7 @@ textarea::-webkit-input-placeholder {
   fill: #ffffff;
 }
 .yx-control[theme="level3-reverse"] {
-  background-color: #b9ced4;
+  background-color: #bac1d2;
   color: #ffffff;
   fill: #ffffff;
 }
@@ -284,16 +304,16 @@ textarea::-webkit-input-placeholder {
   fill: #ffffff;
 }
 .yx-control[theme="danger-reverse"] {
-  background-color: #dd6161;
+  background-color: #ff6c6c;
   color: #ffffff;
   fill: #ffffff;
 }
 .yx-control[disabled],
 .yx-control[theme="disabled"] {
-  border-color: #666666;
-  background-color: #cccccc;
-  color: #666666;
-  fill: #666666;
+  border-color: #999999;
+  background-color: #999999;
+  color: #999999;
+  fill: #999999;
   cursor: not-allowed;
 }
 [layout="block"] > * {
@@ -409,7 +429,7 @@ textarea::-webkit-input-placeholder {
   line-height: 0.6rem;
   text-align: center;
   font-size: 0.14rem;
-  color: #b9ced4;
+  color: #bac1d2;
 }
 .yx-loading-img {
   display: inline-block;
@@ -440,7 +460,7 @@ textarea::-webkit-input-placeholder {
   text-align: center;
   font-size: 0.14rem;
   background-color: #ffffff;
-  fill: #b9ced4;
+  fill: #bac1d2;
 }
 .yx-pulldown-body {
   position: absolute;
@@ -450,7 +470,7 @@ textarea::-webkit-input-placeholder {
   top: 50%;
   left: 0;
   margin-top: -0.1rem;
-  color: #b9ced4;
+  color: #bac1d2;
 }
 .yx-pulldown-body > svg {
   margin-right: 0.02rem;
@@ -470,7 +490,7 @@ textarea::-webkit-input-placeholder {
   width: 2rem;
   height: 0.3rem;
   line-height: 0.3rem;
-  border: 1px solid #8094a5;
+  border: 1px solid #d8dce4;
   padding: 0 0.05rem;
   background-color: #ffffff;
   font-size: 0.16rem;
@@ -484,9 +504,9 @@ textarea::-webkit-input-placeholder {
 }
 .yx-textbox[disabled],
 .yx-textbox[theme="disabled"] {
-  border-color: #8094a5;
-  background-color: #cccccc;
-  color: #666666;
+  border-color: #d8dce4;
+  background-color: #999999;
+  color: #999999;
   cursor: not-allowed;
 }
 .yx-checkbox {
@@ -512,7 +532,7 @@ textarea::-webkit-input-placeholder {
   display: inline-block;
   width: 2rem;
   height: 0.5rem;
-  border: 1px solid #8094a5;
+  border: 1px solid #d8dce4;
   background-color: #ffffff;
 }
 .yx-memo > textarea {
@@ -552,17 +572,17 @@ textarea::-webkit-input-placeholder {
 }
 .yx-number-plus {
   right: 0;
-  border-left: 1px solid #8094a5;
+  border-left: 1px solid #d8dce4;
   font-size: 0.16rem;
 }
 .yx-number-minus {
   left: 0;
-  border-right: 1px solid #8094a5;
+  border-right: 1px solid #d8dce4;
   font-size: 0.2rem;
 }
 .yx-number-plus[disabled],
 .yx-number-minus[disabled] {
-  color: #666666;
+  color: #999999;
 }
 .yx-password {
   position: relative;
@@ -620,7 +640,7 @@ textarea::-webkit-input-placeholder {
   height: 0.25rem;
   margin-top: -0.125rem;
   border-radius: 0.125rem;
-  background-color: #b9ced4;
+  background-color: #bac1d2;
 }
 .yx-switchbutton-button {
   position: absolute;
@@ -630,7 +650,7 @@ textarea::-webkit-input-placeholder {
   width: 0.25rem;
   height: 0.25rem;
   margin-top: -0.125rem;
-  border: 1px solid #8094a5;
+  border: 1px solid #d8dce4;
   border-radius: 0.125rem;
   background-color: white;
 }
@@ -658,12 +678,18 @@ textarea::-webkit-input-placeholder {
   z-index: 30;
 }
 .yx-dialog > .yx-header {
+  position: relative;
   height: 0.4rem;
   line-height: 0.4rem;
+  text-align: center;
+  font-weight: bold;
 }
 .yx-dialog > .yx-content {
-  min-height: 0.8rem;
-  padding: 0.1rem;
+  position: relative;
+  background-color: #ffffff;
+}
+.yx-dialog > .yx-footer {
+  position: relative;
 }
 .yx-mask {
   position: absolute;
@@ -676,16 +702,20 @@ textarea::-webkit-input-placeholder {
   background-color: #000000;
   opacity: 0.2;
 }
+.yx-messagebox > .yx-content {
+  min-height: 0.9rem;
+  max-height: 60%;
+  padding: 0.15rem;
+}
 .yx-messagebox > .yx-footer {
-  height: 0.6rem;
+  height: 0.4rem;
   line-height: 0.3rem;
-  padding: 0.1rem;
   text-align: right;
+  background-color: #d8dce4;
 }
 .yx-messagebox > .yx-footer > .yx-control {
-  margin: 0 0.1rem;
-  min-width: 0.8rem;
-  border-radius: 0.05rem;
+  height: 0.4rem;
+  background-color: #ffffff;
 }
 .yx-floatlayer {
   position: absolute;
@@ -727,7 +757,7 @@ textarea::-webkit-input-placeholder {
   bottom: 0;
   overflow: hidden;
   background-color: #ffffff;
-  box-shadow: 0 0 4px #8094a5;
+  box-shadow: 0 0 4px #d8dce4;
 }
 .yx-backbutton {
   position: absolute;
@@ -756,7 +786,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-toast {
   position: absolute;
-  border: 1px solid #8094a5;
+  border: 1px solid #d8dce4;
   padding: 0.1rem;
   border-radius: 0.05rem;
   z-index: 30;
@@ -783,7 +813,7 @@ textarea::-webkit-input-placeholder {
 .yx-actionsheet-cancel {
   display: block;
   background-color: #ffffff;
-  border: 1px solid #8094a5;
+  border: 1px solid #d8dce4;
   text-align: center;
 }
 .yx-actionsheet-header {
@@ -799,13 +829,13 @@ textarea::-webkit-input-placeholder {
 .yx-actionsheet-content {
   padding-top: 0.5rem;
   border-radius: 0.05rem;
-  box-shadow: 0 0 8px #8094a5;
+  box-shadow: 0 0 8px #d8dce4;
 }
 .yx-actionsheet-content > * {
   display: block;
   height: 0.5rem;
   line-height: 0.5rem;
-  border-top: 0.5px solid #8094a5;
+  border-top: 0.5px solid #d8dce4;
 }
 .yx-actionsheet-cancel {
   margin-top: 0.1rem;
@@ -814,7 +844,7 @@ textarea::-webkit-input-placeholder {
   border-radius: 0.05rem;
   font-size: 0.14rem;
   font-weight: bold;
-  box-shadow: 0 0 8px #8094a5;
+  box-shadow: 0 0 8px #d8dce4;
 }
 .yx-carousel {
   position: relative;
