@@ -2,12 +2,6 @@
 
 
 
-    var styleKeys = Object.create(null);
-
-    var styleCache = Object.create(null);
-
-
-
 
     function parse(array, node, space) {
 
@@ -27,19 +21,19 @@
             case 'Ref':
             case 'Require':
             case 'Reference':
-                array.push(space, 'Class: yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
+                array.push(space, '"Class": yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
             case 'HTML':
             case 'HtmlControl':
-                array.push(space, 'Class: __k.HtmlControl,\n');
-                array.push(space, 'html: \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
+                array.push(space, '"Class": __k.HtmlControl,\n');
+                array.push(space, '"html": \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
                 node = null;
                 break;
 
             default:
-                array.push(space, 'Class: __k.', tagName);
+                array.push(space, '"Class": __k.', tagName);
                 break;
         }
 
@@ -56,12 +50,6 @@
                     parseStyle(styles || (styles = []), value, space + '\t');
                     continue;
                 }
-
-                if (name === 'class')
-                {
-                    array.push(',\n', space, 'className: "', value, '"');
-                    continue;
-                }
                 
                 if (name[1] === '-')
                 {
@@ -71,49 +59,14 @@
                     // 传入的数据
                     if (any === 'd')
                     {
-                        // 样式
-                        if (name[0] === 's' && /style-/.test(name))
-                        {
-                            name = name.substring(6);
-                            name = styleKeys[name] || (styleKeys[name] = name.replace(/-([\w])/g, camelize));
-                            
-                            if (styles)
-                            {
-                                styles.push(styles[0] ? ',\n' : '', space, '\t', name, ': ', value);
-                            }
-                            else
-                            {
-                                styles = [space, '\t', name, ': ', value];
-                            }
-                        }
-                        else
-                        {
-                            array.push(',\n', space, name, ': ', value);
-                        }
+                        array.push(',\n', space, '"', name, '": ', value);
                         continue;
                     }
 
                     // 绑定
                     if (any === 'b')
                     {
-                        // 样式
-                        if (name[0] === 's' && /style-/.test(name))
-                        {
-                            name = name.substring(6);
-                            name = styleKeys[name] || (styleKeys[name] = name.replace(/-([\w])/g, camelize));
-
-                            if (styles)
-                            {
-                                any = styles.bindings || (styles.bindings = []);
-                            }
-                            else
-                            {
-                                any = (styles = []).bindings = [];
-                            }
-
-                            any.push(any[0] ? ',\n' : '', space, '\t\t', name, ': "', value, '"');
-                        }
-                        else if (bindings)
+                        if (bindings)
                         {
                             bindings.push(name, value);
                         }
@@ -141,16 +94,16 @@
                     }
                 }
 
-                array.push(',\n', space, name, ': "', value, '"');
+                array.push(',\n', space, '"', name, '": "', value, '"');
             }
 
             if (styles)
             {
-                array.push(',\n', space, 'style: {', styles.join(''));
+                array.push(',\n', space, '"style": {', styles.join(''));
 
                 if (any = styles.bindings)
                 {
-                    array.push(styles[0] ? ',\n' : '', space, '\tbindings: {\n', any.join(''), '\n', space, '\t}');
+                    array.push(styles[0] ? ',\n' : '', space, '\t"bindings": {\n', any.join(''), '\n', space, '\t}');
                 }
                 
                 array.push('\n', space, '}');
@@ -158,14 +111,14 @@
 
             if (bindings)
             {
-                array.push(',\n', space, 'bindings: {');
+                array.push(',\n', space, '"bindings": {');
                 writeBindings(array, bindings, space + '\t');
                 array.push('\n', space, '}');
             }
 
             if (events)
             {
-                array.push(',\n', space, 'events: {');
+                array.push(',\n', space, '"events": {');
                 writeEvents(array, events, space + '\t');
                 array.push('\n', space, '}');
             }
@@ -192,7 +145,9 @@
             if (node.nodeType === 1)
             {
                 array.push(',\n', space, '\ttemplate: {\n');
-                parse(array, node, space + '\t\t'),
+
+                parse(array, node, space + '\t\t');
+
                 array.push('\n', space, '\t}');
 
                 return;
@@ -216,12 +171,14 @@
                 }
                 else
                 {
-                    array.push(',\n', space, 'children: [');
+                    array.push(',\n', space, '"children": [');
                     flag = 1;
                 }
 
                 array.push('\n', space, '\t{\n');
-                parse(array, node, space + '\t\t'),
+
+                parse(array, node, space + '\t\t');
+
                 array.push('\n', space, '\t}');
             }
         }
@@ -236,9 +193,7 @@
 
     function parseStyle(array, text, space) {
 
-        var keys = styleKeys,
-            cache = styleCache,
-            tokens = text.split(';'),
+        var tokens = text.split(';'),
             token,
             index,
             name,
@@ -255,9 +210,6 @@
                     continue;
                 }
 
-                name = keys[name] || (keys[name] = name.trim().replace(/-([\w])/g, camelize));
-                token = cache[token] || (cache[token] = styleValue(token.trim()));
-
                 if (flag)
                 {
                     array.push(',');
@@ -267,28 +219,9 @@
                     flag = 1;
                 }
 
-                array.push('\n', space, name, ': ', token);
+                array.push('\n', space, '"', name, '": ', '"' + token + '"');
             }
         }
-    }
-
-
-    function styleValue(text) {
-
-        // c-开头表示系统颜色
-        if (text.indexOf('c-') >= 0)
-        {
-            text = '"' + text.replace(/c\-([\w-]+)/g, '" + __c["$1"] + "') + '"';
-            return text.replace('"" + ', '').replace('+ ""', '');
-        }
-
-        return '"' + text + '"';
-    }
-
-
-    function camelize(_, key) {
-
-        return key.toUpperCase();
     }
 
 
@@ -304,7 +237,7 @@
                 array.push(',');
             }
 
-            array.push('\n', space, name, ': "', bindings[index++], '"');
+            array.push('\n', space, '"', name, '": "', bindings[index++], '"');
         }
     }
 
@@ -321,7 +254,7 @@
                 array.push(',');
             }
 
-            array.push('\n', space, name, ': data.', events[index++]);
+            array.push('\n', space, '"', name, '": data.', events[index++]);
         }
     }
 
@@ -333,8 +266,8 @@
 
         var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
             array = ['var __dirname = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
-                'var __c = color || yaxi.color;\n',
-                'var __k = classes || yaxi.classes;\n\n',
+                'var __k = yaxi.classes;\n',
+                'var color = yaxi.color;\n\n',
                 'with(data)\n{\n',
                 'return {\n'];
 

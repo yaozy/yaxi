@@ -23,7 +23,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 // 需要处理变化
                 if (converter.change)
                 {
-                    (changes || (changes = this.__changes = {}))[name] = converter.fn.call(this, values[name]);
+                    (changes || (changes = this.__changes = {}))[converter.name] = converter.fn.call(this, values[name]);
                 }
                 else if (key = converter.name) // 默认转换器
                 {
@@ -55,7 +55,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
     
     // 定义属性
-    this.$property = yaxi.impl.properties(function (name, change) {
+    this.$property = yaxi.impl.property(function (name, change) {
 
         return change ? function () {
 

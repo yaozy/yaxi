@@ -85,8 +85,8 @@
     color['mask'] = '#000000';
 
 
-    (yaxi.colors || (yaxi.colors = Object.create(null))).default = color;
+    (yaxi.colors || (yaxi.colors = {})).default = color;
     
     
 
-})(yaxi.color = Object.create(null));
+})(yaxi.color = {});

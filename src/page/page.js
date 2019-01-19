@@ -74,13 +74,13 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-	this.$property('baseURL', '');
+	this.$property('base', '', true, 'baseURL');
 	
 
 	// 是否自动销毁
-	this.$property('autoDestroy', true, false);
+	this.$property('autoDestroy', true, false, 'auto-destroy');
 
-		
+
 
 	// 页头
 	Object.defineProperty(this, 'header', {

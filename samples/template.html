@@ -1,17 +1,19 @@
 <Page d-header="header">
     <Content>
-        <Text d-text="i18n.text" style="display:block;" />
+        <Text d-text="i18n.text" display="block" />
         <HtmlControl>
-            <div style="color:red;">html text</div>
+            <div color="red">html text</div>
         </HtmlControl>
-        <Panel layout="row">
-            <Button text="123" style="margin:0 .2rem;" />
-            <Button text="456" style="margin:0 .2rem;" weight="100" />
-            <Button text="789" style="margin:0 .2rem;" />
+        <Panel layout="line-middle" background-color="silver" color="red" height="1rem">
+            <Button text="123" width="1rem" />
+            <Panel position="absolute" left="1rem" right="1rem">
+                <Button text="456" width="100%" />
+            </Panel>
+            <Button text="789" width="1rem" position="absolute" right="0" />
         </Panel>
         <!-- <Require src=""></Require> -->
     </Content>
     <Footer e-change="change" d-model="model">
-        <TextBox style="background-color:#888888;color:c-default3;" d-style-background-color="color" b-style-width="width" b-value="value" b-change="value" />
+        <TextBox background-color="#888888" d-background-color="color" b-width="width" b-value="value" b-change="value" />
     </Footer>
 </Page>

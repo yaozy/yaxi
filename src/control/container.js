@@ -216,105 +216,28 @@ yaxi.impl.container = function (base) {
     
 
 
-    function computeWeight(children, size, name) {
+    layouts.row = function (children, dom, gap) {
 
-        var total = 0,
-            control,
-            dom,
-            style,
-            weight;
-
-        for (var i = children.length; i--;)
-        {
-            if ((control = children[i]) && (dom = control.$dom) && 
-                (weight = control.$storage.weight) > 0 &&
-                (!(style = control.__style) || style.display !== 'none'))
-            {
-                total += weight;
-                size += dom[name];
-            }
-            else
-            {
-                weight = 0;
-            }
-
-            control.__weight = weight;
-        }
-
-        return total ? [size, total] : null;
-    }
-
-    
-    function arrange(children, size, total, name) {
-
-        var control, style, weight, value;
-
-        for (var i = children.length; i--;)
-        {
-            if ((control = children[i]) && (weight = control.__weight))
-            {
-                value = weight * size / total + .5 | 0;
-                size -= value;
-                total -= weight;
-
-                value += 'px';
-                style = control.$dom.style;
-                
-                if (style[name] !== value)
-                {
-                    style[name] = value;
-                }
-            }
-        }
     }
 
 
-    layouts.row = function (children, dom) {
+    layouts.column = function (children, dom, gap) {
 
-        var time = performance.now();
-
-        var width = dom.clientWidth,
-            last = dom.lastChild,
-            size = last.offsetLeft + last.offsetWidth;
-
-        if (width !== size && (size = computeWeight(children, width - size, 'offsetWidth')))
-        {
-            arrange(children, size[0], size[1], 'width');
-        }
-
-        console.log(performance.now() - time);
-    }
-
-
-    layouts.column = function (children, dom) {
-
-        var height = dom.clientHeight,
-            last = dom.lastChild,
-            size = last.offsetTop + last.offsetHeight;
-
-        if (height !== size && (size = computeWeight(children, height - size, 'offsetHeight')))
-        {
-            arrange(children, size[0], size[1], 'height');
-        }
     }
 
 
     layouts['same-width'] = function (children, dom, gap) {
 
         var length = children.length,
-            width;
+            width = 1;
 
         if (gap > 0)
         {
             gap = gap * length - 1;
-            width = (1000000 - gap * 100 / dom.clientWidth) / length;
-        }
-        else
-        {
-            width = 1000000 / length;
+            width = 1 - gap / dom.clientWidth;
         }
 
-        width = (width | 0) / 10000 + '%';
+        width = (width * 1000000 / length | 0) / 10000 + '%';
 
         for (var i = 0; i < length; i++)
         {
@@ -431,14 +354,14 @@ yaxi.impl.container = function (base) {
 
 
     
-    renderer.baseURL = function (dom, value) {
+    renderer.base = function (dom, value) {
 
         if (value)
         {
-            if (!this.__baseURL)
+            if (!this.__base)
             {
                 this.on('tap', openURL);
-                this.__baseURL = value;
+                this.__base = value;
             }
         }
         else
@@ -457,7 +380,7 @@ yaxi.impl.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = yaxi.loadModule(this.__baseURL, url),
+                var Class = yaxi.loadModule(this.__base, url),
                     args = control.args;
 
                 if (!Class.prototype.open)

@@ -18,9 +18,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.$defaults.layout = 'same-width';
 
 
-    this.$converter.openURL = false;
-
-
 
     // 容器宿主
     this.$property('host', '', false);
@@ -31,7 +28,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         type: 'int',
         defaultValue: -1
-    });
+
+    }, true, 'selected-index');
 
 
 
@@ -157,7 +155,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             }
             else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
             {
-                host = createControl(this.baseURL, item.url, item.args);
+                host = createControl(this.base, item.url, item.args);
 
                 children.push(item.host = host);
                 host.onshow && host.onshow(true);

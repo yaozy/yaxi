@@ -45,7 +45,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('align', 'left');
 
 
-    this.$property('maxLength', 0);
+    this.$property('maxLength', 0, true, 'max-length');
 
 
     this.$property('pattern', '');

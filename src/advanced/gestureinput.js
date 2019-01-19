@@ -73,10 +73,10 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     this.$property('size', .2);
 
 
-    this.$property('lineColor', 'silver');
+    this.$property('lineColor', 'silver', true, 'line-color');
 
 
-    this.$property('lineWidth', 5);
+    this.$property('lineWidth', 5, true, 'line-width');
 
 
     this.$property('value', '');

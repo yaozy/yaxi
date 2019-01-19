@@ -12,10 +12,10 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
     this.$property('checked', false);
 
 
-    this.$property('checkedIcon', 'icon-yaxi-radio-checked');
+    this.$property('checkedIcon', 'icon-yaxi-radio-checked', true, 'checked-icon');
 
 
-    this.$property('uncheckedIcon', 'icon-yaxi-radio-unchecked');
+    this.$property('uncheckedIcon', 'icon-yaxi-radio-unchecked', true, 'unchecked-icon');
 
 
     // 互斥容器级别

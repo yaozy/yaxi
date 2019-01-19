@@ -1,4 +1,4 @@
-yaxi.impl.properties = function (get, set) {
+yaxi.impl.property = function (get, set) {
 
 
 
@@ -43,13 +43,18 @@ yaxi.impl.properties = function (get, set) {
     }
 
 
+    function camelize(_, text) {
+
+        return text.toUpperCase();
+    }
+
     
     // 定义属性方法
-    return function (name, options, change) {
+    return function (name, options, change, alias) {
 
         var defaultValue, converter, key;
 
-        if (/\W/.test(name))
+        if (/[^\w-]/.test(name))
         {
             throw '"' + name + '" not a valid property name!'; 
         }
@@ -69,7 +74,7 @@ yaxi.impl.properties = function (get, set) {
         {
             key = name;
             defaultValue = options == null ? null : options;
-            options = {};
+            options = { name: name };
         }
 
         if (!converter)
@@ -115,6 +120,13 @@ yaxi.impl.properties = function (get, set) {
         };
 
         define(this, name, options);
+
+        if (alias)
+        {
+            this.$converter[alias] = this.$converter[name];
+            
+            define(this, alias, options);
+        }
     }
 
 

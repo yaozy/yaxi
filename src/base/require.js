@@ -24,10 +24,10 @@ window.require || (function () {
 
         function require(url, flags) {
 
-            return yaxi.loadModule(require.baseURL, url, flags);
+            return yaxi.loadModule(require.base, url, flags);
         }
 
-        require.baseURL = base;
+        require.base = require.baseURL = base;
         require.runAsThread = runAsThread;
 
         return require;
@@ -37,7 +37,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new yaxi.Thread(global.baseURL, this.baseURL, fn);
+        return new yaxi.Thread(global.base, this.base, fn);
     }
 
 
@@ -64,7 +64,7 @@ window.require || (function () {
                     return { exports: text };
                 }
 
-                return { exports: new Function(['data', 'color', 'classes'], global.template(text, url)) };
+                return { exports: new Function('data', global.template(text, url)) };
 
 			default:
                 return { exports: text };
@@ -196,7 +196,7 @@ window.require || (function () {
         // 相对根目录
         if (url[0] === '/')
         {
-            base = global.baseURL;
+            base = global.base;
             return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
         }
 

@@ -42,7 +42,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	// center: 居中对齐
 	// right: 右对齐
 	// custom: 自定义
-	this.$property('alignX', 'center');
+	this.$property('alignX', 'center', true, 'align-x');
 
 
 	// 竖直对齐方式
@@ -50,11 +50,11 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	// middle: 居中对齐
 	// bottom: 下对齐
 	// custom: 自定义
-	this.$property('alignY', 'middle');
+	this.$property('alignY', 'middle', true, 'align-y');
 
 
 	// 是否自动关闭
-	this.$property('autoClose', false, false);
+	this.$property('autoClose', false, false, 'auto-close');
 
 
 

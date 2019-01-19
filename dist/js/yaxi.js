@@ -791,7 +791,7 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 
 
 
-yaxi.impl.properties = function (get, set) {
+yaxi.impl.property = function (get, set) {
 
 
 
@@ -836,13 +836,18 @@ yaxi.impl.properties = function (get, set) {
     }
 
 
+    function camelize(_, text) {
+
+        return text.toUpperCase();
+    }
+
     
     // 定义属性方法
-    return function (name, options, change) {
+    return function (name, options, change, alias) {
 
         var defaultValue, converter, key;
 
-        if (/\W/.test(name))
+        if (/[^\w-]/.test(name))
         {
             throw '"' + name + '" not a valid property name!'; 
         }
@@ -862,7 +867,7 @@ yaxi.impl.properties = function (get, set) {
         {
             key = name;
             defaultValue = options == null ? null : options;
-            options = {};
+            options = { name: name };
         }
 
         if (!converter)
@@ -908,6 +913,13 @@ yaxi.impl.properties = function (get, set) {
         };
 
         define(this, name, options);
+
+        if (alias)
+        {
+            this.$converter[alias] = this.$converter[name];
+            
+            define(this, alias, options);
+        }
     }
 
 
@@ -1743,7 +1755,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
                 // 需要处理变化
                 if (converter.change)
                 {
-                    (changes || (changes = this.__changes = {}))[name] = converter.fn.call(this, values[name]);
+                    (changes || (changes = this.__changes = {}))[converter.name] = converter.fn.call(this, values[name]);
                 }
                 else if (key = converter.name) // 默认转换器
                 {
@@ -1775,7 +1787,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
     
     // 定义属性
-    this.$property = yaxi.impl.properties(function (name, change) {
+    this.$property = yaxi.impl.property(function (name, change) {
 
         return change ? function () {
 
@@ -1948,94 +1960,6 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
 
-yaxi.Style = yaxi.Observe.extend(function (Class, base) {
-    
-    
-
-    this.$defaults = Object.create(null);
-    
-
-
-    (function () {
-
-        var keys = {},
-            style = document.createElement('div').style,
-            regex = /^(?:webkit|ms|moz|o)([A-Z])/;
-
-        function replace(_, key) {
-
-            return key.toLowerCase();
-        }
-
-        for (var name in style)
-        {
-            switch (name)
-            {
-                case 'cssFloat':
-                case 'styleFloat':
-                    keys.float = { name: name, defaultValue: '' };
-                    break;
-
-                case 'cssText':
-                    break;
-
-                default:
-                keys[key = name.replace(regex, replace)] = { name: name, defaultValue: '' };
-                    break;
-            }
-        }
-
-        for (var name in keys)
-        {
-            this.$property(name, keys[name]);
-        }
-
-    }).call(this);
-
-
-
-
-    this.__update_patch = function () {
-
-        var dom, changes;
-
-        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
-        {
-            var storage = this.$storage,
-                style = dom.style,
-                value;
-
-            for (var name in changes)
-            {
-                value = changes[name];
-
-                // 圆角边框转换rem为px以解决在android下不圆的问题
-                if (name === 'borderRadius' && value.indexOf('rem') > 0)
-                {
-                    style[name] = (parseFloat(value) * yaxi.rem | 0) + 'px';
-                }
-                else
-                {
-                    style[name] = value;
-                }
-
-                storage[name] = value;
-            }
-
-            this.__changes = null;
-        }
-    }
-
-
-}, function Style(control) {
-
-    this.parent = control;
-    this.$storage = Object.create(this.$defaults);
-});
-
-
-
-
 ;(function () {
 
 
@@ -2179,7 +2103,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
 
     // 定义属性
-    property = yaxi.impl.properties(function (name) {
+    property = yaxi.impl.property(function (name) {
 
         return function () {
 
@@ -3681,10 +3605,10 @@ window.require || (function () {
 
         function require(url, flags) {
 
-            return yaxi.loadModule(require.baseURL, url, flags);
+            return yaxi.loadModule(require.base, url, flags);
         }
 
-        require.baseURL = base;
+        require.base = require.baseURL = base;
         require.runAsThread = runAsThread;
 
         return require;
@@ -3694,7 +3618,7 @@ window.require || (function () {
     // 作为线程运行
     function runAsThread(fn) {
 
-        return new yaxi.Thread(global.baseURL, this.baseURL, fn);
+        return new yaxi.Thread(global.base, this.base, fn);
     }
 
 
@@ -3721,7 +3645,7 @@ window.require || (function () {
                     return { exports: text };
                 }
 
-                return { exports: new Function(['data', 'color', 'classes'], global.template(text, url)) };
+                return { exports: new Function('data', global.template(text, url)) };
 
 			default:
                 return { exports: text };
@@ -3853,7 +3777,7 @@ window.require || (function () {
         // 相对根目录
         if (url[0] === '/')
         {
-            base = global.baseURL;
+            base = global.base;
             return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
         }
 
@@ -3947,12 +3871,6 @@ window.require || (function () {
 
 
 
-    var styleKeys = Object.create(null);
-
-    var styleCache = Object.create(null);
-
-
-
 
     function parse(array, node, space) {
 
@@ -3972,19 +3890,19 @@ window.require || (function () {
             case 'Ref':
             case 'Require':
             case 'Reference':
-                array.push(space, 'Class: yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
+                array.push(space, '"Class": yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
                 node.removeAttribute('src');
                 break;
 
             case 'HTML':
             case 'HtmlControl':
-                array.push(space, 'Class: __k.HtmlControl,\n');
-                array.push(space, 'html: \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
+                array.push(space, '"Class": __k.HtmlControl,\n');
+                array.push(space, '"html": \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
                 node = null;
                 break;
 
             default:
-                array.push(space, 'Class: __k.', tagName);
+                array.push(space, '"Class": __k.', tagName);
                 break;
         }
 
@@ -4001,12 +3919,6 @@ window.require || (function () {
                     parseStyle(styles || (styles = []), value, space + '\t');
                     continue;
                 }
-
-                if (name === 'class')
-                {
-                    array.push(',\n', space, 'className: "', value, '"');
-                    continue;
-                }
                 
                 if (name[1] === '-')
                 {
@@ -4016,49 +3928,14 @@ window.require || (function () {
                     // 传入的数据
                     if (any === 'd')
                     {
-                        // 样式
-                        if (name[0] === 's' && /style-/.test(name))
-                        {
-                            name = name.substring(6);
-                            name = styleKeys[name] || (styleKeys[name] = name.replace(/-([\w])/g, camelize));
-                            
-                            if (styles)
-                            {
-                                styles.push(styles[0] ? ',\n' : '', space, '\t', name, ': ', value);
-                            }
-                            else
-                            {
-                                styles = [space, '\t', name, ': ', value];
-                            }
-                        }
-                        else
-                        {
-                            array.push(',\n', space, name, ': ', value);
-                        }
+                        array.push(',\n', space, '"', name, '": ', value);
                         continue;
                     }
 
                     // 绑定
                     if (any === 'b')
                     {
-                        // 样式
-                        if (name[0] === 's' && /style-/.test(name))
-                        {
-                            name = name.substring(6);
-                            name = styleKeys[name] || (styleKeys[name] = name.replace(/-([\w])/g, camelize));
-
-                            if (styles)
-                            {
-                                any = styles.bindings || (styles.bindings = []);
-                            }
-                            else
-                            {
-                                any = (styles = []).bindings = [];
-                            }
-
-                            any.push(any[0] ? ',\n' : '', space, '\t\t', name, ': "', value, '"');
-                        }
-                        else if (bindings)
+                        if (bindings)
                         {
                             bindings.push(name, value);
                         }
@@ -4086,16 +3963,16 @@ window.require || (function () {
                     }
                 }
 
-                array.push(',\n', space, name, ': "', value, '"');
+                array.push(',\n', space, '"', name, '": "', value, '"');
             }
 
             if (styles)
             {
-                array.push(',\n', space, 'style: {', styles.join(''));
+                array.push(',\n', space, '"style": {', styles.join(''));
 
                 if (any = styles.bindings)
                 {
-                    array.push(styles[0] ? ',\n' : '', space, '\tbindings: {\n', any.join(''), '\n', space, '\t}');
+                    array.push(styles[0] ? ',\n' : '', space, '\t"bindings": {\n', any.join(''), '\n', space, '\t}');
                 }
                 
                 array.push('\n', space, '}');
@@ -4103,14 +3980,14 @@ window.require || (function () {
 
             if (bindings)
             {
-                array.push(',\n', space, 'bindings: {');
+                array.push(',\n', space, '"bindings": {');
                 writeBindings(array, bindings, space + '\t');
                 array.push('\n', space, '}');
             }
 
             if (events)
             {
-                array.push(',\n', space, 'events: {');
+                array.push(',\n', space, '"events": {');
                 writeEvents(array, events, space + '\t');
                 array.push('\n', space, '}');
             }
@@ -4137,7 +4014,9 @@ window.require || (function () {
             if (node.nodeType === 1)
             {
                 array.push(',\n', space, '\ttemplate: {\n');
-                parse(array, node, space + '\t\t'),
+
+                parse(array, node, space + '\t\t');
+
                 array.push('\n', space, '\t}');
 
                 return;
@@ -4161,12 +4040,14 @@ window.require || (function () {
                 }
                 else
                 {
-                    array.push(',\n', space, 'children: [');
+                    array.push(',\n', space, '"children": [');
                     flag = 1;
                 }
 
                 array.push('\n', space, '\t{\n');
-                parse(array, node, space + '\t\t'),
+
+                parse(array, node, space + '\t\t');
+
                 array.push('\n', space, '\t}');
             }
         }
@@ -4181,9 +4062,7 @@ window.require || (function () {
 
     function parseStyle(array, text, space) {
 
-        var keys = styleKeys,
-            cache = styleCache,
-            tokens = text.split(';'),
+        var tokens = text.split(';'),
             token,
             index,
             name,
@@ -4200,9 +4079,6 @@ window.require || (function () {
                     continue;
                 }
 
-                name = keys[name] || (keys[name] = name.trim().replace(/-([\w])/g, camelize));
-                token = cache[token] || (cache[token] = styleValue(token.trim()));
-
                 if (flag)
                 {
                     array.push(',');
@@ -4212,28 +4088,9 @@ window.require || (function () {
                     flag = 1;
                 }
 
-                array.push('\n', space, name, ': ', token);
+                array.push('\n', space, '"', name, '": ', '"' + token + '"');
             }
         }
-    }
-
-
-    function styleValue(text) {
-
-        // c-开头表示系统颜色
-        if (text.indexOf('c-') >= 0)
-        {
-            text = '"' + text.replace(/c\-([\w-]+)/g, '" + __c["$1"] + "') + '"';
-            return text.replace('"" + ', '').replace('+ ""', '');
-        }
-
-        return '"' + text + '"';
-    }
-
-
-    function camelize(_, key) {
-
-        return key.toUpperCase();
     }
 
 
@@ -4249,7 +4106,7 @@ window.require || (function () {
                 array.push(',');
             }
 
-            array.push('\n', space, name, ': "', bindings[index++], '"');
+            array.push('\n', space, '"', name, '": "', bindings[index++], '"');
         }
     }
 
@@ -4266,7 +4123,7 @@ window.require || (function () {
                 array.push(',');
             }
 
-            array.push('\n', space, name, ': data.', events[index++]);
+            array.push('\n', space, '"', name, '": data.', events[index++]);
         }
     }
 
@@ -4278,8 +4135,8 @@ window.require || (function () {
 
         var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
             array = ['var __dirname = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
-                'var __c = color || yaxi.color;\n',
-                'var __k = classes || yaxi.classes;\n\n',
+                'var __k = yaxi.classes;\n',
+                'var color = yaxi.color;\n\n',
                 'with(data)\n{\n',
                 'return {\n'];
 
@@ -4466,10 +4323,10 @@ yaxi.Thread = (function () {
 
             function require(url, flags) {
     
-                return load(require.baseURL, url, flags);
+                return load(require.base, url, flags);
             }
     
-            require.baseURL = base;
+            require.base = require.baseURL = base;
             return require;
         }
 
@@ -4727,11 +4584,11 @@ yaxi.Thread = (function () {
     color['mask'] = '#000000';
 
 
-    (yaxi.colors || (yaxi.colors = Object.create(null))).default = color;
+    (yaxi.colors || (yaxi.colors = {})).default = color;
     
     
 
-})(yaxi.color = Object.create(null));
+})(yaxi.color = {});
 
 
 
@@ -4783,7 +4640,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     
     
     // 定义属性
-    this.$property = yaxi.impl.properties(function (name, change) {
+    this.$property = yaxi.impl.property(function (name, change) {
 
         return change ? function () {
 
@@ -4856,7 +4713,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     // class
-    this.$property('className', '');
+    this.$property('class', '', true, 'className');
 
 
     // 是否禁用
@@ -4871,8 +4728,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('title', '');
     
 
-    // accessKey
-    this.$property('accessKey', '');
+    // accesskey
+    this.$property('accesskey', '');
     
 
     // alt
@@ -4900,140 +4757,12 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('line', '');
 
 
-
-    // css overflow-x
-    this.$property('overflowX', '');
-
-
-    // css overflow-y
-    this.$property('overflowY', '');
+    // 是否可见
+    this.$property('visible', false);
 
 
-    // css position
-    this.$property('position', '');
-
-
-    // css display
-    this.$property('display', '');
-
-
-    // css top
-    this.$property('top', '');
-
-
-    // css left
-    this.$property('left', '');
-
-
-    // css right
-    this.$property('right', '');
-
-    
-    // css bottom
-    this.$property('bottom', '');
-
-    
-    // css width
-    this.$property('width', '');
-
-
-    // css min-width
-    this.$property('minWidth', '');
-
-
-    // css max-width
-    this.$property('maxWidth', '');
-
-
-    // css height
-    this.$property('height', '');
-
-
-    // css min-height
-    this.$property('minHeight', '');
-
-
-    // css max-height
-    this.$property('maxHeight', '');
-
-
-    // css margin
-    this.$property('margin', '');
-
-
-    // css border
-    this.$property('border', '');
-
-    
-    // css border-width
-    this.$property('borderWidth', '');
-
-
-    // css border-style
-    this.$property('borderStyle', '');
-
-
-    // css border-color
-    this.$property('borderColor', '');
-
-
-    // css border-radius
-    this.$property('borderRadius', '');
-
-
-    // css padding
-    this.$property('padding', '');
-
-
-    // css line-height
-    this.$property('lineHeight', '');
-
-
-    // css text-align
-    this.$property('textAlign', '');
-
-    
-    // css vertical-align
-    this.$property('verticalAlign', '');
-
-
-    // css font-size
-    this.$property('fontSize', '');
-
-    
-    // css font-family
-    this.$property('fontFamily', '');
-
-    
-    // css font-weight
-    this.$property('fontWeight', '');
-
-
-    // css background-color
-    this.$property('backgroundColor', '');
-
-
-    // css color
-    this.$property('color', '');
-
-
-    // css svg fill
-    this.$property('fill', '');
-
-
-
-
-    // 布局权重(仅在父容器layout === row || column时有效)
-    this.$property('weight', {
-     
-        defaultValue: 0,
-
-        converter: function (value) {
-
-            return (value = +value) > 0 ? value : 0;
-        }
-
-    }, false);
+    // 对齐方式 left center right top middle bottom
+    this.$property('align', '');
 
 
 
@@ -5079,48 +4808,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             return target;
         }
     });
-
-
-
-    Object.defineProperty(this, 'offsetTop', {
-
-        get: function () {
-
-            var dom = this.$dom;
-            return dom ? dom.offsetTop: 0;
-        }
-    });
-
-
-    Object.defineProperty(this, 'offsetLeft', {
-
-        get: function () {
-
-            var dom = this.$dom;
-            return dom ? dom.offsetLeft: 0;
-        }
-    });
-
-
-    Object.defineProperty(this, 'offsetWidth', {
-
-        get: function () {
-
-            var dom = this.$dom;
-            return dom ? dom.offsetWidth: 0;
-        }
-    });
-
-
-    Object.defineProperty(this, 'offsetHeight', {
-
-        get: function () {
-
-            var dom = this.$dom;
-            return dom ? dom.offsetHeight: 0;
-        }
-    });
-
 
 
 
@@ -5516,6 +5203,12 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
+    renderer.visible = function (dom, value) {
+
+        dom.setAttribute('display', value ? '' : 'hidden');
+    }
+
+
 
     renderer.id = function (dom, value) {
 
@@ -5592,188 +5285,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         }
     }
 
-    
-
-    renderer.overflowX = function (dom, value) {
-
-        dom.style.overflowX = value;
-    }
-
-
-    renderer.overflowY = function (dom, value) {
-
-        dom.style.overflowY = value;
-    }
-
-
-    renderer.position = function (dom, value) {
-
-        dom.style.position = value;
-    }
-
-
-    renderer.display = function (dom, value) {
-
-        dom.style.display = value;
-    }
-
-
-    renderer.top = function (dom, value) {
-
-        dom.style.top = value;
-    }
-
-
-    renderer.left = function (dom, value) {
-
-        dom.style.left = value;
-    }
-
-
-    renderer.right = function (dom, value) {
-
-        dom.style.right = value;
-    }
-
-
-    renderer.bottom = function (dom, value) {
-
-        dom.style.bottom = value;
-    }
-
-
-    renderer.width = function (dom, value) {
-
-        dom.style.width = value;
-    }
-
-
-    renderer.minWidth = function (dom, value) {
-
-        dom.style.minWidth = value;
-    }
-
-
-    renderer.maxWidth = function (dom, value) {
-
-        dom.style.maxWidth = value;
-    }
-
-
-    renderer.height = function (dom, value) {
-
-        dom.style.height = value;
-    }
-
-    
-    renderer.minHeight = function (dom, value) {
-
-        dom.style.minHeight = value;
-    }
-
-    
-    renderer.maxHeight = function (dom, value) {
-
-        dom.style.maxHeight = value;
-    }
-
-
-    renderer.margin = function (dom, value) {
-
-        dom.style.margin = value;
-    }
-
-
-    renderer.border = function (dom, value) {
-
-        dom.style.border = value;
-    }
-
-
-    renderer.borderWidth = function (dom, value) {
-
-        dom.style.borderWidth = value;
-    }
-
-
-    renderer.borderRadius = function (dom, value) {
-
-        dom.style.borderRadius = value;
-    }
-
-
-    renderer.padding = function (dom, value) {
-
-        dom.style.padding = value;
-    }
-
-
-    renderer.lineHeight = function (dom, value) {
-
-        dom.style.lineHeight = value;
-    }
-
-
-    renderer.fontSize = function (dom, value) {
-
-        dom.style.fontSize = value;
-    }
-
-
-    renderer.fontFamily = function (dom, value) {
-
-        dom.style.fontFamily = value;
-    }
-
-
-    renderer.fontWeight = function (dom, value) {
-
-        dom.style.fontWeight = value;
-    }
-
-
-    renderer.textAlign = function (dom, value) {
-
-        dom.style.textAlign = value;
-    }
-
-
-    renderer.verticalAlign = function (dom, value) {
-
-        dom.style.verticalAlign = value;
-    }
-
-
-
-    renderer.borderStyle = function (dom, value) {
-
-        dom.style.borderStyle = value;
-    }
-
-
-    renderer.borderColor = function (dom, value) {
-
-        dom.style.borderColor = value;
-    }
-
-
-    renderer.backgroundColor = function (dom, value) {
-
-        dom.style.backgroundColor = value;
-    }
-
-
-    renderer.color = function (dom, value) {
-
-        dom.style.color = value;
-    }
-
-
-    renderer.fill = function (dom, value) {
-
-        dom.style.fill = value;
-    }
-
 
 
     function updateDom(name, value) {
@@ -5798,7 +5309,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 dom.setAttribute(name, value);
             }
     }
-
 
     
     
@@ -5877,6 +5387,151 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 }).register('Control');
+
+
+
+
+yaxi.Style = yaxi.Observe.extend(function (Class, base) {
+    
+    
+
+    this.$defaults = Object.create(null);
+    
+
+
+    var keys = (function () {
+
+        var keys = {},
+            style = document.createElement('div').style,
+            regex = /^(?:webkit|ms|moz|o)([A-Z])/,
+            key;
+
+        function lower(_, key) {
+
+            return key.toLowerCase();
+        }
+
+        for (var name in style)
+        {
+            switch (name)
+            {
+                case 'cssFloat':
+                case 'styleFloat':
+                    keys.float = { name: name, defaultValue: '' };
+                    break;
+
+                case 'cssText':
+                    break;
+
+                default:
+                    key = name.replace(regex, lower);
+
+                    if (key === name || !keys[key])
+                    {
+                        keys[key] = name;
+                    }
+                    break;
+            }
+        }
+
+        for (var name in keys)
+        {
+            this.$property(name, keys[name]);
+        }
+
+
+        return keys;
+
+
+    }).call(this);
+
+
+
+    // 给控件扩展通用样式
+    var style = function (name) {
+
+        var key = name.replace(/-(\w)/g, camelize);
+
+        this.renderer[key] = function (dom, value) {
+
+            dom.style[key] = value;
+        }
+
+        this.$property(key, '', true, name);
+
+        key = keys[key] || key;
+
+    }.bind(yaxi.Control.prototype);
+
+
+
+    function camelize(_, text) {
+
+        return text.toUpperCase();
+    }
+
+    
+    
+    ('animation,animation-delay,animation-direction,animation-duration,animation-fill-mode,animation-iteration-count,animation-name,animation-play-state,animation-timing-function,' +
+        'background,background-attachment,background-blend-mode,background-clip,background-color,background-image,background-origin,background-position,background-position-x,background-position-y,background-repeat,background-repeat-y,background-size,' +
+        'border,border-bottom-color,border-bottom-left-radius,border-bottom-right-radius,border-bottom-width,border-collapse,border-color,border-image-outset,border-image-repeat,border-image-slice,border-image-source,border-image-width,border-left,border-left-color,border-left-style,border-left-width,border-radius,border-right,border-right-color,border-right-style,border-right-width,border-spacing,border-style,border-top,border-top-color,border-top-left-radius,border-top-right-radius,border-top-style,border-top-width,border-width,' +
+        'bottom,box-shadow,box-sizing,break-after,break-before,break-inside,caret-color,' +
+        'clip,clip-path,clip-rule,color,cursor,' + 
+        'direction,display,' +
+        'fill,fill-opacity,fill-rule,float,' +
+        'font,font-display,font-family,font-feature-settings,font-kerning,font-size,font-stretch,font-style,font-variant,font-variant-caps,font-variant-east-asian,font-variant-ligatures,font-variant-numeric,font-variation-settings,font-weight,' +
+        'height,' +
+        'left,' +
+        'line-beak,line-height,list-style,list-style-image,list-style-position,list-style-type,' +
+        'margin,margin-top,margin-left,margin-right,margin-bottom,' +
+        'max-height,max-width,min-height,min-width,' +
+        'object-fit,object-position,opacity,' +
+        'outline,outline-color,outline-offset,outline-style,outline-width,' +
+        'overflow,overflow-x,overflow-y,' +
+        'padding,padding-top,padding-right,padding-bottom,padding-left,' +
+        'position,' +
+        'right,' +
+        'speak,' +
+        'stroke,stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,stroke-width,' +
+        'top,' +
+        'transform,transform-box,transform-origin,transform-style,transition,transition-delay,transition-duration,transition-property,transition-timing-function,' +
+        'text-align,text-align-last,text-anchor,text-combine-upright,text-decoration,text-decoration-color,text-decoration-line,text-decoration-skip-ink,text-decoration-style,text-indent,text-orientation,text-overflow,text-rendering,text-shadow,text-size-adjust,text-transform,text-underline-position,' +
+        'user-select,' +
+        'vertical-align,visibility,' +
+        'white-space,width,word-break,word-spacing,word-wrap,writing-mode,' +
+        'z-index,zoom').split(',').forEach(function (name) {
+
+        style(name);
+        
+    });
+
+    
+
+    this.__update_patch = function () {
+
+        var dom, changes;
+
+        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
+        {
+            var storage = this.$storage,
+                style = dom.style;
+
+            for (var name in changes)
+            {
+                storage[name] = style[name] = changes[name];
+            }
+
+            this.__changes = null;
+        }
+    }
+
+
+
+}, function Style(control) {
+
+    this.parent = control;
+    this.$storage = Object.create(this.$defaults);
+});
 
 
 
@@ -6099,105 +5754,28 @@ yaxi.impl.container = function (base) {
     
 
 
-    function computeWeight(children, size, name) {
+    layouts.row = function (children, dom, gap) {
 
-        var total = 0,
-            control,
-            dom,
-            style,
-            weight;
-
-        for (var i = children.length; i--;)
-        {
-            if ((control = children[i]) && (dom = control.$dom) && 
-                (weight = control.$storage.weight) > 0 &&
-                (!(style = control.__style) || style.display !== 'none'))
-            {
-                total += weight;
-                size += dom[name];
-            }
-            else
-            {
-                weight = 0;
-            }
-
-            control.__weight = weight;
-        }
-
-        return total ? [size, total] : null;
-    }
-
-    
-    function arrange(children, size, total, name) {
-
-        var control, style, weight, value;
-
-        for (var i = children.length; i--;)
-        {
-            if ((control = children[i]) && (weight = control.__weight))
-            {
-                value = weight * size / total + .5 | 0;
-                size -= value;
-                total -= weight;
-
-                value += 'px';
-                style = control.$dom.style;
-                
-                if (style[name] !== value)
-                {
-                    style[name] = value;
-                }
-            }
-        }
     }
 
 
-    layouts.row = function (children, dom) {
+    layouts.column = function (children, dom, gap) {
 
-        var time = performance.now();
-
-        var width = dom.clientWidth,
-            last = dom.lastChild,
-            size = last.offsetLeft + last.offsetWidth;
-
-        if (width !== size && (size = computeWeight(children, width - size, 'offsetWidth')))
-        {
-            arrange(children, size[0], size[1], 'width');
-        }
-
-        console.log(performance.now() - time);
-    }
-
-
-    layouts.column = function (children, dom) {
-
-        var height = dom.clientHeight,
-            last = dom.lastChild,
-            size = last.offsetTop + last.offsetHeight;
-
-        if (height !== size && (size = computeWeight(children, height - size, 'offsetHeight')))
-        {
-            arrange(children, size[0], size[1], 'height');
-        }
     }
 
 
     layouts['same-width'] = function (children, dom, gap) {
 
         var length = children.length,
-            width;
+            width = 1;
 
         if (gap > 0)
         {
             gap = gap * length - 1;
-            width = (1000000 - gap * 100 / dom.clientWidth) / length;
-        }
-        else
-        {
-            width = 1000000 / length;
+            width = 1 - gap / dom.clientWidth;
         }
 
-        width = (width | 0) / 10000 + '%';
+        width = (width * 1000000 / length | 0) / 10000 + '%';
 
         for (var i = 0; i < length; i++)
         {
@@ -6314,14 +5892,14 @@ yaxi.impl.container = function (base) {
 
 
     
-    renderer.baseURL = function (dom, value) {
+    renderer.base = function (dom, value) {
 
         if (value)
         {
-            if (!this.__baseURL)
+            if (!this.__base)
             {
                 this.on('tap', openURL);
-                this.__baseURL = value;
+                this.__base = value;
             }
         }
         else
@@ -6340,7 +5918,7 @@ yaxi.impl.container = function (base) {
         {
             if (url = control.url)
             {
-                var Class = yaxi.loadModule(this.__baseURL, url),
+                var Class = yaxi.loadModule(this.__base, url),
                     args = control.args;
 
                 if (!Class.prototype.open)
@@ -6649,7 +6227,7 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('baseURL', '');
+    this.$property('base', '', true, 'baseURL');
 
 
 
@@ -8409,7 +7987,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('baseURL', '');
+    this.$property('base', '', true, 'baseURL');
 
 
     // 模板
@@ -8666,9 +8244,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     this.$defaults.layout = 'same-width';
 
 
-    this.$converter.openURL = false;
-
-
 
     // 容器宿主
     this.$property('host', '', false);
@@ -8679,7 +8254,8 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
         type: 'int',
         defaultValue: -1
-    });
+
+    }, true, 'selected-index');
 
 
 
@@ -8805,7 +8381,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             }
             else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
             {
-                host = createControl(this.baseURL, item.url, item.args);
+                host = createControl(this.base, item.url, item.args);
 
                 children.push(item.host = host);
                 host.onshow && host.onshow(true);
@@ -8995,7 +8571,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('align', 'left');
 
 
-    this.$property('maxLength', 0);
+    this.$property('maxLength', 0, true, 'max-length');
 
 
     this.$property('pattern', '');
@@ -9114,10 +8690,10 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     this.$property('checked', false);
 
 
-    this.$property('checkedIcon', 'icon-yaxi-checkbox-checked');
+    this.$property('checkedIcon', 'icon-yaxi-checkbox-checked', true, 'checked-icon');
 
 
-    this.$property('uncheckedIcon', 'icon-yaxi-checkbox-unchecked');
+    this.$property('uncheckedIcon', 'icon-yaxi-checkbox-unchecked', true, 'unchecked-icon');
 
     
 
@@ -9554,10 +9130,10 @@ yaxi.RadioButton = yaxi.Control.extend(function (Class, base) {
     this.$property('checked', false);
 
 
-    this.$property('checkedIcon', 'icon-yaxi-radio-checked');
+    this.$property('checkedIcon', 'icon-yaxi-radio-checked', true, 'checked-icon');
 
 
-    this.$property('uncheckedIcon', 'icon-yaxi-radio-unchecked');
+    this.$property('uncheckedIcon', 'icon-yaxi-radio-unchecked', true, 'unchecked-icon');
 
 
     // 互斥容器级别
@@ -9767,13 +9343,13 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-	this.$property('baseURL', '');
+	this.$property('base', '', true, 'baseURL');
 	
 
 	// 是否自动销毁
-	this.$property('autoDestroy', true, false);
+	this.$property('autoDestroy', true, false, 'auto-destroy');
 
-		
+
 
 	// 页头
 	Object.defineProperty(this, 'header', {
@@ -10351,7 +9927,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	// center: 居中对齐
 	// right: 右对齐
 	// custom: 自定义
-	this.$property('alignX', 'center');
+	this.$property('alignX', 'center', true, 'align-x');
 
 
 	// 竖直对齐方式
@@ -10359,11 +9935,11 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	// middle: 居中对齐
 	// bottom: 下对齐
 	// custom: 自定义
-	this.$property('alignY', 'middle');
+	this.$property('alignY', 'middle', true, 'align-y');
 
 
 	// 是否自动关闭
-	this.$property('autoClose', false, false);
+	this.$property('autoClose', false, false, 'auto-close');
 
 
 
@@ -11330,7 +10906,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('baseURL', '');
+    this.$property('base', '', true, 'baseURL');
 
 
 
@@ -12033,10 +11609,10 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     this.$property('size', .2);
 
 
-    this.$property('lineColor', 'silver');
+    this.$property('lineColor', 'silver', true, 'line-color');
 
 
-    this.$property('lineWidth', 5);
+    this.$property('lineWidth', 5, true, 'line-width');
 
 
     this.$property('value', '');

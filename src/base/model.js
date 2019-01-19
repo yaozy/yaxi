@@ -141,7 +141,7 @@
 
 
     // 定义属性
-    property = yaxi.impl.properties(function (name) {
+    property = yaxi.impl.property(function (name) {
 
         return function () {
 

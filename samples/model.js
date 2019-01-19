@@ -47,9 +47,7 @@ module.exports = yaxi.Page.extend(function () {
                         template: {
                             Class: yaxi.Text,
                             line: 'bottom-1px',
-                            style: {
-                                display: 'block'
-                            },
+                            display: 'block',
                             bindings: {
                                 text: 'name'
                             }

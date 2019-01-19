@@ -167,10 +167,10 @@ yaxi.Thread = (function () {
 
             function require(url, flags) {
     
-                return load(require.baseURL, url, flags);
+                return load(require.base, url, flags);
             }
     
-            require.baseURL = base;
+            require.base = require.baseURL = base;
             return require;
         }
 

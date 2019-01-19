@@ -20,7 +20,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('baseURL', '');
+    this.$property('base', '', true, 'baseURL');
 
 
     // 模板

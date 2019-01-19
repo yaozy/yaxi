@@ -22,9 +22,7 @@ module.exports = yaxi.Page.extend(function () {
                 layout: 'block',
                 baseURL: require.baseURL,
                 gap: '4px top',
-                style: {
-                    padding: '.1rem'
-                },
+                padding: '.1rem',
                 children: [
                     { text: '模板开发演示', url: 'template.js' },
                     { text: '模型开发演示', url: 'model.js' },
@@ -35,9 +33,9 @@ module.exports = yaxi.Page.extend(function () {
                         layout: 'same-width',
                         gap: '1px',
                         children: [
-                            { text: 'abc', style: { width: '1rem' } },
-                            { text: 'def', weight: 1 },
-                            { text: 'abc', style: { width: '.5rem' } }
+                            { text: 'abc' },
+                            { text: 'def' },
+                            { text: 'abc' }
                         ]
                     }
                     // {
@@ -50,9 +48,7 @@ module.exports = yaxi.Page.extend(function () {
                 ]
             },
             footer: {
-                style: {
-                    height: '.5rem'
-                }
+                height: '.5rem'
             }
         });
     }
