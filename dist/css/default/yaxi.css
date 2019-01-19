@@ -228,36 +228,6 @@ textarea::-webkit-input-placeholder {
   color: #ff6c6c;
   fill: #e89518;
 }
-.yx-control[back="level1"] {
-  background-color: #ffffff;
-}
-.yx-control[back="level2"] {
-  background-color: #cccccc;
-}
-.yx-control[back="level3"] {
-  background-color: #b9ced4;
-}
-.yx-control[back="level4"] {
-  background-color: #cccccc;
-}
-.yx-control[back="level5"] {
-  background-color: #f7f7f7;
-}
-.yx-control[back="primary"] {
-  background-color: #d0ae75;
-}
-.yx-control[back="second"] {
-  background-color: #d0ae75;
-}
-.yx-control[back="success"] {
-  background-color: #71c04a;
-}
-.yx-control[back="warning"] {
-  background-color: #e89518;
-}
-.yx-control[back="danger"] {
-  background-color: #ff6c6c;
-}
 .yx-control[theme="level1-reverse"] {
   background-color: #2d4a63;
   color: #ffffff;

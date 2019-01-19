@@ -9574,8 +9574,16 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType, payload) {
 		
-		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
-			this.trigger('closing', payload) === false)
+		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		{
+			return false;
+		}
+
+		var event = new yaxi.Event('closing');
+
+		event.closeType = closeType;
+
+		if (this.trigger(event, payload) === false)
 		{
 			return false;
 		}
@@ -9595,7 +9603,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		yaxi.toast.hide();
 
-		this.trigger('closed', payload) !== false;
+		event.type = 'closed';
+
+		this.trigger(event, payload);
 		this.opener = null;
 
 		// 如果当前窗口是隐藏状态则显示当前窗口
@@ -10075,9 +10085,16 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 ||
-			this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
-			this.trigger('closing', payload) === false)
+		if (index < 0 || this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		{
+			return false;
+		}
+
+		var event = new yaxi.Event('closing');
+
+		event.closeType = 'closing';
+
+		if (this.trigger(event, payload) === false)
 		{
 			return false;
 		}
@@ -10117,7 +10134,9 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		this.onhide();
 		this.onclosed(closeType, payload);
 
-		this.trigger('closed', payload);
+		event.type = 'closed';
+		
+		this.trigger(event, payload);
 
 		if (this.autoDestroy)
 		{

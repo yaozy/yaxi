@@ -305,8 +305,16 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType, payload) {
 		
-		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
-			this.trigger('closing', payload) === false)
+		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		{
+			return false;
+		}
+
+		var event = new yaxi.Event('closing');
+
+		event.closeType = closeType;
+
+		if (this.trigger(event, payload) === false)
 		{
 			return false;
 		}
@@ -326,7 +334,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		yaxi.toast.hide();
 
-		this.trigger('closed', payload) !== false;
+		event.type = 'closed';
+
+		this.trigger(event, payload);
 		this.opener = null;
 
 		// 如果当前窗口是隐藏状态则显示当前窗口

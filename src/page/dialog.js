@@ -190,9 +190,16 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		
 		var index = stack.indexOf(this);
 
-		if (index < 0 ||
-			this.onclosing(closeType || (closeType = 'OK'), payload) === false ||
-			this.trigger('closing', payload) === false)
+		if (index < 0 || this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		{
+			return false;
+		}
+
+		var event = new yaxi.Event('closing');
+
+		event.closeType = 'closing';
+
+		if (this.trigger(event, payload) === false)
 		{
 			return false;
 		}
@@ -232,7 +239,9 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 		this.onhide();
 		this.onclosed(closeType, payload);
 
-		this.trigger('closed', payload);
+		event.type = 'closed';
+		
+		this.trigger(event, payload);
 
 		if (this.autoDestroy)
 		{
