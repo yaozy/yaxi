@@ -2,33 +2,10 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-	var create = Object.create;
-
     var thumb = '<svg class="yx-segment-thumb" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>'
 
 
     yaxi.template(this, '<div class="yx-control yx-segment"><div class="yx-segment-line"></div><div class="yx-segment-body">' + thumb + '</div>');
-
-
-
-
-    Class.ctor = function () {
-
-        var init;
-
-        // 初始化存储值
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-        
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-        this.on('touchcancel', touchcancel);
-    }
 
 
 
@@ -162,7 +139,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     var state = {};
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var target = event.dom,
             dom = this.$dom.lastChild;
@@ -185,7 +162,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var thumb = state.thumb;
 
@@ -199,7 +176,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = function (event) {
 
         var value = Decimal.singleton(event.clientX).plus(-state.left).pow10(2).div(state.width),
             any;
@@ -251,7 +228,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchcancel() {
+    this.__on_touchcancel = function () {
 
         this.renderer.value(this.$dom, this.value);
     }

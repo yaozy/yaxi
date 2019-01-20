@@ -97,11 +97,6 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
         }
 
         base.render.call(this);
-
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-
         return dom;
     }
 
@@ -141,7 +136,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     var state = {};
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom.firstChild,
             rect = dom.getBoundingClientRect(),
@@ -165,7 +160,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var index = hitTest(event.clientX - state.x, event.clientY - state.y);
 
@@ -183,7 +178,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend() {
+    this.__on_touchend = function () {
 
         var event = new yaxi.Event('change');
 

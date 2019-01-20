@@ -2,6 +2,11 @@
 
 
 
+    // 标记当前设备为移动设备(仅使用触摸事件)
+    yaxi.device = 'mobile';
+
+
+
     var Event = yaxi.Event;
 
 	
@@ -9,11 +14,7 @@
 
     
     // 滑动事件按下时的状态
-    var start = Object.create(null);
-
-
-    // longTap定时器
-    var delay = 0;
+    var state = Object.create(null);
 
 
     // 上次tap事件触发时的控件
@@ -48,37 +49,6 @@
         }
     }
 
-
-	function longTapDelay() {
-        
-        var control = start.control;
-
-        delay = 0;
-
-        start.control = null;
-        start.tap = false;
-
-		if (control && start.longTap)
-		{
-            var e = new Event('longTap');
-
-            e.dom = start.dom;
-            return control.trigger(e);
-        }
-    }
-
-
-    function cancelTap() {
-
-        if (delay)
-        {
-            clearTimeout(delay);
-            delay = 0;
-        }
-
-        start.tap = start.longTap = false;
-    }
-
     
 
     function touchEvent(event, touch) {
@@ -88,13 +58,13 @@
         touch = touch || event.changedTouches[0];
 
         e.dom = event.target;
-        e.start = start;
-        e.original = event;
+        e.state = state;
+        e.domEvent = event;
         e.touches = event.changedTouches;
         e.clientX = touch.clientX << 1;
         e.clientY = touch.clientY << 1;
-        e.distanceX = e.clientX - start.clientX;
-        e.distanceY = e.clientY - start.clientY;
+        e.distanceX = e.clientX - state.clientX;
+        e.distanceY = e.clientY - state.clientY;
 
         return e;
     }
@@ -119,6 +89,17 @@
         return true;
     }
 
+
+    function endEdit() {
+
+        var dom = document.activeElement;
+
+        if (dom && dom !== document.body)
+        {
+            dom.blur();
+        }
+    }
+
     
     function handler(event) {
 
@@ -128,7 +109,7 @@
         {
             e = new Event(event.type);
             e.dom = event.target;
-            e.original = event;
+            e.domEvent = event;
 
             return control.trigger(e);
         }
@@ -138,7 +119,7 @@
 
 	bind('touchstart', function (event) {
 		
-        var control;
+        var control, fn;
 
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
@@ -150,20 +131,24 @@
         {
             var touch = event.changedTouches[0];
 
-            start.tap = start.longTap = true;
+            state.tap = state.longTap = true;
 
-            start.dom = event.target;
-            start.control = control;
-            start.clientX = touch.clientX << 1;
-            start.clientY = touch.clientY << 1;
+            state.dom = event.target;
+            state.control = control;
+            state.clientX = touch.clientX << 1;
+            state.clientY = touch.clientY << 1;
 
-            if (control.trigger(touchEvent(event, touch)) === false)
+            event = touchEvent(event, touch);
+
+            if ((fn = control.__on_touchstart) && fn.call(control, event) === false)
             {
-                cancelTap();
-                return false;
+                return state.tap = false;
             }
 
-            delay = setTimeout(longTapDelay, 600);
+            if (control.trigger(event) === false)
+            {
+                return state.tap = false;
+            }
         }
         
 	}, true);
@@ -171,19 +156,23 @@
 
 	bind('touchmove', function (event) {
         
-        var control;
+        var control, fn;
 
-        if (control = start.control)
+        if (control = state.control)
         {
             event = touchEvent(event);
 
-            if (control.trigger(event) === false)
+            if ((fn = control.__on_touchmove) && fn.call(control, event) === false)
             {
-                start.tap && cancelTap();
                 return false;
             }
 
-            if (start.tap)
+            if (control.trigger(event) === false)
+            {
+                return state.tap = false;
+            }
+
+            if (state.tap)
             {
                 var x = event.distanceX,
                     y = event.distanceY;
@@ -191,7 +180,7 @@
                 // 如果移动了指定
                 if (x < -8 || x > 8 || y < -8 || y > 8)
                 {
-                    cancelTap();
+                    state.tap = false;
                 }
             }
         }
@@ -201,20 +190,19 @@
 
 	bind('touchend', function (event) {
         
-        var control = start.control,
+        var control = state.control,
             any;
 
-        start.control = null;
-
-        if (delay)
-        {
-			clearTimeout(delay);
-		    delay = 0;
-        }
+        state.control = null;
 
         if (control)
         {
             event = touchEvent(event);
+
+            if ((fn = control.__on_touchend) && fn.call(control, event) === false)
+            {
+                return false;
+            }
 
             if (control.trigger(event) === false)
             {
@@ -222,7 +210,7 @@
             }
 
             // 500ms内不重复触发tap事件
-            if (start.tap && (((any = new Date()) - tapTime > 500) || tapControl !== control))
+            if (state.tap && (((any = new Date()) - tapTime > 500) || tapControl !== control))
             {
                 tapControl = control;
                 tapTime = any;
@@ -233,11 +221,9 @@
                 }
                 
                 event.type = 'tap';
+                event.endEdit = endEdit;
 
-                if (control.trigger(event) === false)
-                {
-                    return false;
-                }
+                return control.trigger(event) === false;
             }
         }
 
@@ -246,17 +232,16 @@
 
 	bind('touchcancel', function (event) {
         
-        var control;
+        var control, fn;
 
-        if (delay)
+        if (control = state.control)
         {
-            clearTimeout(delay);
-            delay = 0;
-        }
+            if ((fn = control.__on_touchcancel) && fn.call(control, event) === false)
+            {
+                return false;
+            }
 
-        if (control = start.control)
-        {
-            start.control = null;
+            state.control = null;
             return control.trigger(touchEvent(event));
         }
 
@@ -272,7 +257,7 @@
         {
             e = new Event('input');
             e.dom = event.target;
-            e.original = event;
+            e.domEvent = event;
             e.value = e.dom.value;
 
             return control.trigger(e);
@@ -331,7 +316,7 @@
         {
             e = new Event('focus');
             e.dom = event.target;
-            e.original = event;
+            e.domEvent = event;
 
             return control.trigger(e);
         }

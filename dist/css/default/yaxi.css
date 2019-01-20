@@ -167,10 +167,8 @@ textarea::-webkit-input-placeholder {
   position: absolute;
   top: 0;
   left: 0;
-  width: 200%;
-  height: 200%;
-  transform-origin: 0 0;
-  transform: scale(0.5, 0.5);
+  width: 100%;
+  height: 100%;
   background-color: #ffffff;
   color: #2d4a63;
   fill: #2d4a63;
@@ -652,8 +650,6 @@ textarea::-webkit-input-placeholder {
 }
 .yx-dialog > .yx-header {
   position: relative;
-  height: 0.4rem;
-  line-height: 0.4rem;
   text-align: center;
   font-weight: bold;
 }
@@ -698,8 +694,8 @@ textarea::-webkit-input-placeholder {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background-color: #ffffff;
 }
 .yx-header {
@@ -715,7 +711,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-content {
   position: absolute;
-  top: 0;
+  top: 0.45rem;
   left: 0;
   right: 0;
   bottom: 0;

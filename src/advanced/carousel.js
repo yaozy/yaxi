@@ -23,11 +23,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
 
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-        this.on('touchcancel', touchend);
-
         this.__auto = auto.bind(this);
     }
 
@@ -165,7 +160,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     var position = 0;
 
 
-    function touchstart() {
+    this.__on_touchstart = function () {
 
         var dom = this.$dom,
             width = dom.clientWidth;
@@ -183,7 +178,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var offset = position + event.distanceX;
 
@@ -203,7 +198,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = this.__on_touchcancel = function (event) {
 
         var index = this.index,
             offset = event.distanceX,

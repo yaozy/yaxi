@@ -14,16 +14,6 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function () {
-
-        base.constructor.ctor.call(this);
-
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-    }
-
-
-
     // 图片路径
     this.$property('src', '');
 
@@ -160,7 +150,7 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom.lastChild,
             top = dom.offsetTop,
@@ -220,7 +210,7 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var fn = state.fn,
             x = event.distanceX,

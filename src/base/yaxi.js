@@ -1,3 +1,4 @@
+// yaxi全局变量
 var yaxi = Object.create(null);
 
 
@@ -6,9 +7,9 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
-// 处理rem自适应
-// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
-document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
+
+// 接口实现
+yaxi.impl = Object.create(null);
 
 
 
@@ -56,7 +57,3 @@ Object.extend = function (fn, Class) {
 
 	return Class;
 }
-
-
-// 接口实现
-yaxi.impl = Object.create(null);

@@ -16,9 +16,14 @@ yaxi.Event = Object.extend.call({}, function (Class) {
 
 
 
-    this.stop = function () {
+    this.stop = function (domEvent) {
 
         this.cancelBubble = true;
+
+        if (domEvent && (domEvent = this.domEvent))
+        {
+            domEvent.stopPropagation();
+        }
     }
 
 

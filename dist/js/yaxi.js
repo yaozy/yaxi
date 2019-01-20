@@ -1,3 +1,4 @@
+// yaxi全局变量
 var yaxi = Object.create(null);
 
 
@@ -6,9 +7,9 @@ var yaxi = Object.create(null);
 yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
 
 
-// 处理rem自适应
-// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
-document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
+
+// 接口实现
+yaxi.impl = Object.create(null);
 
 
 
@@ -56,10 +57,6 @@ Object.extend = function (fn, Class) {
 
 	return Class;
 }
-
-
-// 接口实现
-yaxi.impl = Object.create(null);
 
 
 
@@ -946,9 +943,14 @@ yaxi.Event = Object.extend.call({}, function (Class) {
 
 
 
-    this.stop = function () {
+    this.stop = function (domEvent) {
 
         this.cancelBubble = true;
+
+        if (domEvent && (domEvent = this.domEvent))
+        {
+            domEvent.stopPropagation();
+        }
     }
 
 
@@ -1177,25 +1179,19 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
+    // 标记当前设备为移动设备(以鼠标事件为主)
+    yaxi.device = 'pc';
+
+
+
     var Event = yaxi.Event;
 
 	
 	var stack = yaxi.__layer_stack = [];
 
     
-    // 滑动事件按下时的状态
-    var start = Object.create(null);
-
-
-    // longTap定时器
-    var delay = 0;
-
-
-    // 上次tap事件触发时的控件
-    var tapControl = null;
-
-    // 上次tap事件触发时的时间
-    var tapTime = new Date();
+    // 鼠标事件按下时的状态
+    var state = Object.create(null);
 
 
     var bind = document.addEventListener.bind(document);
@@ -1222,59 +1218,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
             dom = dom.parentNode;
         }
     }
-
-
-	function longTapDelay() {
-        
-        var control = start.control;
-
-        delay = 0;
-
-        start.control = null;
-        start.tap = false;
-
-		if (control && start.longTap)
-		{
-            var e = new Event('longTap');
-
-            e.dom = start.dom;
-            return control.trigger(e);
-        }
-    }
-
-
-    function cancelTap() {
-
-        if (delay)
-        {
-            clearTimeout(delay);
-            delay = 0;
-        }
-
-        start.tap = start.longTap = false;
-    }
-
     
-
-    function touchEvent(event, touch) {
-
-        var e = new Event(event.type);
-
-        touch = touch || event.changedTouches[0];
-
-        e.dom = event.target;
-        e.start = start;
-        e.original = event;
-        e.touches = event.changedTouches;
-        e.clientX = touch.clientX << 1;
-        e.clientY = touch.clientY << 1;
-        e.distanceX = e.clientX - start.clientX;
-        e.distanceY = e.clientY - start.clientY;
-
-        return e;
-    }
-
-
 
     function closeLayer(layer, dom) {
 
@@ -1294,6 +1238,22 @@ yaxi.EventTarget = Object.extend(function (Class) {
         return true;
     }
 
+
+    function mouseEvent(event) {
+
+        var e = new Event(event.type);
+
+        e.dom = event.target;
+        e.state = state;
+        e.domEvent = event;
+        e.clientX = event.clientX << 1;
+        e.clientY = event.clientY << 1;
+        e.distanceX = e.clientX - state.clientX;
+        e.distanceY = e.clientY - state.clientY;
+
+        return e;
+    }
+
     
     function handler(event) {
 
@@ -1303,7 +1263,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             e = new Event(event.type);
             e.dom = event.target;
-            e.original = event;
+            e.domEvent = event;
 
             return control.trigger(e);
         }
@@ -1311,7 +1271,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-	bind('touchstart', function (event) {
+	bind('mousedown', function (event) {
 		
         var control;
 
@@ -1323,119 +1283,104 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
+            state.mousedown = state.tap = true;
+            state.dom = event.target;
+            state.control = control;
+            state.clientX = event.clientX << 1;
+            state.clientY = event.clientY << 1;
 
-            start.tap = start.longTap = true;
+            event = mouseEvent(event);
 
-            start.dom = event.target;
-            start.control = control;
-            start.clientX = touch.clientX << 1;
-            start.clientY = touch.clientY << 1;
-
-            if (control.trigger(touchEvent(event, touch)) === false)
+            if ((fn = control.__on_touchstart) && fn.call(control, event) === false)
             {
-                cancelTap();
-                return false;
+                return state.tap = false;
             }
-
-            delay = setTimeout(longTapDelay, 600);
-        }
-        
-	}, true);
-
-
-	bind('touchmove', function (event) {
-        
-        var control;
-
-        if (control = start.control)
-        {
-            event = touchEvent(event);
 
             if (control.trigger(event) === false)
             {
-                start.tap && cancelTap();
-                return false;
-            }
-
-            if (start.tap)
-            {
-                var x = event.distanceX,
-                    y = event.distanceY;
-
-                // 如果移动了指定
-                if (x < -8 || x > 8 || y < -8 || y > 8)
-                {
-                    cancelTap();
-                }
+                return stat.tap = false;
             }
         }
-
-	}, true);
-
-
-	bind('touchend', function (event) {
         
-        var control = start.control,
-            any;
-
-        start.control = null;
-
-        if (delay)
-        {
-			clearTimeout(delay);
-		    delay = 0;
-        }
-
-        if (control)
-        {
-            event = touchEvent(event);
-
-            if (control.trigger(event) === false)
-            {
-                return false;
-            }
-
-            // 500ms内不重复触发tap事件
-            if (start.tap && (((any = new Date()) - tapTime > 500) || tapControl !== control))
-            {
-                tapControl = control;
-                tapTime = any;
-
-                if ((any = control.__on_tap) && any.call(control, event) === false)
-                {
-                    return false;
-                }
-                
-                event.type = 'tap';
-
-                if (control.trigger(event) === false)
-                {
-                    return false;
-                }
-            }
-        }
-
 	}, true);
 
 
-	bind('touchcancel', function (event) {
+	bind('mousemove', function (event) {
         
         var control;
 
-        if (delay)
+        if (control = state.control)
         {
-            clearTimeout(delay);
-            delay = 0;
+            event = mouseEvent(event);
+
+            if (state.mousedown && (fn = control.__on_touchmove) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            return control.trigger(event);
         }
 
-        if (control = start.control)
+	}, true);
+
+    
+	bind('mouseup', function (event) {
+        
+        var control;
+
+        if (control = state.control)
         {
-            start.control = null;
-            return control.trigger(touchEvent(event));
+            state.mousedown = false;    
+            event = mouseEvent(event);
+
+            if ((fn = control.__on_touchend) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            return control.trigger(event);
         }
 
     }, true);
+    
+    
+	bind('click', function (event) {
+        
+        var control, fn;
+
+        if (state.tap && (control = state.control))
+        {
+            if ((fn = control.__on_tap) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            event = mouseEvent(event);
+
+            if (control.trigger(event) === false)
+            {
+                return false;
+            }
+
+            // 兼容tap事件
+            event.type = 'tap';
+            return control.trigger(event);
+        }
+
+    }, true);
+    
+
+    bind('dblclick', function (event) {
+        
+        var control;
+
+        if (state.tap && (control = state.control))
+        {
+            return control.trigger(mouseEvent(event));
+        }
+
+    }, true);
+
 
 
 
@@ -1447,7 +1392,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             e = new Event('input');
             e.dom = event.target;
-            e.original = event;
+            e.domEvent = event;
             e.value = e.dom.value;
 
             return control.trigger(e);
@@ -1469,6 +1414,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             e = new Event('change');
             e.dom = event.target;
+            e.domEvent = event;
             e.value = e.dom.value;
 
             return control.trigger(e);
@@ -1489,29 +1435,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     bind('blur', handler, true);
 
-    bind('focus', function (event) {
-     
-        var target = event.target,
-            control,
-            e;
-
-        // 页面刚打开时禁止自动弹出键盘
-        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
-        {
-            target.blur();
-            return;
-        }
-
-        if (control = findControl(target))
-        {
-            e = new Event('focus');
-            e.dom = event.target;
-            e.original = event;
-
-            return control.trigger(e);
-        }
-        
-    }, true);
+    bind('focus', handler, true);
 
     
 
@@ -1528,24 +1452,12 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             e = new Event('scroll');
             e.dom = event.target;
+            e.domEvent = event;
 
             return control.trigger(e);
         }
 
     }, true);
-
-
-    
-    window.addEventListener('resize', function () {
-
-        var dom = document.activeElement;
-
-        // 打开输入法时把焦点控件移动可视区
-        if (dom && this.innerHeight / this.innerWidth < 1.2)
-        {
-            dom.scrollIntoViewIfNeeded();
-        }
-    });
 
 
 
@@ -4608,22 +4520,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var classes = yaxi.classes = create(null);
 
 
-    var host = yaxi.__dom_host = document.createElement('div');
-
-    host.className = 'yx-host';
-
-    if (document.body)
-    {
-        document.body.appendChild(host);
-    }
-    else
-    {
-        document.addEventListener('DOMContentLoaded', function () {
-
-            document.body.appendChild(host);
-        });
-    }
-
 
 
     Class.register = function (name) {
@@ -5997,6 +5893,7 @@ yaxi.impl.container = function (base) {
 
 yaxi.impl.pulldown = function () {
 
+
     
     var pulldown, loading, overflowY;
 
@@ -6052,9 +5949,11 @@ yaxi.impl.pulldown = function () {
         },
         set: function (value) {
 
+            var pulldown;
+
             if (value)
             {
-                var pulldown = yaxi.Pulldown;
+                pulldown = yaxi.Pulldown;
 
                 if (typeof value === 'function')
                 {
@@ -6070,24 +5969,9 @@ yaxi.impl.pulldown = function () {
 
                     pulldown = value instanceof pulldown ? value : new pulldown(value);
                 }
-
-                if (!this.__pulldown)
-                {
-                    this.on('touchmove', touchmove);
-                    this.on('touchend', touchend);
-                    this.on('touchcancel', touchend);
-                }
-
-                this.__pulldown = pulldown;
             }
-            else
-            {
-                this.off('touchmove', touchmove);
-                this.off('touchend', touchend);
-                this.off('touchcancel', touchend);
 
-                this.__pulldown = null;
-            }
+            this.__pulldown = pulldown;
         }
     });
 
@@ -6128,7 +6012,7 @@ yaxi.impl.pulldown = function () {
 
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         if (pulldown)
         {
@@ -6145,9 +6029,10 @@ yaxi.impl.pulldown = function () {
             }
         }
 
-        if (this.$dom.scrollTop < 1 && (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
+        if ((pulldown = this.__pulldown) && this.$dom.scrollTop < 1 && 
+            (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
         {
-            var start = event.start,
+            var state = event.state,
                 style = this.$dom.style;
 
             if (loading = this.__loading)
@@ -6164,14 +6049,13 @@ yaxi.impl.pulldown = function () {
             }
 
             // 以当前控件和位置开始滑动
-            start.control = this;
-            start.clientX = event.clientX;
-            start.clientY = event.clientY;
+            state.control = this;
+            state.clientX = event.clientX;
+            state.clientY = event.clientY;
     
             overflowY = style.overflowY;
             style.overflowY = 'hidden';
 
-            pulldown = this.pulldown;
             pulldown.start(this);
 
             event.stop();
@@ -6180,7 +6064,7 @@ yaxi.impl.pulldown = function () {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = this.__on_touchcancel = function (event) {
 
         if (pulldown)
         {
@@ -6332,22 +6216,6 @@ yaxi.Canvas = yaxi.Control.extend(function (Class, base) {
     yaxi.template(this, '<canvas class="yx-control"></canvas>');
 
 
-
-    Class.ctor = function () {
-
-        var init;
-        
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-        
-        this.on('touchstart', touchstart.bind(this));
-        this.on('touchmove', touchmove.bind(this));
-    }
-
     
 
     this.$property('width', 300);
@@ -6357,13 +6225,13 @@ yaxi.Canvas = yaxi.Control.extend(function (Class, base) {
 
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         debugger
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         debugger
     }
@@ -9271,6 +9139,39 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
+
+    var host = yaxi.__dom_host = document.createElement('div');
+
+	host.className = 'yx-host';
+
+    if (document.body)
+    {
+        document.body.appendChild(host);
+    }
+    else
+    {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.body.appendChild(host);
+        });
+	}
+	
+	
+	if (yaxi.device === 'mobile')
+	{
+		// 处理rem自适应
+		// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
+		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
+		host.style.cssText = 'width:200%;height:200%;transform-origin: 0 0;transform: scale(.5, .5);';
+	}
+	else
+	{
+		// pc端1rem = 100px
+		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
+	}
+
+
+
 	Class.all = function () {
 
 		var list = [],
@@ -9697,16 +9598,17 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		{
 			var children = this.__children,
 				style = this.content.$dom.style,
-				control;
+				control,
+				value;
 
-			if (control = this.header)
+			if (style.top !== (value = this.header ? '' : 0))
 			{
-				style.top = control.$dom.offsetHeight + 'px';
+				style.top = value;
 			}
 
-			if (control = this.footer)
+			if ((control = this.footer) && style.bottom !== (value = control.$dom.offsetHeight + 'px'))
 			{
-				style.bottom = control.$dom.offsetHeight + 'px';
+				style.bottom = value;
 			}
 
 			for (var i = 0, l = children.length; i < l; i++)
@@ -10875,11 +10777,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 			init.apply(this, arguments);
         }
 
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-        this.on('touchcancel', touchend);
-
         this.__auto = auto.bind(this);
     }
 
@@ -11017,7 +10914,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     var position = 0;
 
 
-    function touchstart() {
+    this.__on_touchstart = function () {
 
         var dom = this.$dom,
             width = dom.clientWidth;
@@ -11035,7 +10932,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var offset = position + event.distanceX;
 
@@ -11055,7 +10952,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = this.__on_touchcancel = function (event) {
 
         var index = this.index,
             offset = event.distanceX,
@@ -11231,16 +11128,6 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
 
 
 
-    Class.ctor = function () {
-
-        base.constructor.ctor.call(this);
-
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-    }
-
-
-
     // 图片路径
     this.$property('src', '');
 
@@ -11377,7 +11264,7 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom.lastChild,
             top = dom.offsetTop,
@@ -11437,7 +11324,7 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var fn = state.fn,
             x = event.distanceX,
@@ -11652,11 +11539,6 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
         }
 
         base.render.call(this);
-
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-
         return dom;
     }
 
@@ -11696,7 +11578,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     var state = {};
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom.firstChild,
             rect = dom.getBoundingClientRect(),
@@ -11720,7 +11602,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var index = hitTest(event.clientX - state.x, event.clientY - state.y);
 
@@ -11738,7 +11620,7 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend() {
+    this.__on_touchend = function () {
 
         var event = new yaxi.Event('change');
 
@@ -12214,33 +12096,10 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 
-	var create = Object.create;
-
     var thumb = '<svg class="yx-segment-thumb" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" /></svg>'
 
 
     yaxi.template(this, '<div class="yx-control yx-segment"><div class="yx-segment-line"></div><div class="yx-segment-body">' + thumb + '</div>');
-
-
-
-
-    Class.ctor = function () {
-
-        var init;
-
-        // 初始化存储值
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-        
-        this.on('touchstart', touchstart);
-        this.on('touchmove', touchmove);
-        this.on('touchend', touchend);
-        this.on('touchcancel', touchcancel);
-    }
 
 
 
@@ -12374,7 +12233,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     var state = {};
 
 
-    function touchstart(event) {
+    this.__on_touchstart = function (event) {
 
         var target = event.dom,
             dom = this.$dom.lastChild;
@@ -12397,7 +12256,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         var thumb = state.thumb;
 
@@ -12411,7 +12270,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = function (event) {
 
         var value = Decimal.singleton(event.clientX).plus(-state.left).pow10(2).div(state.width),
             any;
@@ -12463,7 +12322,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function touchcancel() {
+    this.__on_touchcancel = function () {
 
         this.renderer.value(this.$dom, this.value);
     }

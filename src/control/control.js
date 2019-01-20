@@ -13,22 +13,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     var classes = yaxi.classes = create(null);
 
 
-    var host = yaxi.__dom_host = document.createElement('div');
-
-    host.className = 'yx-host';
-
-    if (document.body)
-    {
-        document.body.appendChild(host);
-    }
-    else
-    {
-        document.addEventListener('DOMContentLoaded', function () {
-
-            document.body.appendChild(host);
-        });
-    }
-
 
 
     Class.register = function (name) {

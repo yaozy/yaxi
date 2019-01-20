@@ -459,6 +459,7 @@ yaxi.impl.container = function (base) {
 
 yaxi.impl.pulldown = function () {
 
+
     
     var pulldown, loading, overflowY;
 
@@ -514,9 +515,11 @@ yaxi.impl.pulldown = function () {
         },
         set: function (value) {
 
+            var pulldown;
+
             if (value)
             {
-                var pulldown = yaxi.Pulldown;
+                pulldown = yaxi.Pulldown;
 
                 if (typeof value === 'function')
                 {
@@ -532,24 +535,9 @@ yaxi.impl.pulldown = function () {
 
                     pulldown = value instanceof pulldown ? value : new pulldown(value);
                 }
-
-                if (!this.__pulldown)
-                {
-                    this.on('touchmove', touchmove);
-                    this.on('touchend', touchend);
-                    this.on('touchcancel', touchend);
-                }
-
-                this.__pulldown = pulldown;
             }
-            else
-            {
-                this.off('touchmove', touchmove);
-                this.off('touchend', touchend);
-                this.off('touchcancel', touchend);
 
-                this.__pulldown = null;
-            }
+            this.__pulldown = pulldown;
         }
     });
 
@@ -590,7 +578,7 @@ yaxi.impl.pulldown = function () {
 
 
 
-    function touchmove(event) {
+    this.__on_touchmove = function (event) {
 
         if (pulldown)
         {
@@ -607,9 +595,10 @@ yaxi.impl.pulldown = function () {
             }
         }
 
-        if (this.$dom.scrollTop < 1 && (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
+        if ((pulldown = this.__pulldown) && this.$dom.scrollTop < 1 && 
+            (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
         {
-            var start = event.start,
+            var state = event.state,
                 style = this.$dom.style;
 
             if (loading = this.__loading)
@@ -626,14 +615,13 @@ yaxi.impl.pulldown = function () {
             }
 
             // 以当前控件和位置开始滑动
-            start.control = this;
-            start.clientX = event.clientX;
-            start.clientY = event.clientY;
+            state.control = this;
+            state.clientX = event.clientX;
+            state.clientY = event.clientY;
     
             overflowY = style.overflowY;
             style.overflowY = 'hidden';
 
-            pulldown = this.pulldown;
             pulldown.start(this);
 
             event.stop();
@@ -642,7 +630,7 @@ yaxi.impl.pulldown = function () {
     }
 
 
-    function touchend(event) {
+    this.__on_touchend = this.__on_touchcancel = function (event) {
 
         if (pulldown)
         {
