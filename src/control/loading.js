@@ -24,9 +24,6 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // 是否无数据
     this.empty = false;
 
-    // 是否前置loading
-    this.before = false;
-
 
 
     // 状态
@@ -101,23 +98,9 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
             parent = parent.$dom;
         }
 
-        if (this.before)
+        if (parent)
         {
-            dom.$loading = 1;
-
-            if (parent)
-            {
-                parent.insertBefore(dom, parent.firstChild || null);
-            }
-        }
-        else
-        {
-            dom.$loading = 2;
-
-            if (parent)
-            {
-                parent.appendChild(dom);
-            }
+            parent.appendChild(dom);
         }
     }
 

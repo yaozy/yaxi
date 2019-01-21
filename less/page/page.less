@@ -9,14 +9,23 @@
 
 .yx-header {
     position: absolute;
+    overflow: hidden;
     top: 0;
     left: 0;
-    right: 0;
+    width: 100%;
     height: .45rem;
     line-height: .45rem;
     text-align: center;
-    overflow: hidden;
+    white-space: nowrap;
     background-color: @back-header-color;
+}
+
+.yx-header>* {
+    position: relative;
+    display: inline-block;
+    top: 50%;
+    transform: translateY(-50%);
+    vertical-align: top;
 }
 
 .yx-content {
@@ -47,7 +56,6 @@
 
 .yx-backbutton {
     position: absolute;
-    top: 0;
     left: 0;
     width: .45rem;
     height: 100%;

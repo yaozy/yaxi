@@ -9,7 +9,8 @@ module.exports = yaxi.Page.extend(function () {
             header: {
                 children: [
                     {
-                        Class: yaxi.BackButton
+                        Class: yaxi.BackButton,
+                        float: 'right'
                     },
                     {
                         Class: yaxi.Text,
@@ -30,8 +31,8 @@ module.exports = yaxi.Page.extend(function () {
                     {
                         Class: yaxi.Panel,
                         subtype: yaxi.Button,
-                        layout: 'same-width',
-                        gap: '1px',
+                        layout: 'line',
+                        gap: '-10px',
                         children: [
                             { text: 'abc', svg: 'icon-yaxi-pulldown', size: '.3rem', gap: '.05rem' },
                             { text: 'def', svg: 'icon-yaxi-pulldown' },

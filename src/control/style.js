@@ -24,7 +24,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             {
                 case 'cssFloat':
                 case 'styleFloat':
-                    keys.float = { name: name, defaultValue: '' };
+                    keys.float = name;
                     break;
 
                 case 'cssText':
@@ -43,12 +43,13 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         for (var name in keys)
         {
-            this.$property(name, keys[name]);
+            this.$property(name, {
+                defaultValue: '',
+                name: keys[name]
+            });
         }
 
-
         return keys;
-
 
     }).call(this);
 

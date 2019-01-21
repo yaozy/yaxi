@@ -4664,17 +4664,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                     delete changes[name];
                 }
             }
-            else if (this.$dom)
+            else if (this.$dom) // 渲染后才注册更新
             {
                 if (value !== storage[name])
                 {
                     patch(this)[name] = value;
-                    storage[name] = value;
                 }
             }
-            else
+            else // 未渲染则直接记录变化
             {
-                storage[name] = value;
+                (this.__changes = {})[name] = value;
             }
 
         } : function (value) {
@@ -5265,10 +5264,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 style[name + 'Width'] = value[1] || '1px';
                 style[name + 'Style'] = value[2] || 'solid';
             }
+
+            dom.setAttribute('line', value);
         }
         else
         {
             dom.style.border = '';
+            dom.removeAttribute('line');
         }
     }
 
@@ -5404,7 +5406,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
             {
                 case 'cssFloat':
                 case 'styleFloat':
-                    keys.float = { name: name, defaultValue: '' };
+                    keys.float = name;
                     break;
 
                 case 'cssText':
@@ -5423,12 +5425,13 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         for (var name in keys)
         {
-            this.$property(name, keys[name]);
+            this.$property(name, {
+                defaultValue: '',
+                name: keys[name]
+            });
         }
 
-
         return keys;
-
 
     }).call(this);
 
@@ -5718,19 +5721,25 @@ yaxi.impl.container = function (base) {
     // 重算布局
     this.invalidate = function () {
 
-        var children = this.__children,
-            length,
-            dom,
-            any;
+        var children = this.__children;
 
-        if ((length = children.length) > 0 && (dom = this.$dom))
+        if (children.length > 0 && (dom = this.$dom))
         {
+            var gap = this.__gap,
+                dom,
+                any;
+
             if (any = layouts[this.$storage.layout])
             {
-                any(children, dom, this.__gap);
+                any(children, dom, gap ? gap[2] : 0);
             }
 
-            for (var i = 0; i < length; i++)
+            if (gap)
+            {
+                computeGap(children, gap);
+            }
+
+            for (var i = 0, l = children.length; i < l; i++)
             {
                 if ((any = children[i]) && any.invalidate && any.$dom)
                 {
@@ -5741,20 +5750,33 @@ yaxi.impl.container = function (base) {
     }
 
 
+    // 计算间隙
+    function computeGap(children, gap) {
+        
+        var name = gap[0],
+            dom,
+            style;
+
+        gap = gap[1];
+
+        if ((dom = children[0].$dom) && (style = dom.style)[name] !== '0')
+        {
+            style[name] = '0';
+        }
+
+        for (var i = 1, l = children.length; i < l; i++)
+        {
+            if (i > 0 && (dom = children[i].$dom) && (style = dom.style)[name] !== gap)
+            {
+                style[name] = gap;
+            }
+        }
+    }
+
+
 
     var layouts = Object.create(null);
     
-
-
-    layouts.row = function (children, dom, gap) {
-
-    }
-
-
-    layouts.column = function (children, dom, gap) {
-
-    }
-
 
     layouts['same-width'] = function (children, dom, gap) {
 
@@ -5818,8 +5840,6 @@ yaxi.impl.container = function (base) {
 
 
 
-    
-    var styleSheet;
 
     var renderer = this.renderer;
 
@@ -5833,39 +5853,17 @@ yaxi.impl.container = function (base) {
 
     renderer.gap = function (dom, value) {
 
-        var style = styleSheet || document.styleSheets[0];
-
-        // 标记布局发生了变化
-        this.__layout = null;
-
-        // 动态添加样式
-        if (!style)
-        {
-            style = document.createElement('style');
-            style.setAttribute('type', 'text/css');
-
-            document.head.appendChild(style);
-            style = styleSheet = style.sheet;
-        }
-
         if (value && (value = value.split(' ', 2))[0])
         {
-            var type = value[1] !== 'top' ? 'left' : 'top',
-                key = type + ':' + (value = value[0]);
-
-            if (!style[key])
-            {
-                style.addRule('[gap="' + key + '"]>*', 'margin-' + type + ': ' + value + ' !important');
-                style[key] = 1;
-            }
-            
-            this.__gap = value.indexOf('px') > 0 ? parseInt(value) : parseFloat(value) * yaxi.rem + .5 | 0;
-            dom.setAttribute('gap', key);
+            this.__gap = [
+                value[1] === 'top' ? 'marginTop' : 'marginLeft', 
+                value[0], 
+                value[0].indexOf('px') > 0 ? parseInt(value[0]) : parseFloat(value[0]) * yaxi.rem + .5 | 0   
+            ];
         }
         else
         {
-            this.__gap = 0;
-            dom.removeAttribute('gap');
+            this.__gap = null;
         }
     }
 
@@ -6088,14 +6086,7 @@ yaxi.impl.pulldown = function () {
 
             var dom = this.$dom;
 
-            if (loading.before)
-            {
-                if (dom.scrollTop > dom.offsetHeight)
-                {
-                    return;
-                }
-            }
-            else if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
+            if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
             {
                 return;
             }
@@ -6823,8 +6814,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
             }
         }
 
-        // 把loading放到最后
-        if (last && last.$loading === 2)
+        if (last)
         {
             dom.appendChild(last);
         }
@@ -6863,12 +6853,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         if (node = dom.firstChild)
         {
             var index = 0;
-
-            // 第一个是loading则路过
-            if (node.$loading === 1)
-            {
-                node = node.nextSibling;
-            }
 
             while (control = this[index++])
             {
@@ -7164,9 +7148,6 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     // 是否无数据
     this.empty = false;
 
-    // 是否前置loading
-    this.before = false;
-
 
 
     // 状态
@@ -7241,23 +7222,9 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
             parent = parent.$dom;
         }
 
-        if (this.before)
+        if (parent)
         {
-            dom.$loading = 1;
-
-            if (parent)
-            {
-                parent.insertBefore(dom, parent.firstChild || null);
-            }
-        }
-        else
-        {
-            dom.$loading = 2;
-
-            if (parent)
-            {
-                parent.appendChild(dom);
-            }
+            parent.appendChild(dom);
         }
     }
 

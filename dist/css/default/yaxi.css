@@ -496,7 +496,6 @@ textarea::-webkit-input-placeholder {
   transition: right 1s;
 }
 .yx-block {
-  margin-top: 0.07rem;
   padding: 0.15rem;
   background-color: #ffffff;
 }
@@ -575,14 +574,22 @@ textarea::-webkit-input-placeholder {
 }
 .yx-header {
   position: absolute;
+  overflow: hidden;
   top: 0;
   left: 0;
-  right: 0;
+  width: 100%;
   height: 0.45rem;
   line-height: 0.45rem;
   text-align: center;
-  overflow: hidden;
+  white-space: nowrap;
   background-color: #ffffff;
+}
+.yx-header > * {
+  position: relative;
+  display: inline-block;
+  top: 50%;
+  transform: translateY(-50%);
+  vertical-align: top;
 }
 .yx-content {
   position: absolute;
@@ -609,7 +616,6 @@ textarea::-webkit-input-placeholder {
 }
 .yx-backbutton {
   position: absolute;
-  top: 0;
   left: 0;
   width: 0.45rem;
   height: 100%;
@@ -927,12 +933,6 @@ textarea::-webkit-input-placeholder {
 [layout="same-height"] > * {
   display: block;
   margin: 0 !important;
-}
-[gap^="top"] > :first-child {
-  margin-top: 0px !important;
-}
-[gap^="left"] > :first-child {
-  margin-left: 0px !important;
 }
 [full="width"] > * {
   width: 100%;

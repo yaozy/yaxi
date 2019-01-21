@@ -66,17 +66,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                     delete changes[name];
                 }
             }
-            else if (this.$dom)
+            else if (this.$dom) // 渲染后才注册更新
             {
                 if (value !== storage[name])
                 {
                     patch(this)[name] = value;
-                    storage[name] = value;
                 }
             }
-            else
+            else // 未渲染则直接记录变化
             {
-                storage[name] = value;
+                (this.__changes = {})[name] = value;
             }
 
         } : function (value) {
@@ -667,10 +666,13 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 style[name + 'Width'] = value[1] || '1px';
                 style[name + 'Style'] = value[2] || 'solid';
             }
+
+            dom.setAttribute('line', value);
         }
         else
         {
             dom.style.border = '';
+            dom.removeAttribute('line');
         }
     }
 

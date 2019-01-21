@@ -436,8 +436,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
             }
         }
 
-        // 把loading放到最后
-        if (last && last.$loading === 2)
+        if (last)
         {
             dom.appendChild(last);
         }
@@ -476,12 +475,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         if (node = dom.firstChild)
         {
             var index = 0;
-
-            // 第一个是loading则路过
-            if (node.$loading === 1)
-            {
-                node = node.nextSibling;
-            }
 
             while (control = this[index++])
             {
