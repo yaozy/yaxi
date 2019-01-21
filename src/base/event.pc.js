@@ -93,6 +93,22 @@
     }
 
 
+    function trigger(control, name, event) {
+
+        var fn;
+
+        while (control)
+        {
+            if ((fn = control[name]) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            control = control.parent;
+        }
+    }
+
+
 
 	bind('mousedown', function (event) {
 		
@@ -114,7 +130,7 @@
 
             event = mouseEvent(event);
 
-            if ((fn = control.__on_touchstart) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchstart', event) === false)
             {
                 return state.tap = false;
             }
@@ -136,7 +152,7 @@
         {
             event = mouseEvent(event);
 
-            if (state.mousedown && (fn = control.__on_touchmove) && fn.call(control, event) === false)
+            if (state.mousedown && trigger(control, '__on_touchmove', event) === false)
             {
                 return false;
             }
@@ -156,7 +172,7 @@
             state.mousedown = false;    
             event = mouseEvent(event);
 
-            if ((fn = control.__on_touchend) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchend', event) === false)
             {
                 return false;
             }
@@ -169,24 +185,28 @@
     
 	bind('click', function (event) {
         
-        var control, fn;
+        var control;
 
         if (state.tap && (control = state.control))
         {
-            if ((fn = control.__on_tap) && fn.call(control, event) === false)
+            event = mouseEvent(event);
+
+            // 兼容tap事件
+            event.type = 'tap';
+            
+            if (trigger(control, '__on_tap', event) === false)
             {
                 return false;
             }
-
-            event = mouseEvent(event);
 
             if (control.trigger(event) === false)
             {
                 return false;
             }
 
-            // 兼容tap事件
-            event.type = 'tap';
+            // 触发click事件
+            event.type = 'click';
+
             return control.trigger(event);
         }
 

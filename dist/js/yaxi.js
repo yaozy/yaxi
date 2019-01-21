@@ -1293,10 +1293,26 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }
 
 
+    function trigger(control, name, event) {
+
+        var fn;
+
+        while (control)
+        {
+            if ((fn = control[name]) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            control = control.parent;
+        }
+    }
+
+
 
 	bind('touchstart', function (event) {
 		
-        var control, fn;
+        var control;
 
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
@@ -1317,7 +1333,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             event = touchEvent(event, touch);
 
-            if ((fn = control.__on_touchstart) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchstart', event) === false)
             {
                 return state.tap = false;
             }
@@ -1333,13 +1349,13 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 	bind('touchmove', function (event) {
         
-        var control, fn;
+        var control;
 
         if (control = state.control)
         {
             event = touchEvent(event);
 
-            if ((fn = control.__on_touchmove) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchmove', event) === false)
             {
                 return false;
             }
@@ -1368,7 +1384,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	bind('touchend', function (event) {
         
         var control = state.control,
-            any;
+            time;
 
         state.control = null;
 
@@ -1376,7 +1392,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             event = touchEvent(event);
 
-            if ((fn = control.__on_touchend) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchend', event) === false)
             {
                 return false;
             }
@@ -1387,19 +1403,19 @@ yaxi.EventTarget = Object.extend(function (Class) {
             }
 
             // 500ms内不重复触发tap事件
-            if (state.tap && (((any = new Date()) - tapTime > 500) || tapControl !== control))
+            if (state.tap && (((time = new Date()) - tapTime > 500) || tapControl !== control))
             {
                 tapControl = control;
-                tapTime = any;
+                tapTime = time;
 
-                if ((any = control.__on_tap) && any.call(control, event) === false)
+                event.type = 'tap';
+                event.endEdit = endEdit;
+
+                if (trigger(control, '__on_tap', event) === false)
                 {
                     return false;
                 }
                 
-                event.type = 'tap';
-                event.endEdit = endEdit;
-
                 return control.trigger(event) === false;
             }
         }
@@ -1409,11 +1425,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 	bind('touchcancel', function (event) {
         
-        var control, fn;
+        var control;
 
         if (control = state.control)
         {
-            if ((fn = control.__on_touchcancel) && fn.call(control, event) === false)
+            if (trigger(control, '__on_touchcancel', event) === false)
             {
                 return false;
             }
@@ -1451,7 +1467,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             if (fn = control.__on_change)
             {
-                fn.call(control, event.target);
+                fn.call(control, event.target.value);
             }
 
             e = new Event('change');

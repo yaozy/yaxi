@@ -173,9 +173,6 @@ textarea::-webkit-input-placeholder {
   color: #2d4a63;
   fill: #2d4a63;
 }
-.yx-tab > .yx-control {
-  border-color: transparent;
-}
 .yx-button {
   position: relative;
   display: inline-block;
@@ -204,7 +201,7 @@ textarea::-webkit-input-placeholder {
   height: 1em;
 }
 .yx-button-text {
-  margin-left: 0.02rem;
+  margin-left: 0.15em;
 }
 .yx-icon {
   position: relative;
@@ -248,7 +245,7 @@ textarea::-webkit-input-placeholder {
   height: 1em;
 }
 .yx-iconbutton-text {
-  margin-top: 0.02rem;
+  margin-top: 0.15em;
 }
 .yx-iframe {
   border: 0;
@@ -292,7 +289,6 @@ textarea::-webkit-input-placeholder {
   overflow: hidden;
   text-align: center;
   font-size: 0.14rem;
-  background-color: #ffffff;
   fill: #bac1d2;
 }
 .yx-pulldown-body {
@@ -314,6 +310,9 @@ textarea::-webkit-input-placeholder {
 }
 .yx-tab > * {
   height: 100%;
+}
+.yx-tab > * {
+  border-color: transparent;
 }
 .yx-text {
   display: inline-block;
@@ -509,7 +508,7 @@ textarea::-webkit-input-placeholder {
   min-height: 1.2rem;
   border-radius: 0.05rem;
   background-color: #ffffff;
-  z-index: 30;
+  z-index: 20;
 }
 .yx-dialog > .yx-header {
   position: relative;
@@ -530,7 +529,7 @@ textarea::-webkit-input-placeholder {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  z-index: 30;
+  z-index: 20;
   background-color: #000000;
   opacity: 0.2;
 }
@@ -538,7 +537,7 @@ textarea::-webkit-input-placeholder {
   position: absolute;
   left: 10%;
   width: 80%;
-  z-index: 10;
+  z-index: 20;
   background-color: #ffffff;
 }
 .yx-messagebox > .yx-header {
@@ -564,7 +563,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-floatlayer {
   position: absolute;
-  z-index: 100;
+  z-index: 30;
 }
 .yx-page {
   position: absolute;
@@ -658,7 +657,7 @@ textarea::-webkit-input-placeholder {
   left: 0.1rem;
   right: 0.1rem;
   bottom: 0.1rem;
-  z-index: 100;
+  z-index: 30;
 }
 .yx-actionsheet-content,
 .yx-actionsheet-cancel {
@@ -900,7 +899,7 @@ textarea::-webkit-input-placeholder {
 [layout="line"] {
   white-space: nowrap;
 }
-[layout="line-nowrap"] > * {
+[layout="line"] > * {
   display: inline-block;
 }
 [layout="line-middle"] {
