@@ -1,14 +1,32 @@
 .yx-iconbutton {
     display: inline-block;
+    height: .45rem;
     text-align: center;
+    line-height: 1em;
 }
 
-.yx-iconbutton svg {
+.yx-iconbutton-body {
+    position: relative;
+    display: inline-block;
+    top: 50%;
+    transform: translateY(-50%);
+    vertical-align: top;
+}
+
+.yx-iconbutton-body>span {
+    position: relative;
+    display: block;
+}
+
+.yx-iconbutton-icon {
+    font-size: 1.2em;
+}
+
+.yx-iconbutton-icon>svg {
     width: 1em;
     height: 1em;
-    vertical-align: text-bottom;
 }
 
-.yx-iconbutton[vertical]>* {
-    display: block;
+.yx-iconbutton-text {
+    margin-top: .02rem;
 }

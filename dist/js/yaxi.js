@@ -1179,8 +1179,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    // 标记当前设备为移动设备(以鼠标事件为主)
-    yaxi.device = 'pc';
+    // 标记当前设备为移动设备(仅使用触摸事件)
+    yaxi.device = 'mobile';
 
 
 
@@ -1190,8 +1190,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	var stack = yaxi.__layer_stack = [];
 
     
-    // 鼠标事件按下时的状态
+    // 滑动事件按下时的状态
     var state = Object.create(null);
+
+
+    // 上次tap事件触发时的控件
+    var tapControl = null;
+
+    // 上次tap事件触发时的时间
+    var tapTime = new Date();
 
 
     var bind = document.addEventListener.bind(document);
@@ -1218,7 +1225,28 @@ yaxi.EventTarget = Object.extend(function (Class) {
             dom = dom.parentNode;
         }
     }
+
     
+
+    function touchEvent(event, touch) {
+
+        var e = new Event(event.type);
+
+        touch = touch || event.changedTouches[0];
+
+        e.dom = event.target;
+        e.state = state;
+        e.domEvent = event;
+        e.touches = event.changedTouches;
+        e.clientX = touch.clientX << 1;
+        e.clientY = touch.clientY << 1;
+        e.distanceX = e.clientX - state.clientX;
+        e.distanceY = e.clientY - state.clientY;
+
+        return e;
+    }
+
+
 
     function closeLayer(layer, dom) {
 
@@ -1239,19 +1267,14 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }
 
 
-    function mouseEvent(event) {
+    function endEdit() {
 
-        var e = new Event(event.type);
+        var dom = document.activeElement;
 
-        e.dom = event.target;
-        e.state = state;
-        e.domEvent = event;
-        e.clientX = event.clientX << 1;
-        e.clientY = event.clientY << 1;
-        e.distanceX = e.clientX - state.clientX;
-        e.distanceY = e.clientY - state.clientY;
-
-        return e;
+        if (dom && dom !== document.body)
+        {
+            dom.blur();
+        }
     }
 
     
@@ -1271,9 +1294,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-	bind('mousedown', function (event) {
+	bind('touchstart', function (event) {
 		
-        var control;
+        var control, fn;
 
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
@@ -1283,13 +1306,16 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
         if (control = findControl(event.target))
         {
-            state.mousedown = state.tap = true;
+            var touch = event.changedTouches[0];
+
+            state.tap = state.longTap = true;
+
             state.dom = event.target;
             state.control = control;
-            state.clientX = event.clientX << 1;
-            state.clientY = event.clientY << 1;
+            state.clientX = touch.clientX << 1;
+            state.clientY = touch.clientY << 1;
 
-            event = mouseEvent(event);
+            event = touchEvent(event, touch);
 
             if ((fn = control.__on_touchstart) && fn.call(control, event) === false)
             {
@@ -1298,89 +1324,105 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             if (control.trigger(event) === false)
             {
-                return stat.tap = false;
+                return state.tap = false;
             }
         }
         
 	}, true);
 
 
-	bind('mousemove', function (event) {
+	bind('touchmove', function (event) {
         
-        var control;
+        var control, fn;
 
         if (control = state.control)
         {
-            event = mouseEvent(event);
+            event = touchEvent(event);
 
-            if (state.mousedown && (fn = control.__on_touchmove) && fn.call(control, event) === false)
+            if ((fn = control.__on_touchmove) && fn.call(control, event) === false)
             {
                 return false;
             }
 
-            return control.trigger(event);
+            if (control.trigger(event) === false)
+            {
+                return state.tap = false;
+            }
+
+            if (state.tap)
+            {
+                var x = event.distanceX,
+                    y = event.distanceY;
+
+                // 如果移动了指定
+                if (x < -8 || x > 8 || y < -8 || y > 8)
+                {
+                    state.tap = false;
+                }
+            }
         }
 
 	}, true);
 
-    
-	bind('mouseup', function (event) {
-        
-        var control;
 
-        if (control = state.control)
+	bind('touchend', function (event) {
+        
+        var control = state.control,
+            any;
+
+        state.control = null;
+
+        if (control)
         {
-            state.mousedown = false;    
-            event = mouseEvent(event);
+            event = touchEvent(event);
 
             if ((fn = control.__on_touchend) && fn.call(control, event) === false)
             {
                 return false;
             }
 
-            return control.trigger(event);
-        }
-
-    }, true);
-    
-    
-	bind('click', function (event) {
-        
-        var control, fn;
-
-        if (state.tap && (control = state.control))
-        {
-            if ((fn = control.__on_tap) && fn.call(control, event) === false)
-            {
-                return false;
-            }
-
-            event = mouseEvent(event);
-
             if (control.trigger(event) === false)
             {
                 return false;
             }
 
-            // 兼容tap事件
-            event.type = 'tap';
-            return control.trigger(event);
+            // 500ms内不重复触发tap事件
+            if (state.tap && (((any = new Date()) - tapTime > 500) || tapControl !== control))
+            {
+                tapControl = control;
+                tapTime = any;
+
+                if ((any = control.__on_tap) && any.call(control, event) === false)
+                {
+                    return false;
+                }
+                
+                event.type = 'tap';
+                event.endEdit = endEdit;
+
+                return control.trigger(event) === false;
+            }
         }
 
-    }, true);
-    
+	}, true);
 
-    bind('dblclick', function (event) {
+
+	bind('touchcancel', function (event) {
         
-        var control;
+        var control, fn;
 
-        if (state.tap && (control = state.control))
+        if (control = state.control)
         {
-            return control.trigger(mouseEvent(event));
+            if ((fn = control.__on_touchcancel) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
+            state.control = null;
+            return control.trigger(touchEvent(event));
         }
 
     }, true);
-
 
 
 
@@ -1414,7 +1456,6 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             e = new Event('change');
             e.dom = event.target;
-            e.domEvent = event;
             e.value = e.dom.value;
 
             return control.trigger(e);
@@ -1435,7 +1476,29 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
     bind('blur', handler, true);
 
-    bind('focus', handler, true);
+    bind('focus', function (event) {
+     
+        var target = event.target,
+            control,
+            e;
+
+        // 页面刚打开时禁止自动弹出键盘
+        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
+        {
+            target.blur();
+            return;
+        }
+
+        if (control = findControl(target))
+        {
+            e = new Event('focus');
+            e.dom = event.target;
+            e.domEvent = event;
+
+            return control.trigger(e);
+        }
+        
+    }, true);
 
     
 
@@ -1452,12 +1515,24 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
             e = new Event('scroll');
             e.dom = event.target;
-            e.domEvent = event;
 
             return control.trigger(e);
         }
 
     }, true);
+
+
+    
+    window.addEventListener('resize', function () {
+
+        var dom = document.activeElement;
+
+        // 打开输入法时把焦点控件移动可视区
+        if (dom && this.innerHeight / this.innerWidth < 1.2)
+        {
+            dom.scrollIntoViewIfNeeded();
+        }
+    });
 
 
 
@@ -5370,7 +5445,12 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     
     ('animation,animation-delay,animation-direction,animation-duration,animation-fill-mode,animation-iteration-count,animation-name,animation-play-state,animation-timing-function,' +
         'background,background-attachment,background-blend-mode,background-clip,background-color,background-image,background-origin,background-position,background-position-x,background-position-y,background-repeat,background-repeat-y,background-size,' +
-        'border,border-bottom-color,border-bottom-left-radius,border-bottom-right-radius,border-bottom-width,border-collapse,border-color,border-image-outset,border-image-repeat,border-image-slice,border-image-source,border-image-width,border-left,border-left-color,border-left-style,border-left-width,border-radius,border-right,border-right-color,border-right-style,border-right-width,border-spacing,border-style,border-top,border-top-color,border-top-left-radius,border-top-right-radius,border-top-style,border-top-width,border-width,' +
+        'border,border-width,border-style,border-color,border-radius,border-spacing,border-collapse,' +
+        'border-image-outset,border-image-repeat,border-image-slice,border-image-source,border-image-width,' +
+        'border-bottom,border-bottom-color,border-bottom-left-radius,border-bottom-right-radius,border-bottom-width,' +
+        'border-left,border-left-color,border-left-style,border-left-width,' +
+        'border-right,border-right-color,border-right-style,border-right-width,' +
+        'border-top,border-top-color,border-top-left-radius,border-top-right-radius,border-top-style,border-top-width,' +
         'bottom,box-shadow,box-sizing,break-after,break-before,break-inside,caret-color,' +
         'clip,clip-path,clip-rule,color,cursor,' + 
         'direction,display,' +
@@ -6185,21 +6265,67 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.Button = yaxi.Control.extend(function (Class, base) {
+yaxi.Button = yaxi.Control.extend(function () {
 
 
 
-    yaxi.template(this, '<button type="button" class="yx-control yx-button"></button>');
+    yaxi.template(this, '<span class="yx-control yx-button"><span class="yx-button-icon"></span><span class="yx-button-text"></span></span>');
 
 
 
+    // 按钮文字
     this.$property('text', '');
+
+    
+    // 图标类名
+    this.$property('icon', '');
+
+
+    // svg图标
+    this.$property('svg', '');
+
+
+    // svg图标大小
+    this.$property('size', '');
+
+
+    // 图标与文字的间距
+    this.$property('gap', '');
     
 
 
-    this.renderer.text = function (dom, value) {
+    var renderer = this.renderer;
 
-        dom.textContent = value;
+
+    renderer.text = function (dom, value) {
+
+        dom.lastChild.textContent = value;
+    }
+    
+
+    renderer.icon = function (dom, value) {
+
+        dom.firstChild.className = value;
+    }
+
+
+    renderer.svg = function (dom, value) {
+
+        dom.firstChild.innerHTML = value ? '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>' : '';
+    }
+
+
+    renderer.size = function (dom, value) {
+
+        var style = dom.firstChild.style;
+        // style.width = style.height = 
+        style.fontSize = value;
+    }
+
+
+    renderer.gap = function (dom, value) {
+
+        dom.lastChild.style.marginLeft = value;
     }
 
 
@@ -6861,7 +6987,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    yaxi.template(this, '<span class="yx-control yx-iconbutton"><span></span><span></span></span>');
+    yaxi.template(this, '<span class="yx-control yx-iconbutton"><span class="yx-iconbutton-body"><span class="yx-iconbutton-icon"></span><span class="yx-iconbutton-text"></span></span></span>');
 
 
 
@@ -6881,8 +7007,8 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '');
 
 
-    // 是否竖排图标
-    this.$property('vertical', false);
+    // 图标与文字的间距
+    this.$property('gap', '');
     
 
 
@@ -6892,60 +7018,31 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     renderer.text = function (dom, value) {
 
-        dom.lastChild.textContent = value;
+        dom.firstChild.lastChild.textContent = value;
     }
 
 
     renderer.icon = function (dom, value) {
 
-        dom.firstChild.className = value;
+        dom.firstChild.firstChild.className = value;
     }
 
 
     renderer.svg = function (dom, value) {
 
-        dom = dom.firstChild;
-
-        if (value)
-        {
-            dom.innerHTML = '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>';
-
-            if (value = this.fill)
-            {
-                dom.style.fill = value;
-            }
-
-            if (value = this.size)
-            {
-                dom.firstChild.style.fontSize = value;
-            }
-        }
-        else
-        {
-            dom.innerHTML = '';
-        }
+        dom.firstChild.firstChild.innerHTML = value ? '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>' : '';
     }
 
 
     renderer.size = function (dom, value) {
 
-        if (dom = dom.firstChild.firstChild)
-        {
-            dom.style.fontSize = value;
-        }
+        dom.firstChild.firstChild.style.fontSize = value;
     }
 
 
-    renderer.vertical = function (dom, value) {
+    renderer.gap = function (dom, value) {
 
-        if (value)
-        {
-            dom.setAttribute('vertical', '1');
-        }
-        else
-        {
-            dom.removeAttribute('vertical');
-        }
+        dom.firstChild.lastChild.style.marginTop = value;
     }
 
 

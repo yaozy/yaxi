@@ -5,7 +5,7 @@
     height: auto;
     min-height: 1.2rem;
     border-radius: .05rem;
-    background-color: @back-level1-color;
+    background-color: @back-default-color;
     z-index: 30;
 }
 
@@ -18,7 +18,7 @@
 
 .yx-dialog>.yx-content {
     position: relative;
-    background-color: @back-level1-color;
+    background-color: @back-default-color;
 }
 
 .yx-dialog>.yx-footer {
@@ -41,20 +41,35 @@
 
 
 
+.yx-messagebox {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    z-index: 10;
+    background-color: @back-default-color;
+}
+
+.yx-messagebox>.yx-header {
+    position: relative;
+    font-weight: bold;
+}
+
 .yx-messagebox>.yx-content {
+    position: relative;
+    top: 0 !important;
     min-height: .9rem;
     max-height: 60%;
     padding: .15rem;
+    background-color: @back-default-color;
 }
 
 .yx-messagebox>.yx-footer {
+    position: relative;
     height: .4rem;
     line-height: .3rem;
-    text-align: right;
-    background-color: @border-level1-color;
+    background-color: @back-default-color;
 }
 
 .yx-messagebox>.yx-footer>.yx-control {
     height: .4rem;
-    background-color: @back-level1-color;
 }

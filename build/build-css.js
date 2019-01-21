@@ -6,12 +6,13 @@ webminify()
     .load('less', [
         'theme/' + theme + '/color.less',
         'base/(reset|animation).less',
-        'control/(control|container|panel).less',
+        'control/control.less',
         'control/*.less',
         'form/textbox.less',
         'form/*.less',
         'page/*.less',
-        'advanced/*.less'
+        'advanced/*.less',
+        'after/*.less'
     ])
     .combine('\r\n\r\n\r\n\r\n')
     .lessToCss()

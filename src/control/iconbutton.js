@@ -3,7 +3,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    yaxi.template(this, '<span class="yx-control yx-iconbutton"><span></span><span></span></span>');
+    yaxi.template(this, '<span class="yx-control yx-iconbutton"><span class="yx-iconbutton-body"><span class="yx-iconbutton-icon"></span><span class="yx-iconbutton-text"></span></span></span>');
 
 
 
@@ -23,8 +23,8 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '');
 
 
-    // 是否竖排图标
-    this.$property('vertical', false);
+    // 图标与文字的间距
+    this.$property('gap', '');
     
 
 
@@ -34,60 +34,31 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     renderer.text = function (dom, value) {
 
-        dom.lastChild.textContent = value;
+        dom.firstChild.lastChild.textContent = value;
     }
 
 
     renderer.icon = function (dom, value) {
 
-        dom.firstChild.className = value;
+        dom.firstChild.firstChild.className = value;
     }
 
 
     renderer.svg = function (dom, value) {
 
-        dom = dom.firstChild;
-
-        if (value)
-        {
-            dom.innerHTML = '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>';
-
-            if (value = this.fill)
-            {
-                dom.style.fill = value;
-            }
-
-            if (value = this.size)
-            {
-                dom.firstChild.style.fontSize = value;
-            }
-        }
-        else
-        {
-            dom.innerHTML = '';
-        }
+        dom.firstChild.firstChild.innerHTML = value ? '<svg aria-hidden="true"><use xlink:href="#' + value.replace(/[<>"']/g, '') + '"></use></svg>' : '';
     }
 
 
     renderer.size = function (dom, value) {
 
-        if (dom = dom.firstChild.firstChild)
-        {
-            dom.style.fontSize = value;
-        }
+        dom.firstChild.firstChild.style.fontSize = value;
     }
 
 
-    renderer.vertical = function (dom, value) {
+    renderer.gap = function (dom, value) {
 
-        if (value)
-        {
-            dom.setAttribute('vertical', '1');
-        }
-        else
-        {
-            dom.removeAttribute('vertical');
-        }
+        dom.firstChild.lastChild.style.marginTop = value;
     }
 
 

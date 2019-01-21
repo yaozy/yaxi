@@ -33,9 +33,9 @@ module.exports = yaxi.Page.extend(function () {
                         layout: 'same-width',
                         gap: '1px',
                         children: [
-                            { text: 'abc' },
-                            { text: 'def' },
-                            { text: 'abc' }
+                            { text: 'abc', svg: 'icon-yaxi-pulldown', size: '.3rem', gap: '.05rem' },
+                            { text: 'def', svg: 'icon-yaxi-pulldown' },
+                            { text: 'abc', svg: 'icon-yaxi-pulldown', Class: yaxi.IconButton }
                         ]
                     }
                     // {

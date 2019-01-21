@@ -1,16 +1,35 @@
 .yx-button {
+    position: relative;
+    display: inline-block;
     height: .35rem;
-    margin: 0;
-    border: none;
-    outline: none;
     white-space: nowrap;
     text-align: center;
-    transition: .1s;
-    cursor: pointer;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
     border-width: 1px;
     border-style: solid;
+    cursor: pointer;
+}
+
+.yx-button>span {
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    top: 50%;
+    height: 1em;
+    line-height: 1em;
+    transform: translateY(-50%);
+}
+
+
+.yx-button-icon {
+    font-size: 1.2em;
+}
+
+.yx-button svg {
+    vertical-align: top;
+    width: 1em;
+    height: 1em;
+}
+
+.yx-button-text {
+    margin-left: .02rem;
 }
