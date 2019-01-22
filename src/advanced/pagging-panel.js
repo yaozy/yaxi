@@ -8,8 +8,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         this.loading = onloading;
         this.pulldown = onpulldown;
-
-        this.style.overflowY = 'auto';
+        this.overflowY = 'auto';
     }
 
 
@@ -39,7 +38,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         var size = this.pageSize;
 
-        this.load(loading.index, size).then(function (data) {
+        this.load(loading.index).then(function (data) {
 
             if (data && data.length < size)
             {
@@ -55,10 +54,10 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
     function onpulldown(pulldown) {
 
-        var loading = this.loading,
+        var loading = this.__loading,
             size = this.pageSize;
 
-        this.load(loading.index = 1, size).then(function (data) {
+        this.load(loading ? loading.index = 1 : 1, size).then(function (data) {
 
             if (data && loading && data.length < size)
             {
@@ -78,7 +77,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
     this.refresh = function () {
 
-        var loading = this.loading;
+        var loading = this.__loading;
 
         if (loading)
         {

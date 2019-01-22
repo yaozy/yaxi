@@ -252,7 +252,7 @@
         {
             if (fn = control.__on_change)
             {
-                fn.call(control, event.target);
+                fn.call(control, event);
             }
 
             e = new Event('change');

@@ -667,7 +667,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 style[name + 'Style'] = value[2] || '';
             }
 
-            dom.setAttribute('line', value);
+            dom.setAttribute('line', name);
         }
         else
         {

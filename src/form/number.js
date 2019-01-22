@@ -177,11 +177,11 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__on_change = function (dom) {
+    this.__on_change = function (event) {
 
         var value = this.value;
 
-        this.value = +dom.value || 0;
+        this.value = +event.target.value || 0;
 
         if (this.value !== value)
         {

@@ -85,11 +85,11 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
 
-    this.__on_change = function (dom) {
+    this.__on_change = function (event) {
 
         var value = this.value;
 
-        this.value = dom.value;
+        this.value = event.target.value;
 
         if (this.value !== value)
         {

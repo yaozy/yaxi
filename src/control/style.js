@@ -10,12 +10,18 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         var keys = {},
             style = document.createElement('div').style,
-            regex = /^(?:webkit|ms|moz|o)([A-Z])/,
+            regex1 = /^(?:webkit|ms|moz|o)([A-Z])/,
+            regex2 = /[A-Z]/g,
             key;
 
-        function lower(_, key) {
+        function lower(_, text) {
 
-            return key.toLowerCase();
+            return text.toLowerCase();
+        }
+
+        function css(text) {
+        
+            return '-' + text.toLowerCase();
         }
 
         for (var name in style)
@@ -31,7 +37,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
                     break;
 
                 default:
-                    key = name.replace(regex, lower);
+                    key = name.replace(regex1, lower);
 
                     if (key === name || !keys[key])
                     {
@@ -43,10 +49,16 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         for (var name in keys)
         {
+            key = name.replace(regex2, css);
+            
             this.$property(name, {
-                defaultValue: '',
-                name: keys[name]
-            });
+                
+                name: keys[name],
+                defaultValue: ''
+
+            }, true, key);
+
+            keys[key] = keys[name];
         }
 
         return keys;
@@ -58,7 +70,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     // 给控件扩展通用样式
     var style = function (name) {
 
-        var key = name.replace(/-(\w)/g, camelize);
+        var key = keys[name] || name;
 
         this.renderer[key] = function (dom, value) {
 
@@ -67,16 +79,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         this.$property(key, '', true, name);
 
-        key = keys[key] || key;
-
     }.bind(yaxi.Control.prototype);
-
-
-
-    function camelize(_, text) {
-
-        return text.toUpperCase();
-    }
 
     
     

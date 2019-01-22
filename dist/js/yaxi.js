@@ -1467,7 +1467,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
         {
             if (fn = control.__on_change)
             {
-                fn.call(control, event.target.value);
+                fn.call(control, event);
             }
 
             e = new Event('change');
@@ -4508,64 +4508,59 @@ yaxi.Thread = (function () {
     color['back-footer'] = '#ffffff';
 
 
-    color['back-level1'] = '#ffffff';
-    color['back-level2'] = '#cccccc';
-    color['back-level3'] = '#b9ced4';
-    color['back-level4'] = '#cccccc';
-    color['back-level5'] = '#f7f7f7';
-
+    color['back-default'] = '#ffffff';
     color['back-reverse'] = '#f7f7f7';
 
-    color['back-primary'] = '#d0ae75';
-    color['back-second'] = '#d0ae75';
+    color['back-primary'] = '#f4b532';
+    color['back-second'] = '#f4b532';
     color['back-success'] = '#71c04a';
     color['back-warning'] = '#e89518';
     color['back-danger'] = '#ff6c6c';
     color['back-disabled'] = '#666666';
 
 
-    color['font-level1'] = '#2d4a63';
-    color['font-level2'] = '#8094a5';
-    color['font-level3'] = '#b9ced4';
+    color['font-level1'] = '#31313d';
+    color['font-level2'] = '#6c768b';
+    color['font-level3'] = '#b8c0de';
     color['font-level4'] = '#cccccc';
-    color['font-level5'] = '#cccccc';
+    color['font-level5'] = '#f7f7f7';
 
     color['font-reverse'] = '#ffffff';
 
-    color['font-primary'] = '#d0ae75';
-    color['font-second'] = '#d0ae75';
+    color['font-primary'] = '#f4b532';
+    color['font-second'] = '#f4b532';
     color['font-success'] = '#71c04a';
     color['font-warning'] = '#e89518';
     color['font-danger'] = '#ff6c6c';
     color['font-disabled'] = '#666666';
 
 
-    color['border-level1'] = '#8094a5';
-    color['border-level2'] = '#8094a5';
-    color['border-level3'] = '#b9ced4';
+    color['border-level1'] = '#6c768b';
+    color['border-level2'] = '#6c768b';
+    color['border-level3'] = '#b8c0de';
     color['border-level4'] = '#cccccc';
-    color['border-level5'] = '#cccccc';
+    color['border-level5'] = '#f7f7f7';
 
     color['border-reverse'] = '#ffffff';
 
-    color['border-primary'] = '#d0ae75';
-    color['border-second'] = '#d0ae75';
+    color['border-primary'] = '#f4b532';
+    color['border-second'] = '#f4b532';
     color['border-success'] = '#71c04a';
     color['border-warning'] = '#e89518';
     color['border-danger'] = '#dd6161';
     color['border-disabled'] = '#666666';
 
 
-    color['icon-level1'] = '#2d4a63';
-    color['icon-level2'] = '#8094a5';
-    color['icon-level3'] = '#b9ced4';
+    color['icon-level1'] = '#31313d';
+    color['icon-level2'] = '#6c768b';
+    color['icon-level3'] = '#b8c0de';
     color['icon-level4'] = '#cccccc';
-    color['icon-level5'] = '#cccccc';
+    color['icon-level5'] = '#f7f7f7';
 
     color['icon-reverse'] = '#ffffff';
 
-    color['icon-primary'] = '#d0ae75';
-    color['icon-second'] = '#d0ae75';
+    color['icon-primary'] = '#f4b532';
+    color['icon-second'] = '#f4b532';
     color['icon-success'] = '#71c04a';
     color['icon-warning'] = '#e89518';
     color['icon-danger'] = '#ff6c6c';
@@ -5265,7 +5260,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                 style[name + 'Style'] = value[2] || '';
             }
 
-            dom.setAttribute('line', value);
+            dom.setAttribute('line', name);
         }
         else
         {
@@ -5392,12 +5387,18 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         var keys = {},
             style = document.createElement('div').style,
-            regex = /^(?:webkit|ms|moz|o)([A-Z])/,
+            regex1 = /^(?:webkit|ms|moz|o)([A-Z])/,
+            regex2 = /[A-Z]/g,
             key;
 
-        function lower(_, key) {
+        function lower(_, text) {
 
-            return key.toLowerCase();
+            return text.toLowerCase();
+        }
+
+        function css(text) {
+        
+            return '-' + text.toLowerCase();
         }
 
         for (var name in style)
@@ -5413,7 +5414,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
                     break;
 
                 default:
-                    key = name.replace(regex, lower);
+                    key = name.replace(regex1, lower);
 
                     if (key === name || !keys[key])
                     {
@@ -5425,10 +5426,16 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         for (var name in keys)
         {
+            key = name.replace(regex2, css);
+            
             this.$property(name, {
-                defaultValue: '',
-                name: keys[name]
-            });
+                
+                name: keys[name],
+                defaultValue: ''
+
+            }, true, key);
+
+            keys[key] = keys[name];
         }
 
         return keys;
@@ -5440,7 +5447,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     // 给控件扩展通用样式
     var style = function (name) {
 
-        var key = name.replace(/-(\w)/g, camelize);
+        var key = keys[name] || name;
 
         this.renderer[key] = function (dom, value) {
 
@@ -5449,16 +5456,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         this.$property(key, '', true, name);
 
-        key = keys[key] || key;
-
     }.bind(yaxi.Control.prototype);
-
-
-
-    function camelize(_, text) {
-
-        return text.toUpperCase();
-    }
 
     
     
@@ -8580,11 +8578,11 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
     
-    this.__on_change = function (dom) {
+    this.__on_change = function (event) {
 
         var value = this.value;
 
-        this.value = dom.value;
+        this.value = event.target.value;;
 
         if (this.value !== value)
         {
@@ -8760,11 +8758,11 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
 
-    this.__on_change = function (dom) {
+    this.__on_change = function (event) {
 
         var value = this.value;
 
-        this.value = dom.value;
+        this.value = event.target.value;
 
         if (this.value !== value)
         {
@@ -8962,11 +8960,11 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
-    this.__on_change = function (dom) {
+    this.__on_change = function (event) {
 
         var value = this.value;
 
-        this.value = +dom.value || 0;
+        this.value = +event.target.value || 0;
 
         if (this.value !== value)
         {
@@ -12001,8 +11999,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         this.loading = onloading;
         this.pulldown = onpulldown;
-
-        this.style.overflowY = 'auto';
+        this.overflowY = 'auto';
     }
 
 
@@ -12032,7 +12029,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         var size = this.pageSize;
 
-        this.load(loading.index, size).then(function (data) {
+        this.load(loading.index).then(function (data) {
 
             if (data && data.length < size)
             {
@@ -12048,10 +12045,10 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
     function onpulldown(pulldown) {
 
-        var loading = this.loading,
+        var loading = this.__loading,
             size = this.pageSize;
 
-        this.load(loading.index = 1, size).then(function (data) {
+        this.load(loading ? loading.index = 1 : 1, size).then(function (data) {
 
             if (data && loading && data.length < size)
             {
@@ -12071,7 +12068,7 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
     this.refresh = function () {
 
-        var loading = this.loading;
+        var loading = this.__loading;
 
         if (loading)
         {
