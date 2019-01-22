@@ -4698,8 +4698,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('id', '');
 
 
-    // class
-    this.$property('class', '', true, 'className');
+    // className
+    this.$property('className', '', true, 'class');
 
 
     // 是否禁用
@@ -5255,14 +5255,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             if (name === 'all')
             {
                 style.borderWidth = value[1] || '1px';
-                style.borderStyle = value[2] || 'solid';
+                style.borderStyle = value[2] || '';
             }
             else
             {
                 name = 'border' + name[0].toUpperCase() + name.substring(1);
 
                 style[name + 'Width'] = value[1] || '1px';
-                style[name + 'Style'] = value[2] || 'solid';
+                style[name + 'Style'] = value[2] || '';
             }
 
             dom.setAttribute('line', value);
@@ -5881,59 +5881,47 @@ yaxi.impl.container = function (base) {
     }
 
 
-    
-    renderer.base = function (dom, value) {
 
-        if (value)
+    this.__on_tap = function (event) {
+
+        var base = this.base;
+
+        if (base)
         {
-            if (!this.__base)
+            var control = event.target,
+                url;
+
+            while (control && control !== this)
             {
-                this.on('tap', openURL);
-                this.__base = value;
+                if (url = control.url)
+                {
+                    var Class = yaxi.loadModule(base, url),
+                        args = control.args;
+
+                    if (!Class.prototype.open)
+                    {
+                        control = control.parent;
+                        continue;
+                    }
+
+                    if (args && args.length > 0)
+                    {
+                        control = Object.create(Class.prototype);
+
+                        Class.apply(control, args);
+                        control.open();
+                    }
+                    else
+                    {
+                        new Class().open();
+                    }
+                    
+                    event.stop();
+                    return false;
+                }
+
+                control = control.parent;
             }
-        }
-        else
-        {
-            this.off('tap', openURL);
-        }
-    }
-
-
-    function openURL(event) {
-
-        var control = event.target,
-            url;
-
-        while (control && control !== this)
-        {
-            if (url = control.url)
-            {
-                var Class = yaxi.loadModule(this.__base, url),
-                    args = control.args;
-
-                if (!Class.prototype.open)
-                {
-                    control = control.parent;
-                    continue;
-                }
-
-                if (args && args.length > 0)
-                {
-                    control = Object.create(Class.prototype);
-
-                    Class.apply(control, args);
-                    control.open();
-                }
-                else
-                {
-                    new Class().open();
-                }
-                
-                event.stop();
-                return false;
-            }
-
-            control = control.parent;
         }
     }
 
@@ -6198,7 +6186,7 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('base', '', true, 'baseURL');
+    this.$property('base', '', false, 'baseURL');
 
 
 
@@ -7935,7 +7923,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('base', '', true, 'baseURL');
+    this.$property('base', '', false, 'baseURL');
 
 
     // 模板
@@ -8179,14 +8167,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     yaxi.template(this, '<div class="yx-control yx-panel yx-tab" layout="same-width"></div>');
 
 
-    
-    Class.ctor = function () {
-
-        base.constructor.ctor.call(this);
-        this.on('tap', handleTap);
-    }
-
-
 
 
     this.$defaults.layout = 'same-width';
@@ -8237,7 +8217,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    function handleTap(event) {
+    this.__on_tap = function (event) {
 
         var target = event.target,
             parent;
@@ -9324,7 +9304,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-	this.$property('base', '', true, 'baseURL');
+	this.$property('base', '', false, 'baseURL');
 	
 
 	// 是否自动销毁
@@ -9787,28 +9767,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
     
-    
-    var create = Object.create;
-    
-
 
     yaxi.template(this, '<span class="yx-control yx-backbutton"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-back"></use></svg><span></span></span>');
-
-
-
-    Class.ctor = function () {
-
-        var init;
-        
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-        
-        this.on('tap', handleTap.bind(this));
-    }
 
 
 
@@ -9817,7 +9777,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    function handleTap(event) {
+    this.__on_tap = function handleTap() {
 
         var target = this,
             parent;
@@ -10648,11 +10608,10 @@ yaxi.Control.extend(function (Class, base) {
                 }
 
                 values.className = 'yx-actionsheet-content ' + (values.className || '');
-                
+
                 control = this.content = new (values.Class || yaxi.Panel)();
                 control.parent = this;
                 control.assign(values);
-                control.on('tap', selected);
             }
         }
 	};
@@ -10679,35 +10638,9 @@ yaxi.Control.extend(function (Class, base) {
                 control = this.cancel = new (values.Class || yaxi.Text)();
                 control.parent = this;
                 control.assign(values);
-                control.on('tap', close);
             }
         }
 	};
-
-
-
-    function selected(event) {
-
-        var control = event.target,
-            parent;
-
-        while (control && (parent = control.parent))
-        {
-            if (parent === this)
-            {
-                this.parent.close(control);
-                return;
-            }
-
-            control = parent;
-        }
-    }
-
-
-    function close() {
-
-        this.parent.close();
-    }
 
 	
 	
@@ -10751,9 +10684,8 @@ yaxi.Control.extend(function (Class, base) {
 
         return this;
 	}
-	
-	
-	
+    
+    
 	this.close = function (selected) {
 		
 		var parent, dom;
@@ -10779,6 +10711,34 @@ yaxi.Control.extend(function (Class, base) {
             }
 		}
     }
+
+
+
+    this.__on_tap = function () {
+
+        var content = this.content,
+            cancel = this.cancel,
+            control = event.target,
+            parent;
+
+        while (control && (parent = control.parent))
+        {
+            if (parent === content)
+            {
+                this.parent.close(control);
+                return;
+            }
+
+            if (parent === cancel)
+            {
+                this.parent.close();
+                return;
+            }
+
+            control = parent;
+        }
+    }
+
     
 
     this.destroy = function () {
@@ -10902,7 +10862,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
-    this.$property('base', '', true, 'baseURL');
+    this.$property('base', '', false, 'baseURL');
 
 
 

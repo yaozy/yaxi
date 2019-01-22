@@ -68,11 +68,10 @@ yaxi.Control.extend(function (Class, base) {
                 }
 
                 values.className = 'yx-actionsheet-content ' + (values.className || '');
-                
+
                 control = this.content = new (values.Class || yaxi.Panel)();
                 control.parent = this;
                 control.assign(values);
-                control.on('tap', selected);
             }
         }
 	};
@@ -99,35 +98,9 @@ yaxi.Control.extend(function (Class, base) {
                 control = this.cancel = new (values.Class || yaxi.Text)();
                 control.parent = this;
                 control.assign(values);
-                control.on('tap', close);
             }
         }
 	};
-
-
-
-    function selected(event) {
-
-        var control = event.target,
-            parent;
-
-        while (control && (parent = control.parent))
-        {
-            if (parent === this)
-            {
-                this.parent.close(control);
-                return;
-            }
-
-            control = parent;
-        }
-    }
-
-
-    function close() {
-
-        this.parent.close();
-    }
 
 	
 	
@@ -171,9 +144,8 @@ yaxi.Control.extend(function (Class, base) {
 
         return this;
 	}
-	
-	
-	
+    
+    
 	this.close = function (selected) {
 		
 		var parent, dom;
@@ -199,6 +171,34 @@ yaxi.Control.extend(function (Class, base) {
             }
 		}
     }
+
+
+
+    this.__on_tap = function () {
+
+        var content = this.content,
+            cancel = this.cancel,
+            control = event.target,
+            parent;
+
+        while (control && (parent = control.parent))
+        {
+            if (parent === content)
+            {
+                this.parent.close(control);
+                return;
+            }
+
+            if (parent === cancel)
+            {
+                this.parent.close();
+                return;
+            }
+
+            control = parent;
+        }
+    }
+
     
 
     this.destroy = function () {

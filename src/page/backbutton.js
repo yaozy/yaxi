@@ -1,28 +1,8 @@
 yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
     
-    
-    var create = Object.create;
-    
-
 
     yaxi.template(this, '<span class="yx-control yx-backbutton"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-back"></use></svg><span></span></span>');
-
-
-
-    Class.ctor = function () {
-
-        var init;
-        
-        this.$storage = create(this.$defaults);
-
-        if (init = this.init)
-		{
-			init.apply(this, arguments);
-        }
-        
-        this.on('tap', handleTap.bind(this));
-    }
 
 
 
@@ -31,7 +11,7 @@ yaxi.BackButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    function handleTap(event) {
+    this.__on_tap = function handleTap() {
 
         var target = this,
             parent;

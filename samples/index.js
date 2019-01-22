@@ -29,15 +29,8 @@ module.exports = yaxi.Page.extend(function () {
                     { text: '模型开发演示', url: 'model.js' },
                     { text: '多线程开发演示', events: { tap: runThread } },
                     {
-                        Class: yaxi.Panel,
-                        subtype: yaxi.Button,
-                        layout: 'line',
-                        gap: '-10px',
-                        children: [
-                            { text: 'abc', svg: 'icon-yaxi-pulldown', size: '.3rem', gap: '.05rem' },
-                            { text: 'def', svg: 'icon-yaxi-pulldown' },
-                            { text: 'abc', svg: 'icon-yaxi-pulldown', Class: yaxi.IconButton }
-                        ]
+                        Class: yaxi.Segment,
+                        segments: 5
                     }
                     // {
                     //     Class: yaxi.ClipImage,

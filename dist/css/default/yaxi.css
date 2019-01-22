@@ -169,9 +169,13 @@ textarea::-webkit-input-placeholder {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #ffffff;
   color: #2d4a63;
   fill: #2d4a63;
+}
+.yx-control {
+  border-style: solid;
+  border-width: 0;
+  border-color: #d8dce4;
 }
 .yx-button {
   position: relative;
@@ -180,7 +184,6 @@ textarea::-webkit-input-placeholder {
   white-space: nowrap;
   text-align: center;
   border-width: 1px;
-  border-style: solid;
   cursor: pointer;
 }
 .yx-button > span {
@@ -310,9 +313,10 @@ textarea::-webkit-input-placeholder {
 }
 .yx-tab > * {
   height: 100%;
-}
-.yx-tab > * {
+  vertical-align: top;
   border-color: transparent;
+  color: #bac1d2;
+  fill: #bac1d2;
 }
 .yx-text {
   display: inline-block;
@@ -496,6 +500,7 @@ textarea::-webkit-input-placeholder {
   transition: right 1s;
 }
 .yx-block {
+  margin: 0.08rem;
   padding: 0.15rem;
   background-color: #ffffff;
 }
@@ -851,7 +856,6 @@ textarea::-webkit-input-placeholder {
 .yx-segment {
   position: relative;
   height: 0.4rem;
-  fill: #d0ae75;
 }
 .yx-segment-line {
   position: absolute;
@@ -860,7 +864,7 @@ textarea::-webkit-input-placeholder {
   right: 0.15rem;
   height: 4px;
   margin-top: -2px;
-  background-color: #bac1d2;
+  background-color: #cccccc;
 }
 .yx-segment-body {
   position: absolute;
@@ -881,7 +885,7 @@ textarea::-webkit-input-placeholder {
   transform: translateX(-0.1rem);
 }
 .yx-segment-node > circle:first-child {
-  fill: #ffffff;
+  fill: #cccccc;
 }
 .yx-segment-node > circle:last-child {
   fill: #ffffff;
@@ -891,6 +895,7 @@ textarea::-webkit-input-placeholder {
   height: 0.24rem;
   margin-top: -0.12rem;
   transform: translateX(-0.12rem);
+  fill: #d0ae75;
 }
 [layout="block"] > * {
   display: block;

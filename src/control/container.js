@@ -348,59 +348,47 @@ yaxi.impl.container = function (base) {
     }
 
 
-    
-    renderer.base = function (dom, value) {
 
-        if (value)
+    this.__on_tap = function (event) {
+
+        var base = this.base;
+
+        if (base)
         {
-            if (!this.__base)
+            var control = event.target,
+                url;
+
+            while (control && control !== this)
             {
-                this.on('tap', openURL);
-                this.__base = value;
+                if (url = control.url)
+                {
+                    var Class = yaxi.loadModule(base, url),
+                        args = control.args;
+
+                    if (!Class.prototype.open)
+                    {
+                        control = control.parent;
+                        continue;
+                    }
+
+                    if (args && args.length > 0)
+                    {
+                        control = Object.create(Class.prototype);
+
+                        Class.apply(control, args);
+                        control.open();
+                    }
+                    else
+                    {
+                        new Class().open();
+                    }
+                    
+                    event.stop();
+                    return false;
+                }
+
+                control = control.parent;
             }
-        }
-        else
-        {
-            this.off('tap', openURL);
-        }
-    }
-
-
-    function openURL(event) {
-
-        var control = event.target,
-            url;
-
-        while (control && control !== this)
-        {
-            if (url = control.url)
-            {
-                var Class = yaxi.loadModule(this.__base, url),
-                    args = control.args;
-
-                if (!Class.prototype.open)
-                {
-                    control = control.parent;
-                    continue;
-                }
-
-                if (args && args.length > 0)
-                {
-                    control = Object.create(Class.prototype);
-
-                    Class.apply(control, args);
-                    control.open();
-                }
-                else
-                {
-                    new Class().open();
-                }
-                
-                event.stop();
-                return false;
-            }
-
-            control = control.parent;
         }
     }
 

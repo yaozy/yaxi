@@ -5,14 +5,6 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
     yaxi.template(this, '<div class="yx-control yx-panel yx-tab" layout="same-width"></div>');
 
 
-    
-    Class.ctor = function () {
-
-        base.constructor.ctor.call(this);
-        this.on('tap', handleTap);
-    }
-
-
 
 
     this.$defaults.layout = 'same-width';
@@ -63,7 +55,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
 
 
-    function handleTap(event) {
+    this.__on_tap = function (event) {
 
         var target = event.target,
             parent;

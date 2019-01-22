@@ -100,8 +100,8 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.$property('id', '');
 
 
-    // class
-    this.$property('class', '', true, 'className');
+    // className
+    this.$property('className', '', true, 'class');
 
 
     // 是否禁用
@@ -657,14 +657,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             if (name === 'all')
             {
                 style.borderWidth = value[1] || '1px';
-                style.borderStyle = value[2] || 'solid';
+                style.borderStyle = value[2] || '';
             }
             else
             {
                 name = 'border' + name[0].toUpperCase() + name.substring(1);
 
                 style[name + 'Width'] = value[1] || '1px';
-                style[name + 'Style'] = value[2] || 'solid';
+                style[name + 'Style'] = value[2] || '';
             }
 
             dom.setAttribute('line', value);
