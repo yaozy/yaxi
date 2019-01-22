@@ -654,20 +654,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             var style = dom.style,
                 name = (value = value.split(' '))[0];
 
+            dom.setAttribute('line', name);
+
             if (name === 'all')
             {
                 style.borderWidth = value[1] || '1px';
-                style.borderStyle = value[2] || '';
             }
             else
             {
-                name = 'border' + name[0].toUpperCase() + name.substring(1);
-
-                style[name + 'Width'] = value[1] || '1px';
-                style[name + 'Style'] = value[2] || '';
+                style['border' + name[0].toUpperCase() + name.substring(1) + 'Width'] = value[1] || '1px';
             }
-
-            dom.setAttribute('line', name);
         }
         else
         {

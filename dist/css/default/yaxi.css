@@ -180,7 +180,7 @@ textarea::-webkit-input-placeholder {
 .yx-button {
   position: relative;
   display: inline-block;
-  height: 0.35rem;
+  height: 0.45rem;
   white-space: nowrap;
   text-align: center;
   border-width: 1px;
@@ -620,7 +620,7 @@ textarea::-webkit-input-placeholder {
 }
 .yx-footer.yx-control,
 .yx-footer > .yx-control {
-  border: 0;
+  border-width: 0;
 }
 .yx-backbutton {
   position: absolute;

@@ -174,7 +174,7 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__on_tap = function () {
+    this.__on_tap = function (event) {
 
         var content = this.content,
             cancel = this.cancel,
@@ -183,15 +183,15 @@ yaxi.Control.extend(function (Class, base) {
 
         while (control && (parent = control.parent))
         {
-            if (parent === content)
+            if (control === cancel)
             {
-                this.parent.close(control);
+                this.close();
                 return;
             }
 
-            if (parent === cancel)
+            if (parent === content)
             {
-                this.parent.close();
+                this.close(control);
                 return;
             }
 

@@ -5247,20 +5247,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             var style = dom.style,
                 name = (value = value.split(' '))[0];
 
+            dom.setAttribute('line', name);
+
             if (name === 'all')
             {
                 style.borderWidth = value[1] || '1px';
-                style.borderStyle = value[2] || '';
             }
             else
             {
-                name = 'border' + name[0].toUpperCase() + name.substring(1);
-
-                style[name + 'Width'] = value[1] || '1px';
-                style[name + 'Style'] = value[2] || '';
+                style['border' + name[0].toUpperCase() + name.substring(1) + 'Width'] = value[1] || '1px';
             }
-
-            dom.setAttribute('line', name);
         }
         else
         {
@@ -10712,7 +10708,7 @@ yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__on_tap = function () {
+    this.__on_tap = function (event) {
 
         var content = this.content,
             cancel = this.cancel,
@@ -10721,15 +10717,15 @@ yaxi.Control.extend(function (Class, base) {
 
         while (control && (parent = control.parent))
         {
-            if (parent === content)
+            if (control === cancel)
             {
-                this.parent.close(control);
+                this.close();
                 return;
             }
 
-            if (parent === cancel)
+            if (parent === content)
             {
-                this.parent.close();
+                this.close(control);
                 return;
             }
 
