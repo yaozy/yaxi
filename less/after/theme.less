@@ -123,8 +123,12 @@
 [disabled],
 [theme="disabled"] {
     border-color: @border-disabled-color;
-    background-color: @back-disabled-color;
     color: @font-disabled-color;
     fill: @icon-disabled-color;
     cursor: not-allowed;
+}
+
+.yx-button[disabled],
+.yx-button[theme="disabled"] {
+    background-color: @back-disabled-color;
 }

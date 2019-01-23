@@ -52,6 +52,7 @@
 .yx-messagebox>.yx-header {
     position: relative;
     font-weight: bold;
+    box-shadow: none;
 }
 
 .yx-messagebox>.yx-content {
@@ -67,9 +68,12 @@
     position: relative;
     height: .4rem;
     line-height: .3rem;
-    background-color: @back-default-color;
+    box-shadow: none;
+    border-top-width: 1px;
+    border-color: @border-level1-color;
 }
 
 .yx-messagebox>.yx-footer>.yx-control {
     height: .4rem;
+    border-color: @border-level1-color;
 }

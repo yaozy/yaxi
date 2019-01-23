@@ -173,7 +173,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			else
 			{
 				values.key = values.key || 'page-header';
-				values.className = 'yx-header ' + (values.className || '');
 			}
 
 			control = new (values.Class || yaxi.Header)();
@@ -217,7 +216,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 
 			values.key = values.key || 'page-content';
-			values.className = 'yx-content ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Content)();
 			control.parent = this;
@@ -243,7 +241,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			}
 
 			values.key = values.key || 'page-footer';
-			values.className = 'yx-footer ' + (values.className || '');
 
 			control = new (values.Class || yaxi.Footer)();
 			control.parent = this;
@@ -282,6 +279,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		return null;
 	}
 
+	
 	
 	// 扩展容器功能
 	yaxi.impl.container.call(this, base);
@@ -464,9 +462,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 				control,
 				value;
 
-			if (style.top !== (value = this.header ? '' : 0))
+			if (!this.header)
 			{
-				style.top = value;
+				style.top = 0;
 			}
 
 			if ((control = this.footer) && style.bottom !== (value = control.$dom.offsetHeight + 'px'))

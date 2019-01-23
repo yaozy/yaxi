@@ -13,12 +13,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
 
 
-    yaxi.template(this, '<div class="yx-control yx-pulldown" style="height:0;">' +
-            '<span class="yx-pulldown-body">' +
-                '<svg aria-hidden="true"><use xlink:href="#icon-yaxi-pulldown"></use></svg>' +
-                '<span class="yx-loading-img" style="display:none;"></span>' +
-                '<span></span>' +
-            '</span>' +
+    yaxi.template(this, '<div class="yx-control yx-pulldown" layout="line-middle">' +
+            '<svg aria-hidden="true"><use xlink:href="#icon-yaxi-pulldown"></use></svg>' +
+            '<span class="yx-loading-img" style="display:none;"></span>' +
+            '<span></span>' +
         '</div>');
 
 
@@ -40,7 +38,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
         if (dom)
         {
-            dom = dom.firstChild.firstChild;
+            dom = dom.firstChild;
             dom.style.display = 'none';
 
             dom = dom.nextSibling;
@@ -100,7 +98,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
         host = host.$dom || host;
         host.insertBefore(dom, host.firstChild);
 
-        dom = dom.firstChild.firstChild;
+        dom = dom.firstChild;
         dom.style.display = '';
         dom.nextSibling.style.display = 'none';
 
@@ -113,7 +111,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
         var dom = this.$dom,
             style = dom.style,
-            transform,
+            svg,
             text;
 
         if (offset <= 0)
@@ -125,17 +123,16 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
         {
             if (this.ready = offset >= yaxi.rem * .8)
             {
-                transform = 'rotateZ(180deg)';
+                svg = '#icon-yaxi-pulldown-up';
                 text = this.releaseText || i18n('release');
             }
             else
             {
-                transform = '';
+                svg = '#icon-yaxi-pulldown';
                 text = this.pulldownText || i18n('pulldown');
             }
 
-            dom = dom.firstChild;
-            dom.firstChild.style.transform = transform;
+            dom.firstChild.firstChild.setAttribute('xlink:href', svg);
             dom.lastChild.innerHTML = text;
 
             style.height = offset + 'px';
@@ -183,7 +180,7 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
         {
             if (this.ready)
             {
-                var node = dom.firstChild.lastChild;
+                var node = dom.lastChild;
 
                 node.innerHTML = i18n(fail ? 'fail' : 'success');
                 node.previousSibling.style.display = 'none';

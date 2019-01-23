@@ -13,26 +13,16 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: .45rem;
-    line-height: .45rem;
-    text-align: center;
-    white-space: nowrap;
+    height: .5rem;
+    line-height: .5rem;
     background-color: @back-header-color;
-    box-shadow:0 0 4px @border-level1-color;
+    box-shadow: 0 0 .04rem @border-level1-color;
     z-index: 1;
-}
-
-.yx-header>* {
-    position: relative;
-    display: inline-block;
-    top: 50%;
-    transform: translateY(-50%);
-    vertical-align: top;
 }
 
 .yx-content {
     position: absolute;
-    top: .45rem;
+    top: .5rem;
     left: 0;
     right: 0;
     bottom: 0;
@@ -48,38 +38,36 @@
     bottom: 0;
     overflow: hidden;
     background-color: @back-footer-color;
-    box-shadow:0 0 4px @border-level1-color;
+    box-shadow:0 0 .04rem @border-level1-color;
 }
 
-.yx-footer.yx-control,
-.yx-footer>.yx-control {
+.yx-footer.yx-control {
     border-width: 0;
 }
 
-.yx-backbutton {
+
+.yx-header .yx-backbutton {
     position: absolute;
+}
+
+.yx-backbutton {
     left: 0;
-    width: .45rem;
+    min-width: .45rem;
     height: 100%;
     z-index: 10;
     font-size: .18rem;
-}
-
-.yx-backbutton>span {
-    display: inline-block;
-    margin-top: .02rem;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .yx-backbutton>svg {
-    margin: 0 .2em;
     width: 1.2em;
     height: 1.2em;
-    vertical-align: text-bottom;
 }
 
 .yx-title {
     width: 100%;
-    height: .45rem;
-    line-height: .45rem;
+    height: .5rem;
+    line-height: .5rem;
     text-align: center;
 }

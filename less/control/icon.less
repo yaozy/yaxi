@@ -1,18 +1,16 @@
 .yx-icon {
-    position: relative;
     display: inline-block;
     overflow: hidden;
     width: .3rem;
     height: .3rem;
-    vertical-align: middle;
+    text-align: center;
 }
 
 .yx-icon>svg {
-    position: absolute;
+    position: relative;
     top: 50%;
-    left: 50%;
     width: 1.2em;
     height: 1.2em;
-    margin-top: -.65em;
-    margin-left: -.6em;
+    transform: translateY(-50%);
+    vertical-align: top;
 }

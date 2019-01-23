@@ -178,7 +178,6 @@ textarea::-webkit-input-placeholder {
   border-color: #d8dce4;
 }
 .yx-button {
-  position: relative;
   display: inline-block;
   height: 0.45rem;
   white-space: nowrap;
@@ -207,27 +206,25 @@ textarea::-webkit-input-placeholder {
   margin-left: 0.15em;
 }
 .yx-icon {
-  position: relative;
   display: inline-block;
   overflow: hidden;
   width: 0.3rem;
   height: 0.3rem;
-  vertical-align: middle;
+  text-align: center;
 }
 .yx-icon > svg {
-  position: absolute;
+  position: relative;
   top: 50%;
-  left: 50%;
   width: 1.2em;
   height: 1.2em;
-  margin-top: -0.65em;
-  margin-left: -0.6em;
+  transform: translateY(-50%);
+  vertical-align: top;
 }
 .yx-iconbutton {
   display: inline-block;
   height: 0.45rem;
-  text-align: center;
   line-height: 1em;
+  text-align: center;
 }
 .yx-iconbutton-body {
   position: relative;
@@ -287,29 +284,18 @@ textarea::-webkit-input-placeholder {
   background-color: #f4b532;
 }
 .yx-pulldown {
-  position: relative;
   height: 0.8rem;
   overflow: hidden;
   text-align: center;
   font-size: 0.14rem;
+  color: #b8c0de;
   fill: #b8c0de;
 }
-.yx-pulldown-body {
-  position: absolute;
-  display: inline-block;
-  width: 100%;
-  height: 0.2rem;
-  top: 50%;
-  left: 0;
-  margin-top: -0.1rem;
-  color: #b8c0de;
-}
-.yx-pulldown-body > svg {
+.yx-pulldown > svg {
   margin-right: 0.02rem;
   width: 1.4em;
   height: 1.4em;
-  font-size: 1em;
-  vertical-align: top;
+  transform-origin: 50% 50%;
 }
 .yx-tab > * {
   height: 100%;
@@ -548,6 +534,7 @@ textarea::-webkit-input-placeholder {
 .yx-messagebox > .yx-header {
   position: relative;
   font-weight: bold;
+  box-shadow: none;
 }
 .yx-messagebox > .yx-content {
   position: relative;
@@ -561,14 +548,20 @@ textarea::-webkit-input-placeholder {
   position: relative;
   height: 0.4rem;
   line-height: 0.3rem;
-  background-color: #ffffff;
+  box-shadow: none;
+  border-top-width: 1px;
+  border-color: #d8dce4;
 }
 .yx-messagebox > .yx-footer > .yx-control {
   height: 0.4rem;
+  border-color: #d8dce4;
 }
 .yx-floatlayer {
   position: absolute;
   z-index: 30;
+  border-width: 1px;
+  background-color: #ffffff;
+  box-shadow: 0 0 0.04rem #d8dce4;
 }
 .yx-page {
   position: absolute;
@@ -584,24 +577,15 @@ textarea::-webkit-input-placeholder {
   top: 0;
   left: 0;
   width: 100%;
-  height: 0.45rem;
-  line-height: 0.45rem;
-  text-align: center;
-  white-space: nowrap;
+  height: 0.5rem;
+  line-height: 0.5rem;
   background-color: #ffffff;
-  box-shadow: 0 0 4px #d8dce4;
+  box-shadow: 0 0 0.04rem #d8dce4;
   z-index: 1;
-}
-.yx-header > * {
-  position: relative;
-  display: inline-block;
-  top: 50%;
-  transform: translateY(-50%);
-  vertical-align: top;
 }
 .yx-content {
   position: absolute;
-  top: 0.45rem;
+  top: 0.5rem;
   left: 0;
   right: 0;
   bottom: 0;
@@ -616,34 +600,31 @@ textarea::-webkit-input-placeholder {
   bottom: 0;
   overflow: hidden;
   background-color: #ffffff;
-  box-shadow: 0 0 4px #d8dce4;
+  box-shadow: 0 0 0.04rem #d8dce4;
 }
-.yx-footer.yx-control,
-.yx-footer > .yx-control {
+.yx-footer.yx-control {
   border-width: 0;
 }
-.yx-backbutton {
+.yx-header .yx-backbutton {
   position: absolute;
+}
+.yx-backbutton {
   left: 0;
-  width: 0.45rem;
+  min-width: 0.45rem;
   height: 100%;
   z-index: 10;
   font-size: 0.18rem;
-}
-.yx-backbutton > span {
-  display: inline-block;
-  margin-top: 0.02rem;
+  white-space: nowrap;
+  text-align: center;
 }
 .yx-backbutton > svg {
-  margin: 0 0.2em;
   width: 1.2em;
   height: 1.2em;
-  vertical-align: text-bottom;
 }
 .yx-title {
   width: 100%;
-  height: 0.45rem;
-  line-height: 0.45rem;
+  height: 0.5rem;
+  line-height: 0.5rem;
   text-align: center;
 }
 .yx-toast {
@@ -693,7 +674,7 @@ textarea::-webkit-input-placeholder {
 .yx-actionsheet-content {
   padding-top: 0.5rem;
   border-radius: 0.05rem;
-  box-shadow: 0 0 8px #d8dce4;
+  box-shadow: 0 0 0.04rem #d8dce4;
 }
 .yx-actionsheet-content > * {
   display: block;
@@ -708,7 +689,7 @@ textarea::-webkit-input-placeholder {
   border-radius: 0.05rem;
   font-size: 0.14rem;
   font-weight: bold;
-  box-shadow: 0 0 8px #d8dce4;
+  box-shadow: 0 0 0.04rem #d8dce4;
 }
 .yx-carousel {
   position: relative;
@@ -1055,8 +1036,11 @@ textarea::-webkit-input-placeholder {
 [disabled],
 [theme="disabled"] {
   border-color: #999999;
-  background-color: #eeeeee;
   color: #999999;
   fill: #999999;
   cursor: not-allowed;
+}
+.yx-button[disabled],
+.yx-button[theme="disabled"] {
+  background-color: #eeeeee;
 }

@@ -196,12 +196,11 @@ yaxi.impl.container = function (base) {
                 dom,
                 any;
 
-            if (any = layouts[this.$storage.layout])
+            if (any = yaxi.layouts[this.$storage.layout])
             {
                 any(children, dom, gap ? gap[2] : 0);
             }
-
-            if (gap)
+            else if (gap)
             {
                 computeGap(children, gap);
             }
@@ -242,62 +241,6 @@ yaxi.impl.container = function (base) {
 
 
 
-    var layouts = Object.create(null);
-    
-
-    layouts['same-width'] = function (children, dom, gap) {
-
-        var length = children.length,
-            width = 1;
-
-        if (gap > 0)
-        {
-            gap = gap * length - 1;
-            width = 1 - gap / dom.clientWidth;
-        }
-
-        width = (width * 1000000 / length | 0) / 10000 + '%';
-
-        for (var i = 0; i < length; i++)
-        {
-            var style = children[i].$dom.style;
-
-            if (style.width !== width)
-            {
-                style.width = width;
-            }
-        }
-    }
-
-
-    layouts['same-height'] = function (children, dom, gap) {
-
-        var length = children.length,
-            height;
-
-        if (gap > 0)
-        {
-            gap = gap * length - 1;
-            height = (1000000 - gap * 100 / dom.clientHeight) / length;
-        }
-        else
-        {
-            height = 1000000 / length;
-        }
-
-        for (var i = 0; i < length; i++)
-        {
-            var style = children[i].$dom.style;
-
-            if (style.height !== height)
-            {
-                style.height = height;
-            }
-        }
-    }
-
-
-
     // 窗口变化时检查布局
     window.addEventListener('resize', function () {
 
@@ -323,9 +266,9 @@ yaxi.impl.container = function (base) {
         if (value && (value = value.split(' ', 2))[0])
         {
             this.__gap = [
-                value[1] === 'top' ? 'marginTop' : 'marginLeft', 
-                value[0], 
-                value[0].indexOf('px') > 0 ? parseInt(value[0]) : parseFloat(value[0]) * yaxi.rem + .5 | 0   
+                value[1] === 'top' ? 'marginTop' : 'marginLeft',
+                value[0],
+                value[0].indexOf('px') > 0 ? parseInt(value[0]) : parseFloat(value[0]) * yaxi.rem + .5 | 0
             ];
         }
         else
@@ -581,7 +524,6 @@ yaxi.impl.pulldown = function () {
             {
                 if (loading.shown)
                 {
-                    loading.status = 'loading';
                     loading.style.visibility = 'hidden';
                 }
                 else

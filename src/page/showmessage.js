@@ -38,7 +38,10 @@ yaxi.showMessage = function (options) {
 
         if (buttons = options.buttons)
         {
-            for (var i = buttons.length; i--;)
+            var length = buttons.length,
+                width = (1000000 / length | 0) / 10000 + '%';
+
+            for (var i = 0; i < length; i++)
             {
                 var item = buttons[i];
 
@@ -51,10 +54,17 @@ yaxi.showMessage = function (options) {
                 }
                 else
                 {
-                    buttons[i] = {
+                    buttons[i] = item = {
                         key: item,
                         text: i18n[item] || item
                     }
+                }
+
+                item.width = width;
+
+                if (i > 0)
+                {
+                    item.line = 'left';
                 }
             }
         }
@@ -66,12 +76,11 @@ yaxi.showMessage = function (options) {
 
     options.footer = {
         subtype: yaxi.Button,
-        layout: 'same-width',
-        gap: '1px',
         children: options.buttons || [
             {
                 key: 'OK',
-                text: i18n.OK
+                text: i18n.OK,
+                width: '100%'
             }
         ],
         events: {
@@ -104,6 +113,8 @@ yaxi.prompt = function (options) {
     });
 
     options.content = {
+        margin: 0,
+        padding: '.1rem .3rem .3rem',
         children: [
             {
                 Class: options.control || (options.password ? yaxi.Password : yaxi.TextBox),

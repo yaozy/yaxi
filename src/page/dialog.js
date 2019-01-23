@@ -197,7 +197,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 		var event = new yaxi.Event('closing');
 
-		event.closeType = 'closing';
+		event.closeType = closeType;
 
 		if (this.trigger(event, payload) === false)
 		{

@@ -73,6 +73,24 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
     }
 
 
+    function refresh() {
+
+        var loading = this.__loading;
+            size = this.pageSize;
+            
+        this.load(loading.index = 1, size).then(function (data) {
+
+            if (data && data.length < size)
+            {
+                loading.complete(!data.length);
+            }
+
+        }).catch(function () {
+
+            loading.fail();
+        });
+    }
+
 
 
     this.refresh = function () {
@@ -81,21 +99,11 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
         if (loading)
         {
-            var size = this.pageSize;
-            
-            loading.load(200);
+            // 先显示loading
+            loading.load();
 
-            this.load(loading.index = 1, size).then(function (data) {
-
-                if (data && data.length < size)
-                {
-                    loading.complete(!data.length);
-                }
-
-            }).catch(function () {
-
-                loading.fail();
-            });
+            // 先显示200msloading再加载数据以解决加载过快闪烁的问题
+            setTimeout(refresh.bind(this), 200);
         }
         else
         {
