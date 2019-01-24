@@ -169,7 +169,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         if (thumb)
         {
             thumb.style.left = (event.clientX - state.left) * 100 / state.width + '%';
-            event.stop();
+            event.stop(true);
 
             return false;
         }
@@ -223,7 +223,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
             this.renderer.value(this.$dom, value);
         }
 
-        event.stop();
+        event.stop(true);
         return false;
     }
 
@@ -231,6 +231,9 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
     this.__on_touchcancel = function () {
 
         this.renderer.value(this.$dom, this.value);
+
+        event.stop(true);
+        return false;
     }
 
 

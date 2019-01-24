@@ -1,13 +1,45 @@
-yaxi.Observe = Object.extend.call({}, function (Class) {
+yaxi.impl.observe = function () {
 
 
 
     var create = Object.create;
 
-    var patch = yaxi.__observe_patch;
+
+
+    // 默认值集合
+    this.$defaults = create(null);
+
+
+    // 转换器集合
+    this.$converter = create(null);
+
+
+
+    // 当前模型
+    this.model = null;
+
+
+
+    // 不转换Class
+    this.$converter.Class = false;
+
+
+    // 转换bindings
+    this.$converter.bindings = {
+
+        fn: function (values) {
+
+            var model;
+
+            if (values && (model = this.model || (this.model = this.__find_model())))
+            {
+                yaxi.__bind_model.call(model, this, values);
+            }
+        }
+    };
+
+
     
-
-
     // 赋值
     this.assign = function (values) {
 
@@ -42,93 +74,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
         return this;
     }
-
-
-
-    // 默认值集合
-    this.$defaults = create(null);
-
-
-    // 转换器集合
-    this.$converter = create(null);
-
-
     
-    // 定义属性
-    this.$property = yaxi.impl.property(function (name, change) {
-
-        return change ? function () {
-
-            var value = this.__changes;
-            return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
-
-        } : function () {
-
-            return this.$storage[name];
-        }
-
-    }, function (name, converter, change) {
-
-        return change ? function (value) {
-
-            var changes = this.__changes;
-
-            value = converter.call(this, value);
-
-            if (changes)
-            {
-                if (value === changes[name])
-                {
-                    return;
-                }
-
-                if (value !== this.$storage[name])
-                {
-                    changes[name] = value;
-                }
-                else
-                {
-                    delete changes[name];
-                }
-            }
-            else if (value !== this.$storage[name])
-            {
-                patch(this)[name] = value;
-            }
-
-        } : function (value) {
-
-            this.$storage[name] = converter.call(this, value);
-        }
-
-    });
-
-
-
-
-    // 当前模型
-    this.model = null;
-
-
-
-    // 不转换Class
-    this.$converter.Class = false;
-
-
-    // 转换bindings
-    this.$converter.bindings = {
-
-        fn: function (values) {
-
-            var model;
-
-            if (values && (model = this.model || (this.model = this.__find_model())))
-            {
-                yaxi.__bind_model.call(model, this, values);
-            }
-        }
-    };
-
 
     
     // 推送绑定
@@ -192,35 +138,11 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
     }
 
 
-    
-    this.__update_patch = function () {
-
-        var changes;
-
-        if (changes = this.__changes)
-        {
-            var storage = this.$storage;
-
-            this.__changes = null;
-
-            for (var name in changes)
-            {
-                storage[name] = changes[name];
-            }
-        }
-    }
-
-
-
-    this.__class_init = function (Class) {
+    this.__class_init = function () {
 
         this.$defaults = create(this.$defaults);
         this.$converter = create(this.$converter);
     }
 
 
-
-}, function Observe() {
- 
-    this.$storage = Object.create(this.$defaults);
-});
+}

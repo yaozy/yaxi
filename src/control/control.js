@@ -4,9 +4,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     var create = Object.create;
 
-    var patch = yaxi.__observe_patch;
 
-    
     var eventTarget = yaxi.EventTarget.prototype;
 
     // 注册的控件类集合
@@ -27,7 +25,11 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     
+    // 标记是否已发生变化
+    this.__dirty = true;
+
     
+
     // 定义属性
     this.$property = yaxi.impl.property(function (name, change) {
 
@@ -66,16 +68,14 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
                     delete changes[name];
                 }
             }
-            else if (this.$dom) // 渲染后才注册更新
-            {
-                if (value !== storage[name])
-                {
-                    patch(this)[name] = value;
-                }
-            }
-            else // 未渲染则直接记录变化
+            else if (value !== storage[name])
             {
                 (this.__changes = {})[name] = value;
+
+                if (!this.__dirty)
+                {
+                    this.__add_patch();
+                }
             }
 
         } : function (value) {
@@ -87,12 +87,34 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
+
+
     // 控件风格
     this.$property('theme', '');
     
 
-    // 背景风格
-    this.$property('back', '');
+    // 是否可见
+    this.$property('visible', true);
+
+
+    // 线条 top|left|right|bottom|all
+    this.$property('line', '');
+
+
+    // 绑定的url
+    this.$property('url', '', false);
+
+
+    // 打开url时的参数
+    this.$property('args', null, false);
+    
+
+    // 自定义key
+    this.$property('key', '', false);
+    
+
+    // 自定义tag
+    this.$property('tag', null, false);
 
 
 
@@ -122,35 +144,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     // alt
     this.$property('alt', '');
-
-
-    // 绑定的url
-    this.$property('url', '', false);
-
-
-    // 打开url时的参数
-    this.$property('args', null, false);
-    
-
-    // 自定义key
-    this.$property('key', '', false);
-    
-
-    // 自定义tag
-    this.$property('tag', null, false);
-
-
-
-    // 线条 top|left|right|bottom|all
-    this.$property('line', '');
-
-
-    // 是否可见
-    this.$property('visible', false);
-
-
-    // 对齐方式 left center right top middle bottom
-    this.$property('align', '');
 
 
 
@@ -514,23 +507,16 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     this.render = function () {
 
         var dom = this.$dom || (this.$dom = this.$template.cloneNode(true)),
-            any;
+            
+            style;
 
         dom.$control = this;
 
-        if (this.__changes)
-        {
-            this.__update_patch();
-        }
+        this.__apply_patch();
 
-        if (any = this.__style)
+        if (style = this.__style)
         {
-            any.__update_patch();
-        }
-
-        if (any = this.__events)
-        {
-            any.__update_patch();
+            style.__apply_patch(dom);
         }
 
         return dom;
@@ -543,11 +529,68 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.__update_patch = function () {
+    // 补丁集合
+    var patches = [];
 
-        var changes, dom;
+    // 调度器
+    var schedule;
 
-        if ((changes = this.__changes) && (dom = this.$dom))
+
+
+    function update() {
+
+        var list = patches,
+            index = 0,
+            item,
+            fn;
+
+        while (item = list[index++])
+        {
+            item.__apply_patch();
+
+            if (fn = item.invalidate)
+            {
+                fn.call(item);
+            }
+        }
+    }
+
+
+    // 注册补丁
+    this.__add_patch = function () {
+
+        var target = this,
+            parent;
+
+        this.__dirty = true;
+
+        while (parent = target.parent);
+        {
+            if (parent.__dirty)
+            {
+                return;
+            }
+
+            parent.__dirty = true;
+            target = parent;
+        }
+
+        patches.push(target);
+
+        if (!schedule)
+        {
+            schedule = setTimeout(update, 0);
+        }
+    }
+
+
+    this.__apply_patch = function (dom) {
+
+        var changes;
+
+        this.__dirty = false;
+
+        if (changes = this.__changes)
         {
             var storage = this.$storage,
                 renderer = this.renderer,
@@ -569,11 +612,12 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             }
 
             this.__changes = null;
+            return changes;
         }
     }
 
-    
 
+    
 
     // 更新补丁
     var renderer = this.renderer = create(null);
@@ -585,15 +629,36 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         dom.setAttribute('theme', value);
     }
 
-    renderer.back = function (dom, value) {
-
-        dom.setAttribute('back', value);
-    }
-
 
     renderer.visible = function (dom, value) {
 
         dom.setAttribute('display', value ? '' : 'hidden');
+    }
+
+
+    renderer.line = function (dom, value) {
+
+        if (value)
+        {
+            var style = dom.style,
+                name = (value = value.split(' '))[0];
+
+            dom.setAttribute('line', name);
+
+            if (name === 'all')
+            {
+                style.borderWidth = value[1] || '1px';
+            }
+            else
+            {
+                style['border' + name[0].toUpperCase() + name.substring(1) + 'Width'] = value[1] || '1px';
+            }
+        }
+        else
+        {
+            dom.style.border = '';
+            dom.removeAttribute('line');
+        }
     }
 
 
@@ -644,32 +709,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     renderer.alt = function (dom, value) {
 
         dom.setAttribute('alt', value);
-    }
-
-
-    renderer.line = function (dom, value) {
-
-        if (value)
-        {
-            var style = dom.style,
-                name = (value = value.split(' '))[0];
-
-            dom.setAttribute('line', name);
-
-            if (name === 'all')
-            {
-                style.borderWidth = value[1] || '1px';
-            }
-            else
-            {
-                style['border' + name[0].toUpperCase() + name.substring(1) + 'Width'] = value[1] || '1px';
-            }
-        }
-        else
-        {
-            dom.style.border = '';
-            dom.removeAttribute('line');
-        }
     }
 
 

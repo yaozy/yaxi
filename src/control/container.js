@@ -357,8 +357,6 @@ yaxi.impl.container = function (base) {
             index = 0,
             control;
 
-        children.__patch = 1;
-
         while (control = children[index++])
         {
             dom.appendChild(control.render());
@@ -518,7 +516,7 @@ yaxi.impl.pulldown = function () {
             {
                 pulldown.move(event.distanceY);
 
-                event.stop();
+                event.stop(true);
                 return false;
             }
             else
@@ -555,7 +553,7 @@ yaxi.impl.pulldown = function () {
 
             pulldown.start(this);
 
-            event.stop();
+            event.stop(true);
             return false;
         }
     }
@@ -565,14 +563,14 @@ yaxi.impl.pulldown = function () {
 
         if (pulldown)
         {
-            this.$dom.style.overflowY = overflowY || '';
-
             if (pulldown.$dom)
             {
+                this.$dom.style.overflowY = overflowY || '';
+
                 pulldown.stop(this, loading);
                 pulldown = null;
 
-                event.stop();
+                event.stop(true);
                 return false;
             }
 

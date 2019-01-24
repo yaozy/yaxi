@@ -209,10 +209,9 @@
         var control = state.control,
             time;
 
-        state.control = null;
-
         if (control)
         {
+            state.control = null;
             event = touchEvent(event);
 
             if (trigger(control, '__on_touchend', event) === false)
@@ -252,13 +251,16 @@
 
         if (control = state.control)
         {
+            state.control = null;
+            event = touchEvent(event);
+
             if (trigger(control, '__on_touchcancel', event) === false)
             {
                 return false;
             }
 
             state.control = null;
-            return control.trigger(touchEvent(event));
+            return control.trigger(event);
         }
 
     }, true);

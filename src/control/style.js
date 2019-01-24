@@ -1,9 +1,8 @@
-yaxi.Style = yaxi.Observe.extend(function (Class, base) {
-    
+yaxi.Style = Object.extend.call({}, function () {
     
 
-    this.$defaults = Object.create(null);
-    
+
+    var define = Object.defineProperty;
 
 
     var keys = (function () {
@@ -49,15 +48,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
         for (var name in keys)
         {
-            key = name.replace(regex2, css);
-            
-            this.$property(name, {
-                
-                name: keys[name],
-                defaultValue: ''
-
-            }, true, key);
-
+            property(name, key = name.replace(regex2, css));
             keys[key] = keys[name];
         }
 
@@ -66,21 +57,19 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     }).call(this);
 
 
-
     // 给控件扩展通用样式
-    var style = function (name) {
+    var style = function (css) {
 
-        var key = keys[name] || name;
+        var name = keys[css] || css;
 
-        this.renderer[key] = function (dom, value) {
+        this.renderer[name] = function (dom, value) {
 
-            dom.style[key] = value;
+            dom.style[name] = value;
         }
 
-        this.$property(key, '', true, name);
+        property(name, css);
 
     }.bind(yaxi.Control.prototype);
-
     
     
     ('animation,animation-delay,animation-direction,animation-duration,animation-fill-mode,animation-iteration-count,animation-name,animation-play-state,animation-timing-function,' +
@@ -122,12 +111,81 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
     });
 
     
+    function property(target, name, css) {
 
-    this.__update_patch = function () {
+        var options = {
 
-        var dom, changes;
+            get: function () {
+    
+                var value = this.__changes;
+                return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
+            },
+            set: function (value) {
+        
+                var any;
+        
+                value = '' + value;
+        
+                if (any = this.__changes)
+                {
+                    if (value === any[name])
+                    {
+                        return;
+                    }
+        
+                    if (value !== this.$storage[name])
+                    {
+                        any[name] = value;
+                    }
+                    else
+                    {
+                        delete any[name];
+                    }
+                }
+                else if (value !== this.$storage[name])
+                {
+                    (this.__changes = {})[name] = value;
+        
+                    if ((any = this.$control) && !any.__dirty)
+                    {
+                        any.__add_patch();
+                    }
+                }
+            }
+        }
 
-        if ((dom = this.parent) && (dom = dom.$dom) && (changes = this.__changes))
+        define(target, name, options);
+    
+        if (css !== name)
+        {
+            define(target, css, options);
+        }
+    }
+
+
+
+    // 赋值
+    this.assign = function (values) {
+
+        if (value)
+        {
+            var changes = this.__changes = {};
+
+            for (var name in values)
+            {
+                changes[name] = '' + values[name];
+            }
+        }
+
+        return this;
+    }
+
+
+    this.__apply_patch = function (dom) {
+
+        var changes;
+
+        if (changes = this.__changes)
         {
             var storage = this.$storage,
                 style = dom.style;
@@ -145,6 +203,6 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
 }, function Style(control) {
 
-    this.parent = control;
-    this.$storage = Object.create(this.$defaults);
+    this.$control = control;
+    this.$storage = Object.create(null);
 });

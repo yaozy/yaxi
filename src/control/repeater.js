@@ -135,22 +135,17 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function (dom) {
 
-        var changes;
+        var changes = base.__apply_patch.call(this, dom);
 
-        if (changes = this.__changes)
+        if (changes && (changes.template || changes.store))
         {
-            base.__update_patch.call(this);
+            this.__children.clear();
 
-            if (changes.template || changes.store)
+            if ((changes = this.store) && changes.length > 0)
             {
-                this.__children.clear();
-
-                if ((changes = this.store) && changes.length > 0)
-                {
-                    this.__model_insert(0, changes);
-                }
+                this.__model_insert(0, changes);
             }
         }
     }
@@ -188,22 +183,19 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             }
 
             // 处理子控件补丁
-            if (children.__patch)
+            if (any = children.__changes)
             {
-                if (any = children.__changes)
+                if (index >= 0)
                 {
-                    if (index >= 0)
-                    {
-                        any[0] = 1;
-                    }
+                    any[0] = 1;
+                }
 
-                    any.push.apply(any[1], controls);
-                }
-                else
-                {
-                    children.__changes = index < 0 ? [0, controls] : [1, controls];
-                    patch(children);
-                }
+                any.push.apply(any[1], controls);
+            }
+            else
+            {
+                children.__changes = index < 0 ? [0, controls] : [1, controls];
+                patch(children);
             }
         }
     }

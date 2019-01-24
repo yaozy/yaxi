@@ -33,7 +33,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.assign = function (values) {
 
-        var owner = this.owner,
+        var owner = this.$control,
             childClass = owner.__child_class,
             subtype = owner.subtype || yaxi.Control,
             index = 0,
@@ -111,7 +111,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     function createControls(self, list, index, outputs) {
 
-        var owner = self.owner,
+        var owner = self.$control,
             childClass = owner.__child_class,
             subtype = owner.subtype || yaxi.Control,
             length = list.length,
@@ -137,7 +137,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
             var controls = createControls(this, arguments, 0, []),
                 changes;
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -166,7 +166,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         {
             control.parent = null;
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -191,7 +191,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
             var controls = createControls(this, arguments, 0, []),
                 changes;
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -221,7 +221,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         {
             control.parent = null;
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -242,7 +242,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.splice = function (index, length) {
 
-        var flag = this.__patch,
+        var flag = this.__dirty,
             changes = flag && this.__changes,
             controls;
 
@@ -309,7 +309,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
                 controls[i].parent = null;
             }
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -336,7 +336,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         {
             array.sort.call(this, sortby);
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -362,7 +362,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         {
             array.reverse.call(this);
 
-            if (this.__patch)
+            if (this.__dirty)
             {
                 if (changes = this.__changes)
                 {
@@ -382,13 +382,13 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes, owner, any;
 
         if (changes = this.__changes)
         {
-            owner = this.owner;
+            owner = this.$control;
 
             // 第二个以后是要移除节点
             if (changes.length > 2)
@@ -491,7 +491,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-}, function ControlCollection(owner) {
+}, function ControlCollection(control) {
 
-    this.owner = owner;
+    this.$control = control;
 });

@@ -130,8 +130,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
             index = 0,
             any;
 
-        children.__patch = 1;
-
         while (any = children[index++])
         {
             host.appendChild(any.render());
@@ -175,6 +173,9 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         position = -this.index * width;
 
         dom.firstChild.style.transition = '';
+
+        event.stop(true);
+        return false;
     }
 
 
@@ -193,7 +194,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         this.$dom.firstChild.style.transform = 'translateX(' + offset + 'px)';
 
-        event.stop();
+        event.stop(true);
         return false;
     }
 
@@ -221,6 +222,9 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         {
             this.renderer.time(this.$dom, value + 1000);
         }
+
+        event.stop(true);
+        return false;
     }
 
 

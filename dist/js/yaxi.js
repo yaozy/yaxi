@@ -1690,7 +1690,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         while (item = list[index++])
         {
-            item.__update_patch();
+            item.__apply_patch();
         }
 
         list.length = delay = 0;
@@ -1928,7 +1928,7 @@ yaxi.Observe = Object.extend.call({}, function (Class) {
 
 
     
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes;
 
@@ -5113,17 +5113,17 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
         if (this.__changes)
         {
-            this.__update_patch();
+            this.__apply_patch();
         }
 
         if (any = this.__style)
         {
-            any.__update_patch();
+            any.__apply_patch();
         }
 
         if (any = this.__events)
         {
-            any.__update_patch();
+            any.__apply_patch();
         }
 
         return dom;
@@ -5136,7 +5136,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes, dom;
 
@@ -5496,7 +5496,7 @@ yaxi.Style = yaxi.Observe.extend(function (Class, base) {
 
     
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var dom, changes;
 
@@ -6701,7 +6701,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes, owner, any;
 
@@ -8066,13 +8066,13 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes;
 
         if (changes = this.__changes)
         {
-            base.__update_patch.call(this);
+            base.__apply_patch.call(this);
 
             if (changes.template || changes.store)
             {
@@ -11995,13 +11995,13 @@ yaxi.GroupView = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__update_patch = function () {
+    this.__apply_patch = function () {
 
         var changes;
 
         if (changes = this.__changes)
         {
-            base.__update_patch.call(this);
+            base.__apply_patch.call(this);
 
             if (changes.template || changes.store)
             {
