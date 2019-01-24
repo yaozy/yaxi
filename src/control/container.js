@@ -291,7 +291,20 @@ yaxi.impl.container = function (base) {
     }
 
 
+    renderer.nomargin = function (dom, value) {
 
+        if (value)
+        {
+            dom.setAttribute('nomargin', value);
+        }
+        else
+        {
+            dom.removeAttribute('nomargin');
+        }
+    }
+
+
+    
     this.__on_tap = function (event) {
 
         var base = this.base;

@@ -5818,7 +5818,20 @@ yaxi.impl.container = function (base) {
     }
 
 
+    renderer.nomargin = function (dom, value) {
 
+        if (value)
+        {
+            dom.setAttribute('nomargin', value);
+        }
+        else
+        {
+            dom.removeAttribute('nomargin');
+        }
+    }
+
+
+    
     this.__on_tap = function (event) {
 
         var base = this.base;
@@ -6117,8 +6130,12 @@ yaxi.Panel = yaxi.Control.extend(function (Class, base) {
     this.$property('gap', '');
 
 
-    // 子组件组件充满
+    // 子组件充满
     this.$property('full', '');
+
+    
+    // 去掉子组件外边距
+    this.$property('nomargin', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
@@ -7929,8 +7946,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     this.$property('gap', 0);
 
 
-    // 子组件组件充满
+    // 子组件充满
     this.$property('full', '');
+
+
+    // 去掉子组件外边距
+    this.$property('nomargin', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
@@ -12401,3 +12422,28 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
 }).register('Segment');
+
+
+
+
+yaxi.Tel = yaxi.Panel.extend(function () {
+
+
+
+    yaxi.template(this, '<div class="yx-control yx-panel yx-tel" rel="nofollow" target="_blank"><a rel="nofollow" target="_blank"></a></div>');
+
+
+
+    // 电话号码
+    this.$property('value', '');
+
+    
+
+    this.renderer.value = function (dom, value) {
+
+        dom.firstChild.setAttribute('href', value ? 'tel:' + value : '');
+    }
+
+
+    
+}).register('Tel');

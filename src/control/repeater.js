@@ -15,8 +15,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     this.$property('gap', 0);
 
 
-    // 子组件组件充满
+    // 子组件充满
     this.$property('full', '');
+
+
+    // 去掉子组件外边距
+    this.$property('nomargin', '');
 
 
     // url基础路径(没置了此路径点击时将打开子项绑定的url)
