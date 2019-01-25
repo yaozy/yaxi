@@ -5,6 +5,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
     var host = yaxi.__dom_host = document.createElement('div');
 
+
 	host.className = 'yx-host';
 
     if (document.body)
@@ -32,6 +33,19 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		// pc端1rem = 100px
 		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
 	}
+
+
+	
+	// 窗口变化时调整布局
+	window.addEventListener('resize', function () {
+
+		var page;
+
+		if ((page = Class.current) && page.$dom)
+		{
+			page.invalidate();
+		}
+	});
 
 
 
@@ -283,19 +297,6 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	// 扩展容器功能
 	yaxi.impl.container.call(this, base);
-
-
-
-	// 注册检查布局事件
-	yaxi.on('yaxi-check-layout', function () {
-
-		var page;
-
-		if ((page = this.Page.current) && page.$dom)
-		{
-			page.invalidate();
-		}
-	});
 
 
 

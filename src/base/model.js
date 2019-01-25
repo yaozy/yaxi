@@ -535,23 +535,23 @@
 
 
     // 赋值
-    this.$assign = function (data) {
+    this.$assign = function (values) {
 
-        if (data)
+        if (values)
         {
             var storage = this.$storage || (this.$storage = {}),
                 converters = this.$converter,
                 converter;
 
-            for (var name in data)
+            for (var name in values)
             {
                 if (converter = converters[name])
                 {
-                    storage[name] = converter.fn.call(this, data[name]);
+                    storage[name] = converter.fn.call(this, values[name]);
                 }
                 else
                 {
-                    this[name] = data[name];
+                    this[name] = values[name];
                 }
             }
         }

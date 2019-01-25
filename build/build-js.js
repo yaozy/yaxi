@@ -4,10 +4,10 @@ const theme = webminify.theme || 'default';
 
 webminify()
     .load('', [
-        'src/base/(yaxi|i18n|extend|utils|math|properties|event|event.m|pipe|patch|observe|model|store|stream|http|cache|require|template|thread).js',
+        'src/base/(yaxi|i18n|extend|utils|math|properties|event|event.m|pipe|binding|model|store|stream|http|cache|require|template|thread).js',
         'icon/iconfont.js',
         'less/theme/' + theme + '/color.js',
-        'src/control/(control|style|container|panel).js',
+        'src/control/(style|control|container|panel).js',
         'src/control/*.js',
         'src/form/textbox.js',
         'src/form/*.js',

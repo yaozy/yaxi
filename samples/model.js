@@ -23,23 +23,25 @@ module.exports = yaxi.Page.extend(function () {
     });
 
 
+    var model = new Model().$assign({
+        text: 11111.1222223,
+        submodel: {
+            value: 20
+        },
+        store: [
+            { name: 1111, age: 1 },
+            { name: 2222, age: 2 },
+            { name: 3333, age: 3 }
+        ]
+    });
+
 
     this.init = function () {
 
         this.assign({
             header: '模型开发演示',
             content: {
-                model: new Model({
-                    text: 11111.1222223,
-                    submodel: {
-                        value: 20
-                    },
-                    store: [
-                        { name: 1111, age: 1 },
-                        { name: 2222, age: 2 },
-                        { name: 3333, age: 3 }
-                    ]
-                }),
+                model: model,
                 children: [
                     {
                         Class: yaxi.Repeater,

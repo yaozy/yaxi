@@ -1,13 +1,10 @@
 ;(function (Math) {
 
 
-
-    var round = Math.round;
-
+    
     var toFixed = (0).toFixed;
 
     var cache = new Decimal(0);
-
 
 
 
@@ -295,7 +292,7 @@
 
         if ((digits |= 0) < d)
         {
-            this.v = round(this.v * ('1e' + digits) / ('1e' + d));
+            this.v = this.v / ('1e' + (d - digits)) + .50000000000005 | 0;
             this.d = digits;
         }
 
@@ -305,49 +302,46 @@
 
     prototype.toFixed = function (digits) {
 
-        var d = this.d;
+        var d = this.d,
+            v = this.v;
 
-        if ((digits |= 0) > 0)
+        if (d > 0)
         {
-            if (d)
-            {
-                if (d > digits)
-                {
-                    return toFixed.call(round(this.v * ('1e' + digits) / ('1e' + d)) / ('1e' + digits), digits);
-                }
-
-                return toFixed.call(this.v / ('1e' + d), digits);
-            }
-
-            return toFixed.call(this.v, digits);
+            v = v / ('1e' + d);
         }
-        
-        return d ? '' + round(this.v / ('1e' + d)) : '' + this.v;
-    }
 
-
-    prototype.valueOf = function () {
-        
-        var d = this.d;
-        return d ? this.v / ('1e' + d) : this.v;
+        return v.toFixed(digits);
     }
 
 
     prototype.toString = function (k) {
 
-        var d = this.d;
-        return (d ? this.v / ('1e' + d) : this.v).toString(k);
-    }
+        var d = this.d,
+            v = this.v;
 
+        if (d > 0)
+        {
+            v = v / ('1e' + d);
+        }
+
+        return v.toString(k);
+    }
 
 
 
     Object.defineProperty(prototype, 'value', {
 
-        get: function () {
+        get: prototype.valueOf = function () {
 
-            var d = this.d;
-            return d ? this.v / ('1e' + d) : this.v;
+            var d = this.d,
+                v = this.v;
+
+            if (d > 0)
+            {
+                v = v / ('1e' + d);
+            }
+
+            return v;
         }
     });
 
@@ -366,48 +360,38 @@
     {
         number.toFixed = function (digits) {
 
-            return Decimal.call(cache, this).toFixed(digits);
+            return toFixed.call(round(+this, digits |= 0), digits);
         }
     }
 
 
     number.round = function (digits) {
 
-        var value = +this;
+        return round(+this, digits);
+    }
+
+
+
+    // 重载四舍五入方法增加指定小数位数
+    function round(value, digits) {
 
         if (value !== value)
         {
             return 0;
         }
 
-        if (value === (value | 0))
-        {
-            return value;
-        }
-
         if ((digits |= 0) > 0)
         {
-            var items = ('' + value).split('.'),
-                d = items[1];
-
-            if (!d || d.length <= digits)
-            {
-                return value;
-            }
-
-            return round(items[0] + d.slice(0, digits) + '.' + d[digits]) / ('1e' + digits);
+            digits = '1e' + digits;
+            return (value * digits + .50000000000005 | 0) / digits;
         }
-        
-        return round(value);
+
+        return value + .50000000000005 | 0;
     }
 
 
 
-    // 重载四舍五入方法增加指定小数位数
-    Math.round = function (value, digits) {
-
-        return (+value).round(digits);
-    }
+    Math.round = round;
 
 
 

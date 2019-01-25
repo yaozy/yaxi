@@ -9,9 +9,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     var splice = array.splice;
 
 
-    var patch = yaxi.__add_patch;
-
-
 
     this.length = 0;
 
@@ -82,8 +79,6 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
                     }
 
                     control.parent = owner;
-                    control.__last_index = null;
-
                     return control;
                 }
             }
@@ -135,18 +130,20 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         if (arguments.length > 0)
         {
             var controls = createControls(this, arguments, 0, []),
-                changes;
+                changes,
+                owner;
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes.push.apply(changes[1], controls);
+            }
+            else
+            {
+                this.__changes = [0, controls];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes.push.apply(changes[1], controls);
-                }
-                else
-                {
-                    this.__changes = [0, controls];
-                    patch(this);
+                    owner.$patch();
                 }
             }
 
@@ -159,23 +156,23 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.pop = function () {
 
-        var control = array.pop.call(this),
-            changes;
+        var control, changes, owner;
 
-        if (control)
+        if (control = array.pop.call(this))
         {
             control.parent = null;
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes.push(control);
+            }
+            else
+            {
+                this.__changes = [0, [], control];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes.push(control);
-                }
-                else
-                {
-                    this.__changes = [0, [], control];
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -189,19 +186,21 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         if (arguments.length > 0)
         {
             var controls = createControls(this, arguments, 0, []),
-                changes;
+                changes,
+                owner;
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes[0] = 1;
+                changes.push.apply(changes[1], controls);
+            }
+            else
+            {
+                this.__changes = [1, controls];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes[0] = 1;
-                    changes.push.apply(changes[1], controls);
-                }
-                else
-                {
-                    this.__changes = [1, controls];
-                    patch(this);
+                    owner.$patch();
                 }
             }
 
@@ -214,24 +213,24 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.shift = function () {
 
-        var control = array.shift.call(this),
-            changes;
+        var control, owner, changes;
 
-        if (control)
+        if (control = array.shift.call(this))
         {
             control.parent = null;
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes[0] = 1;
+                changes.push(control);
+            }
+            else
+            {
+                this.__changes = [1, [], control];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes[0] = 1;
-                    changes.push(control);
-                }
-                else
-                {
-                    this.__changes = [1, [], control];
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -242,25 +241,26 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.splice = function (index, length) {
 
-        var flag = this.__dirty,
-            changes = flag && this.__changes,
+        var owner = this.$control,
+            changes = this.__changes,
             controls;
 
         if (arguments.length > 2)
         {
             controls = createControls(this, arguments, 2, [index, length]);
             
-            if (flag)
+            if (changes)
             {
-                if (changes)
+                changes[0] = 1;
+                changes.push.apply(changes[1], controls.slice(2));
+            }
+            else
+            {
+                this.__changes = changes = [1, controls.slice(2)];
+
+                if (!owner.__dirty)
                 {
-                    changes[0] = 1;
-                    changes.push.apply(changes[1], controls.slice(2));
-                }
-                else
-                {
-                    this.__changes = changes = [1, controls.slice(2)];
-                    patch(this);
+                    owner.$patch();
                 }
             }
 
@@ -278,17 +278,18 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
                 controls[i].parent = null;
             }
 
-            if (flag)
+            if (changes)
             {
-                if (changes)
+                changes[0] = 1;
+                changes.push.apply(changes, controls);
+            }
+            else
+            {
+                this.__changes = [1, []].concat(controls);
+
+                if (!owner.__dirty)
                 {
-                    changes[0] = 1;
-                    changes.push.apply(changes, controls);
-                }
-                else
-                {
-                    this.__changes = [1, []].concat(controls);
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -300,7 +301,8 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     this.clear = function () {
 
         var controls = splice.call(this, 0),
-            changes;
+            changes,
+            owner;
 
         if (controls.length > 0)
         {
@@ -309,17 +311,18 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
                 controls[i].parent = null;
             }
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes[0] = 0;
+                changes.push.apply(changes, controls);
+            }
+            else
+            {
+                this.__changes = [0, []].concat(controls);
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes[0] = 0;
-                    changes.push.apply(changes, controls);
-                }
-                else
-                {
-                    this.__changes = [0, []].concat(controls);
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -330,22 +333,23 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.sort = function (sortby) {
 
-        var changes;
+        var changes, owner;
 
         if (this.length > 0)
         {
             array.sort.call(this, sortby);
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes[0] = 1;
+            }
+            else
+            {
+                this.__changes = [1, []];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes[0] = 1;
-                }
-                else
-                {
-                    this.__changes = [1, []];
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -356,22 +360,23 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
     this.reverse = function () {
 
-        var changes;
+        var changes, owner;
 
         if (this.length > 0)
         {
             array.reverse.call(this);
 
-            if (this.__dirty)
+            if (changes = this.__changes)
             {
-                if (changes = this.__changes)
+                changes[0] = 1;
+            }
+            else
+            {
+                this.__changes = [1, []];
+
+                if (!(owner = this.$control).__dirty)
                 {
-                    changes[0] = 1;
-                }
-                else
-                {
-                    this.__changes = [1, []];
-                    patch(this);
+                    owner.$patch();
                 }
             }
         }
@@ -382,46 +387,36 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
 
 
 
-    this.__apply_patch = function () {
+    this.__patch = function (owner, dom, changes) {
 
-        var changes, owner, any;
-
-        if (changes = this.__changes)
+        // 第二个以后是要移除节点
+        if (changes.length > 2)
         {
-            owner = this.$control;
+            this.__remove(owner, changes);
+        }
 
-            // 第二个以后是要移除节点
-            if (changes.length > 2)
-            {
-                this.__remove_patch(owner, changes);
-            }
+        // 第二个参数是增加的子控件集合
+        if (changes[1].length > 0)
+        {
+            this.__insert(owner, changes[1], dom);
+        }
 
-            if (any = owner.$dom)
-            {
-                // 第二个参数是增加的子控件集合
-                if (changes[1].length > 0)
-                {
-                    this.__insert_patch(owner, changes[1], any);
-                }
+        // 第一个参数是否排序
+        if (changes[0])
+        {
+            this.__sort(dom);
+        }
 
-                // 第一个参数是否排序
-                if (changes[0])
-                {
-                    this.__sort_patch(any);
-                }
-            }
+        this.__changes = null;
 
-            this.__changes = null;
-
-            if (any = this.onchange)
-            {
-                any.call(this, owner);
-            }
+        if (changes = this.onchange)
+        {
+            changes.call(this, owner);
         }
     }
 
 
-    this.__insert_patch = function (owner, controls, dom) {
+    this.__insert = function (owner, controls, dom) {
 
         var last = owner.__loading && dom.lastChild;
 
@@ -443,7 +438,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__remove_patch = function (owner, changes) {
+    this.__remove = function (owner, changes) {
 
         var control, dom, parent;
 
@@ -468,7 +463,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__sort_patch = function (dom) {
+    this.__sort = function (dom) {
 
         var node, item, control;
 

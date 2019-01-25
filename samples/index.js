@@ -13,7 +13,7 @@ module.exports = yaxi.Page.extend(function () {
                         float: 'right'
                     },
                     {
-                        Class: yaxi.Text,
+                        Class: yaxi.Title,
                         text: 'samples'
                     }
                 ]
@@ -45,8 +45,20 @@ module.exports = yaxi.Page.extend(function () {
                 height: '.5rem'
             }
         });
-    }
 
+            
+        var content = this.content;
+
+        setInterval(function () {
+
+            content.children = [
+                { text: '模板开发演示', url: 'template.js' },
+                { text: '模型开发演示', url: 'model.js' },
+                { text: '多线程开发演示', events: { tap: runThread } }
+            ]
+
+        }, 5000);
+    }
 
 
     function runThread() {

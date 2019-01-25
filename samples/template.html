@@ -1,19 +1,17 @@
 <Page d-header="header">
     <Content>
         <Text d-text="i18n.text" display="block" />
-        <HTML>
-            <div color="red">html text</div>
+        <HTML color="red">
+            <div>html text</div>
         </HTML>
         <Panel layout="line-middle" background-color="silver" color="red" height="1rem">
             <Button text="123" width="1rem" />
-            <Panel position="absolute" left="1rem" right="1rem">
-                <Button text="456" width="100%" />
-            </Panel>
+            <Button text="456" />
             <Button text="789" width="1rem" position="absolute" right="0" />
         </Panel>
         <!-- <R src=""></R> -->
     </Content>
-    <Footer e-change="change" d-model="model">
+    <Footer e-change="onchange" d-model="model">
         <TextBox background-color="#888888" d-background-color="color" b-width="width" b-value="value" b-change="value" />
     </Footer>
 </Page>

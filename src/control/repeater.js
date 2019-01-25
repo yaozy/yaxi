@@ -2,6 +2,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
+
     yaxi.template(this, '<div class="yx-control yx-repeater"></div>');
 
     
@@ -131,13 +132,9 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    var patch = yaxi.__add_patch;
+    this.__patch = function (dom) {
 
-
-
-    this.__apply_patch = function (dom) {
-
-        var changes = base.__apply_patch.call(this, dom);
+        var changes = base.__patch.call(this, dom);
 
         if (changes && (changes.template || changes.store))
         {
@@ -195,7 +192,11 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             else
             {
                 children.__changes = index < 0 ? [0, controls] : [1, controls];
-                patch(children);
+                
+                if (!this.__dirty)
+                {
+                    this.$patch();
+                }
             }
         }
     }

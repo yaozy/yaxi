@@ -10,8 +10,8 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 
 
 		
-	// 注册检查布局事件
-	yaxi.on('yaxi-check-layout', function () {
+	// 窗口变化时调整布局
+	window.addEventListener('resize', function () {
 
 		var list = stack,
 			index = 0,
@@ -24,7 +24,6 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 				item.invalidate();
 			}
 		}
-		
 	});
 	
 

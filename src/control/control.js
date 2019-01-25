@@ -1,4 +1,4 @@
-yaxi.Control = yaxi.Observe.extend(function (Class, base) {
+yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
 
@@ -9,6 +9,10 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
     // 注册的控件类集合
     var classes = yaxi.classes = create(null);
+
+
+    // 渲染器
+    var renderer = this.renderer = create(null);
 
 
 
@@ -25,10 +29,23 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     
+    // 默认值集合
+    this.$defaults = create(null);
+
+
+    // 转换器集合
+    this.$converter = create(null);
+
+
+    // 不转换Class
+    this.$converter.Class = false;
+
+
+
     // 标记是否已发生变化
     this.__dirty = true;
 
-    
+
 
     // 定义属性
     this.$property = yaxi.impl.property(function (name, change) {
@@ -74,7 +91,7 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
                 if (!this.__dirty)
                 {
-                    this.__add_patch();
+                    this.$patch();
                 }
             }
 
@@ -84,8 +101,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         }
 
     });
-
-
 
 
 
@@ -166,6 +181,217 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
         }
     };
 
+
+    
+    // 读取控件样式值
+    function get(name) {
+
+        return function () {
+    
+            return (this.__changes || this.$storage)[name] || '';
+        }
+    }
+
+
+    // 设置控件样式值
+    function set(name) {
+
+        return function (value) {
+        
+            var changes;
+    
+            value = '' + value;
+    
+            if (changes = this.__changes)
+            {
+                if (value === changes[name])
+                {
+                    return;
+                }
+    
+                if (value !== this.$storage[name])
+                {
+                    changes[name] = value;
+                }
+                else
+                {
+                    delete changes[name];
+                }
+            }
+            else if (value !== this.$storage[name])
+            {
+                (this.__changes = {})[name] = value;
+    
+                if (!this.__dirty)
+                {
+                    this.$patch();
+                }
+            }
+        }
+    }
+
+
+    // 控件样式渲染方法
+    function rendererFn(name) {
+
+        return function (dom, value) {
+
+            dom.style[name] = value;
+        }
+    }
+
+
+    // 给控件扩展样式属性
+    ;(function (list) {
+
+        var define = Object.defineProperty,
+            styles = yaxi.styles,
+            converter = this.$converter,
+            renderer = this.renderer,
+            style,
+            name,
+            key,
+            css,
+            any;
+
+        for (var i = 0, l = list.length; i < l; i++)
+        {
+            style = styles[css = list[i]];
+
+            if (style)
+            {
+                name = style[0];
+                key = style[2];
+            }
+            else
+            {
+                console.log(css);
+                name = key = css.replace(/-(\w)/g, camelize);
+            }
+
+            define(this, name, any = {
+                get: get(key),
+                set: set(key)
+            });
+
+            renderer[name] = rendererFn(key);
+            converter[name] = key; // 标记样式转换器
+
+            if (css !== name)
+            {
+                define(this, css, any);
+                converter[css] = key;
+            }
+        }
+
+        function camelize(_, text) {
+
+            return text.toUpperCase();
+        }
+
+    }.call(this, ('animation,animation-delay,animation-direction,animation-duration,animation-fill-mode,animation-iteration-count,animation-name,animation-play-state,animation-timing-function,' +
+        'background,background-attachment,background-blend-mode,background-clip,background-color,background-image,background-origin,background-position,background-position-x,background-position-y,background-repeat,background-repeat-y,background-size,' +
+        'border,border-width,border-style,border-color,border-radius,border-spacing,border-collapse,' +
+        'border-image-outset,border-image-repeat,border-image-slice,border-image-source,border-image-width,' +
+        'border-bottom,border-bottom-color,border-bottom-left-radius,border-bottom-right-radius,border-bottom-width,' +
+        'border-left,border-left-color,border-left-style,border-left-width,' +
+        'border-right,border-right-color,border-right-style,border-right-width,' +
+        'border-top,border-top-color,border-top-left-radius,border-top-right-radius,border-top-style,border-top-width,' +
+        'bottom,box-shadow,box-sizing,break-after,break-before,break-inside,caret-color,' +
+        'clip,clip-path,clip-rule,color,cursor,' + 
+        'direction,display,' +
+        'fill,fill-opacity,fill-rule,float,' +
+        'font,font-display,font-family,font-feature-settings,font-kerning,font-size,font-stretch,font-style,font-variant,font-variant-caps,font-variant-east-asian,font-variant-ligatures,font-variant-numeric,font-variation-settings,font-weight,' +
+        'height,' +
+        'left,' +
+        'line-break,line-height,list-style,list-style-image,list-style-position,list-style-type,' +
+        'margin,margin-top,margin-left,margin-right,margin-bottom,' +
+        'max-height,max-width,min-height,min-width,' +
+        'object-fit,object-position,opacity,' +
+        'outline,outline-color,outline-offset,outline-style,outline-width,' +
+        'overflow,overflow-x,overflow-y,' +
+        'padding,padding-top,padding-right,padding-bottom,padding-left,' +
+        'position,' +
+        'right,' +
+        'speak,' +
+        'stroke,stroke-dasharray,stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,stroke-width,' +
+        'top,' +
+        'transform,transform-box,transform-origin,transform-style,transition,transition-delay,transition-duration,transition-property,transition-timing-function,' +
+        'text-align,text-align-last,text-anchor,text-combine-upright,text-decoration,text-decoration-color,text-decoration-line,text-decoration-skip-ink,text-decoration-style,text-indent,text-orientation,text-overflow,text-rendering,text-shadow,text-size-adjust,text-transform,text-underline-position,' +
+        'user-select,' +
+        'vertical-align,visibility,' +
+        'white-space,width,word-break,word-spacing,word-wrap,writing-mode,' +
+        'z-index,zoom').split(',')));
+
+
+    
+    // 赋值
+    this.assign = function (values) {
+
+        var converters = this.$converter,
+            converter,
+            changes,
+            key;
+
+        for (var name in values)
+        {
+            if (converter = converters[name])
+            {
+                if (typeof converter === 'string') // 样式属性
+                {
+                    (changes || (changes = this.__changes = {}))[converter] = '' + values[name];
+                }
+                else if (converter.change) // 需要处理变化
+                {
+                    (changes || (changes = this.__changes = {}))[converter.name] = converter.fn.call(this, values[name]);
+                }
+                else if (key = converter.name) // 默认转换器
+                {
+                    this.$storage[key] = converter.fn.call(this, values[name]);
+                }
+                else // 自定义转换器
+                {
+                    converter.fn.call(this, values[name]);
+                }
+            }
+            else if (converter !== false)
+            {
+                this[name] = values[name];
+            }
+        }
+
+        return this;
+    }
+    
+    
+
+    // 扩展绑定实现
+    yaxi.impl.binding.call(this);
+
+
+    // 转换bindings
+    this.$converter.bindings = {
+
+        fn: this.__set_bindings
+    };
+
+
+    // 推送绑定
+    this.$push = function (value) {
+
+        var binding = this.__binding_push,
+            pipe;
+
+        if (binding)
+        {
+            if (pipe = binding.pipe)
+            {
+                value = pipe(value);
+            }
+
+            binding.model[binding.name] = value;
+        }
+    }
 
 
 
@@ -506,18 +732,10 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     // 渲染控件
     this.render = function () {
 
-        var dom = this.$dom || (this.$dom = this.$template.cloneNode(true)),
-            
-            style;
+        var dom = this.$dom || (this.$dom = this.$template.cloneNode(true));
 
         dom.$control = this;
-
-        this.__apply_patch();
-
-        if (style = this.__style)
-        {
-            style.__apply_patch(dom);
-        }
+        this.__patch(dom);
 
         return dom;
     }
@@ -530,41 +748,47 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
 
 
     // 补丁集合
-    var patches = [];
+    var patches = yaxi.__patches = [];
 
     // 调度器
     var schedule;
 
 
-
+    // 更新补丁
     function update() {
 
         var list = patches,
             index = 0,
             item,
-            fn;
+            any;
 
         while (item = list[index++])
         {
-            item.__apply_patch();
-
-            if (fn = item.invalidate)
+            if (any = item.$dom)
             {
-                fn.call(item);
+                item.__patch(any);
+
+                if (any = item.invalidate)
+                {
+                    any.call(item);
+                }
             }
         }
+
+        schedule = patches.length = 0;
     }
 
 
+
     // 注册补丁
-    this.__add_patch = function () {
+    this.$patch = function () {
 
         var target = this,
             parent;
 
         this.__dirty = true;
 
-        while (parent = target.parent);
+        while (parent = target.parent)
         {
             if (parent.__dirty)
             {
@@ -584,26 +808,29 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
     }
 
 
-    this.__apply_patch = function (dom) {
+    this.__patch = function (dom) {
 
-        var changes;
+        var changes, value, any;
 
         this.__dirty = false;
+
+        if ((any = this.__style) && (changes = any.__changes))
+        {
+            any.__patch(dom, changes);
+        }
 
         if (changes = this.__changes)
         {
             var storage = this.$storage,
-                renderer = this.renderer,
-                value,
-                fn;
+                renderer = this.renderer;
 
             for (var name in changes)
             {
                 storage[name] = value = changes[name];
 
-                if (fn = renderer[name])
+                if (any = renderer[name])
                 {
-                    fn.call(this, dom, value);
+                    any.call(this, dom, value);
                 }
                 else
                 {
@@ -615,12 +842,6 @@ yaxi.Control = yaxi.Observe.extend(function (Class, base) {
             return changes;
         }
     }
-
-
-    
-
-    // 更新补丁
-    var renderer = this.renderer = create(null);
 
 
 

@@ -196,10 +196,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             {
                 parent.removeChild(dom);
                 
-                if (loading)
+                if (loading && loading.$dom)
                 {
                     loading.show();
-                    loading.style.visibility = '';
+                    loading.$dom.style.visibility = '';
                 }
             }
         }

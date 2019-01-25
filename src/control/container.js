@@ -241,15 +241,6 @@ yaxi.impl.container = function (base) {
 
 
 
-    // 窗口变化时检查布局
-    window.addEventListener('resize', function () {
-
-        yaxi.trigger('yaxi-check-layout');
-        
-    });
-
-
-
 
     var renderer = this.renderer;
 
@@ -363,6 +354,35 @@ yaxi.impl.container = function (base) {
         }
 
         return dom;
+    }
+
+
+    
+    this.__patch = function (dom) {
+
+        var children = this.__children,
+            changes,
+            length,
+            control,
+            dom;
+
+        base.__patch.call(this, dom);
+
+        if (changes = children.__changes)
+        {
+            children.__patch(this, dom, changes);
+        }
+
+        if ((length = children.length) > 0)
+        {
+            for (var i = 0; i < length; i++)
+            {
+                if ((control = children[i]) && (dom = control.$dom))
+                {
+                    control.__patch(dom);
+                }
+            }
+        }
     }
 
 
@@ -533,9 +553,9 @@ yaxi.impl.pulldown = function () {
 
             if (loading = this.__loading)
             {
-                if (loading.shown)
+                if (loading.$dom)
                 {
-                    loading.style.visibility = 'hidden';
+                    loading.$dom.style.visibility = 'hidden';
                 }
                 else
                 {

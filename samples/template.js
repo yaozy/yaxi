@@ -10,17 +10,7 @@ module.exports = yaxi.Page.extend(function () {
         i18n: {
             text: 'i18n'
         },
-
-        onpulldown: function (pulldown) {
-
-            setTimeout(function () {
-
-                pulldown.hide();
-
-            }, 3000);
-        },
-
-        change: function () {
+        onchange: function () {
 
             alert(this.model.value);
         }
