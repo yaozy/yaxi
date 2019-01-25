@@ -265,7 +265,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             }
             else
             {
-                console.log(css);
                 name = key = css.replace(/-(\w)/g, camelize);
             }
 
