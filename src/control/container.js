@@ -350,7 +350,7 @@ yaxi.impl.container = function (base) {
 
         while (control = children[index++])
         {
-            dom.appendChild(control.render());
+            dom.appendChild(control.$dom || control.render());
         }
 
         return dom;

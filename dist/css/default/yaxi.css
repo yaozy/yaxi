@@ -658,6 +658,7 @@ textarea::-webkit-input-placeholder {
   line-height: 0.52rem;
   text-align: center;
   z-index: 1;
+  color: #999999;
 }
 .yx-actionsheet-content {
   padding-top: 0.5rem;

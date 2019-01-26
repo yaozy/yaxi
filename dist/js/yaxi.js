@@ -5918,7 +5918,7 @@ yaxi.impl.container = function (base) {
 
         while (control = children[index++])
         {
-            dom.appendChild(control.render());
+            dom.appendChild(control.$dom || control.render());
         }
 
         return dom;
@@ -11054,7 +11054,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         while (any = children[index++])
         {
-            host.appendChild(any.render());
+            host.appendChild(any.$dom || any.render());
         }
 
         if ((any = this.pagination) && children.length > 0)
