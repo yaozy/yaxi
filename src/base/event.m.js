@@ -206,10 +206,9 @@
 
 	bind('touchend', function (event) {
         
-        var control = state.control,
-            time;
+        var control, time;
 
-        if (control)
+        if (control = state.control)
         {
             state.control = null;
             event = touchEvent(event);
@@ -259,7 +258,6 @@
                 return false;
             }
 
-            state.control = null;
             return control.trigger(event);
         }
 

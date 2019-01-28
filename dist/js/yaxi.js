@@ -1367,10 +1367,9 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 	bind('touchend', function (event) {
         
-        var control = state.control,
-            time;
+        var control, time;
 
-        if (control)
+        if (control = state.control)
         {
             state.control = null;
             event = touchEvent(event);
@@ -1420,7 +1419,6 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 return false;
             }
 
-            state.control = null;
             return control.trigger(event);
         }
 
@@ -5945,7 +5943,7 @@ yaxi.impl.container = function (base) {
         {
             for (var i = 0; i < length; i++)
             {
-                if ((control = children[i]) && (dom = control.$dom))
+                if ((control = children[i]) && control.__dirty && (dom = control.$dom))
                 {
                     control.__patch(dom);
                 }
@@ -5986,7 +5984,7 @@ yaxi.impl.pulldown = function () {
 
 
     
-    var pulldown, loading, overflowY;
+    var pulldown, loading, host;
 
 
 
@@ -6098,19 +6096,12 @@ yaxi.impl.pulldown = function () {
 
     this.__on_touchmove = function (event) {
 
-        if (pulldown)
+        if (pulldown && pulldown.$dom)
         {
-            if (pulldown.$dom)
-            {
-                pulldown.move(event.distanceY);
+            pulldown.move(event.distanceY);
 
-                event.stop(true);
-                return false;
-            }
-            else
-            {
-                pulldown = null;
-            }
+            event.stop(true);
+            return false;
         }
 
         if ((pulldown = this.__pulldown) && this.$dom.scrollTop < 1 && 
@@ -6136,13 +6127,17 @@ yaxi.impl.pulldown = function () {
             state.clientX = event.clientX;
             state.clientY = event.clientY;
     
-            overflowY = style.overflowY;
-            style.overflowY = 'hidden';
+            // 记录前当滚动的容器
+            host = style.overflowY === 'auto' ? this.$dom : null;
 
             pulldown.start(this);
 
             event.stop(true);
             return false;
+        }
+        else
+        {
+            pulldown = host = null;
         }
     }
 
@@ -6153,7 +6148,10 @@ yaxi.impl.pulldown = function () {
         {
             if (pulldown.$dom)
             {
-                this.$dom.style.overflowY = overflowY || '';
+                if (host)
+                {
+                    host.style.overflowY = 'auto';
+                }
 
                 pulldown.stop(this, loading);
                 pulldown = null;
@@ -6162,7 +6160,7 @@ yaxi.impl.pulldown = function () {
                 return false;
             }
 
-            pulldown = loading = null;
+            pulldown = loading = host = null;
         }
     }
 
@@ -6770,13 +6768,13 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         // 第二个以后是要移除节点
         if (changes.length > 2)
         {
-            this.__remove(owner, changes);
+            this.__remove(owner, dom, changes);
         }
 
         // 第二个参数是增加的子控件集合
         if (changes[1].length > 0)
         {
-            this.__insert(owner, changes[1], dom);
+            this.__insert(owner, dom, changes[1]);
         }
 
         // 第一个参数是否排序
@@ -6794,7 +6792,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__insert = function (owner, controls, dom) {
+    this.__insert = function (owner, dom, controls) {
 
         var last = owner.__loading && dom.lastChild;
 
@@ -6816,20 +6814,22 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__remove = function (owner, changes) {
+    this.__remove = function (owner, dom, changes) {
 
-        var control, dom, parent;
+        var control, node;
 
         for (var i = 2, l = changes.length; i < l; i++)
         {
+            // 父控件未发生变化则不处理
             if ((control = changes[i]).parent === owner)
             {
                 continue;
             }
 
-            if ((dom = control.$dom) && (parent = dom.parentNode))
+            // 父节点未变则
+            if ((node = control.$dom) && node.parentNode === dom)
             {
-                parent.removeChild(dom);
+                dom.removeChild(node);
             }
 
             // 如果没有父节点且不缓存则销毁组件
@@ -7503,9 +7503,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
     function done(container) {
 
-        var dom = this.$dom;
+        var self = this,
+            dom;
 
-        if (dom)
+        if (dom = this.$dom)
         {
             dom = dom.firstChild;
             dom.style.display = 'none';
@@ -7519,9 +7520,9 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             // 最少显示500ms的loading
             setTimeout(function () {
 
-                this.onload.call(container, this);
+                self.onload.call(container, self);
 
-            }.bind(this), 500);
+            }, 500);
         }
     }
 
@@ -7550,10 +7551,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             parent.removeChild(dom);
         }
 
-        if (loading)
+        if (loading && (dom = loading.$dom))
         {
             loading.show();
-            loading.style.visibility = '';
+            dom.style.visibility = '';
         }
     }
 
@@ -7665,10 +7666,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             {
                 parent.removeChild(dom);
                 
-                if (loading && loading.$dom)
+                if (loading && (dom = loading.$dom))
                 {
                     loading.show();
-                    loading.$dom.style.visibility = '';
+                    dom.style.visibility = '';
                 }
             }
         }
@@ -8351,6 +8352,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             previous,
             item,
             host,
+            dom,
             start;
 
         if (previous = children[this.__index])
@@ -8359,7 +8361,11 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
             if (host = previous.host)
             {
-                host.display = 'none';
+                if (dom = host.$dom)
+                {
+                    dom.style.display = 'none';
+                }
+
                 host.onhide && host.onhide();
             }
         }
@@ -8368,7 +8374,11 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
         {
             if (host = item.host)
             {
-                host.display = 'block';
+                if (dom = host.$dom)
+                {
+                    dom.style.display = '';
+                }
+
                 host.onshow && host.onshow(false);
             }
             else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url
@@ -9632,7 +9642,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			this.onopened();
 			this.onshow(true);
 
-			if (opener)
+			if (opener && opener.$dom)
 			{
 				opener.$dom.style.display = 'none';
 				opener.onhide();
@@ -9679,24 +9689,27 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		yaxi.toast.hide();
 
-		event.type = 'closed';
-
-		this.trigger(event, payload);
-		this.opener = null;
-
-		// 如果当前窗口是隐藏状态则显示当前窗口
-		if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+		try
 		{
-			dom.style.display = '';
-
-			opener.onshow();
-			opener.invalidate();
+			event.type = 'closed';	
+			this.trigger(event, payload);
 		}
-
-		if (this.autoDestroy)
+		finally
 		{
-			// 延时销毁以加快页面切换速度
-			setTimeout(this.destroy.bind(this), 100);
+			this.opener = null;
+
+			// 如果当前窗口是隐藏状态则显示当前窗口
+			if ((opener = Class.current) && (dom = opener.$dom))
+			{
+				dom.style.display = '';
+				opener.onshow();
+			}
+
+			if (this.autoDestroy)
+			{
+				// 延时销毁以加快页面切换速度
+				setTimeout(this.destroy.bind(this), 100);
+			}
 		}
 
 		return true;
@@ -11080,7 +11093,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     var position = 0;
 
 
-    this.__on_touchstart = function () {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom,
             width = dom.clientWidth;

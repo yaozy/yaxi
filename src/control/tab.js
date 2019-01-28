@@ -110,6 +110,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             previous,
             item,
             host,
+            dom,
             start;
 
         if (previous = children[this.__index])
@@ -118,7 +119,11 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
             if (host = previous.host)
             {
-                host.display = 'none';
+                if (dom = host.$dom)
+                {
+                    dom.style.display = 'none';
+                }
+
                 host.onhide && host.onhide();
             }
         }
@@ -127,7 +132,11 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
         {
             if (host = item.host)
             {
-                host.display = 'block';
+                if (dom = host.$dom)
+                {
+                    dom.style.display = '';
+                }
+
                 host.onshow && host.onshow(false);
             }
             else if (item.url && (host = this.host && this.find(this.host)) && (children = host.children)) // 打开指定url

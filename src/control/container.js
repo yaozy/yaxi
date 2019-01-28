@@ -377,7 +377,7 @@ yaxi.impl.container = function (base) {
         {
             for (var i = 0; i < length; i++)
             {
-                if ((control = children[i]) && (dom = control.$dom))
+                if ((control = children[i]) && control.__dirty && (dom = control.$dom))
                 {
                     control.__patch(dom);
                 }
@@ -418,7 +418,7 @@ yaxi.impl.pulldown = function () {
 
 
     
-    var pulldown, loading, overflowY;
+    var pulldown, loading, host;
 
 
 
@@ -530,19 +530,12 @@ yaxi.impl.pulldown = function () {
 
     this.__on_touchmove = function (event) {
 
-        if (pulldown)
+        if (pulldown && pulldown.$dom)
         {
-            if (pulldown.$dom)
-            {
-                pulldown.move(event.distanceY);
+            pulldown.move(event.distanceY);
 
-                event.stop(true);
-                return false;
-            }
-            else
-            {
-                pulldown = null;
-            }
+            event.stop(true);
+            return false;
         }
 
         if ((pulldown = this.__pulldown) && this.$dom.scrollTop < 1 && 
@@ -568,13 +561,17 @@ yaxi.impl.pulldown = function () {
             state.clientX = event.clientX;
             state.clientY = event.clientY;
     
-            overflowY = style.overflowY;
-            style.overflowY = 'hidden';
+            // 记录前当滚动的容器
+            host = style.overflowY === 'auto' ? this.$dom : null;
 
             pulldown.start(this);
 
             event.stop(true);
             return false;
+        }
+        else
+        {
+            pulldown = host = null;
         }
     }
 
@@ -585,7 +582,10 @@ yaxi.impl.pulldown = function () {
         {
             if (pulldown.$dom)
             {
-                this.$dom.style.overflowY = overflowY || '';
+                if (host)
+                {
+                    host.style.overflowY = 'auto';
+                }
 
                 pulldown.stop(this, loading);
                 pulldown = null;
@@ -594,7 +594,7 @@ yaxi.impl.pulldown = function () {
                 return false;
             }
 
-            pulldown = loading = null;
+            pulldown = loading = host = null;
         }
     }
 

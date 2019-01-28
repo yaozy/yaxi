@@ -34,9 +34,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
 
     function done(container) {
 
-        var dom = this.$dom;
+        var self = this,
+            dom;
 
-        if (dom)
+        if (dom = this.$dom)
         {
             dom = dom.firstChild;
             dom.style.display = 'none';
@@ -50,9 +51,9 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             // 最少显示500ms的loading
             setTimeout(function () {
 
-                this.onload.call(container, this);
+                self.onload.call(container, self);
 
-            }.bind(this), 500);
+            }, 500);
         }
     }
 
@@ -81,10 +82,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             parent.removeChild(dom);
         }
 
-        if (loading)
+        if (loading && (dom = loading.$dom))
         {
             loading.show();
-            loading.style.visibility = '';
+            dom.style.visibility = '';
         }
     }
 
@@ -196,10 +197,10 @@ yaxi.Pulldown = yaxi.Control.extend(function (Class, base) {
             {
                 parent.removeChild(dom);
                 
-                if (loading && loading.$dom)
+                if (loading && (dom = loading.$dom))
                 {
                     loading.show();
-                    loading.$dom.style.visibility = '';
+                    dom.style.visibility = '';
                 }
             }
         }

@@ -478,7 +478,7 @@ textarea::-webkit-input-placeholder {
   background-color: white;
 }
 .yx-switchbutton-checked > .yx-switchbutton-bar {
-  background-color: #31313d;
+  background-color: #71c04a;
 }
 .yx-switchbutton-checked > .yx-switchbutton-button {
   left: auto;
@@ -505,6 +505,7 @@ textarea::-webkit-input-placeholder {
   text-align: center;
   font-weight: bold;
   box-shadow: none;
+  color: #6c768b;
 }
 .yx-dialog > .yx-content {
   position: relative;
@@ -873,13 +874,14 @@ textarea::-webkit-input-placeholder {
 .yx-tel {
   display: inline-block;
 }
-.yx-tel > a {
+.yx-tel > a:first-child {
   position: absolute;
   display: inline-block;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 100;
 }
 [layout="block"] > * {
   display: block;
@@ -1048,7 +1050,7 @@ textarea::-webkit-input-placeholder {
 [theme="danger"] {
   border-color: #ff6c6c;
   color: #ff6c6c;
-  fill: #e89518;
+  fill: #ff6c6c;
 }
 [theme="level1-reverse"] {
   background-color: #31313d;

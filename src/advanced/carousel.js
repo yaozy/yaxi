@@ -158,7 +158,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     var position = 0;
 
 
-    this.__on_touchstart = function () {
+    this.__on_touchstart = function (event) {
 
         var dom = this.$dom,
             width = dom.clientWidth;

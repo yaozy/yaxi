@@ -392,13 +392,13 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
         // 第二个以后是要移除节点
         if (changes.length > 2)
         {
-            this.__remove(owner, changes);
+            this.__remove(owner, dom, changes);
         }
 
         // 第二个参数是增加的子控件集合
         if (changes[1].length > 0)
         {
-            this.__insert(owner, changes[1], dom);
+            this.__insert(owner, dom, changes[1]);
         }
 
         // 第一个参数是否排序
@@ -416,7 +416,7 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__insert = function (owner, controls, dom) {
+    this.__insert = function (owner, dom, controls) {
 
         var last = owner.__loading && dom.lastChild;
 
@@ -438,20 +438,22 @@ yaxi.ControlCollection = Object.extend.call({}, function (Class) {
     }
 
 
-    this.__remove = function (owner, changes) {
+    this.__remove = function (owner, dom, changes) {
 
-        var control, dom, parent;
+        var control, node;
 
         for (var i = 2, l = changes.length; i < l; i++)
         {
+            // 父控件未发生变化则不处理
             if ((control = changes[i]).parent === owner)
             {
                 continue;
             }
 
-            if ((dom = control.$dom) && (parent = dom.parentNode))
+            // 父节点未变则
+            if ((node = control.$dom) && node.parentNode === dom)
             {
-                parent.removeChild(dom);
+                dom.removeChild(node);
             }
 
             // 如果没有父节点且不缓存则销毁组件

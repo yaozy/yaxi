@@ -319,7 +319,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			this.onopened();
 			this.onshow(true);
 
-			if (opener)
+			if (opener && opener.$dom)
 			{
 				opener.$dom.style.display = 'none';
 				opener.onhide();
@@ -366,24 +366,27 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 		yaxi.toast.hide();
 
-		event.type = 'closed';
-
-		this.trigger(event, payload);
-		this.opener = null;
-
-		// 如果当前窗口是隐藏状态则显示当前窗口
-		if ((opener = Class.current) && (dom = opener.$dom) && dom.style.display === 'none')
+		try
 		{
-			dom.style.display = '';
-
-			opener.onshow();
-			opener.invalidate();
+			event.type = 'closed';	
+			this.trigger(event, payload);
 		}
-
-		if (this.autoDestroy)
+		finally
 		{
-			// 延时销毁以加快页面切换速度
-			setTimeout(this.destroy.bind(this), 100);
+			this.opener = null;
+
+			// 如果当前窗口是隐藏状态则显示当前窗口
+			if ((opener = Class.current) && (dom = opener.$dom))
+			{
+				dom.style.display = '';
+				opener.onshow();
+			}
+
+			if (this.autoDestroy)
+			{
+				// 延时销毁以加快页面切换速度
+				setTimeout(this.destroy.bind(this), 100);
+			}
 		}
 
 		return true;
