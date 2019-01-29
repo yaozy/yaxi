@@ -2,10 +2,15 @@
 yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
-    
 
     // 重定向状态码
-    this.redirectStatus = 299;
+    Class.redirectStatus = 299;
+
+
+    // 默认超时时间
+    Class.timeout = 10000;
+
+
 
 
     // 重定向
@@ -78,10 +83,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
             stream.reject({
                 url: options.url,
-                status: 'timeout'
+                status: 601,
+                message: yaxi.i18n.ajax.timeout
             });
 
-        }, options.timeout || 30000);
+        }, options.timeout || Class.timeout);
 
         ajax.send(options.data);
 
@@ -99,8 +105,8 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
         {
             stream.reject({
                 url: options.url,
-                status: ajax.status,
-                message: ajax.statusText || ajax.responseText,
+                status: ajax.status || 600,
+                message: ajax.statusText || ajax.responseText || yaxi.i18n.ajax.network,
                 options: options
             });
         }
@@ -109,7 +115,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
     this.response = function (ajax, stream, options) {
 
-        if (ajax.status === this.redirectStatus)
+        if (ajax.status === Class.redirectStatus)
         {
             this.redirect();
         }

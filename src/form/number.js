@@ -177,6 +177,18 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
+    this.__on_input = function (event) {
+
+        var maxlength = this.maxlength;
+
+        // 增加input type="number"不支持maxlength的问题
+        if (maxlength > 0 && event.target.value.length >= maxlength)
+        {
+            return false;
+        }
+    }
+
+
     this.__on_change = function (event) {
 
         var value = this.value;
@@ -192,6 +204,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
             this.renderer.value(this.$dom, value);
         }
     }
+
 
 
 

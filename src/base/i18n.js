@@ -6,6 +6,11 @@ yaxi.languages = {
         Yes: 'Yes',
         No: 'No',
 
+        ajax: {
+            network: 'network refused！',
+            timeout: 'request timeout'
+        },
+
         loading: {
             loading: 'loading, please wait...',
             empty: 'no data',
@@ -28,6 +33,11 @@ yaxi.languages = {
         Cancel: '取消',
         Yes: '是',
         No: '否',
+
+        ajax: {
+            network: '无法连接服务器, 请检查网络设置！',
+            timeout: '请求超时！'
+        },
 
         loading: {
             loading: '正在加载, 请稍候...',
@@ -52,6 +62,11 @@ yaxi.languages = {
         Cancel: '取消',
         Yes: '是',
         No: '否',
+
+        ajax: {
+            network: '無法連接服務器, 請檢查網絡設置！',
+            timeout: '請求超時！'
+        },
 
         loading: {
             loading: '正在加載, 請稍候...',

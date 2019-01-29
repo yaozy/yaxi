@@ -45,7 +45,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('align', 'left');
 
 
-    this.$property('maxLength', 0, true, 'max-length');
+    this.$property('maxlength', 0, true);
 
 
     this.$property('pattern', '');
@@ -109,13 +109,13 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
     renderer.placeholder = function (dom, value) {
 
-        dom.firstChild.placeholder = value;
+        dom.firstChild.setAttribute('placeholder', value);
     }
 
 
-    renderer.maxLength = function (dom, value) {
+    renderer.maxlength = function (dom, value) {
 
-        dom.firstChild.maxLength = value;
+        dom.firstChild.setAttribute('maxlength', value);
     }
 
 

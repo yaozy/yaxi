@@ -1,7 +1,9 @@
 ;(function (Math) {
 
 
-    
+
+    var round = Math.round;
+
     var toFixed = (0).toFixed;
 
     var cache = new Decimal(0);
@@ -292,7 +294,7 @@
 
         if ((digits |= 0) < d)
         {
-            this.v = this.v / ('1e' + (d - digits)) + .50000000000005 | 0;
+            this.v = round(this.v / ('1e' + (d - digits)));
             this.d = digits;
         }
 
@@ -360,20 +362,20 @@
     {
         number.toFixed = function (digits) {
 
-            return toFixed.call(round(+this, digits |= 0), digits);
+            return toFixed.call(roundFix(+this, digits |= 0), digits);
         }
     }
 
 
     number.round = function (digits) {
 
-        return round(+this, digits);
+        return roundFix(+this, digits);
     }
 
 
 
     // 重载四舍五入方法增加指定小数位数
-    function round(value, digits) {
+    function roundFix(value, digits) {
 
         if (value !== value)
         {
@@ -383,15 +385,15 @@
         if ((digits |= 0) > 0)
         {
             digits = '1e' + digits;
-            return (value * digits + .50000000000005 | 0) / digits;
+            return round(value * digits) / digits;
         }
 
-        return value + .50000000000005 | 0;
+        return round(value);
     }
 
 
 
-    Math.round = round;
+    Math.round = roundFix;
 
 
 

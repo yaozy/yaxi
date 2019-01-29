@@ -69,6 +69,11 @@ yaxi.languages = {
         Yes: 'Yes',
         No: 'No',
 
+        ajax: {
+            network: 'network refused！',
+            timeout: 'request timeout'
+        },
+
         loading: {
             loading: 'loading, please wait...',
             empty: 'no data',
@@ -91,6 +96,11 @@ yaxi.languages = {
         Cancel: '取消',
         Yes: '是',
         No: '否',
+
+        ajax: {
+            network: '无法连接服务器, 请检查网络设置！',
+            timeout: '请求超时！'
+        },
 
         loading: {
             loading: '正在加载, 请稍候...',
@@ -115,6 +125,11 @@ yaxi.languages = {
         Cancel: '取消',
         Yes: '是',
         No: '否',
+
+        ajax: {
+            network: '無法連接服務器, 請檢查網絡設置！',
+            timeout: '請求超時！'
+        },
 
         loading: {
             loading: '正在加載, 請稍候...',
@@ -373,7 +388,9 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 ;(function (Math) {
 
 
-    
+
+    var round = Math.round;
+
     var toFixed = (0).toFixed;
 
     var cache = new Decimal(0);
@@ -664,7 +681,7 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 
         if ((digits |= 0) < d)
         {
-            this.v = this.v / ('1e' + (d - digits)) + .50000000000005 | 0;
+            this.v = round(this.v / ('1e' + (d - digits)));
             this.d = digits;
         }
 
@@ -732,20 +749,20 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
     {
         number.toFixed = function (digits) {
 
-            return toFixed.call(round(+this, digits |= 0), digits);
+            return toFixed.call(roundFix(+this, digits |= 0), digits);
         }
     }
 
 
     number.round = function (digits) {
 
-        return round(+this, digits);
+        return roundFix(+this, digits);
     }
 
 
 
     // 重载四舍五入方法增加指定小数位数
-    function round(value, digits) {
+    function roundFix(value, digits) {
 
         if (value !== value)
         {
@@ -755,15 +772,15 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
         if ((digits |= 0) > 0)
         {
             digits = '1e' + digits;
-            return (value * digits + .50000000000005 | 0) / digits;
+            return round(value * digits) / digits;
         }
 
-        return value + .50000000000005 | 0;
+        return round(value);
     }
 
 
 
-    Math.round = round;
+    Math.round = roundFix;
 
 
 
@@ -1432,6 +1449,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
+            if ((fn = control.__on_input) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
             e = new Event('input');
             e.dom = event.target;
             e.domEvent = event;
@@ -2970,10 +2992,15 @@ yaxi.Stream = Object.extend(function (Class) {
 yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
 
-    
 
     // 重定向状态码
-    this.redirectStatus = 299;
+    Class.redirectStatus = 299;
+
+
+    // 默认超时时间
+    Class.timeout = 10000;
+
+
 
 
     // 重定向
@@ -3046,10 +3073,11 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
             stream.reject({
                 url: options.url,
-                status: 'timeout'
+                status: 601,
+                message: yaxi.i18n.ajax.timeout
             });
 
-        }, options.timeout || 30000);
+        }, options.timeout || Class.timeout);
 
         ajax.send(options.data);
 
@@ -3067,8 +3095,8 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
         {
             stream.reject({
                 url: options.url,
-                status: ajax.status,
-                message: ajax.statusText || ajax.responseText,
+                status: ajax.status || 600,
+                message: ajax.statusText || ajax.responseText || yaxi.i18n.ajax.network,
                 options: options
             });
         }
@@ -3077,7 +3105,7 @@ yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
 
     this.response = function (ajax, stream, options) {
 
-        if (ajax.status === this.redirectStatus)
+        if (ajax.status === Class.redirectStatus)
         {
             this.redirect();
         }
@@ -8625,7 +8653,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('align', 'left');
 
 
-    this.$property('maxLength', 0, true, 'max-length');
+    this.$property('maxlength', 0, true);
 
 
     this.$property('pattern', '');
@@ -8689,13 +8717,13 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
     renderer.placeholder = function (dom, value) {
 
-        dom.firstChild.placeholder = value;
+        dom.firstChild.setAttribute('placeholder', value);
     }
 
 
-    renderer.maxLength = function (dom, value) {
+    renderer.maxlength = function (dom, value) {
 
-        dom.firstChild.maxLength = value;
+        dom.firstChild.setAttribute('maxlength', value);
     }
 
 
@@ -9088,6 +9116,18 @@ yaxi.Number = yaxi.TextBox.extend(function () {
 
 
 
+    this.__on_input = function (event) {
+
+        var maxlength = this.maxlength;
+
+        // 增加input type="number"不支持maxlength的问题
+        if (maxlength > 0 && event.target.value.length >= maxlength)
+        {
+            return false;
+        }
+    }
+
+
     this.__on_change = function (event) {
 
         var value = this.value;
@@ -9103,6 +9143,7 @@ yaxi.Number = yaxi.TextBox.extend(function () {
             this.renderer.value(this.$dom, value);
         }
     }
+
 
 
 

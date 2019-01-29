@@ -233,6 +233,11 @@
 
         if (control = findControl(event.target))
         {
+            if ((fn = control.__on_input) && fn.call(control, event) === false)
+            {
+                return false;
+            }
+
             e = new Event('input');
             e.dom = event.target;
             e.domEvent = event;
