@@ -37,7 +37,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
             if ((value |= 0) < 0)
             {
-                return 0;
+                return -1;
             }
             
             if (value >= this.children.length)
@@ -142,7 +142,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         if (any = this.time)
         {
-            this.renderer.time(dom, any);
+            renderer.time.call(this, dom, any);
         }
 
         children.onchange = onchange;
@@ -215,12 +215,12 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
         }
         else
         {
-            this.renderer.index(this.$dom, index | 0);
+            renderer.index.call(this, this.$dom, index | 0);
         }
 
         if (value = this.time)
         {
-            this.renderer.time(this.$dom, value + 1000);
+            renderer.time.call(this, this.$dom, value + 1000);
         }
 
         event.stop(true);
@@ -235,44 +235,47 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     
     renderer.index = function (dom, value) {
 
-        var name = 'yx-carousel-selected',
-            style1 = dom.firstChild.style,
-            style2,
-            any;
+        if (this.__children.length > 0)
+        {
+            var name = 'yx-carousel-selected',
+                style1 = dom.firstChild.style,
+                style2,
+                any;
 
-        if (value > 0 || position)
-        {
-            style1.transform = 'translateX(-' + value + '00%)';
-        }
-        else // 回到第一页动画特殊处理
-        {
-            if (any = +style1.transform.match(/\d+/) | 0)
+            if (value > 0 || position)
             {
-                any += 100;
+                style1.transform = 'translateX(-' + value + '00%)';
+            }
+            else // 回到第一页动画特殊处理
+            {
+                if (any = +style1.transform.match(/\d+/) | 0)
+                {
+                    any += 100;
+                }
+
+                style2 = dom.firstChild.firstChild.style;
+                style2.transform = 'translateX(' + any + '%)';
+
+                style1.transform = 'translateX(-' + any + '%)';
+
+                setTimeout(function () {
+
+                    style1.transform = style1.transition = style2.transform = '';
+
+                }, 600);
             }
 
-            style2 = dom.firstChild.firstChild.style;
-            style2.transform = 'translateX(' + any + '%)';
+            style1.transition = 'transform 600ms ease';
 
-            style1.transform = 'translateX(-' + any + '%)';
+            if (any = dom.lastChild.querySelector('.' + name))
+            {
+                any.classList.remove(name);
+            }
 
-            setTimeout(function () {
-
-                style1.transform = style1.transition = style2.transform = '';
-
-            }, 600);
-        }
-
-        style1.transition = 'transform 600ms ease';
-
-        if (any = dom.lastChild.querySelector('.' + name))
-        {
-            any.classList.remove(name);
-        }
-
-        if (any = dom.lastChild.children[value])
-        {
-            any.classList.add(name);
+            if (any = dom.lastChild.children[value])
+            {
+                any.classList.add(name);
+            }
         }
     }
 
@@ -341,7 +344,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     
     function auto() {
 
-        var children = this.children,
+        var children = this.__children,
             index = this.index + 1;
 
         if (index >= children.length)

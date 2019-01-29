@@ -588,7 +588,7 @@ textarea::-webkit-input-placeholder {
 .yx-footer {
   position: absolute;
   left: 0;
-  right: 0;
+  width: 100%;
   bottom: 0;
   overflow: hidden;
   background-color: #ffffff;
@@ -919,7 +919,7 @@ textarea::-webkit-input-placeholder {
   transform: translateY(-50%);
 }
 [layout="line-middle"] > .yx-text {
-  padding-bottom: 0.1em;
+  padding-top: 0.1em;
 }
 [layout="line-bottom"] {
   height: 0.5rem;
