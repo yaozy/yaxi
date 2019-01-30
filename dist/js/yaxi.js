@@ -1315,6 +1315,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
 		
         var control;
 
+        yaxi.pressdown = true;
+
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
             event.stopPropagation();
@@ -1386,6 +1388,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
         
         var control, time;
 
+        yaxi.pressdown = false;
+
         if (control = state.control)
         {
             state.control = null;
@@ -1425,6 +1429,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
 	bind('touchcancel', function (event) {
         
         var control;
+
+        yaxi.pressdown = false;
 
         if (control = state.control)
         {
@@ -10998,8 +11004,6 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 		{
 			init.apply(this, arguments);
         }
-
-        this.__auto = auto.bind(this);
     }
 
 
@@ -11133,42 +11137,68 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
     var position = 0;
 
+    var swipe = 0;
+
 
     this.__on_touchstart = function (event) {
 
-        var dom = this.$dom,
-            width = dom.clientWidth;
+        var children = this.__children;
 
-        if (this.__delay)
+        if (children.length > 0)
         {
-            clearTimeout(this.__delay);
-            this.__delay = 0;
+            var dom = this.$dom,
+                width = dom.clientWidth;
+
+            last = -(children.length - 1) * width;
+            position = -this.index * width;
+
+            dom.firstChild.style.transition = '';
+            swipe = 0;
         }
-
-        last = -(this.__children.length - 1) * width;
-        position = -this.index * width;
-
-        dom.firstChild.style.transition = '';
-
-        event.stop(true);
-        return false;
+        else
+        {
+            swipe = -1;
+        }
     }
 
 
     this.__on_touchmove = function (event) {
 
-        var offset = position + event.distanceX;
-
-        if (offset > 0)
+        if (swipe < 0)
         {
-            offset = 0;
-        }
-        else if (offset < last)
-        {
-            offset = last;
+            return;
         }
 
-        this.$dom.firstChild.style.transform = 'translateX(' + offset + 'px)';
+        var x = event.distanceX,
+            y = event.distanceY;
+
+        if (swipe === 0)
+        {
+            if (y < 0)
+            {
+                y = -y;
+            }
+
+            if ((x > 0 ? x : -x) < y)
+            {
+                return;
+            }
+
+            swipe = 1;
+        }
+
+        x += position;
+
+        if (x > 0)
+        {
+            x = 0;
+        }
+        else if (x < last)
+        {
+            x = last;
+        }
+
+        this.$dom.firstChild.style.transform = 'translateX(' + x + 'px)';
 
         event.stop(true);
         return false;
@@ -11177,30 +11207,33 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
     this.__on_touchend = this.__on_touchcancel = function (event) {
 
-        var index = this.index,
-            offset = event.distanceX,
-            value = yaxi.rem;
+        if (swipe > 0)
+        {
+            var index = this.index,
+                offset = event.distanceX,
+                value = yaxi.rem / 2;
 
-        if (offset < -value && index < this.__children.length - 1)
-        {
-            this.index++;
-        }
-        else if (offset > value && index > 0)
-        {
-            this.index--;
-        }
-        else
-        {
-            renderer.index.call(this, this.$dom, index | 0);
-        }
+            if (offset < -value && index < this.__children.length - 1)
+            {
+                this.index++;
+            }
+            else if (offset > value && index > 0)
+            {
+                this.index--;
+            }
+            else
+            {
+                renderer.index.call(this, this.$dom, index | 0);
+            }
 
-        if (value = this.time)
-        {
-            renderer.time.call(this, this.$dom, value + 1000);
-        }
+            if (value = this.time)
+            {
+                renderer.time.call(this, this.$dom, value + 1000);
+            }
 
-        event.stop(true);
-        return false;
+            event.stop(true);
+            return false;
+        }
     }
 
 
@@ -11218,7 +11251,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
                 style2,
                 any;
 
-            if (value > 0 || position)
+            if (value > 0 || swipe > 0)
             {
                 style1.transform = 'translateX(-' + value + '00%)';
             }
@@ -11265,7 +11298,7 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
 
         if (value > 0)
         {
-            this.__delay = setTimeout(this.__auto, value);
+            autoplay.call(this, value);
         }
     }
 
@@ -11317,22 +11350,42 @@ yaxi.Carousel = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    
-    function auto() {
+    function autoplay(time) {
 
-        var children = this.__children,
-            index = this.index + 1;
+        var fn = (function () {
 
-        if (index >= children.length)
-        {
-            index = 0;
-        }
+            var time = this.time,
+                children,
+                index;
 
-        this.index = index;
+            if (time > 0)
+            {
+                if (!yaxi.pressdown && (children = this.__children).length > 0)
+                {
+                    if (swipe > 0)
+                    {
+                        swipe = 0;
+                    }
+                    else
+                    {
+                        index = this.index + 1;
 
-        this.__delay = setTimeout(this.__auto, this.time);
+                        if (index >= children.length)
+                        {
+                            index = 0;
+                        }
+
+                        this.index = index;
+                    }
+                }
+
+                this.__delay = setTimeout(fn, time);
+            }
+
+        }).bind(this);
+
+        this.__delay = setTimeout(fn, time);
     }
-
 
 
 

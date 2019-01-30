@@ -137,6 +137,8 @@
 		
         var control;
 
+        yaxi.pressdown = true;
+
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
             event.stopPropagation();
@@ -208,6 +210,8 @@
         
         var control, time;
 
+        yaxi.pressdown = false;
+
         if (control = state.control)
         {
             state.control = null;
@@ -247,6 +251,8 @@
 	bind('touchcancel', function (event) {
         
         var control;
+
+        yaxi.pressdown = false;
 
         if (control = state.control)
         {
