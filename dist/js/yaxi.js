@@ -9409,9 +9409,9 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	// 窗口变化时调整布局
 	window.addEventListener('resize', function () {
 
-		var page;
+		var page = stack[stack.length - 1];
 
-		if ((page = Class.current) && page.$dom)
+		if (page && page.$dom)
 		{
 			page.invalidate();
 		}
@@ -9419,24 +9419,21 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 
+
+	// 页面栈
+	var stack = Class.stack = [];
+
+
+
 	Class.all = function () {
 
-		var list = [],
-			page = Class.current;
-
-		while (page)
-		{
-			list.push(page);
-			page = page.opener;
-		}
-
-		return list.reverse();
+		return stack;
 	}
 
 
 	Class.close = function (amount, closeType) {
 
-		var page;
+		var list = stack;
 
 		if (typeof amount === 'string')
 		{
@@ -9448,19 +9445,23 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			amount = amount || 1;
 		}
 
-		while (amount > 0 && (page = Class.current))
+		for (var i = list.length; i--;)
 		{
-			page.close(closeType);
-			amount--;
+			if (--amount < 0)
+			{
+				return;
+			}
+
+			list[i].close(closeType);
 		}
 
-		return Class.current;
+		return list[list.length - 1] || null;
 	}
 
 
 	Class.closeTo = function (level, closeType) {
 
-		var list = Class.all();
+		var list = stack;
 
 		level |= 0;
 
@@ -9469,19 +9470,29 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			list[i].close(closeType || 'OK');
 		}
 
-		return list[level];
+		return list[level] || null;
 	}
 
 
 	Class.closeAll = function (closeType) {
 
-		var page;
+		var list = stack;
 
-		while (page = Class.current)
+		for (var i = list.length; i--;)
 		{
-			page.close(closeType || 'OK');
+			list[i].close(closeType || 'OK');
 		}
 	}
+
+
+	// 当前窗口
+	Object.defineProperty(Class, 'current', {
+
+		get: function () {
+
+			return stack[stack.length - 1] || null;
+		}
+	});
 
 
 
@@ -9497,6 +9508,17 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	// 是否自动销毁
 	this.$property('autoDestroy', true, false, 'auto-destroy');
 
+
+
+	// 上一个页面
+	Object.defineProperty(this, 'opener', {
+
+		get: function () {
+
+			var index = stack.indexOf(this);
+			return index > 0 && stack[index - 1] || null;
+		}
+	});
 
 
 	// 页头
@@ -9671,35 +9693,38 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
 	this.open = function () {
-				
-		if (this.onopening() !== false && this.trigger('opening') !== false)
+
+		var opener = stack[stack.length - 1];
+
+		if (stack.indexOf(this) >= 0 ||
+			this.onopening() === false ||
+			this.trigger('opening') === false)
 		{
-			var opener = Class.current || null;
-			
-			var time = performance.now();
-
-			Class.current = this;
-			this.opener = opener;
-			
-			yaxi.__dom_host.appendChild(this.$dom || this.render());
-			
-			this.onmounted();
-
-			this.openTime = new Date();
-			this.onopened();
-			this.onshow(true);
-
-			if (opener && opener.$dom)
-			{
-				opener.$dom.style.display = 'none';
-				opener.onhide();
-			}
-			
-			this.trigger('opened');
-			this.invalidate();
-
-			console.log('open page time: ' + (performance.now() - time) + 'ms');
+			return this;
 		}
+		
+		var time = performance.now();
+		
+		stack.push(this);
+
+		yaxi.__dom_host.appendChild(this.$dom || this.render());
+		
+		this.onmounted();
+
+		this.openTime = new Date();
+		this.onopened();
+		this.onshow(true);
+
+		this.trigger('opened');
+		this.invalidate();
+
+		if (opener && opener.$dom)
+		{
+			opener.$dom.style.display = 'none';
+			opener.onhide();
+		}
+
+		console.log('open page time: ' + (performance.now() - time) + 'ms');
 
 		return this;
 	}
@@ -9707,10 +9732,15 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType, payload) {
 		
-		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		var index = stack.indexOf(this);
+
+		if (index < 0 || this.onclosing(closeType || (closeType = 'OK'), payload) === false)
 		{
 			return false;
 		}
+
+		// 关闭所有弹出层
+		yaxi.FloatLayer.close();
 
 		var event = new yaxi.Event('closing');
 
@@ -9721,18 +9751,8 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 			return false;
 		}
 
-		var dom = this.$dom,
-			opener = this.opener;
-		
 		this.onhide();
 		this.onclosed(closeType, payload);
-
-		if (dom && dom.parentNode)
-		{
-			dom.parentNode.removeChild(dom);
-		}
-		
-		Class.current = opener;
 
 		yaxi.toast.hide();
 
@@ -9743,13 +9763,19 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		}
 		finally
 		{
-			this.opener = null;
+			var opener, dom;
 
-			// 如果当前窗口是隐藏状态则显示当前窗口
-			if ((opener = Class.current) && (dom = opener.$dom))
+			stack.splice(index, 1);
+
+			if ((opener = stack[stack.length - 1]) && (dom = opener.$dom))
 			{
 				dom.style.display = '';
-				opener.onshow();
+				opener.onshow(false);
+			}
+
+			if ((dom = this.$dom) && dom.parentNode)
+			{
+				dom.parentNode.removeChild(dom);
 			}
 
 			if (this.autoDestroy)
@@ -10317,6 +10343,17 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 		}
 	});
 	
+
+
+	Class.close = function () {
+
+		var list = stack;
+
+		for (var i = list.length; i--;)
+		{
+			list[i].close();
+		}
+	}
 
 	
 	
@@ -11628,6 +11665,12 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
+    this.invalidate = function () {
+
+        resizeMask(this.$dom);
+    }
+
+
 
     this.toCanvas = function () {
 
@@ -11681,9 +11724,49 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.toDataURL = function (type, quality) {
+    function compress(source, width, height) {
 
-        return this.toCanvas().toDataURL(type, quality);
+        var canvas = document.createElement('canvas'),
+            context = canvas.getContext('2d');
+
+        if (width)
+        {
+            height = source.height * width / source.width | 0;
+        }
+        else
+        {
+            width = source.width * height / source.height | 0;
+        }
+    
+        canvas.width = width;
+        canvas.height = height;
+    
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+    
+        context.drawImage(source, 0, 0, source.width, source.height, 0, 0, width, height);
+    
+        return canvas;
+    }
+
+
+    this.toDataURL = function (type, quality, width, height) {
+
+        var canvas = this.toCanvas();
+
+        if (width > 0)
+        {
+            if (width < canvas.width)
+            {
+                canvas = compress(canvas, width);
+            }
+        }
+        else if (height > 0 && height < canvas.height)
+        {
+            canvas = compress(canvas, 0, height);
+        }
+
+        return canvas.toDataURL(type, quality);
     }
 
 

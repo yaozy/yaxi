@@ -232,6 +232,12 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
+    this.invalidate = function () {
+
+        resizeMask(this.$dom);
+    }
+
+
 
     this.toCanvas = function () {
 
@@ -285,9 +291,49 @@ yaxi.ClipImage = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.toDataURL = function (type, quality) {
+    function compress(source, width, height) {
 
-        return this.toCanvas().toDataURL(type, quality);
+        var canvas = document.createElement('canvas'),
+            context = canvas.getContext('2d');
+
+        if (width)
+        {
+            height = source.height * width / source.width | 0;
+        }
+        else
+        {
+            width = source.width * height / source.height | 0;
+        }
+    
+        canvas.width = width;
+        canvas.height = height;
+    
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+    
+        context.drawImage(source, 0, 0, source.width, source.height, 0, 0, width, height);
+    
+        return canvas;
+    }
+
+
+    this.toDataURL = function (type, quality, width, height) {
+
+        var canvas = this.toCanvas();
+
+        if (width > 0)
+        {
+            if (width < canvas.width)
+            {
+                canvas = compress(canvas, width);
+            }
+        }
+        else if (height > 0 && height < canvas.height)
+        {
+            canvas = compress(canvas, 0, height);
+        }
+
+        return canvas.toDataURL(type, quality);
     }
 
 

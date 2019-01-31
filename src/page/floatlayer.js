@@ -27,6 +27,17 @@ yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
 	});
 	
 
+
+	Class.close = function () {
+
+		var list = stack;
+
+		for (var i = list.length; i--;)
+		{
+			list[i].close();
+		}
+	}
+
 	
 	
 	this.show = function () {
