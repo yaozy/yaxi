@@ -362,9 +362,7 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 	
 	this.close = function (closeType, payload) {
 		
-		var index = stack.indexOf(this);
-
-		if (index < 0 || this.onclosing(closeType || (closeType = 'OK'), payload) === false)
+		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false)
 		{
 			return false;
 		}
@@ -393,11 +391,21 @@ yaxi.Page = yaxi.Control.extend(function (Class, base) {
 		}
 		finally
 		{
-			var opener, dom;
+			var index = stack.indexOf(this),
+				opener,
+				dom;
 
-			stack.splice(index, 1);
+			if (index < 0)
+			{
+				index = stack.length;
+			}
+			else
+			{
+				stack.splice(index, 1);
+			}
 
-			if ((opener = stack[stack.length - 1]) && (dom = opener.$dom))
+			// 关闭的是最后一个窗口时才显示上一个窗口
+			if (index === stack.length && (opener = stack[index - 1]) && (dom = opener.$dom))
 			{
 				dom.style.display = '';
 				opener.onshow(false);
