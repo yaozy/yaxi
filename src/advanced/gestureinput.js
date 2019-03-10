@@ -140,10 +140,11 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
         var dom = this.$dom.firstChild,
             rect = dom.getBoundingClientRect(),
+            scale = yaxi.scale,
             index;
 
-        state.x = rect.left << 1;
-        state.y = rect.top << 1;
+        state.x = rect.left << scale;
+        state.y = rect.top << scale;
         state.width = dom.offsetWidth;
         state.height = dom.offsetHeight;
         state.size = state.width / 6 | 0;

@@ -1,9 +1,28 @@
 (function () {
 
 
+    var host = yaxi.__dom_host = document.createElement('div');
 
-    // 标记当前设备为移动设备(以鼠标事件为主)
-    yaxi.device = 'pc';
+
+	host.className = 'yx-host';
+
+    if (document.body)
+    {
+        document.body.appendChild(host);
+    }
+    else
+    {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.body.appendChild(host);
+        });
+    }
+
+    // 1rem = 100px
+	document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
+
+    // 是否放大一倍
+    yaxi.scale = 0;
 
 
 
@@ -17,7 +36,7 @@
     var state = Object.create(null);
 
 
-    var bind = document.addEventListener.bind(document);
+    var bind = host.addEventListener.bind(host);
 
 
 
@@ -69,8 +88,8 @@
         e.dom = event.target;
         e.state = state;
         e.domEvent = event;
-        e.clientX = event.clientX << 1;
-        e.clientY = event.clientY << 1;
+        e.clientX = event.clientX;
+        e.clientY = event.clientY;
         e.distanceX = e.clientX - state.clientX;
         e.distanceY = e.clientY - state.clientY;
 
@@ -127,8 +146,8 @@
             state.mousedown = state.tap = true;
             state.dom = event.target;
             state.control = control;
-            state.clientX = event.clientX << 1;
-            state.clientY = event.clientY << 1;
+            state.clientX = event.clientX;
+            state.clientY = event.clientY;
 
             event = mouseEvent(event);
 

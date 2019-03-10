@@ -40,7 +40,17 @@ const mime = {
   
 http.createServer(function (request, response) {
   
-    let url = decodeURIComponent(request.url.substring(1)) || 'index.html';
+    let url = decodeURIComponent(request.url.substring(1));
+
+    if (url)
+    {
+        let index = url.indexOf('?');
+
+        if (index >= 0)
+        {
+            url = url.substring(0, index);
+        }
+    }
 
     response.writeHead(200, {
         'Content-Type': mime[path.extname(url).substring(1)] || 'application/octet-stream'
@@ -52,6 +62,7 @@ http.createServer(function (request, response) {
     }
     else
     {
+        response.writeHead(404);
         response.end();
     }
 

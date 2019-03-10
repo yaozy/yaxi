@@ -80,8 +80,14 @@
     color['mask'] = '#000000';
 
 
+    
     (yaxi.colors || (yaxi.colors = {})).default = color;
     
+
+    if (typeof color !== 'undefined')
+    {
+        jiac.color = color;
+    }
     
 
 })(yaxi.color = {});

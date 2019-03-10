@@ -15,6 +15,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     var renderer = this.renderer = create(null);
 
 
+    if (typeof jiac !== 'undefined')
+    {
+        jiac.classes = classes;
+    }
+
 
 
     Class.register = function (name) {

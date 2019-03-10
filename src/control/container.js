@@ -309,7 +309,7 @@ yaxi.impl.container = function (base) {
             {
                 if (url = control.url)
                 {
-                    var Class = yaxi.loadModule(base, url),
+                    var Class = jiac.loadModule(base, url),
                         args = control.args;
 
                     if (!Class.prototype.open)
@@ -515,7 +515,7 @@ yaxi.impl.pulldown = function () {
 
             var dom = this.$dom;
 
-            if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
+            if (dom.scrollTop + (dom.offsetHeight << yaxi.scale) < dom.scrollHeight)
             {
                 return;
             }

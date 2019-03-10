@@ -3,11 +3,6 @@ var yaxi = Object.create(null);
 
 
 
-// 当前语言
-yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
-
-
-
 // 接口实现
 yaxi.impl = Object.create(null);
 

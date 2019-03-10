@@ -88,4 +88,4 @@ yaxi.languages = {
 };
 
 
-yaxi.i18n = yaxi.languages[yaxi.language] || yaxi.languages['en-US'];
+yaxi.i18n = yaxi.languages[jiac.language] || yaxi.languages['en-US'];

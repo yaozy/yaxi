@@ -2,8 +2,45 @@
 
 
 
-    // 标记当前设备为移动设备(仅使用触摸事件)
-    yaxi.device = 'mobile';
+    var host = yaxi.__dom_host = document.createElement('div');
+
+    // 是否放大一倍
+    var scale = yaxi.scale = 0
+
+    // 是否在微信浏览器中打开
+    var weixin = navigator.userAgent.toLowerCase().indexOf('micromessenger') >= 0;
+
+
+	host.className = 'yx-host';
+
+    if (document.body)
+    {
+        document.body.appendChild(host);
+    }
+    else
+    {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.body.appendChild(host);
+        });
+	}
+	
+	
+	// 在微信中打开时(微信自动排版会打乱网页布局)
+	if (weixin)
+	{
+        // 1rem = 100px
+		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
+	}
+	else
+	{
+		// 处理rem自适应
+		// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
+		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
+        host.style.cssText = 'width:200%;height:200%;transform-origin: 0 0;transform: scale(.5, .5);';
+        
+        yaxi.scale = scale = 1
+	}
 
 
 
@@ -24,7 +61,7 @@
     var tapTime = new Date();
 
 
-    var bind = document.addEventListener.bind(document);
+    var bind = host.addEventListener.bind(host);
 
 
 
@@ -61,8 +98,8 @@
         e.state = state;
         e.domEvent = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX << 1;
-        e.clientY = touch.clientY << 1;
+        e.clientX = touch.clientX << scale;
+        e.clientY = touch.clientY << scale;
         e.distanceX = e.clientX - state.clientX;
         e.distanceY = e.clientY - state.clientY;
 
@@ -132,6 +169,15 @@
     }
 
 
+    function stop(event) {
+      
+        event.stopPropagation();
+        event.preventDefault();
+
+        return false;
+    }
+
+
 
 	bind('touchstart', function (event) {
 		
@@ -141,34 +187,27 @@
 
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
-            event.stopPropagation();
-            return false;
+            return stop(event);
         }
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
+            var touch = event.changedTouches[0],
+                e = touchEvent(event, touch);
 
             state.tap = state.longTap = true;
 
             state.dom = event.target;
             state.control = control;
-            state.clientX = touch.clientX << 1;
-            state.clientY = touch.clientY << 1;
+            state.clientX = touch.clientX << scale;
+            state.clientY = touch.clientY << scale;
 
-            event = touchEvent(event, touch);
-
-            if (trigger(control, '__on_touchstart', event) === false)
+            if (trigger(control, '__on_touchstart', e) === false || control.trigger(e) === false)
             {
-                return state.tap = false;
-            }
-
-            if (control.trigger(event) === false)
-            {
-                return state.tap = false;
+                return state.tap = stop(event);
             }
         }
-        
+
 	}, true);
 
 
@@ -178,22 +217,24 @@
 
         if (control = state.control)
         {
-            event = touchEvent(event);
+            var e = touchEvent(event),
+                x,
+                y;
 
-            if (trigger(control, '__on_touchmove', event) === false)
+            if (trigger(control, '__on_touchmove', e) === false)
             {
-                return false;
+                return stop(event);
             }
 
-            if (control.trigger(event) === false)
+            if (control.trigger(e) === false)
             {
-                return state.tap = false;
+                return state.tap = stop(event);
             }
-
+            
             if (state.tap)
             {
-                var x = event.distanceX,
-                    y = event.distanceY;
+                x = e.distanceX;
+                y = e.distanceY;
 
                 // 如果移动了指定
                 if (x < -8 || x > 8 || y < -8 || y > 8)
@@ -201,6 +242,11 @@
                     state.tap = false;
                 }
             }
+        }
+
+        if (weixin)
+        {
+            // return stop(event);
         }
 
 	}, true);
@@ -214,17 +260,13 @@
 
         if (control = state.control)
         {
+            var e = touchEvent(event);
+
             state.control = null;
-            event = touchEvent(event);
 
-            if (trigger(control, '__on_touchend', event) === false)
+            if (trigger(control, '__on_touchend', e) === false || control.trigger(e) === false)
             {
-                return false;
-            }
-
-            if (control.trigger(event) === false)
-            {
-                return false;
+                return stop(event);
             }
 
             // 500ms内不重复触发tap事件
@@ -233,15 +275,13 @@
                 tapControl = control;
                 tapTime = time;
 
-                event.type = 'tap';
-                event.endEdit = endEdit;
+                e.type = 'tap';
+                e.endEdit = endEdit;
 
-                if (trigger(control, '__on_tap', event) === false)
+                if (trigger(control, '__on_tap', e) === false || control.trigger(e) === false)
                 {
-                    return false;
+                    return stop(event);
                 }
-                
-                return control.trigger(event) === false;
             }
         }
 
@@ -256,15 +296,14 @@
 
         if (control = state.control)
         {
+            var e = touchEvent(event);
+
             state.control = null;
-            event = touchEvent(event);
 
-            if (trigger(control, '__on_touchcancel', event) === false)
+            if (trigger(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
             {
-                return false;
+                return stop(event);
             }
-
-            return control.trigger(event);
         }
 
     }, true);

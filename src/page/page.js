@@ -1,40 +1,6 @@
 yaxi.Page = yaxi.Control.extend(function (Class, base) {
 
 
-
-
-    var host = yaxi.__dom_host = document.createElement('div');
-
-
-	host.className = 'yx-host';
-
-    if (document.body)
-    {
-        document.body.appendChild(host);
-    }
-    else
-    {
-        document.addEventListener('DOMContentLoaded', function () {
-
-            document.body.appendChild(host);
-        });
-	}
-	
-	
-	if (yaxi.device === 'mobile')
-	{
-		// 处理rem自适应
-		// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
-		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
-		host.style.cssText = 'width:200%;height:200%;transform-origin: 0 0;transform: scale(.5, .5);';
-	}
-	else
-	{
-		// pc端1rem = 100px
-		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
-	}
-
-
 	
 	// 窗口变化时调整布局
 	window.addEventListener('resize', function () {

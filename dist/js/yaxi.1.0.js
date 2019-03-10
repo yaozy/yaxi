@@ -3,11 +3,6 @@ var yaxi = Object.create(null);
 
 
 
-// 当前语言
-yaxi.language = navigator.language || navigator.userLanguage || 'en-US';
-
-
-
 // 接口实现
 yaxi.impl = Object.create(null);
 
@@ -151,7 +146,7 @@ yaxi.languages = {
 };
 
 
-yaxi.i18n = yaxi.languages[yaxi.language] || yaxi.languages['en-US'];
+yaxi.i18n = yaxi.languages[jiac.language] || yaxi.languages['en-US'];
 
 
 
@@ -1180,8 +1175,45 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    // 标记当前设备为移动设备(仅使用触摸事件)
-    yaxi.device = 'mobile';
+    var host = yaxi.__dom_host = document.createElement('div');
+
+    // 是否放大一倍
+    var scale = yaxi.scale = 0
+
+    // 是否在微信浏览器中打开
+    var weixin = navigator.userAgent.toLowerCase().indexOf('micromessenger') >= 0;
+
+
+	host.className = 'yx-host';
+
+    if (document.body)
+    {
+        document.body.appendChild(host);
+    }
+    else
+    {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.body.appendChild(host);
+        });
+	}
+	
+	
+	// 在微信中打开时(微信自动排版会打乱网页布局)
+	if (weixin)
+	{
+        // 1rem = 100px
+		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
+	}
+	else
+	{
+		// 处理rem自适应
+		// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
+		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
+        host.style.cssText = 'width:200%;height:200%;transform-origin: 0 0;transform: scale(.5, .5);';
+        
+        yaxi.scale = scale = 1
+	}
 
 
 
@@ -1202,7 +1234,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     var tapTime = new Date();
 
 
-    var bind = document.addEventListener.bind(document);
+    var bind = host.addEventListener.bind(host);
 
 
 
@@ -1239,8 +1271,8 @@ yaxi.EventTarget = Object.extend(function (Class) {
         e.state = state;
         e.domEvent = event;
         e.touches = event.changedTouches;
-        e.clientX = touch.clientX << 1;
-        e.clientY = touch.clientY << 1;
+        e.clientX = touch.clientX << scale;
+        e.clientY = touch.clientY << scale;
         e.distanceX = e.clientX - state.clientX;
         e.distanceY = e.clientY - state.clientY;
 
@@ -1310,6 +1342,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
     }
 
 
+    function stop(event) {
+      
+        event.stopPropagation();
+        event.preventDefault();
+
+        return false;
+    }
+
+
 
 	bind('touchstart', function (event) {
 		
@@ -1319,34 +1360,27 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if ((control = stack[0]) && closeLayer(stack[stack.length - 1], event.target))
         {
-            event.stopPropagation();
-            return false;
+            return stop(event);
         }
     
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
+            var touch = event.changedTouches[0],
+                e = touchEvent(event, touch);
 
             state.tap = state.longTap = true;
 
             state.dom = event.target;
             state.control = control;
-            state.clientX = touch.clientX << 1;
-            state.clientY = touch.clientY << 1;
+            state.clientX = touch.clientX << scale;
+            state.clientY = touch.clientY << scale;
 
-            event = touchEvent(event, touch);
-
-            if (trigger(control, '__on_touchstart', event) === false)
+            if (trigger(control, '__on_touchstart', e) === false || control.trigger(e) === false)
             {
-                return state.tap = false;
-            }
-
-            if (control.trigger(event) === false)
-            {
-                return state.tap = false;
+                return state.tap = stop(event);
             }
         }
-        
+
 	}, true);
 
 
@@ -1356,22 +1390,24 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = state.control)
         {
-            event = touchEvent(event);
+            var e = touchEvent(event),
+                x,
+                y;
 
-            if (trigger(control, '__on_touchmove', event) === false)
+            if (trigger(control, '__on_touchmove', e) === false)
             {
-                return false;
+                return stop(event);
             }
 
-            if (control.trigger(event) === false)
+            if (control.trigger(e) === false)
             {
-                return state.tap = false;
+                return state.tap = stop(event);
             }
-
+            
             if (state.tap)
             {
-                var x = event.distanceX,
-                    y = event.distanceY;
+                x = e.distanceX;
+                y = e.distanceY;
 
                 // 如果移动了指定
                 if (x < -8 || x > 8 || y < -8 || y > 8)
@@ -1379,6 +1415,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
                     state.tap = false;
                 }
             }
+        }
+
+        if (weixin)
+        {
+            // return stop(event);
         }
 
 	}, true);
@@ -1392,17 +1433,13 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = state.control)
         {
+            var e = touchEvent(event);
+
             state.control = null;
-            event = touchEvent(event);
 
-            if (trigger(control, '__on_touchend', event) === false)
+            if (trigger(control, '__on_touchend', e) === false || control.trigger(e) === false)
             {
-                return false;
-            }
-
-            if (control.trigger(event) === false)
-            {
-                return false;
+                return stop(event);
             }
 
             // 500ms内不重复触发tap事件
@@ -1411,15 +1448,13 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 tapControl = control;
                 tapTime = time;
 
-                event.type = 'tap';
-                event.endEdit = endEdit;
+                e.type = 'tap';
+                e.endEdit = endEdit;
 
-                if (trigger(control, '__on_tap', event) === false)
+                if (trigger(control, '__on_tap', e) === false || control.trigger(e) === false)
                 {
-                    return false;
+                    return stop(event);
                 }
-                
-                return control.trigger(event) === false;
             }
         }
 
@@ -1434,15 +1469,14 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (control = state.control)
         {
+            var e = touchEvent(event);
+
             state.control = null;
-            event = touchEvent(event);
 
-            if (trigger(control, '__on_touchcancel', event) === false)
+            if (trigger(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
             {
-                return false;
+                return stop(event);
             }
-
-            return control.trigger(event);
         }
 
     }, true);
@@ -3379,920 +3413,6 @@ yaxi.Cache = Object.extend.call({}, function () {
 
 
 
-window.require || (function () {
-
-
-
-    // 全局require
-    var global = window.require = factory(location.href.substring(0, location.href.lastIndexOf('/')));
-
-	// 已加载缓存集合
-	var modules = global.modules = Object.create(null);
-
-    // 已加载的多语言资源
-    var languages = global.languages = Object.create(null);
-
-    // 相对url缓存
-    var urls = Object.create(null);
-
-    // 扩展名缓存
-    var exts = Object.create(null);
-
-
-
-
-    function factory(base) {
-
-        function require(url, flags) {
-
-            return yaxi.loadModule(require.base, url, flags);
-        }
-
-        require.base = require.baseURL = base;
-        require.runAsThread = runAsThread;
-
-        return require;
-    }
-
-
-    // 作为线程运行
-    function runAsThread(fn) {
-
-        return new yaxi.Thread(global.base, this.base, fn);
-    }
-
-
-    function execute(url, ext, flags) {
-
-        var text = ajax(url);
-		
-		switch (ext)
-		{
-            case '.css':
-                loadCss(text);
-                return { exports: text };
-
-			case '.js':
-                return loadJs(text, url, flags);
-
-            case '.json':
-                text = text ? JSON.parse(text) : null;
-                return { exports: text };
-
-            case '.html':
-                if (flags === false)
-                {
-                    return { exports: text };
-                }
-
-                return { exports: new Function('data', global.template(text, url)) };
-
-			default:
-                return { exports: text };
-		}
-    }
-
-
-    function ajax(url) {
-
-        var xhr = new XMLHttpRequest(),
-            text;
-						
-		xhr.open('GET', url, false);
-
-        xhr.onreadystatechange = function () {
-
-            if (this.readyState === 4)
-            {
-                if (this.status < 300)
-                {
-                    text = this.responseText;
-                }
-                else
-                {
-                    throw this.statusText;
-                }
-                
-                this.onreadystatechange = null;
-            }
-        }
-
-        xhr.send(null);
-
-        return text;
-    }
-
-
-	function loadCss(text) {
-
-        var dom = document.createElement('style'),
-            color = yaxi.color;  
-			
-        dom.setAttribute('type', 'text/css');  
-
-        text = text.replace(/c-([\w-]+)/g, function (text, key) {
-
-            return color[key] || text;
-        });
-    
-        if (dom.styleSheet) // IE  
-        {
-            dom.styleSheet.cssText = text;  
-        }
-        else // w3c  
-        {
-            dom.appendChild(document.createTextNode(text));  
-        }
-    
-        document.head.appendChild(dom);
-	}
-
-
-	function loadJs(text, url, flags) {
-
-        var module = { exports: {} };
-
-        if (text)
-        {
-            text = text + '\n//# sourceURL=' + url;
-
-            // 全局执行
-            if (flags === false)
-            {
-                eval.call(window, module.exports.text = text);
-            }
-            else
-            {
-                new Function(['require', 'exports', 'module'], text)(
-                    factory(url.substring(0, url.lastIndexOf('/') + 1)),
-                    module.exports,
-                    module);
-            }
-        }
-
-		return module;
-    }
-
-
-    function mixin(target, source) {
-
-        var value;
-
-        for (var key in source)
-        {
-            if ((value = source[key]) && typeof value === 'object')
-            {
-                mixin(target[key] || (target[key] = {}), value);
-            }
-            else
-            {
-                target[key] = value;
-            }
-        }
-    }
-
-
-    function relative(url) {
-
-        var last;
-
-        while (true)
-        {
-            last = url.replace(/[^/]*\/\.\.\//, '');
-            
-            if (last === url)
-            {
-                break;
-            }
-            
-            url = last;
-        }
-        
-        return url.replace(/[.]+\//g, '');
-    }
-
-
-    function absolute(base, url) {
-
-        // 相对根目录
-        if (url[0] === '/')
-        {
-            base = global.base;
-            return base + (base[base.length - 1] === '/' ? url.substring(1) : url);
-        }
-
-        // 相对当前目录
-        url = (base[base.length - 1] === '/' ? base : base + '/') + url;
-
-        return urls[url] || (urls[url] = relative(url));
-    }
-
-
-
-    yaxi.absoluteUrl = absolute;
-
-    
-    yaxi.loadModule = function (base, url, flags) {
-
-        var ext = exts[url],
-            any;
-
-        if (ext)
-        {
-            url = ext[1];
-            ext = ext[0];
-        }
-        else
-        {
-            if (ext = url.match(/\.\w+$/))
-            {
-                exts[url] = [ext = ext[0].toLowerCase(), url];
-            }
-            else
-            {
-                exts[url] = [ext = '.js', url += '.js'];
-            }
-        }
-
-        url = absolute(base, url);
-
-        if (any = modules[url])
-        {
-            return any.exports;
-        }
-
-        if (url.indexOf('{{language}}') >= 0)
-        {
-            languages[url] = ext;
-            any = url.replace('{{language}}', yaxi.language);
-        }
-        else
-        {
-            any = url;
-        }
-
-        return (modules[url] = execute(any, ext, flags)).exports;
-    }
-
-    
-    yaxi.switchLanguage = function (language) {
-
-        yaxi.language = language;
-        yaxi.i18n = yaxi.languages[language] || yaxi.languages['en-US'];
-
-        for (var key in languages)
-        {
-            var url = key.replace('{{language}}', language),
-                data = ajax(url);
-
-            switch (languages[key])
-            {
-                case '.js':
-                    data = loadJs(data, url).exports;
-                    break;
-
-                case '.json':
-                    data = data ? JSON.parse(text) : null;
-                    break;
-            }
-
-            mixin(modules[key].exports, data);
-        }
-    }
-
-
-
-})();
-
-
-
-
-;(function () {
-
-
-
-
-    function parse(array, node, space) {
-
-        var attributes = node.attributes,
-            tagName = node.tagName,
-            item,
-            name,
-            value,
-            bindings,
-            styles,
-            events,
-            any;
-
-        switch (tagName)
-        {
-            case 'R':
-            case 'Ref':
-            case 'Require':
-            case 'Reference':
-                array.push(space, '"Class": yaxi.loadModule(__dirname, "', node.getAttribute('src'), '")');
-                node.removeAttribute('src');
-                break;
-
-            case 'HTML':
-            case 'HtmlControl':
-                array.push(space, '"Class": __k.HtmlControl,\n');
-                array.push(space, '"html": \'', node.innerHTML.replace(/\n\s*/g, '').replace(/[']/g, '\\\''), '\'');
-                node = null;
-                break;
-
-            default:
-                array.push(space, '"Class": __k.', tagName);
-                break;
-        }
-
-        if (attributes && attributes[0])
-        {
-            for (var i = 0, l = attributes.length; i < l; i++)
-            {
-                item = attributes[i];
-                name = item.nodeName;
-                value = item.nodeValue;
-
-                if (name === 'style')
-                {
-                    parseStyle(styles || (styles = []), value, space + '\t');
-                    continue;
-                }
-                
-                if (name[1] === '-')
-                {
-                    any = name[0];
-                    name = name.substring(2);
-
-                    // 传入的数据
-                    if (any === 'd')
-                    {
-                        array.push(',\n', space, '"', name, '": ', value);
-                        continue;
-                    }
-
-                    // 绑定
-                    if (any === 'b')
-                    {
-                        if (bindings)
-                        {
-                            bindings.push(name, value);
-                        }
-                        else
-                        {
-                            bindings = [name, value];
-                        }
-                        
-                        continue;
-                    }
-
-                    // 事件
-                    if (any === 'e')
-                    {
-                        if (events)
-                        {
-                            events.push(name, value);
-                        }
-                        else
-                        {
-                            events = [name, value];
-                        }
-
-                        continue;
-                    }
-                }
-
-                array.push(',\n', space, '"', name, '": "', value, '"');
-            }
-
-            if (styles)
-            {
-                array.push(',\n', space, '"style": {', styles.join(''));
-
-                if (any = styles.bindings)
-                {
-                    array.push(styles[0] ? ',\n' : '', space, '\t"bindings": {\n', any.join(''), '\n', space, '\t}');
-                }
-                
-                array.push('\n', space, '}');
-            }
-
-            if (bindings)
-            {
-                array.push(',\n', space, '"bindings": {');
-                writeBindings(array, bindings, space + '\t');
-                array.push('\n', space, '}');
-            }
-
-            if (events)
-            {
-                array.push(',\n', space, '"events": {');
-                writeEvents(array, events, space + '\t');
-                array.push('\n', space, '}');
-            }
-        }
-
-        if (node && (node = node.firstChild))
-        {
-            if (tagName === 'Repeater')
-            {
-                parseTemplate(array, node, space);
-            }
-            else
-            {
-                parseChildren(array, node, space);
-            }
-        }
-    }
-
-
-    function parseTemplate(array, node, space) {
-
-        do
-        {
-            if (node.nodeType === 1)
-            {
-                array.push(',\n', space, '\ttemplate: {\n');
-
-                parse(array, node, space + '\t\t');
-
-                array.push('\n', space, '\t}');
-
-                return;
-            }
-        }
-        while (node = node.nextSibling);
-    }
-
-
-    function parseChildren(array, node, space) {
-
-        var flag;
-
-        do
-        {
-            if (node.nodeType === 1)
-            {
-                if (flag)
-                {
-                    array.push(',');
-                }
-                else
-                {
-                    array.push(',\n', space, '"children": [');
-                    flag = 1;
-                }
-
-                array.push('\n', space, '\t{\n');
-
-                parse(array, node, space + '\t\t');
-
-                array.push('\n', space, '\t}');
-            }
-        }
-        while (node = node.nextSibling);
-
-        if (flag)
-        {
-            array.push('\n', space, ']');
-        }
-    }
-
-
-    function parseStyle(array, text, space) {
-
-        var tokens = text.split(';'),
-            token,
-            index,
-            name,
-            flag;
-
-        for (var i = 0, l = tokens.length; i < l; i++)
-        {
-            if ((token = tokens[i]) && (index = token.indexOf(':')) > 0)
-            {
-                name = token.substring(0, index);
-               
-                if (!(token = token.substring(index + 1)))
-                {
-                    continue;
-                }
-
-                if (flag)
-                {
-                    array.push(',');
-                }
-                else
-                {
-                    flag = 1;
-                }
-
-                array.push('\n', space, '"', name, '": ', '"' + token + '"');
-            }
-        }
-    }
-
-
-    function writeBindings(array, bindings, space) {
-
-        var index = 0,
-            name;
-
-        while (name = bindings[index++])
-        {
-            if (index > 1)
-            {
-                array.push(',');
-            }
-
-            array.push('\n', space, '"', name, '": "', bindings[index++], '"');
-        }
-    }
-
-
-    function writeEvents(array, events, space) {
-
-        var index = 0,
-            name;
-
-        while (name = events[index++])
-        {
-            if (index > 1)
-            {
-                array.push(',');
-            }
-
-            array.push('\n', space, '"', name, '": data.', events[index++]);
-        }
-    }
-
-
-
-
-    
-    require.template = function (text, url) {
-
-        var node = new DOMParser().parseFromString(text, 'text/xml').documentElement,
-            array = ['var __dirname = "' + url.substring(0, url.lastIndexOf('/') + 1) + '";\n',
-                'var __k = yaxi.classes;\n',
-                'var color = yaxi.color;\n\n',
-                'with(data)\n{\n',
-                'return {\n'];
-
-        parse(array, node, '\t');
-
-        array.push('\n};\n}\n\n//# sourceURL=', url);
-
-        return array.join('');
-    }
-
-
-
-})();
-
-
-
-
-yaxi.Thread = (function () {
-
-
-
-    var seed = 1;
-
-
-
-    var inject = '' + function () {
-
-
-        var global = factory(base);
-
-        var modules = global.modules = Object.create(null);
-
-        // 相对url缓存
-        var urls = Object.create(null);
-
-        // 扩展名缓存
-        var exts = Object.create(null);
-
-
-        function relative(url) {
-
-            var last;
-    
-            while (true)
-            {
-                last = url.replace(/[^/]*\/\.\.\//, '');
-                
-                if (last === url)
-                {
-                    break;
-                }
-                
-                url = last;
-            }
-            
-            return url.replace(/[.]+\//g, '');
-        }
-
-
-        function absolute(base, url) {
-    
-            // 相对根目录
-            if (url[0] === '/')
-            {
-                return root + url;
-            }
-    
-            // 相对当前目录
-            url = (base[base.length - 1] === '/' ? base : base + '/') + url;
-
-            return urls[url] || (urls[url] = relative(url));
-        }
-
-
-        function load(base, url, flags) {
-
-            var ext = exts[url],
-                any;
-
-            if (ext)
-            {
-                url = ext[1];
-                ext = ext[0];
-            }
-            else
-            {
-                if (ext = url.match(/\.\w+$/))
-                {
-                    exts[url] = [ext = ext[0].toLowerCase(), url];
-                }
-                else
-                {
-                    exts[url] = [ext = '.js', url += '.js'];
-                }
-            }
-
-            url = absolute(base, url);
-
-            if (any = modules[url])
-            {
-                return any.exports;
-            }
-
-            return (modules[url] = execute(url, ext, flags)).exports;
-        }
-
-
-        function ajax(url) {
-
-            var xhr = new XMLHttpRequest(),
-                text;
-                            
-            xhr.open('GET', url, false);
-    
-            xhr.onreadystatechange = function () {
-    
-                if (this.readyState === 4)
-                {
-                    if (this.status < 300)
-                    {
-                        text = this.responseText;
-                    }
-                    else
-                    {
-                        throw this.statusText;
-                    }
-                    
-                    this.onreadystatechange = null;
-                }
-            }
-    
-            xhr.send(null);
-
-            return text;
-        }
-
-
-        function loadJs(text, url, flags) {
-
-            var module = { exports: {} };
-    
-            if (text)
-            {
-                text = text + '\n//# sourceURL=' + url;
-    
-                // 全局执行
-                if (flags === false)
-                {
-                    eval.call(self, module.exports.text = text);
-                }
-                else
-                {
-                    new Function(['require', 'exports', 'module'], text)(
-                        factory(url.substring(0, url.lastIndexOf('/') + 1)),
-                        module.exports,
-                        module);
-                }
-            }
-    
-            return module;
-        }
-
-
-        function execute(url, ext, flags) {
-
-            var text = ajax(url);
-
-            switch (ext)
-            {
-                case '.js':
-                    return loadJs(text, url, flags);
-
-                case '.json':
-                    text = text ? JSON.parse(text) : null;
-                    return { exports: text };
-
-                default:
-                    return { exports: text };
-            }
-        }
-
-        
-        function factory(base) {
-
-            function require(url, flags) {
-    
-                return load(require.base, url, flags);
-            }
-    
-            require.base = require.baseURL = base;
-            return require;
-        }
-
-
-        
-        function reply(uuid, value, e) {
-
-            self.postMessage(JSON.stringify([uuid, value, e]));
-        }
-        
-
-        self.addEventListener('message', function (event) {
-            
-            var target = this,
-                data = event.data,
-                uuid = data.uuid,
-                method = data.method,
-                index = 0,
-                list = method.split('.'),
-                name,
-                fn;
-
-            try
-            {
-                name = list.pop();
-
-                while (target && (fn = list[index++]))
-                {
-                    target = target[fn];
-                }
-
-                if (target && (fn = target[name]))
-                {
-                    list = data.args || [];
-
-                    if (data.async)
-                    {
-                        list.push(function (value, e) {
-
-                            reply(uuid, value, e);
-                        });
-
-                        fn.apply(target, list);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            reply(uuid, fn.apply(target, list));
-                        }
-                        catch (e)
-                        {
-                            reply(uuid, null, e);
-                        }
-                    }
-                }
-                else
-                {
-                    reply(uuid, null, 'not support method "' + method + '"!');
-                }
-            }
-            catch (e)
-            {
-                reply(uuid, null, e);
-            }
-        });
-
-
-        return global;
-
-    };
-
-
-    inject = inject.substring(inject.indexOf('{') + 1);
-    inject = inject.substring(0, inject.lastIndexOf('}'));
-
-
-    
-
-    function Thread(root, base, url) {
-
-        var list = ['var require = function (self, root, base) {\n', 
-            inject, 
-            '\n}(self, "', 
-                root[root.length - 1] !== '/' ? root : root.slice(0, -1),  '", "', 
-                base,
-            '");\n\n\n\n\n'];
-
-        if (typeof url === 'string')
-        {
-            list.push('require("' + url + '", false);');
-        }
-        else
-        {
-            list.push('' + url);
-        }
-
-        list = [list.join('')];
-
-        this.queue = [];
-        this.worker = new Worker(URL.createObjectURL(new Blob(list)));
-        this.worker.onmessage = onmessage.bind(this);
-    }
-
-    
-    
-    function onmessage(event) {
-
-        var data;
-
-        if (data = event.data)
-        {
-            var queue = this.queue,
-                index = 0,
-                uuid = (data = JSON.parse(data))[0],
-                item;
-
-            while (item = queue[index])
-            {
-                if (item === uuid)
-                {
-                    queue[index + 1].call(this, data[1], data[2]);
-                    queue.splice(index, 2);
-                    return;
-                }
-
-                index += 2;
-            }
-        }
-    }
-
-
-    Thread.prototype.exec = function (method, args, callback, async) {
-
-        if (method)
-        {
-            var uuid = seed++;
-
-            this.queue.push(uuid, callback);
-
-            this.worker.postMessage({
-                uuid: uuid,
-                method: method,
-                args: args,
-                async: async
-            });
-        }
-    }
-
-
-    Thread.prototype.terminate = function () {
-
-        this.worker.terminate();
-    }
-
-
-
-    return Thread;
-    
-
-
-})();
-
-
-
-
 !function(h){var c,o='<svg><symbol id="icon-yaxi-pulldown" viewBox="0 0 1024 1024"><path d="M512 960C264.96 960 64 759.04 64 512S264.96 64 512 64s448 200.96 448 448S759.04 960 512 960zM512 128C300.256 128 128 300.256 128 512c0 211.744 172.256 384 384 384 211.744 0 384-172.256 384-384C896 300.256 723.744 128 512 128z"  ></path><path d="M694.56 522.144c-12.544-12.608-33.376-12.64-45.952-0.064L544 625.984 544 319.328c0-17.76-14.208-32.16-32-32.16-17.76 0-32 14.4-32 32.16l0 308.32-105.216-106.688c-12.48-12.608-32.704-12.736-45.312-0.256C316.832 533.216 316.8 553.6 329.28 566.208l159.36 161.056c6.272 6.336 14.592 9.568 22.88 9.568 8.16 0 16.384-3.168 22.624-9.312 0.032-0.064 0.032-0.064 0.064-0.128 0.032 0 0.064 0 0.096-0.064l160.192-159.68C707.072 555.104 707.104 534.72 694.56 522.144z"  ></path></symbol><symbol id="icon-yaxi-back" viewBox="0 0 1024 1024"><path d="M395.21518 513.604544l323.135538-312.373427c19.052938-18.416442 19.052938-48.273447 0-66.660212-19.053961-18.416442-49.910737-18.416442-68.964698 0L291.75176 480.290811c-19.052938 18.416442-19.052938 48.273447 0 66.660212l357.633237 345.688183c9.525957 9.207709 22.01234 13.796214 34.497699 13.796214 12.485359 0 24.971741-4.588505 34.466999-13.82896 19.052938-18.416442 19.052938-48.242747 0-66.660212L395.21518 513.604544z"  ></path></symbol><symbol id="icon-yaxi-radio-checked" viewBox="0 0 1024 1024"><path d="M512 259.56503703c-138.83922963 0-252.43496297 113.59573333-252.43496297 252.43496297s113.59573333 252.43496297 252.43496297 252.43496297 252.43496297-113.59573333 252.43496297-252.43496297S650.83922963 259.56503703 512 259.56503703zM512 7.13007408C234.323968 7.13007408 7.13007408 234.323968 7.13007408 512s227.19389392 504.86992592 504.86992592 504.86992592 504.86992592-227.19389392 504.86992592-504.86992592S789.676032 7.13007408 512 7.13007408zM512 915.89594075c-222.13791289 0-403.89594075-181.76045511-403.89594075-403.89594075S289.86208711 108.10405925 512 108.10405925 915.89594075 289.86208711 915.89594075 512 734.13791289 915.89594075 512 915.89594075z"  ></path></symbol><symbol id="icon-yaxi-checkbox-unchecked" viewBox="0 0 1024 1024"><path d="M892.24735231 1012.51492048l-760.49638045 0c-66.35446257 0-120.26589234-53.91310559-120.26589234-120.26589234l0-760.56676528c0-66.35446257 53.91310559-120.26589234 120.26589234-120.26589236l760.49638045 0c66.35446257 0 120.26589234 53.91310559 120.26589235 120.26589236l0 760.56676528c0 66.35446257-53.91310559 120.26589234-120.26589235 120.26589234zM131.75264769 82.98768981c-26.88533005 0-48.76495786 21.95168848-48.76495788 48.76495788l0 760.56676528c0 26.81326939 21.87962782 48.76495786 48.76495788 48.76495787l760.49638045 0c26.81326939 0 48.76495786-21.95168848 48.76495787-48.76495787l0-760.56676528c0-26.81326939-21.95168848-48.76495786-48.76495787-48.76495788l-760.49638045 0z"  ></path></symbol><symbol id="icon-yaxi-checkbox-checked" viewBox="0 0 1024 1024"><path d="M892.24735231 1012.51492048l-760.49638045 0c-66.35446257 0-120.26589234-53.91310559-120.26589234-120.26589234l0-760.56676528c0-66.35446257 53.91310559-120.26589234 120.26589234-120.26589236l760.49638045 0c66.35446257 0 120.26589234 53.91310559 120.26589235 120.26589236l0 760.56676528c0 66.35446257-53.91310559 120.26589234-120.26589235 120.26589234zM131.75264769 82.98768981c-26.88533005 0-48.76495786 21.95168848-48.76495788 48.76495788l0 760.56676528c0 26.81326939 21.87962782 48.76495786 48.76495788 48.76495787l760.49638045 0c26.81326939 0 48.76495786-21.95168848 48.76495787-48.76495787l0-760.56676528c0-26.81326939-21.95168848-48.76495786-48.76495787-48.76495788l-760.49638045 0z"  ></path><path d="M449.57870885 836.76231882l-274.13886619-274.21092687 101.10445971-101.10445972 154.87344396 154.80138332 308.38779037-431.80089021 116.40478156 83.08594269z"  ></path></symbol><symbol id="icon-yaxi-circle" viewBox="0 0 1024 1024"><path d="M32 512c0 265.09653333 214.90346667 480 480 480s480-214.90346667 480-480c0-265.09653333-214.90346667-480-480-480-265.09653333 0-480 214.90346667-480 480z"  ></path></symbol><symbol id="icon-yaxi-number-plus" viewBox="0 0 1024 1024"><path d="M740.828151 485.179145 538.820344 485.179145 538.820344 283.185664c0-14.81645-11.989055-26.820855-26.820855-26.820855-14.769378 0-26.790156 12.004405-26.790156 26.820855l-0.013303 201.99348L283.200502 485.179145c-14.801101 0-26.820855 12.019755-26.820855 26.820855 0 14.81645 12.019755 26.819832 26.820855 26.819832l201.991434 0-0.013303 201.994504c0 14.800078 12.051477 26.821879 26.820855 26.821879 14.8318 0 26.820855-12.021801 26.820855-26.821879L538.820344 538.819832l201.979154 0c14.8318 0 26.820855-12.003382 26.820855-26.819832S755.631298 485.179145 740.828151 485.179145z"  ></path></symbol><symbol id="icon-yaxi-number-minus" viewBox="0 0 1024 1024"><path d="M768.440022 485.814618c0 14.475689-11.743462 26.185382-26.200732 26.185382l-460.467323 0c-14.458293 0-26.167986-11.70867-26.167986-26.185382l0 0c0-14.458293 11.70867-26.183336 26.167986-26.183336l460.467323 0C756.697583 459.631282 768.440022 471.356324 768.440022 485.814618L768.440022 485.814618z"  ></path></symbol><symbol id="icon-yaxi-ring" viewBox="0 0 1024 1024"><path d="M512.00582201 1020.25554034C231.74603093 1020.25554034 3.74329458 792.25396907 3.74329458 511.99301405c0-280.24698311 228.00273635-508.24971947 508.26252629-508.24971947 280.24698311 0 508.24971947 228.00273635 508.24971947 508.24971947C1020.25554034 792.25396907 792.25396907 1020.25554034 512.00582201 1020.25554034zM512.00582201 122.55727616c-214.7425792 0-389.44970979 174.7001435-389.4497098 389.43573789 0 214.7425792 174.70712946 389.44970979 389.4497098 389.44970979 214.73675833 0 389.43690183-174.70712946 389.43690183-389.44970979C901.44272384 297.2574208 726.7425792 122.55727616 512.00582201 122.55727616z"  ></path></symbol><symbol id="icon-yaxi-radio-unchecked" viewBox="0 0 1024 1024"><path d="M512 7.13007408C234.323968 7.13007408 7.13007408 234.323968 7.13007408 512s227.19389392 504.86992592 504.86992592 504.86992592 504.86992592-227.19389392 504.86992592-504.86992592S789.676032 7.13007408 512 7.13007408zM512 915.89351348c-222.13791287 0-403.89351348-181.75802787-403.89351348-403.89351348S289.86208713 108.10405925 512 108.10405925 915.89594075 289.86208713 915.89594075 512 734.13791287 915.89351348 512 915.89351348z"  ></path></symbol><symbol id="icon-yaxi-eye-open" viewBox="0 0 1024 1024"><path d="M515.2 224C208 224 22.4 537.6 22.4 537.6s214.4 304 492.8 304 492.8-304 492.8-304S822.4 224 515.2 224zM832 652.8c-102.4 86.4-211.2 140.8-320 140.8s-217.6-51.2-320-140.8c-35.2-32-70.4-64-99.2-99.2-6.4-6.4-9.6-12.8-16-19.2 3.2-6.4 9.6-12.8 12.8-19.2 25.6-35.2 57.6-70.4 92.8-102.4 99.2-89.6 208-144 329.6-144s230.4 54.4 329.6 144c35.2 32 64 67.2 92.8 102.4 3.2 6.4 9.6 12.8 12.8 19.2-3.2 6.4-9.6 12.8-16 19.2-28.8 32-60.8 67.2-99.2 99.2z" fill="" ></path><path d="M512 345.6c-96 0-169.6 76.8-169.6 169.6 0 96 76.8 169.6 169.6 169.6 96 0 169.6-76.8 169.6-169.6S604.8 345.6 512 345.6z m0 294.4c-67.2 0-121.6-54.4-121.6-121.6 0-67.2 54.4-121.6 121.6-121.6 67.2 0 121.6 54.4 121.6 121.6 0 64-54.4 121.6-121.6 121.6z" fill="" ></path></symbol><symbol id="icon-yaxi-bankcard" viewBox="0 0 1024 1024"><path d="M823.5 598.4L237.8 864.6c-14.5 6.6-31.6 0.2-38.2-14.3L19.2 453.4c-6.6-14.5-0.2-31.6 14.3-38.2L597.2 159c14.5-6.6 31.6-0.2 38.2 14.3l190.4 418.9c1.1 2.4 0 5.1-2.3 6.2z" fill="#FFD858" ></path><path d="M823.5 598.4L519.6 736.5 315.3 287.1 619.2 149c2.4-1.1 5.1 0 6.2 2.3l200.4 440.9c1.1 2.4 0 5.1-2.3 6.2z" fill="#FDC223" ></path><path d="M58.317 539.506l616.25-280.102 42.828 94.227-616.25 280.101zM231.012 640.378l163.143-74.153 16.47 36.234-163.144 74.153zM260.634 705.552L487.87 602.268l16.47 36.234-227.237 103.284z" fill="#1A7FC0" ></path><path d="M981.1 805.3H362c-15.9 0-28.9-12.9-28.9-28.9v-436c0-15.9 12.9-28.9 28.9-28.9h619.1c15.9 0 28.9 12.9 28.9 28.9v436c0 16-12.9 28.9-28.9 28.9z" fill="#83C6EF" ></path><path d="M1005.3 805.3H671.6V311.6h333.7c2.6 0 4.7 2.1 4.7 4.7v484.3c0 2.6-2.1 4.7-4.7 4.7z" fill="#429BCF" ></path><path d="M333.1 435H1010v103.5H333.1zM448.6 598.2h179.2V638H448.6zM448.6 669.9h249.6v39.8H448.6z" fill="#1A7FC0" ></path><path d="M942.9 638.1h-35.1c-10.9 0-19.9-9-19.9-19.9 0-10.9 9-19.9 19.9-19.9h35.1c10.9 0 19.9 9 19.9 19.9 0 10.9-9 19.9-19.9 19.9z" fill="#FFD858" ></path></symbol><symbol id="icon-yaxi-eye-close" viewBox="0 0 1024 1024"><path d="M515.49297778 629.18428445c-203.28106667 0-392.82460445-109.44284445-494.81500445-285.59587556-14.90261333-25.73084445-6.05297778-58.56256 19.55953778-73.46631111 25.73084445-14.90147555 58.67975111-6.05297778 73.46631111 19.56067555C196.48284445 432.65592889 350.39914667 521.48906667 515.37692445 521.48906667S834.26986667 432.65479111 917.04888889 289.56672c14.90261333-25.73084445 47.73546667-34.57934222 73.46631111-19.67672889s34.46215111 47.73546667 19.67559111 73.46631111C908.31758222 519.74144 718.77404445 629.18314667 515.49297778 629.18314667z m-278.72597333 53.5552c-9.43104 0-19.09418667-2.44394667-27.70944-7.68341334-25.4976-15.36796445-33.64750222-48.43406222-18.27953778-73.81447111l59.37720888-98.26417778c15.36910222-25.4976 48.4352-33.53144889 73.8156089-18.27953777 25.4976 15.36796445 33.64750222 48.43406222 18.2784 73.8144711l-59.3772089 98.26417778c-10.12963555 16.64910222-27.82663111 25.96408889-46.1050311 25.96408889z m554.5415111 0c-18.16234667 0-35.97653333-9.19665778-46.1050311-25.96295112l-59.37834667-98.26417778c-15.36796445-25.4976-7.21806222-58.44650667 18.16234667-73.8144711 25.4976-15.36796445 58.44764445-7.21806222 73.81560888 18.16234666l59.37720889 98.26417778c15.36796445 25.4976 7.21806222 58.44764445-18.16234667 73.81560889-8.61525333 5.23832889-18.27953778 7.80060445-27.70944 7.80060444z m-275.81553777 69.97333333c-29.68917333 0-53.78958222-24.10040889-53.78958223-53.78958223v-123.52853333c0-29.68917333 24.10040889-53.78958222 53.78958223-53.78958222 29.68917333 0 53.78958222 24.10040889 53.78958222 53.78958222v123.52853333c0 29.68917333-24.10040889 53.78958222-53.78958222 53.78958223z" fill="#707070" ></path></symbol><symbol id="icon-yaxi-checkbox-three" viewBox="0 0 1024 1024"><path d="M1012.51436242 941.01231019V82.98768981a71.50205225 71.50205225 0 0 0-71.50205223-71.50205223H82.98768981a71.50205225 71.50205225 0 0 0-71.50205223 71.50205223v858.02462038a71.50205225 71.50205225 0 0 0 71.50205223 71.50205223h858.02462038a71.50205225 71.50205225 0 0 0 71.50205223-71.50205223z m-143.00410448-71.50205225H154.48974206V154.48974206h715.02051588v715.02051588z"  ></path><path d="M297.49384493 297.49384493h429.01231014v429.01231014H297.49384493z"  ></path></symbol><symbol id="icon-yaxi-copy" viewBox="0 0 1024 1024"><path d="M733.86666667 170.66666667h-580.26666667A85.43573333 85.43573333 0 0 0 68.26666667 256v648.53333333C68.26666667 951.6032 106.56426667 989.86666667 153.6 989.86666667h580.26666667c47.06986667 0 85.33333333-38.26346667 85.33333333-85.33333334v-648.53333333C819.2 208.96426667 780.93653333 170.66666667 733.86666667 170.66666667z m17.06666666 733.86666666c0 9.38666667-7.68 17.06666667-17.06666666 17.06666667h-580.26666667a17.06666667 17.06666667 0 0 1-17.06666667-17.06666667v-648.53333333a17.06666667 17.06666667 0 0 1 17.06666667-17.06666667h580.26666667a17.06666667 17.06666667 0 0 1 17.06666666 17.06666667v648.53333333z"  ></path><path d="M870.4 34.13333333h-580.26666667a34.13333333 34.13333333 0 0 0 0 68.26666667h580.26666667a17.06666667 17.06666667 0 0 1 17.06666667 17.06666667v648.53333333a34.13333333 34.13333333 0 1 0 68.26666666 0v-648.53333333C955.73333333 72.43093333 917.46986667 34.13333333 870.4 34.13333333z"  ></path><path d="M614.4 349.86666667H273.06666667a34.13333333 34.13333333 0 0 0 0 68.26666666h341.33333333a34.13333333 34.13333333 0 1 0 0-68.26666666zM614.4 520.53333333H273.06666667a34.13333333 34.13333333 0 1 0 0 68.26666667h341.33333333a34.13333333 34.13333333 0 1 0 0-68.26666667zM477.86666667 689.7664H273.06666667a34.13333333 34.13333333 0 1 0 0 68.26666667h204.8a34.13333333 34.13333333 0 1 0 0-68.26666667z"  ></path></symbol><symbol id="icon-yaxi-alipay" viewBox="0 0 1325 1024"><path d="M171.9595514 512c0 265.57071929 214.16993451 479.74065379 479.7406538 479.74065379s479.74065379-214.16993451 479.74065378-479.74065379S917.27092449 32.25934621 651.7002052 32.25934621 171.9595514 246.42928071 171.9595514 512z" fill="#5A9EF7" ></path><path d="M752.78841455 571.9675813s17.13359531-23.98703275 34.26718948-71.96109711c18.84695438-47.97406549 20.56031346-75.38781753 20.56031345-75.38781752l-137.0687579-1.71335908v-46.26070642l166.195869-1.71335907v-34.26718948H668.83380051v-75.38781753h-82.24125499V340.66405262H428.96347303v34.26718948l155.91571343-1.71336021v51.40078478h-123.36188303v27.41375203h257.00392164c-1.71335907 17.13359531-6.85343744 32.5538304-11.9935158 47.97406549-10.28015673 25.70039182-20.56031346 49.68742457-20.5603146 49.68742458s-119.93516373-42.83398713-185.0428234-42.83398714c-63.39430059 0-140.49547719 25.70039182-149.0622737 99.37484914-6.85343744 73.67445731 35.98054855 114.79508537 97.66149005 128.50196139 59.9675813 13.70687602 116.50844445 0 166.19586903-23.98703275 49.68742457-23.98703275 97.66149006-78.81453568 97.66149006-78.81453568l255.29056256 125.07524096s15.42023509-23.98703275 27.41375091-46.26070528c8.56679765-15.42023509 15.42023509-32.5538304 22.27367365-47.97406549l-265.57071928-90.80805262z m-263.85735908 121.64852281c-90.80805262 0-107.94164679-44.54734621-107.94164678-75.3878164 0-30.84047019 18.84695438-66.82101987 95.94812984-71.96109824 75.38781753-5.14007837 179.90274503 54.82750293 179.90274502 54.82750294s-77.10117661 92.5214117-167.90922808 92.5214117z" fill="#FFFFFF" ></path></symbol><symbol id="icon-yaxi-weixin" viewBox="0 0 1024 1024"><path d="M1010.8 628c0-141.2-141.3-256.2-299.9-256.2-168 0-300.3 115.1-300.3 256.2 0 141.4 132.3 256.2 300.3 256.2 35.2 0 70.7-8.9 106-17.7l96.8 53-26.6-88.2c70.9-53.2 123.7-123.7 123.7-203.3zM618 588.8c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40c0 22-17.9 40-40 40z m194.3-0.3c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40z" fill="#00C800" ></path><path d="M366.3 106.9c-194.1 0-353.1 132.3-353.1 300.3 0 97 52.9 176.6 141.3 238.4l-35.3 106.2 123.4-61.9c44.2 8.7 79.6 17.7 123.7 17.7 11.1 0 22.1-0.5 33-1.4-6.9-23.6-10.9-48.3-10.9-74 0-154.3 132.5-279.5 300.2-279.5 11.5 0 22.8 0.8 34 2.1C692 212.6 539.9 106.9 366.3 106.9zM247.7 349.2c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z m246.6 0c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z" fill="#00C800" ></path></symbol><symbol id="icon-yaxi-pulldown-up" viewBox="0 0 1024 1024"><path d="M512 64C759.04 64 960 264.96 960 512S759.04 960 512 960s-448-200.96-448-448S264.96 64 512 64zM512 896.00000001C723.744 896 896 723.744 896.00000001 512c0-211.74400001-172.256-384.00000001-384.00000001-384.00000001-211.74400001 0-384.00000001 172.256-384.00000001 384.00000001C128 723.744 300.256 896 512 896.00000001z"  ></path><path d="M329.44 501.856c12.544 12.608 33.37599999 12.64 45.952 0.064L480 398.016 480 704.672c0 17.75999999 14.208 32.16 32 32.16 17.75999999 0 32-14.4 32-32.16l0-308.32 105.216 106.688c12.48 12.608 32.704 12.736 45.312 0.256C707.168 490.784 707.2 470.4 694.72 457.792l-159.36-161.056c-6.272-6.336-14.592-9.568-22.88-9.568-8.15999999 0-16.384 3.168-22.624 9.312-0.032 0.064-0.032 0.064-0.064 0.128-0.032 0-0.06399999 0-0.096 0.064l-160.192 159.68C316.928 468.89599999 316.896 489.28 329.44 501.856z"  ></path></symbol></svg>',t=(c=document.getElementsByTagName("script"))[c.length-1].getAttribute("data-injectcss");if(t&&!h.__iconfont__svg__cssinject__){h.__iconfont__svg__cssinject__=!0;try{document.write("<style>.svgfont {display: inline-block;width: 1em;height: 1em;fill: currentColor;vertical-align: -0.1em;font-size:16px;}</style>")}catch(c){console&&console.log(c)}}!function(c){if(document.addEventListener)if(~["complete","loaded","interactive"].indexOf(document.readyState))setTimeout(c,0);else{var t=function(){document.removeEventListener("DOMContentLoaded",t,!1),c()};document.addEventListener("DOMContentLoaded",t,!1)}else document.attachEvent&&(l=c,e=h.document,i=!1,a=function(){i||(i=!0,l())},(o=function(){try{e.documentElement.doScroll("left")}catch(c){return void setTimeout(o,50)}a()})(),e.onreadystatechange=function(){"complete"==e.readyState&&(e.onreadystatechange=null,a())});var l,e,i,a,o}(function(){var c,t,l,e,i,a;(c=document.createElement("div")).innerHTML=o,o=null,(t=c.getElementsByTagName("svg")[0])&&(t.setAttribute("aria-hidden","true"),t.style.position="absolute",t.style.width=0,t.style.height=0,t.style.overflow="hidden",l=t,(e=document.body).firstChild?(i=l,(a=e.firstChild).parentNode.insertBefore(i,a)):e.appendChild(l))})}(window);
 
 
@@ -4379,8 +3499,14 @@ yaxi.Thread = (function () {
     color['mask'] = '#000000';
 
 
+    
     (yaxi.colors || (yaxi.colors = {})).default = color;
     
+
+    if (typeof color !== 'undefined')
+    {
+        jiac.color = color;
+    }
     
 
 })(yaxi.color = {});
@@ -4575,6 +3701,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     // 渲染器
     var renderer = this.renderer = create(null);
 
+
+    if (typeof jiac !== 'undefined')
+    {
+        jiac.classes = classes;
+    }
 
 
 
@@ -5909,7 +5040,7 @@ yaxi.impl.container = function (base) {
             {
                 if (url = control.url)
                 {
-                    var Class = yaxi.loadModule(base, url),
+                    var Class = jiac.loadModule(base, url),
                         args = control.args;
 
                     if (!Class.prototype.open)
@@ -6115,7 +5246,7 @@ yaxi.impl.pulldown = function () {
 
             var dom = this.$dom;
 
-            if (dom.scrollTop + (dom.offsetHeight << 1) < dom.scrollHeight)
+            if (dom.scrollTop + (dom.offsetHeight << yaxi.scale) < dom.scrollHeight)
             {
                 return;
             }
@@ -8358,7 +7489,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = yaxi.loadModule(base, url),
+        var Class = jiac.loadModule(base, url),
             control,
             style;
 
@@ -9369,40 +8500,6 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
 
 yaxi.Page = yaxi.Control.extend(function (Class, base) {
-
-
-
-
-    var host = yaxi.__dom_host = document.createElement('div');
-
-
-	host.className = 'yx-host';
-
-    if (document.body)
-    {
-        document.body.appendChild(host);
-    }
-    else
-    {
-        document.addEventListener('DOMContentLoaded', function () {
-
-            document.body.appendChild(host);
-        });
-	}
-	
-	
-	if (yaxi.device === 'mobile')
-	{
-		// 处理rem自适应
-		// 字体放大两倍, 然后设置页面为2倍屏幕宽度再缩小一半解决无法渲染1px像素问题
-		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 2 * 10000 / 375 | 0) / 100) + 'px';
-		host.style.cssText = 'width:200%;height:200%;transform-origin: 0 0;transform: scale(.5, .5);';
-	}
-	else
-	{
-		// pc端1rem = 100px
-		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
-	}
 
 
 	
@@ -11955,10 +11052,11 @@ yaxi.GestureInput = yaxi.Control.extend(function (Class, base) {
 
         var dom = this.$dom.firstChild,
             rect = dom.getBoundingClientRect(),
+            scale = yaxi.scale,
             index;
 
-        state.x = rect.left << 1;
-        state.y = rect.top << 1;
+        state.x = rect.left << scale;
+        state.y = rect.top << scale;
         state.width = dom.offsetWidth;
         state.height = dom.offsetHeight;
         state.size = state.width / 6 | 0;
@@ -12459,7 +11557,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         var target = event.dom,
             dom = this.$dom.lastChild;
 
-        state.left = dom.getBoundingClientRect().left << 1;
+        state.left = dom.getBoundingClientRect().left << yaxi.scale;
         state.width = dom.offsetWidth;
 
         while (target && target !== dom)

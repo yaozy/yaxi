@@ -82,7 +82,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 
     function createControl(base, url, args) {
 
-        var Class = yaxi.loadModule(base, url),
+        var Class = jiac.loadModule(base, url),
             control,
             style;
 

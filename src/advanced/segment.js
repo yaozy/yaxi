@@ -144,7 +144,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
         var target = event.dom,
             dom = this.$dom.lastChild;
 
-        state.left = dom.getBoundingClientRect().left << 1;
+        state.left = dom.getBoundingClientRect().left << yaxi.scale;
         state.width = dom.offsetWidth;
 
         while (target && target !== dom)
