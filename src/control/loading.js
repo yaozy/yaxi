@@ -196,7 +196,7 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
             // 显示loading
             this.load();
 
-            // 最少显示500msloading
+            // 最少显示500ms loading
             setTimeout(this.onload.bind(this.parent, this), 500);
         }
     }

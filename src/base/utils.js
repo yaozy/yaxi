@@ -34,7 +34,7 @@
         }
 
         return '' + text;
-    };
+    }
 
 
     //html解码函数
@@ -46,7 +46,7 @@
 
             return keys[key] || key;
         });
-    };
+    }
 
 
 
