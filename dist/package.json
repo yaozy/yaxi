@@ -1,0 +1,23 @@
+{
+  "name": "yaxi",
+  "version": "1.0.15",
+  "description": "",
+  "main": "build/server.js",
+  "scripts": {
+    "server": "node build/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaozy/yaxi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yaozy/yaxi/issues"
+  },
+  "homepage": "https://github.com/yaozy/yaxi#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "jiac": "^1.0.0"
+  }
+}

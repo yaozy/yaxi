@@ -5,6 +5,10 @@
   "main": "samples/build/publish.js",
   "scripts": {
     "build": "node build/build.js",
+    "build:wx": "node build/build-wx.js",
+    "build:h5": "node build/build-h5.js",
+    "build-css:h5": "node build/build-h5-css.js",
+    "build-css:wx": "node build/build-wx-css.js",
     "server": "node build/server.js",
     "publish": "node samples/build/publish.js",
     "test": "echo \"Error: no test specified\" && exit 1"

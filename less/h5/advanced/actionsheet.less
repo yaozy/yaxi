@@ -1,0 +1,52 @@
+.yx-actionsheet {
+    position: absolute;
+    left: .20rem;
+    right: 20rem;
+    bottom: 20rem;
+    z-index: 30;
+}
+
+
+.yx-actionsheet-content,
+.yx-actionsheet-cancel {
+    display: block;
+    background-color: @bg-level1-color;
+    border: 1px solid @border-level1-color;
+    text-align: center;
+}
+
+
+.yx-actionsheet-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100rem;
+    line-height: 104rem;
+    text-align: center;
+    z-index: 1;
+    color: @font-disabled-color;
+}
+
+.yx-actionsheet-content {
+    padding-top: 100rem;
+    border-radius: 10rem;
+    box-shadow: 0 0 8rem @border-level1-color;
+}
+
+.yx-actionsheet-content>* {
+    display: block;
+    height: 100rem;
+    line-height: 100rem;
+    border-top: .5px solid @border-level1-color;
+}
+
+.yx-actionsheet-cancel {
+    margin-top: 200rem;
+    height: 100rem;
+    line-height: 100rem;
+    border-radius: 10rem;
+    font-size: 28rem;
+    font-weight: bold;
+    box-shadow: 0 0 8rem @border-level1-color;
+}

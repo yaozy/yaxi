@@ -1,0 +1,41 @@
+.yx-switchbutton {
+    position: relative;
+    display: inline-block;
+    width: 200rem;
+    height: 60rem;
+}
+
+.yx-switchbutton-bar {
+    position: absolute;
+    display: inline-block;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 50rem;
+    margin-top: -25rem;
+    border-radius: 25rem;
+    background-color: @font-level3-color;
+}
+
+.yx-switchbutton-button {
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    top: 50%;
+    width: 50rem;
+    height: 50rem;
+    margin-top: -25rem;
+    border: 1px solid @border-level1-color;
+    border-radius: 25rem;
+    background-color: white;
+}
+
+.yx-switchbutton-checked>.yx-switchbutton-bar {
+    background-color: @font-success-color;
+}
+
+.yx-switchbutton-checked>.yx-switchbutton-button {
+    left: auto;
+    right: 0;
+    transition: right 1s;
+}
