@@ -902,9 +902,20 @@ yaxi.impl.property = function (get, set) {
  
         change = change !== false;
     
+        this.$defaults[name] = value;
+
+        value = {
+            name: name,
+            change: change,
+            fn: converter
+        };
+
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
+            converter = this.$converter;
+            converter[name] = false; // 指定了get的情况下不支持转换器
+
             options.set || (options.set = function () {
 
                 var type = this.typeName;
@@ -915,18 +926,10 @@ yaxi.impl.property = function (get, set) {
         {
             options.get = get(name, change);
             options.set || (options.set = set(name, converter, change));
+
+            converter = this.$converter;
+            converter[name] = value;
         }
-
-        this.$defaults[name] = value;
-
-        value = {
-            name: name,
-            change: change,
-            fn: converter
-        };
-
-        converter = this.$converter;
-        converter[name] = value;
 
         define(this, name, options);
 
@@ -5187,7 +5190,33 @@ yaxi.IconButton = yaxi.ContentControl.extend(function (Class, base) {
 yaxi.Image = yaxi.Control.extend(function (Class, base) {
 
 
-    
+    // 图片资源地址
+    this.$property('src', '');
+
+
+    // 图片裁剪、缩放的模式
+    /*
+     *  scaleToFill	缩放模式, 不保持纵横比缩放图片, 使图片的宽高完全拉伸至填满 image 元素	
+     *  aspectFit	缩放模式, 保持纵横比缩放图片, 使图片的长边能完全显示出来。也就是说, 可以完整地将图片显示出来。	
+     *  aspectFill	缩放模式, 保持纵横比缩放图片, 只保证图片的短边能完全显示出来。也就是说, 图片通常只在水平或垂直方向是完整的, 另一个方向将会发生截取。	
+     *  widthFix	缩放模式, 宽度不变, 高度自动变化, 保持原图宽高比不变	
+     *  heightFix	缩放模式, 高度不变, 宽度自动变化, 保持原图宽高比不变	2.10.3
+     *  top	裁剪模式, 不缩放图片, 只显示图片的顶部区域	
+     *  bottom	裁剪模式, 不缩放图片, 只显示图片的底部区域	
+     *  center	裁剪模式, 不缩放图片, 只显示图片的中间区域	
+     *  left	裁剪模式, 不缩放图片, 只显示图片的左边区域	
+     *  right	裁剪模式, 不缩放图片, 只显示图片的右边区域	
+     *  top left	裁剪模式, 不缩放图片, 只显示图片的左上边区域	
+     *  top right	裁剪模式, 不缩放图片, 只显示图片的右上边区域	
+     *  bottom left	裁剪模式, 不缩放图片, 只显示图片的左下边区域	
+     *  bottom right	裁剪模式, 不缩放图片, 只显示图片的右下边区域
+    */
+    this.$property('mode', '');
+
+
+    // 图片懒加载，在即将进入一定范围（上下三屏）时才开始加载
+    this.$property('lazy', false, true, 'lazy-load');
+
 
 
 }, function Image() {
@@ -5210,8 +5239,8 @@ yaxi.ImageButton = yaxi.ContentControl.extend(function (Class, base) {
     this.$property('layout', '');
     
 
-    // 图像url
-    this.$property('image', '');
+    // 图像路径
+    this.$property('src', '');
 
 
     // 图像大小
@@ -5266,6 +5295,60 @@ yaxi.SideBar = yaxi.Panel.extend(function (Class, base) {
     yaxi.Panel.apply(this, arguments);
 
 }).register('SideBar');
+
+
+
+
+yaxi.Swiper = yaxi.Panel.extend(function (Class, base) {
+
+
+
+    // 是否显示面板指示点
+    this.$property('dot', true);
+
+
+    // 指示点颜色
+    this.$property('color', '', true, 'dot-color');
+
+
+    // 是否自动切换
+    this.$property('autoplay', false);
+
+
+    // 当前所在滑块的 index
+    this.$property('current', 0);
+
+
+    // 自动切换时间间隔
+    this.$property('interval', 5000);
+
+
+    // 滑动动画时长
+    this.$property('duration', 500);
+
+
+    // 是否采用衔接滑动
+    this.$property('circular', 500);
+
+
+    // 滑动方向是否为纵向
+    this.$property('vertical', false);
+
+
+    // 前边距, 可用于露出前一项的一小部分, 接受px和rem值
+    this.$property('before', '');
+
+
+    // 后边距, 可用于露出后一项的一小部分, 接受px和rem值
+    this.$property('after', '');
+
+
+
+}, function Swiper() {
+
+    yaxi.Panel.apply(this, arguments);
+
+}).register("Swiper");
 
 
 
@@ -7228,38 +7311,11 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-yaxi.Text.mixin(function (mixin, base) {
+yaxi.Band.mixin(function (mixin, base) {
 
-
-
-    yaxi.template(this, '<span class="$class"></span>');
 
     
-
-    mixin.text = function (view, value) {
-
-        var format;
-
-        if (!this.__security)
-        {
-            view.textContent = (format = this.__format) ? format(value) : value;
-        }
-    }
-
-
-    mixin.security = function (view, value) {
-
-        var format;
-
-        if (this.__security = value)
-        {
-            view.textContent = value;
-        }
-        else
-        {
-            view.textContent = (format = this.__format) ? format(this.text) : this.text;
-        }
-    }
+    yaxi.template(this, '<div class="$class"></div>');
 
 
 
@@ -7300,6 +7356,41 @@ yaxi.IconButton.mixin(function (mixin, base) {
     mixin.icon = function (view, value) {
 
         view.firstChild.className = 'yx-iconbutton-icon iconfont ' + value;
+    }
+
+
+    mixin.size = function (view, value) {
+
+        var style = view.firstChild.style;
+        style.width = style.height = value;
+    }
+
+
+    this.__render_content = function (view, content) {
+
+        base.__render_content.call(this, view.lastChild, content);
+    }
+
+
+});
+
+
+
+
+yaxi.ImageButton.mixin(function (mixin, base) {
+
+
+
+    yaxi.template(this, '<div class="$class">'
+            + '<div class="yx-imagebutton-image"></div>'
+            + '<div class="yx-imagebutton-content"></div>'
+        + '</div>');
+
+
+
+    mixin.src = function (view, value) {
+
+        view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 
@@ -7511,19 +7602,6 @@ yaxi.ScrollPanel.mixin(function (mixin, base) {
 
 
 
-yaxi.Band.mixin(function (mixin, base) {
-
-
-    
-    yaxi.template(this, '<div class="$class"></div>');
-
-
-
-});
-
-
-
-
 yaxi.SideBar.mixin(function (mixin, base) {
 
 
@@ -7549,6 +7627,46 @@ yaxi.Tab.mixin(function (mixin, base) {
 
         this.__change_class(view, 'yx-tab-', value);
     }
+
+
+});
+
+
+
+
+yaxi.Text.mixin(function (mixin, base) {
+
+
+
+    yaxi.template(this, '<span class="$class"></span>');
+
+    
+
+    mixin.text = function (view, value) {
+
+        var format;
+
+        if (!this.__security)
+        {
+            view.textContent = (format = this.__format) ? format(value) : value;
+        }
+    }
+
+
+    mixin.security = function (view, value) {
+
+        var format;
+
+        if (this.__security = value)
+        {
+            view.textContent = value;
+        }
+        else
+        {
+            view.textContent = (format = this.__format) ? format(this.text) : this.text;
+        }
+    }
+
 
 
 });

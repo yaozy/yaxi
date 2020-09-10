@@ -6,9 +6,6 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    mixin.$type = 'Panel';
-
-    
 
     this.render = panel.render;
 

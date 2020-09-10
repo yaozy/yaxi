@@ -2,11 +2,9 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
 
 
-    mixin.$type = 'Button';
-
-
-
     function renderContent(self, content) {
+
+        self.__content_dirty = false;
 
         if (typeof content === 'string')
         {
@@ -54,13 +52,11 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
     this.patch = function (view, prefix) {
 
-        var content;
-
         base.patch.call(this, view, prefix);
 
-        if (content = this.__content || '')
+        if (this.__content_dirty)
         {
-            view.content = renderContent(this, content);
+            view[prefix + 'content'] = renderContent(this, this.__content || '');
         }
         else
         {

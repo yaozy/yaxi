@@ -2,11 +2,6 @@ yaxi.Panel.mixin(function (mixin, base) {
 
 
 
-    // 默认渲染类型
-    mixin.$type = 'Panel';
-
-
-
     this.render = function () {
 
         var view = base.render.call(this);
@@ -24,11 +19,11 @@ yaxi.Panel.mixin(function (mixin, base) {
                 list[i] = children[i].render();
             }
 
-            view.children = list;
+            view.c = list;
         }
         else
         {
-            delete view.children;
+            delete view.c;
         }
 
         return view;
@@ -66,7 +61,7 @@ yaxi.Panel.mixin(function (mixin, base) {
 
         var item;
 
-        prefix += '.children[';
+        prefix += '.c[';
 
         for (var i = 0, l = children.length; i < l; i++)
         {
@@ -88,7 +83,7 @@ yaxi.Panel.mixin(function (mixin, base) {
             list[i] = children[i].render();
         }
 
-        view[prefix + '.children'] = view.children = list;
+        view[prefix + '.c'] = view.children = list;
     }
 
 
@@ -97,7 +92,7 @@ yaxi.Panel.mixin(function (mixin, base) {
         var length = children.length;
         var item;
 
-        prefix += '.children[';
+        prefix += '.c[';
 
         for (var i = 0; i < length; i++)
         {

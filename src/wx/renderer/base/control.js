@@ -6,6 +6,9 @@ yaxi.Control.mixin(function (mixin) {
 
     var assign = Object.assign;
 
+    var owner = Object.getOwnPropertyNames; 
+
+
     var color = yaxi.color;
 
 
@@ -17,13 +20,13 @@ yaxi.Control.mixin(function (mixin) {
         var mixin = this.$mixin;
         var storage = this.$storage;
         var converter = this.$converter;
-        var list = this.__wx_class = [this.$class, this.class];
+        var list = this.__wx_class = ['', this.class];
         var view = create(null);
         var value, fn;
 
         this.__dirty = false;
 
-        view.t = mixin.$type || this.typeName;
+        view.t = this.typeName;
         view.u = this.uuid;
 
         if (value = this.__changes)
@@ -32,8 +35,12 @@ yaxi.Control.mixin(function (mixin) {
             assign(storage, value);
         }
 
-        for (var name in storage)
+        var names = owner(storage);
+
+        for (var i = 0, l = names.length; i < l; i++)
         {
+            var name = names[i];
+
             // 配置了处理变更的属性才处理
             if ((value = converter[name]) && value.change)
             {
@@ -56,8 +63,18 @@ yaxi.Control.mixin(function (mixin) {
             mixin.onselected.call(this, view, '', true, value);
         }
 
+        // 合并class
         list.dirty = false;
-        view.class = list.join(' ');
+        value = list.join(' ');
+        
+        if (value === ' ')
+        {
+            delete view.class;
+        }
+        else
+        {
+            view.class = value;
+        }
 
         return view;
     }
@@ -96,15 +113,19 @@ yaxi.Control.mixin(function (mixin) {
 
             mixin.onrender.call(this, view, prefix);
 
+            // 选中状态变更处理
             if ((value = changes.selected) != null && (changes = this.selectedStatus))
             {
                 mixin.onselected.call(this, view, prefix, value, changes);
             }
 
+            // class变更处理
             if ((value = this.__wx_class) && value.dirty)
             {
                 value.dirty = false;
-                view[prefix + 'class'] = value.join(' ');
+                value = value.join(' ');
+
+                view[prefix + 'class'] = value === ' ' ? '' : value;
             }
         }
     }
@@ -130,7 +151,7 @@ yaxi.Control.mixin(function (mixin) {
                     list.splice(i, 1);
                 }
 
-                break;
+                return;
             }
         }
 

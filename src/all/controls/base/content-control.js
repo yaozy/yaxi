@@ -47,6 +47,8 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
             }
     
             this.__content = content;
+            this.__content_dirty = true;  // 标记内容已变更
+
             return value;
         }
 

@@ -20,14 +20,23 @@
 
     wx.translateEvent = function (event) {
 
-        var fn;
+        var any;
 
-        if (fn = translates[event.type])
+        uuid = this.__event_id;
+        key = this.__event_key;
+
+        if (any = translates[event.type])
         {
-            uuid = this.__event_id;
-            key = this.__event_key;
+            any(event);
+        }
+        else
+        {
+            event = new Event(event.type);
 
-            fn(event);
+            event.target = any = controls[uuid];
+            event.key = key;
+
+            any.trigger(event);
         }
 
     }.bind(wx);
@@ -179,6 +188,25 @@
         event.target = control;
 
         if (call(control, '__on_longpress', event) === false || 
+            control.trigger(event) === false)
+        {
+            return false;
+        }
+    }
+
+
+
+    translates.change = function (event) {
+
+        var control = controls[uuid];
+        var current = event.detail.current;
+
+        event = new Event(event.type);
+        event.target = control;
+        event.key = key;
+        event.current = current;
+
+        if (call(control, '__on_change', event) === false || 
             control.trigger(event) === false)
         {
             return false;

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const base = process.cwd();
+const base = path.join(process.cwd(), 'platforms/h5/');
 
 
 const mime = {

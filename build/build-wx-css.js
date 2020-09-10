@@ -2,11 +2,6 @@ const Compressor = require('jiac/css-compressor');
 const theme = require('./theme').theme
 
 
-process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-});
-
-
 new Compressor()
     .load('less', [
         'all/theme/' + theme + '/color.less',

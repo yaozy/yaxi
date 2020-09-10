@@ -102,9 +102,20 @@ yaxi.impl.property = function (get, set) {
  
         change = change !== false;
     
+        this.$defaults[name] = value;
+
+        value = {
+            name: name,
+            change: change,
+            fn: converter
+        };
+
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
+            converter = this.$converter;
+            converter[name] = false; // 指定了get的情况下不支持转换器
+
             options.set || (options.set = function () {
 
                 var type = this.typeName;
@@ -115,18 +126,10 @@ yaxi.impl.property = function (get, set) {
         {
             options.get = get(name, change);
             options.set || (options.set = set(name, converter, change));
+
+            converter = this.$converter;
+            converter[name] = value;
         }
-
-        this.$defaults[name] = value;
-
-        value = {
-            name: name,
-            change: change,
-            fn: converter
-        };
-
-        converter = this.$converter;
-        converter[name] = value;
 
         define(this, name, options);
 

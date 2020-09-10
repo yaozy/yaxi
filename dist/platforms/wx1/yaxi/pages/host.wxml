@@ -1,0 +1,23 @@
+<import src="../components/template.wxml" />
+
+<view class="yx-statusbar" style="height:{{ top }}px;" />
+<view class="yx-host" style="top:{{ top }}px;" 
+    bindtouchstart="handleEvent"
+    bindtouchmove="handleEvent"
+    bindtouchcancel="handleEvent"
+    bindtouchend="handleEvent"
+    bindtouchforcechange="handleEvent"
+    bindtap="handleEvent"
+    bindlongpress="handleEvent"
+    bindtransitionend="handleEvent"
+    bindanimationstart="handleEvent"
+    bindanimationiteration="handleEvent"
+    bindanimationend="handleEvent">
+    <template 
+        wx:for="{{ pages }}" 
+        wx:key="index"  
+        wx:if="{{ item }}" 
+        is="{{ item.t }}" 
+        data="{{ ...item }}" />
+</view>
+<image wx:if="{{ !loaded }}" class="yx-splash-screen" mode="scaleToFill" src="/images/splash-screen.jpg"></image>

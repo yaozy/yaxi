@@ -25,6 +25,8 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     
     this.__render_content = function (view, content) {
 
+        this.__content_dirty = false;
+
         if (typeof content === 'string')
         {
             this.__render_text(view, content);

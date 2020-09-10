@@ -9,8 +9,8 @@ yaxi.ImageButton = yaxi.ContentControl.extend(function (Class, base) {
     this.$property('layout', '');
     
 
-    // 图像url
-    this.$property('image', '');
+    // 图像路径
+    this.$property('src', '');
 
 
     // 图像大小

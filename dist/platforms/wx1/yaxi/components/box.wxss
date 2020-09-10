@@ -1,0 +1,3 @@
+@import '../wxss/default/yaxi.wxss';
+@import '../../icon/iconfont.wxss';
+

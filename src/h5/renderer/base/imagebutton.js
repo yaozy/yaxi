@@ -9,9 +9,9 @@ yaxi.ImageButton.mixin(function (mixin, base) {
 
 
 
-    mixin.image = function (view, value) {
+    mixin.src = function (view, value) {
 
-        view.firstChild.backgroundImage = value ? 'url(' + value + ')' : '';
+        view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 

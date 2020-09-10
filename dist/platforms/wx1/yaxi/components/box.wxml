@@ -1,0 +1,7 @@
+<import src="./template.wxml" />
+
+<template 
+    wx:for="{{ children }}"
+    wx:key="index"
+    is="{{ item.t }}"
+    data="{{ ...item }}"></template>

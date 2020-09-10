@@ -1,0 +1,343 @@
+.yx-control {
+  box-sizing: border-box;
+  flex-grow: 1;
+  flex-shrink: 1;
+  -webkit-overflow-scrolling: touch;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+.yx-text {
+  display: inline-block;
+  flex-grow: 0;
+}
+.yx-button {
+  display: inline-flex;
+  justify-items: center;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  height: 80rpx;
+  white-space: nowrap;
+  background-color: #1c86ee;
+  color: #f7f7f7;
+}
+.yx-button.active {
+  background-color: #48d1cc;
+}
+.yx-iconbutton {
+  display: inline-flex;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  align-items: center;
+  width: 150rpx;
+  height: 100rpx;
+  text-align: center;
+}
+.yx-iconbutton-icon {
+  width: 60rpx;
+  height: 60rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 1.2;
+  font-size: 60rpx;
+}
+.yx-iconbutton-content {
+  flex-grow: 1;
+  flex-shrink: 1;
+  font-size: 28rpx;
+}
+.yx-panel {
+  position: relative;
+  display: block;
+  overflow: auto;
+  width: auto;
+  height: auto;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.yx-band {
+  overflow: auto;
+  width: 100%;
+  height: 100rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.yx-icon {
+  display: inline-block;
+  overflow: hidden;
+  min-width: 40rpx;
+  height: 60rpx;
+  text-align: center;
+}
+.yx-imagebutton {
+  display: inline-flex;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  align-items: center;
+  width: 150rpx;
+  height: 100rpx;
+  text-align: center;
+}
+.yx-imagebutton-image {
+  width: 50rpx;
+  height: 50rpx;
+  margin-top: 10rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+  line-height: 1.2;
+  font-size: 60rpx;
+  background-position: center;
+  background-size: contain;
+}
+.yx-imagebutton-content {
+  flex-grow: 1;
+  flex-shrink: 1;
+  font-size: 28rpx;
+}
+.yx-repeater {
+  position: relative;
+  display: block;
+  overflow: auto;
+  width: auto;
+  height: auto;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.yx-sidebar {
+  overflow: auto;
+  width: 200rpx;
+  height: 100%;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.yx-swiper {
+  height: 300rpx;
+}
+.yx-swiper-host,
+.yx-swiper-item > .yx-control {
+  width: 100%;
+  height: 100%;
+}
+.yx-swiper-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30rpx;
+  height: 20rpx;
+  line-height: 20rpx;
+  text-align: center;
+}
+.yx-swiper-dot {
+  display: inline-block;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 12rpx;
+  margin: 0 8rpx;
+  background-color: #f7f7f7;
+  opacity: 0.3;
+}
+.yx-swiper-active-dot {
+  background-color: #1c86ee;
+  opacity: 0.8;
+}
+.yx-tab {
+  display: -webkit-flex;
+  display: flex;
+  justify-items: stretch;
+  height: 100rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-size: 30rpx;
+  overflow: hidden;
+}
+.yx-tab-top {
+  border-bottom: 0.5px solid #cccccc;
+}
+.yx-tab-bottom {
+  border-top: 0.5px solid #cccccc;
+}
+.yx-tab-page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+}
+.yx-page {
+  position: absolute;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  z-index: 1;
+}
+.yx-header {
+  display: inline-flex;
+  overflow: hidden;
+  width: 100%;
+  height: 90rpx;
+  padding-left: 20rpx;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  white-space: nowrap;
+  border-bottom: 0.5px solid #cccccc;
+  z-index: 999;
+}
+.yx-header-back,
+.yx-header-icon,
+.yx-header-space {
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+.yx-header-back {
+  width: 90rpx;
+  margin-left: -20rpx;
+  padding: 50rpx 0;
+  text-align: center;
+}
+.yx-header-hide {
+  margin-left: -20rpx;
+  display: none;
+}
+.yx-header-icon {
+  width: 60rpx;
+  text-align: center;
+}
+.yx-header-host {
+  overflow: hidden;
+  flex-shrink: 1;
+  flex-grow: 1;
+}
+.yx-host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+}
+.yx-layout-row {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+}
+.yx-layout-row-reverse {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.yx-layout-column {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+}
+.yx-layout-column-reverse {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.yx-hidden {
+  visibility: hidden;
+}
+.yx-theme-level1 {
+  background-color: #ffffff;
+  color: #31313d;
+}
+.yx-theme-level2 {
+  background-color: #ffffff;
+  color: #6c768b;
+}
+.yx-theme-level3 {
+  background-color: #ffffff;
+  color: #b8c0de;
+}
+.yx-theme-level4 {
+  background-color: #ffffff;
+  color: #cccccc;
+}
+.yx-theme-level5 {
+  background-color: #ffffff;
+  color: #f7f7f7;
+}
+.yx-theme-primary {
+  background-color: #ffffff;
+  color: #1c86ee;
+}
+.yx-theme-second {
+  background-color: #ffffff;
+  color: #48d1cc;
+}
+.yx-theme-success {
+  background-color: #ffffff;
+  color: #71c04a;
+}
+.yx-theme-warning {
+  background-color: #ffffff;
+  color: #e89518;
+}
+.yx-theme-danger {
+  background-color: #ffffff;
+  color: #ff6c6c;
+}
+.yx-theme-disabled {
+  background-color: #ffffff;
+  color: #999999;
+}
+.yx-theme-level1-reverse {
+  background-color: #31313d;
+  color: #ffffff;
+}
+.yx-theme-level2-reverse {
+  background-color: #6c768b;
+  color: #ffffff;
+}
+.yx-theme-level3-reverse {
+  background-color: #b8c0de;
+  color: #ffffff;
+}
+.yx-theme-level4-reverse {
+  background-color: #cccccc;
+  color: #ffffff;
+}
+.yx-theme-level5-reverse {
+  background-color: #f7f7f7;
+  color: #ffffff;
+}
+.yx-theme-primary-reverse {
+  background-color: #1c86ee;
+  color: #ffffff;
+}
+.yx-theme-second-reverse {
+  background-color: #48d1cc;
+  color: #ffffff;
+}
+.yx-theme-success-reverse {
+  background-color: #71c04a;
+  color: #ffffff;
+}
+.yx-theme-warning-reverse {
+  background-color: #e89518;
+  color: #ffffff;
+}
+.yx-theme-danger-reverse {
+  background-color: #ff6c6c;
+  color: #ffffff;
+}
+.yx-theme-disabled-reverse {
+  background-color: #999999;
+  color: #eeeeee;
+}
