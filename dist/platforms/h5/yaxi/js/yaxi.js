@@ -6996,9 +6996,15 @@ yaxi.Control.mixin(function (mixin) {
 
             assign(storage, changes);
 
+            // 先同步class以免冲掉
+            if (changes.class)
+            {
+                mixin.class.call(this, view, changes.class);
+            }
+
             for (var name in changes)
             {
-                if (fn = mixin[name])
+                if (name !== 'class' && (fn = mixin[name]))
                 {
                     fn.call(this, view, changes[name]);
                 }

@@ -3,31 +3,32 @@ const Watcher = require('jiac/watcher');
 
 
 new Watcher('./icon', './platforms/h5/icon')
-    .syncDir()
+    .sync()
     .watch();
 
 new Watcher('./icon', './platforms/wx/icon')
-    .syncDir()
+    .plugin(/\.css$/i, file => file.replace(/\.css$/i, '.wxss'))
+    .sync()
     .watch();
 
 
 
 new Watcher('./images', './platforms/h5/images')
-    .syncDir()
+    .sync()
     .watch();
 
 new Watcher('./images', './platforms/wx/images')
-    .syncDir()
+    .sync()
     .watch();
 
 
 
 new Watcher('./src', './platforms/h5/js')
     .template(/\.html$/i)
-    .syncDir()
+    .sync()
     .watch();
 
 new Watcher('./src', './platforms/wx/js')
     .template(/\.html$/i)
-    .syncDir()
+    .sync()
     .watch();
