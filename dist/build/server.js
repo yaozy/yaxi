@@ -3,6 +3,7 @@ const path = require('path');
 const http = require('http');
 const base = path.join(process.cwd(), 'platforms/h5/');
 
+console.log(base);
 
 const mime = {
     htm: 'text/html',

@@ -151,7 +151,7 @@
 </template>
 
 
-<template name="Sidebar">
+<template name="SideBar">
 
 <box 
     data-id="{{ u }}"

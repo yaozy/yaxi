@@ -397,7 +397,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
     // 选中时状态
-    this.$property('selectedStatus', null, false);
+    this.$property('selectedStatus', null, false, 'selected-status');
     
 
     // 自定义key

@@ -100,9 +100,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
             if (Class = options.Class)
             {
-                if (typeof Class === 'string')
+                if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
-                    Class = classes[control];
+                    throw '"' + options.Class + '" doesn\'t register!';
                 }
                 
                 check(Class, parent);

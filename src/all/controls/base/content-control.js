@@ -83,9 +83,9 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
         var Class = options.Class;
         var control;
 
-        if (typeof Class === 'string')
+        if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            Class = classes[Class];
+            throw '"' + options.Class + '" doesn\'t register!';
         }
 
         if (Class)

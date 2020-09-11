@@ -2956,7 +2956,7 @@ Object.extend.call(Array, function (Class, base) {
                         case '@':
                         case '#':
                         case '.':
-                            if ((token = tokens[index++][0]) < '0' || token > 'z')
+                            if ((token = tokens[index++])[0] < '0' || token[0] > 'z')
                             {
                                 raise(key, index - 2, ' , ' + key + ' must be followed alphabet or number or "_"');
                             }
@@ -3962,7 +3962,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
     // 选中时状态
-    this.$property('selectedStatus', null, false);
+    this.$property('selectedStatus', null, false, 'selected-status');
     
 
     // 自定义key
@@ -4376,9 +4376,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
             if (Class = options.Class)
             {
-                if (typeof Class === 'string')
+                if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
-                    Class = classes[control];
+                    throw '"' + options.Class + '" doesn\'t register!';
                 }
                 
                 check(Class, parent);
@@ -4700,6 +4700,8 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
             }
     
             this.__content = content;
+            this.__content_dirty = true;  // 标记内容已变更
+
             return value;
         }
 
@@ -4734,9 +4736,9 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
         var Class = options.Class;
         var control;
 
-        if (typeof Class === 'string')
+        if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            Class = classes[Class];
+            throw '"' + options.Class + '" doesn\'t register!';
         }
 
         if (Class)
@@ -5215,7 +5217,7 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
 
 
     // 图片懒加载，在即将进入一定范围（上下三屏）时才开始加载
-    this.$property('lazy', false, true, 'lazy-load');
+    this.$property('lazyLoad', false, true, 'lazy-load');
 
 
 
@@ -5304,11 +5306,15 @@ yaxi.Swiper = yaxi.Panel.extend(function (Class, base) {
 
 
     // 是否显示面板指示点
-    this.$property('dot', true);
+    this.$property('dots', true);
 
 
-    // 指示点颜色
-    this.$property('color', '', true, 'dot-color');
+    // 指示点样式
+    this.$property('dotStyle', '', true, 'dot-style');
+
+
+    // 活动指示点颜色
+    this.$property('activeDotStyle', '', true, 'dot-active-style');
 
 
     // 是否自动切换
@@ -5341,6 +5347,13 @@ yaxi.Swiper = yaxi.Panel.extend(function (Class, base) {
 
     // 后边距, 可用于露出后一项的一小部分, 接受px和rem值
     this.$property('after', '');
+
+
+
+    this.__on_change = function (event) {
+
+        this.current = event.current;
+    }
 
 
 
@@ -7157,6 +7170,8 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
     
     this.__render_content = function (view, content) {
+
+        this.__content_dirty = false;
 
         if (typeof content === 'string')
         {

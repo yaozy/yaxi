@@ -2956,7 +2956,7 @@ Object.extend.call(Array, function (Class, base) {
                         case '@':
                         case '#':
                         case '.':
-                            if ((token = tokens[index++][0]) < '0' || token > 'z')
+                            if ((token = tokens[index++])[0] < '0' || token[0] > 'z')
                             {
                                 raise(key, index - 2, ' , ' + key + ' must be followed alphabet or number or "_"');
                             }
@@ -3962,7 +3962,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
     // 选中时状态
-    this.$property('selectedStatus', null, false);
+    this.$property('selectedStatus', null, false, 'selected-status');
     
 
     // 自定义key
@@ -4376,9 +4376,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
             if (Class = options.Class)
             {
-                if (typeof Class === 'string')
+                if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
-                    Class = classes[control];
+                    throw '"' + options.Class + '" doesn\'t register!';
                 }
                 
                 check(Class, parent);
@@ -4736,9 +4736,9 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
         var Class = options.Class;
         var control;
 
-        if (typeof Class === 'string')
+        if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            Class = classes[Class];
+            throw '"' + options.Class + '" doesn\'t register!';
         }
 
         if (Class)

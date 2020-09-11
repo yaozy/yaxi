@@ -112,7 +112,7 @@ Object.extend.call(Array, function (Class, base) {
                         case '@':
                         case '#':
                         case '.':
-                            if ((token = tokens[index++][0]) < '0' || token > 'z')
+                            if ((token = tokens[index++])[0] < '0' || token[0] > 'z')
                             {
                                 raise(key, index - 2, ' , ' + key + ' must be followed alphabet or number or "_"');
                             }

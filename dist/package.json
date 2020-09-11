@@ -4,7 +4,8 @@
   "description": "",
   "main": "build/server.js",
   "scripts": {
-    "server:h5": "node build/server.js"
+    "server:h5": "node build/server.js",
+    "watch": "node build/watch.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,6 @@
   "homepage": "https://github.com/yaozy/yaxi#readme",
   "dependencies": {},
   "devDependencies": {
-    "jiac": "^1.0.0"
+    "jiac": "^1.0.6"
   }
 }

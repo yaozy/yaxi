@@ -1,4 +1,5 @@
 const yaxi = require('../../yaxi/js/yaxi');
+const template = require('./main.html');
 
 
 module.exports = yaxi.Panel.extend(function (Class, base) {
@@ -6,20 +7,13 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.assign({
-            children: [
-                {
-                    Class: yaxi.Button,
-                    content: 'open page',
-                    events: {
-                        tap: function () {
+        this.assign(template(this));
+    }
 
-                            new (require('./test'))().open();
-                        }
-                    }
-                }
-            ]
-        });
+
+    this.openPage = function () {
+
+        new (require('./test'))().open();
     }
 
 
