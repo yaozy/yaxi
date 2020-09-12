@@ -805,7 +805,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
     classes[Class.typeName = this.typeName = 'Control'] = Class;
 
-    
+
+
     function register(name) {
 
         if (name)
@@ -813,7 +814,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             var prototype = this.prototype;
 
             classes[this.typeName = prototype.typeName = name] = this;
-            prototype.$class = prototype.$class + ' yx-' + name.toLowerCase();
+            classes[name = name.toLowerCase()] = this;
+
+            prototype.$class = prototype.$class + ' yx-' + name;
         }
 
         return this;

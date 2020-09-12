@@ -4,6 +4,10 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
     var create = Object.create;
 
+    var define = Object.defineProperty;
+
+
+
 
 	// 页面栈
     var all = [];
@@ -32,23 +36,6 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
         }
 
         throw 'can not find uuid ' + uuid + ' of page!';
-    }
-
-
-    function open(Page, payload) {
-
-        var page = new Page(payload);
-        
-        if (page.onopening(payload) !== false)
-        {
-            all.push(page);
-            page.payload = payload;
-
-            wx.navigateTo({
-
-                url: '../../yaxi/pages/host?uuid=' + page.uuid
-            });
-        }
     }
 
 
@@ -83,61 +70,77 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 	
-	// 获取所有页面
-	yaxi.getAllPages = function () {
+	// 获取当前所有页面
+    define(yaxi, 'currentPages', {
 
-		return all.slice();
-	}
+        get: function () {
+
+            return all.slice();
+        }
+    });
 
 
 	// 获取当前页面
-	yaxi.getCurrentPage = function () {
+	define(yaxi, 'currentPage', {
 
-		return all[all.length - 1] || null;
-	}
+        get: function () {
+
+            return all[all.length - 1] || null;
+        }
+    });
 
 
 
-    // 关闭所有页面后打开指定的页面
-    yaxi.reLaunch = function (Page, payload) {
+	// 打开指定页面
+    yaxi.openPage = function (Page, payload, callback) {
 
-        if (all[0])
+        if (typeof payload === 'function')
         {
-            wx.navigateBack({
-
-                delta: all.length
-            });
+            callback = payload;
+            payload = void 0;
         }
 
-        open(Page, payload);
-    }
+        try
+        {
+            var page = new Page(payload);
+        
+            if (page.onopening(payload) !== false)
+            {
+                all.push(page);
+                page.payload = payload;
     
-
-	// 关闭当前页面后打开指定的页面
-    yaxi.redirectTo = function (Page, payload) {
-
-        if (all[0])
-        {
-            wx.navigateBack();
+                wx.navigateTo({
+    
+                    url: '../../yaxi/pages/host?uuid=' + page.uuid,
+    
+                    success: function () {
+    
+                        callback && callback(page);
+                    }
+                });
+            }
         }
-
-        open(Page, payload);
+        catch (e)
+        {
+            console.error(e);
+            throw e;
+        }
     }
 
 
-	// 不关闭当前页面后打开指定的页面
-    yaxi.navigateTo = function (Page, payload) {
+	// 关闭当前页面
+    yaxi.closePage = function (delta, callback) {
 
-        open(Page, payload);
-    }
-
-
-	// 关闭
-    yaxi.navigateBack = function (delta) {
+        if (typeof delta === 'function')
+        {
+            callback = delta;
+            delta = 1;
+        }
 
         wx.navigateBack({
 
-            delta: delta || 1
+            delta: delta || 1,
+            success: callback
         });
 	}
     
@@ -173,7 +176,7 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 
-    yaxi.wx.__on_page_open = function (uuid, wxPage, wxName) {
+    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
 
         try
         {
@@ -205,12 +208,12 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
     }
 
 
-    yaxi.wx.__on_page_close = function (uuid) {
+    yaxi.__on_page_close = function (uuid) {
 
         var index = find(uuid, true);
         var page = all[index];
 
-        page.onclosed(page.payload);
+        page.onclosed();
 
         page.__wx = null;
         page.destroy();

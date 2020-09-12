@@ -1,7 +1,7 @@
 const yaxi = require('../../yaxi/js/yaxi');
 
 
-module.exports = yaxi.Panel.extend(function (Class, base) {
+module.exports = yaxi.Box.extend(function (Class, base) {
 
 
     this.init = function () {

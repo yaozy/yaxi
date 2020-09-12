@@ -1,7 +1,7 @@
 const yaxi = require('../../yaxi/js/yaxi');
 
 
-module.exports = yaxi.Panel.extend(function (Class, base) {
+module.exports = yaxi.Box.extend(function (Class, base) {
 
 
     this.init = function () {
@@ -11,7 +11,7 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
                 {
                     Class: yaxi.Button,
                     content: {
-                        Class: yaxi.Panel,
+                        Class: yaxi.Box,
                         children: [
                             {
                                 Class: yaxi.Text,
@@ -26,7 +26,7 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
                     events: {
                         tap: function () {
 
-                            new (require('./test'))().open();
+                            require('./test').open();
                         }
                     }
                 },
@@ -36,7 +36,7 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
                     events: {
                         tap: function () {
 
-                            new (require('./model'))().open();
+                            require('./model').open();
                         }
                     }
                 }

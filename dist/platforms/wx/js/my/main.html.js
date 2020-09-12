@@ -2,23 +2,23 @@ module.exports = function (data) {
 
 
 return {
-	"Class": "Panel",
+	"Class": "box",
 	"theme": "level5-reverse",
 	"children": [
 		{
-			"Class": "Band",
+			"Class": "band",
 			"theme": "level1",
 			"children": [
 				{
-					"Class": "SideBar",
+					"Class": "sidebar",
 					"children": [
 						{
-							"Class": "Image"
+							"Class": "image"
 						}
 					]
 				},
 				{
-					"Class": "Panel",
+					"Class": "box",
 					"layout": "column",
 					"children": [
 						{
@@ -35,57 +35,57 @@ return {
 			]
 		},
 		{
-			"Class": "Band",
+			"Class": "band",
 			"theme": "level1",
 			"style": "margin-top:20rem;",
 			"children": [
 				{
-					"Class": "Band"
+					"Class": "band"
 				}
 			]
 		},
 		{
-			"Class": "Band",
+			"Class": "band",
 			"theme": "level1",
 			"style": "margin-top:20rem;",
 			"children": [
 				{
-					"Class": "Band"
+					"Class": "band"
 				},
 				{
-					"Class": "Band"
+					"Class": "band"
 				},
 				{
-					"Class": "Band"
+					"Class": "band"
 				}
 			]
 		},
 		{
-			"Class": "Band",
+			"Class": "band",
 			"theme": "level1",
 			"style": "margin-top:20rem;",
 			"children": [
 				{
-					"Class": "Band"
+					"Class": "band"
 				},
 				{
-					"Class": "Band"
+					"Class": "band"
 				},
 				{
-					"Class": "Band"
+					"Class": "band"
 				}
 			]
 		},
 		{
-			"Class": "Band",
+			"Class": "band",
 			"theme": "level1",
 			"style": "margin-top:20rem;",
 			"children": [
 				{
-					"Class": "Band"
+					"Class": "band"
 				},
 				{
-					"Class": "Band"
+					"Class": "band"
 				}
 			]
 		}

@@ -1,4 +1,4 @@
-yaxi.Popup = yaxi.Panel.extend(function (Class, base) {
+yaxi.Popup = yaxi.Box.extend(function (Class, base) {
 	
 
 
@@ -6,6 +6,6 @@ yaxi.Popup = yaxi.Panel.extend(function (Class, base) {
 	
 }, function Popup() {
 
-	yaxi.Panel.call(this);
+	yaxi.Box.call(this);
 
 }).register('Popup');

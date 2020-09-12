@@ -1,4 +1,4 @@
-yaxi.Tel = yaxi.Panel.extend(function () {
+yaxi.Tel = yaxi.Box.extend(function () {
 
 
 

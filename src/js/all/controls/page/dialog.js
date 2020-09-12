@@ -7,6 +7,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 }, function Dialog() {
 
-	yaxi.Panel.call(this);
+	yaxi.Box.call(this);
 
 }).register('Dialog');

@@ -2,7 +2,7 @@ const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
 
 
-module.exports = yaxi.Panel.extend(function (Class, base) {
+module.exports = yaxi.Box.extend(function (Class, base) {
 
 
     this.init = function () {
@@ -13,7 +13,7 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
 
     this.openPage = function () {
 
-        yaxi.navigateTo(require('./test'));
+        require('./test').open();
     }
 
 

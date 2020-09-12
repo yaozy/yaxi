@@ -62,14 +62,14 @@ yaxi.Control.extend(function (Class, base) {
                 if (values instanceof Array)
                 {
                     values = {
-                        Class: yaxi.Panel,
+                        Class: yaxi.Box,
                         children: values
                     }
                 }
 
                 values.className = 'yx-actionsheet-content ' + (values.className || '');
 
-                control = this.content = new (values.Class || yaxi.Panel)();
+                control = this.content = new (values.Class || yaxi.Box)();
                 control.parent = this;
                 control.assign(values);
             }

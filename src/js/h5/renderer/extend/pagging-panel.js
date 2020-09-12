@@ -1,4 +1,4 @@
-yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
+yaxi.PaggingBox = yaxi.Box.extend(function (Class, base) {
 
 
 
@@ -141,4 +141,4 @@ yaxi.PaggingPanel = yaxi.Panel.extend(function (Class, base) {
 
 
 
-}).register('PaggingPanel');
+}).register('PaggingBox');

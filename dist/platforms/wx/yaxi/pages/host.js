@@ -7,7 +7,7 @@ Page({
      */
     data: {
         top: 0,
-        data: Object
+        d: Object
     },
 
 
@@ -15,18 +15,19 @@ Page({
 
         var uuid;
         
-        yaxi.wx.getSystemInfo(info => {
+        yaxi.getSystemInfo(info => {
 
             this.setData({ top: info.statusBarHeight });
         });
 
         if (uuid = options && +options.uuid)
         {
-            yaxi.wx.__on_page_open(this.__uuid = uuid, this, 'data');
+            yaxi.__on_page_open(this.__uuid = uuid, this, 'd');
         }
         else
         {
-            yaxi.redirectTo(require('../../js/main'));
+            wx.navigateBack();
+            require('../../js/main').open();
         }
     },
 
@@ -37,7 +38,7 @@ Page({
 
         if (uuid = this.__uuid)
         {
-            yaxi.wx.__on_page_close(uuid);
+            yaxi.__on_page_close(uuid);
         }
     },
 

@@ -1,4 +1,4 @@
-yaxi.Panel.mixin(function (mixin, base) {
+yaxi.Box.mixin(function (mixin, base) {
 
 
 

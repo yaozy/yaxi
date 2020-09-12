@@ -13,24 +13,24 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                     content: 'yaxi test page'
                 },
                 {
-                    Class: yaxi.Panel,
+                    Class: yaxi.Box,
                     layout: 'row',
                     children: [
                         {
                             Class: yaxi.SideBar
                         },
                         {
-                            Class: yaxi.Panel,
+                            Class: yaxi.Box,
                             layout: 'column',
                             children: [
                                 {
                                     Class: yaxi.Band
                                 },
                                 {
-                                    Class: yaxi.Panel,
+                                    Class: yaxi.Box,
                                     children: [
                                         {
-                                            Class: yaxi.Panel
+                                            Class: yaxi.Box
                                         },
                                         {
                                             Class: yaxi.Button,

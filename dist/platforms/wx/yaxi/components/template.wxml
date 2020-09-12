@@ -123,12 +123,12 @@
 </template>
 
 
-<template name="Panel">
+<template name="Box">
 
     <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-panel{{ class }}" 
+        class="yx-control yx-box{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent"
         children="{{ c }}">
@@ -142,7 +142,7 @@
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-panel yx-band{{ class }}" 
+    class="yx-control yx-box yx-band{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}">
@@ -156,7 +156,7 @@
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-panel yx-sidebar{{ class }}" 
+    class="yx-control yx-box yx-sidebar{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}">
@@ -165,12 +165,12 @@
 </template>
 
 
-<template name="ScrollPanel">
+<template name="ScrollBox">
 
     <scroll-view 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-panel yx-scrollpanel{{ class }}" 
+        class="yx-control yx-box yx-scrollbox{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent">
         <box wx:if="{{ c }}" children="{{ c }}" />
@@ -183,7 +183,7 @@
 
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-panel yx-swiper{{ class }}" 
+        class="yx-control yx-box yx-swiper{{ class }}" 
         style="{{ style || '' }}">
         <swiper 
             data-id="{{ u }}"
@@ -227,7 +227,7 @@
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-panel yx-tab yx-tab-bottom{{ class }}" 
+    class="yx-control yx-box yx-tab yx-tab-bottom{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}">
@@ -241,7 +241,7 @@
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-panel yx-page{{ class }}" 
+    class="yx-control yx-box yx-page{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}">

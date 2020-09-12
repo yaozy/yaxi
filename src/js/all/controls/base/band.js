@@ -1,10 +1,10 @@
-yaxi.Band = yaxi.Panel.extend(function (Class, base) {
+yaxi.Band = yaxi.Box.extend(function (Class, base) {
 
 
 
 
 }, function Band() {
 
-    yaxi.Panel.apply(this, arguments);
+    yaxi.Box.apply(this, arguments);
 
 }).register('Band');

@@ -1,4 +1,4 @@
-yaxi.SideBar = yaxi.Panel.extend(function (Class, base) {
+yaxi.SideBar = yaxi.Box.extend(function (Class, base) {
 
 
     
@@ -6,6 +6,6 @@ yaxi.SideBar = yaxi.Panel.extend(function (Class, base) {
 
 }, function SideBar() {
 
-    yaxi.Panel.apply(this, arguments);
+    yaxi.Box.apply(this, arguments);
 
 }).register('SideBar');

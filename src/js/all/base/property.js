@@ -72,6 +72,7 @@ yaxi.impl.property = function (target) {
         else
         {
             options.change = options.change !== false;
+            options.convert || (options.convert = cache[options.type || typeof defaultValue])
 
             options.get = this.__build_get(name, options);
             options.set || (options.set = this.__build_set(name, options));
@@ -80,7 +81,7 @@ yaxi.impl.property = function (target) {
             converts[name] = options.convert === false ? null : {
                 name: name,
                 change: options.change,
-                fn: options.convert || (options.convert = cache[options.type || typeof defaultValue])
+                fn: options.convert
             };
         }
 

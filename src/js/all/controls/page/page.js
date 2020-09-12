@@ -1,4 +1,4 @@
-yaxi.Page = yaxi.Panel.extend(function (Class, base) {
+yaxi.Page = yaxi.Box.extend(function (Class, base) {
 
 
 	
@@ -22,13 +22,27 @@ yaxi.Page = yaxi.Panel.extend(function (Class, base) {
 	}
 	
 	
-	this.onclosed = function (payload) {
+	this.onclosed = function () {
+	}
+
+
+
+	function open(payload, callback) {
+
+		yaxi.openPage(this, payload, callback);
+	}
+
+
+	this.__class_init = function (Class) {
+
+		base.__class_init.call(this, Class);
+		Class.open = open;
 	}
 
 
     
 }, function Page() {
 
-    yaxi.Panel.apply(this, arguments);
+    yaxi.Box.apply(this, arguments);
 
 }).register('Page');

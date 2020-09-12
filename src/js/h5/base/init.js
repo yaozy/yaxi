@@ -4,8 +4,6 @@
     
     var h5 = yaxi.h5 = Object.create(null);
 
-    var update = yaxi.__notify_update;
-
 
 
     yaxi.platform = 'h5';
@@ -14,55 +12,6 @@
     // 是否在微信浏览器中打开
     h5.weixin = navigator.userAgent.toLowerCase().indexOf('micromessenger') >= 0;
 
-
-
-    yaxi.on('yaxi-page-change', function (event) {
-
-        var host = yaxi.__view_host;
-        var page = event.page;
-        var index = event.index;
-        var callback = event.callback;
-
-        event.page = null;
-
-        if (event.open)
-        {
-            update(true);
-
-            host.appendChild(page.render());
-            page[callback](index);
-
-            update(false);
-        }
-        else if (page.$view)
-        {
-            host.removeChild(page.$view);
-            page[callback](index);
-        }
-        
-    });
-
-
-    yaxi.on('yaxi-page-patch', function (event) {
-
-        var patches = event.payload;
-        var index = 0;
-        var control, view;
-
-        event.payload = null;
-
-        update(true);
-
-        while (control = patches[index++])
-        {
-            if (view = control.$view)
-            {
-                control.patch(view);
-            }
-        }
-
-        update(false);
-    });
 
 
     // 获取系统信息

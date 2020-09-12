@@ -12,10 +12,8 @@ yaxi.Header.mixin(function (mixin, base) {
 
     this.__render_content = function (view, content) {
 
-        var root = this.root;
-
         base.__render_content.call(this, view.lastChild, content);
-        view.firstChild.style.display = root.index && root.index() > 0 ? '' : 'none';
+        view.firstChild.style.display = yaxi.currentPages.length > 1 ? '' : 'none';
     }
 
 

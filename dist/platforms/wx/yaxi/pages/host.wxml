@@ -13,5 +13,5 @@
     bindanimationstart="handleEvent"
     bindanimationiteration="handleEvent"
     bindanimationend="handleEvent">
-    <template wx:if="{{ data }}" is="{{ data.t }}" data="{{ ...data }}" />
+    <template wx:if="{{ d }}" is="{{ d.t }}" data="{{ ...d }}" />
 </view>

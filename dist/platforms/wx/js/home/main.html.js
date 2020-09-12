@@ -2,50 +2,48 @@ module.exports = function (data) {
 
 
 return {
-	"Class": "Panel",
+	"Class": "box",
 	"children": [
 		{
-			"Class": "Swiper",
-			"autoplay": false,
+			"Class": "swiper",
 			"children": [
 				{
-					"Class": "Image",
+					"Class": "image",
 					"src": "/images/splash-screen.jpg"
 				},
 				{
-					"Class": "Image",
+					"Class": "image",
 					"src": "/images/splash-screen.jpg"
 				},
 				{
-					"Class": "Image",
+					"Class": "image",
 					"src": "/images/splash-screen.jpg"
 				},
 				{
-					"Class": "Image",
+					"Class": "image",
 					"src": "/images/splash-screen.jpg"
 				}
 			]
 		},
 		{
-			"Class": "Band",
+			"Class": "band",
 			"children": [
 				{
-					"Class": "Button",
+					"Class": "button",
 					"events": {
 						"tap": data.openPage
-					},
-					"content": "Open Page"
+					}
 				}
 			]
 		},
 		{
-			"Class": "Band"
+			"Class": "band"
 		},
 		{
-			"Class": "Band"
+			"Class": "band"
 		},
 		{
-			"Class": "Band"
+			"Class": "band"
 		}
 	]
 };

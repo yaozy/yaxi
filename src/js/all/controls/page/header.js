@@ -25,12 +25,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (event.key === 'back')
         {
-            var root = this.root;
-
-            if (root && root.close)
-            {
-                root.close();
-            }
+            yaxi.closePage();
         }
     }
 

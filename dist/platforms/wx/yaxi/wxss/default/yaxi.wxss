@@ -1,9 +1,3 @@
-/*隐藏滚动条*/
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  color: transparent;
-}
 .yx-control {
   box-sizing: border-box;
   flex-grow: 1;
@@ -57,7 +51,7 @@
   flex-shrink: 1;
   font-size: 28rpx;
 }
-.yx-panel {
+.yx-box {
   position: relative;
   display: block;
   overflow: auto;
@@ -235,6 +229,8 @@
   bottom: 0;
   width: 100%;
   height: auto;
+  font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
+  font-size: 32rpx;
 }
 .yx-layout-row {
   display: -webkit-flex;

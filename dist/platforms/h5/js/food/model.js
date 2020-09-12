@@ -38,7 +38,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                     content: 'yaxi model page'
                 },
                 {
-                    Class: yaxi.Panel,
+                    Class: yaxi.Box,
                     layout: 'column',
                     children: [
                         {

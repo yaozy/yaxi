@@ -6,9 +6,5 @@ yaxi.Button.mixin(function (mixin, base) {
 
 
 
-    this.__no_content = 'content is empty';
-    
-
-
 });
 

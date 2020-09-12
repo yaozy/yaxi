@@ -2,7 +2,7 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    var panel = yaxi.Panel.prototype;
+    var box = yaxi.Box.prototype;
 
     
 
@@ -10,10 +10,10 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    this.render = panel.render;
+    this.render = box.render;
 
 
-    this.patch = panel.patch;
+    this.patch = box.patch;
 
     
 

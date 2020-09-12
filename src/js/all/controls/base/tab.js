@@ -1,4 +1,4 @@
-yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
+yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
 
 
@@ -95,7 +95,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
                     return host;
                 }
 
-                throw 'Tab host must be a Panel!';
+                throw 'Tab host must be a Box!';
             }
 
             throw 'Tab can not find host "' + this.host + '"!';
@@ -215,7 +215,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
 }, function Tab() {
 
 
-    yaxi.Panel.apply(this, arguments);
+    yaxi.Box.apply(this, arguments);
 
 
 }).register('Tab');

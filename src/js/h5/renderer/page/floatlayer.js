@@ -1,4 +1,4 @@
-yaxi.FloatLayer = yaxi.Panel.extend(function (Class, base) {
+yaxi.FloatLayer = yaxi.Box.extend(function (Class, base) {
 	
 
 
