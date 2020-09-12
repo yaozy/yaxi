@@ -18,14 +18,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     var patches = yaxi.__patches = [];
 
 
-    // 渲染前处理集合
-    var renderings = [];
-
-
-    // 渲染后处理集合
-    var rendereds = [];
-
-
     // 调度器
     var schedule = 0;
 
@@ -61,39 +53,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     // 更新补丁
     function update() {
 
-        yaxi.trigger('yaxi-page-patch', patches);
+        yaxi.__on_page_patch(patches);
         schedule = patches.length = 0;
     }
 
-
-    // 通知更新
-    yaxi.__notify_update = function (before) {
-
-        var list = before ? renderings : rendereds;
-        var index = 0;
-        var fn;
-
-        while (fn = list[index++])
-        {
-            fn.apply(list[index++], list[index++]);
-        }
-
-        list.length = 0;
-    }
-
-
-    // 注册渲染前事件
-    this.bindBeforeRender = function (fn, args) {
-
-        renderings.push(fn, this, args);
-    } 
-
-
-    // 注册渲染后事件
-    this.bindAfterRender = function (fn, args) {
-
-        rendereds.push(fn, this, args);
-    }
 
 
     

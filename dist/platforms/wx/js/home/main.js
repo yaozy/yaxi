@@ -13,7 +13,7 @@ module.exports = yaxi.Panel.extend(function (Class, base) {
 
     this.openPage = function () {
 
-        new (require('./test'))().open();
+        yaxi.navigateTo(require('./test'));
     }
 
 

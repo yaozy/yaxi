@@ -7,29 +7,38 @@ Page({
      */
     data: {
         top: 0,
-        loaded: false,
-        pages: []
+        data: Object
     },
 
 
-    onLoad: function () {
+    onLoad: function (options) {
 
-        yaxi.wx.init(this, 'pages');
+        var uuid;
+        
+        yaxi.wx.getSystemInfo(info => {
 
-        yaxi.getSystemInfo(info => {
-
-            this.setData({ top: info.statusBarHeight }, () => {
-
-                new (require('../../js/main'))().open();
-
-                setTimeout(() => {
-
-                    this.setData({ loaded: true });
-
-                }, 1000);
-            });
+            this.setData({ top: info.statusBarHeight });
         });
 
+        if (uuid = options && +options.uuid)
+        {
+            yaxi.wx.__on_page_open(this.__uuid = uuid, this, 'data');
+        }
+        else
+        {
+            yaxi.redirectTo(require('../../js/main'));
+        }
+    },
+
+
+    onUnload: function () {
+
+        var uuid;
+
+        if (uuid = this.__uuid)
+        {
+            yaxi.wx.__on_page_close(uuid);
+        }
     },
 
 

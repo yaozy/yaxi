@@ -21,8 +21,8 @@
     "checkSiteMap": true,
     "uploadWithSourceMap": true,
     "compileHotReLoad": false,
-    "useMultiFrameRuntime": false,
-    "useApiHook": false,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
@@ -36,7 +36,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "1.9.4",
-  "appid": "wx82194fad03a1cec2",
+  "appid": "wx42e7077f83804d13",
   "projectname": "wx",
   "debugOptions": {
     "hidedInDevtools": []

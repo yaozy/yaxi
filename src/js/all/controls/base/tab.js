@@ -35,7 +35,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             // 第一次设置选中索引时在渲染前再处理,否则host可能没有初始化好
             if (value >= 0)
             {
-                this.bindBeforeRender(initIndex, [value]);
+                yaxi.bindBeforeRender(initIndex, this, [value]);
             }
 
             return value;

@@ -29,7 +29,7 @@ yaxi.impl.mixin = function (fn) {
         var prototype = this.prototype;
         var base = this.superclass;
         
-        fn.call(prototype, prototype.$mixin, base && base.prototype || null);
+        fn.call(prototype, prototype.$mixin, base && base.prototype || null, yaxi);
     }
 
     return this;
@@ -81,7 +81,7 @@ Object.extend = function (fn, Class) {
 
     if (fn)
     {
-        fn.call(prototype, Class, base);
+        fn.call(prototype, Class, base, yaxi);
         ctor = Class.ctor;
     }
 
@@ -3539,14 +3539,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     var patches = yaxi.__patches = [];
 
 
-    // 渲染前处理集合
-    var renderings = [];
-
-
-    // 渲染后处理集合
-    var rendereds = [];
-
-
     // 调度器
     var schedule = 0;
 
@@ -3582,39 +3574,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     // 更新补丁
     function update() {
 
-        yaxi.trigger('yaxi-page-patch', patches);
+        yaxi.__on_page_patch(patches);
         schedule = patches.length = 0;
     }
 
-
-    // 通知更新
-    yaxi.__notify_update = function (before) {
-
-        var list = before ? renderings : rendereds;
-        var index = 0;
-        var fn;
-
-        while (fn = list[index++])
-        {
-            fn.apply(list[index++], list[index++]);
-        }
-
-        list.length = 0;
-    }
-
-
-    // 注册渲染前事件
-    this.bindBeforeRender = function (fn, args) {
-
-        renderings.push(fn, this, args);
-    } 
-
-
-    // 注册渲染后事件
-    this.bindAfterRender = function (fn, args) {
-
-        rendereds.push(fn, this, args);
-    }
 
 
     
@@ -5600,7 +5563,7 @@ yaxi.Tab = yaxi.Panel.extend(function (Class, base) {
             // 第一次设置选中索引时在渲染前再处理,否则host可能没有初始化好
             if (value >= 0)
             {
-                this.bindBeforeRender(initIndex, [value]);
+                yaxi.bindBeforeRender(initIndex, this, [value]);
             }
 
             return value;
@@ -6051,95 +6014,9 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 yaxi.Page = yaxi.Panel.extend(function (Class, base) {
 
 
-
-	var define = Object.defineProperty;
-
-	
-	// 页面栈
-	var all = [];
-
-
 	
 	// 禁止作为子控件
 	Class.allowParent = false;
-
-
-
-	// 所有窗口
-	define(Class, 'all', {
-
-		get: function () {
-
-			return all;
-		}
-	});
-
-
-	// 当前窗口
-	define(Class, 'current', {
-
-		get: function () {
-
-			return all[all.length - 1] || null;
-		}
-	});
-
-
-
-	Class.close = function (amount, closeType) {
-
-		if (typeof amount === 'string')
-		{
-			closeType = amount;
-			amount = 1;
-		}
-		else
-		{
-			amount = amount || 1;
-		}
-
-		for (var i = all.length; i--;)
-		{
-			if (--amount < 0)
-			{
-				return;
-			}
-
-			all[i].close(closeType);
-		}
-
-		return all[all.length - 1] || null;
-	}
-
-
-	Class.closeTo = function (level, closeType) {
-
-		level |= 0;
-
-		for (var i = all.length - 1; i > level; i--)
-		{
-			all[i].close(closeType || 'OK');
-		}
-
-		return all[level] || null;
-	}
-
-
-	Class.closeAll = function (closeType) {
-
-		for (var i = all.length; i--;)
-		{
-			all[i].close(closeType || 'OK');
-		}
-	}
-
-
-
-	
-	this.index = function () {
-
-		return all.indexOf(this);
-	}
 
 
 
@@ -6149,161 +6026,16 @@ yaxi.Page = yaxi.Panel.extend(function (Class, base) {
 	}
 
 	
-
-	this.open = function () {
-
-		if (all.indexOf(this) >= 0 ||
-			this.onopening() === false ||
-			this.trigger('opening') === false)
-		{
-			return;
-		}
-
-		all.push(this);
-
-		// 触发全局事件通知窗口打开, 以便其它平台处理
-		var event = new yaxi.Event('yaxi-page-change');
-
-		event.index = all.length - 1;
-		event.page = this;
-		event.open = true;
-		event.callback = '__open';
-
-		this.removeClass('yx-hidden');
-
-		yaxi.trigger(event);
-	}
-
-
-	this.__open = function (index) {
-
-		var last;
-
-		if (last = all[index - 1])
-		{
-			last.addClass('yx-hidden');
-			last.onhide();
-		}
-
-		this.onopened();
-		this.onshow(true);
-
-		this.trigger('opened');
+	
+	this.onopening = function (payload) {
 	}
 	
 	
-	
-	this.close = function (closeType, payload) {
-		
-		var index = all.indexOf(this);
-
-		if (index < 0)
-		{
-			return false;
-		}
-
-		if (this.onclosing(closeType || (closeType = 'OK'), payload) === false)
-		{
-			return false;
-		}
-
-		var event = new yaxi.Event('closing');
-
-		event.closeType = closeType;
-
-		if (this.trigger(event, payload) === false)
-		{
-			return false;
-		}
-
-		all.splice(index, 1);
-
-		// 触发全局事件通知窗口关闭, 以便其它平台处理
-		event = new yaxi.Event('yaxi-page-change');
-		event.index = all.length;
-		event.page = this;
-		event.callback = '__close';
-
-		yaxi.trigger(event);
-	}
-
-
-	this.__close = function (index) {
-
-		var event = new yaxi.Event('closed');
-
-		this.onhide();
-		this.onclosed();
-
-		this.trigger(event);
-
-		// 延时销毁以加快页面切换速度
-		setTimeout(this.destroy.bind(this), 10);
-
-		// 关闭的是最后一个窗口时才显示上一个窗口
-		if (index > 0 && index === all.length)
-		{
-			var page = all[index - 1];
-
-			page.removeClass('yx-hidden');
-			page.onshow(false);
-		}
+	this.onopened = function (payload) {
 	}
 	
 	
-	this.onopening = function () {
-	}
-	
-	
-	this.onopened = function () {
-		
-	}
-	
-	
-	this.onclosing = function (closeType, payload) {
-	}
-	
-	
-	this.onclosed = function (closeType, payload) {
-		
-	}
-
-
-	this.onshow = function (first) {
-
-	}
-
-
-	this.onhide = function () {
-
-	}
-
-
-	
-	
-    this.__class_init = function (Class) {
-
-		base.__class_init.call(this, Class);
-		Class.open = open;
-	}
-
-
-
-	function open() {
-
-		var page;
-
-		if (arguments.length > 0)
-		{
-			page = Object.create(this.prototype);
-			this.apply(page, arguments);
-		}
-		else
-		{
-			page = new this();
-		}
-
-		return page.open();
+	this.onclosed = function (payload) {
 	}
 
 
@@ -6387,6 +6119,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
     
 
+    var create = Object.create;
+
+ 
+
     yaxi.platform = 'wx';
 
 
@@ -6394,65 +6130,107 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     yaxi.wx = Object.create(null);
 
 
-    yaxi.wx.init = function (wxPage, wxPagesName) {
 
 
-        var create = Object.create;
 
-        var update = yaxi.__notify_update;
+    // yaxi.on('yaxi-page-change', function (event) {
+
+    //     var index = event.index;
+    //     var page = event.page;
+    //     var open = event.open;
+    //     var data = create(null);
+
+    //     open && update(true);
+
+    //     event.page = null;
+    //     // data[wxPagesName + '[' + index + ']'] = open ? page.render() : null;
+
+    //     // console.log(data);
+
+    //     if (open)
+    //     {
+    //         wx.navigateTo({
+
+    //             url: '/yaxi/pages/host?uuid=' + page.uuid
+    //         });
+    //     }
+
+    //     // wxPage.setData(data, function () {
+
+    //     //     page[event.callback](index);
+    //     //     open && update(false);
+    //     // });
+    // });
 
 
-        yaxi.on('yaxi-page-change', function (event) {
 
-            var index = event.index;
-            var page = event.page;
-            var open = event.open;
-            var data = create(null);
-
-            open && update(true);
-
-            event.page = null;
-            data[wxPagesName + '[' + index + ']'] = open ? page.render() : null;
-
-            console.log(data);
-
-            wxPage.setData(data, function () {
-
-                page[event.callback](index);
-                open && update(false);
-            });
-        });
+    // yaxi.wx.init = function (wxPage, wxPagesName) {
 
 
-        yaxi.on('yaxi-page-patch', function (event) {
+    //     var create = Object.create;
 
-            var patches = event.payload;
-            var data = create(null);
-            var index = 0;
-            var control;
+    //     var update = yaxi.__notify_update;
 
-            event.payload = null;
 
-            update(true);
+    //     yaxi.on('yaxi-page-change', function (event) {
 
-            while (control = patches[index++])
-            {
-                control.patch(data, wxPagesName + '[' + control.index() + ']');
-            }
+    //         var index = event.index;
+    //         var page = event.page;
+    //         var open = event.open;
+    //         var data = create(null);
 
-            console.log(data);
+    //         open && update(true);
+
+    //         event.page = null;
+    //         data[wxPagesName + '[' + index + ']'] = open ? page.render() : null;
+
+    //         console.log(data);
+
+    //         if (open)
+    //         {
+    //             wx.navigateTo({
+
+    //                 url: '../pages/host?uuid=' + page.uuid
+    //             });
+    //         }
+
+    //         // wxPage.setData(data, function () {
+
+    //         //     page[event.callback](index);
+    //         //     open && update(false);
+    //         // });
+    //     });
+
+
+    //     yaxi.on('yaxi-page-patch', function (event) {
+
+    //         var patches = event.payload;
+    //         var data = create(null);
+    //         var index = 0;
+    //         var control;
+
+    //         event.payload = null;
+
+    //         update(true);
+
+    //         while (control = patches[index++])
+    //         {
+    //             control.patch(data, wxPagesName + '[' + control.index() + ']');
+    //         }
+
+    //         console.log(data);
             
-            wxPage.setData(data, function () {
+    //         wxPage.setData(data, function () {
 
-                update(false);
-            });
-        });
+    //             update(false);
+    //         });
+    //     });
 
-    }
+    // }
 
 
     // 获取系统信息
-    yaxi.getSystemInfo = function (callback) {
+    yaxi.wx.getSystemInfo = function (callback) {
 
         callback && wx.getSystemInfo({
 
@@ -7070,6 +6848,233 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 yaxi.Tab.mixin(function (mixin, base) {
+
+
+
+});
+
+
+
+
+yaxi.Page.mixin(function (mixin, base, yaxi) {
+
+
+
+    var create = Object.create;
+
+
+	// 页面栈
+    var all = [];
+    
+
+
+    // 渲染前处理集合
+    var renderings = [];
+
+    // 渲染后处理集合
+    var rendereds = [];
+
+
+
+
+    function find(uuid, index) {
+
+        var list = all;
+
+        for (var i = list.length; i--;)
+        {
+            if (list[i].uuid === uuid)
+            {
+                return index ? i : list[i];
+            }
+        }
+
+        throw 'can not find uuid ' + uuid + ' of page!';
+    }
+
+
+    function open(Page, payload) {
+
+        var page = new Page(payload);
+        
+        if (page.onopening(payload) !== false)
+        {
+            all.push(page);
+            page.payload = payload;
+
+            wx.navigateTo({
+
+                url: '../../yaxi/pages/host?uuid=' + page.uuid
+            });
+        }
+    }
+
+
+
+    // 通知渲染
+    function notifyRender(list) {
+
+        var index = 0;
+        var fn;
+
+        while (fn = list[index++])
+        {
+            fn.apply(list[index++], list[index++]);
+        }
+
+        list.length = 0;
+    }
+
+
+    // 注册渲染前事件
+    yaxi.bindBeforeRender = function (fn, control, args) {
+
+        renderings.push(fn, control, args);
+    }
+
+
+    // 注册渲染后事件
+    yaxi.bindAfterRender = function (fn, control, args) {
+
+        rendereds.push(fn, control, args);
+    }
+
+
+	
+	// 获取所有页面
+	yaxi.getAllPages = function () {
+
+		return all.slice();
+	}
+
+
+	// 获取当前页面
+	yaxi.getCurrentPage = function () {
+
+		return all[all.length - 1] || null;
+	}
+
+
+
+    // 关闭所有页面后打开指定的页面
+    yaxi.reLaunch = function (Page, payload) {
+
+        if (all[0])
+        {
+            wx.navigateBack({
+
+                delta: all.length
+            });
+        }
+
+        open(Page, payload);
+    }
+    
+
+	// 关闭当前页面后打开指定的页面
+    yaxi.redirectTo = function (Page, payload) {
+
+        if (all[0])
+        {
+            wx.navigateBack();
+        }
+
+        open(Page, payload);
+    }
+
+
+	// 不关闭当前页面后打开指定的页面
+    yaxi.navigateTo = function (Page, payload) {
+
+        open(Page, payload);
+    }
+
+
+	// 关闭
+    yaxi.navigateBack = function (delta) {
+
+        wx.navigateBack({
+
+            delta: delta || 1
+        });
+	}
+    
+    
+
+    yaxi.__on_page_patch = function (patches) {
+
+        var index = 0;
+        var times = 0;
+        var control, page, data;
+
+        notifyRender(renderings);
+
+        while (control = patches[index++])
+        {
+            if (page = control.__wx_page)
+            {
+                times++;
+
+                control.patch(data = create(null), control.__wx_name);
+                console.log(data);
+
+                page.setData(data, function () {
+
+                    if (--times <= 0)
+                    {
+                        notifyRender(rendereds);
+                    }
+                });
+            }
+        }
+    }
+
+
+
+    yaxi.wx.__on_page_open = function (uuid, wxPage, wxName) {
+
+        try
+        {
+            var page = find(uuid);
+            var data;
+
+            notifyRender(renderings);
+
+            data = {};
+            data[wxName || (wxName = 'data')] = page.render();
+
+            console.log(data);
+
+            wxPage.setData(data, function () {
+
+                notifyRender(rendereds);
+
+                page.onopened(page.payload);
+    
+                page.__wx_page = wxPage;
+                page.__wx_name = wxName;
+            });
+        }
+        catch (e)
+        {
+            console.error(e);
+            throw e;
+        }
+    }
+
+
+    yaxi.wx.__on_page_close = function (uuid) {
+
+        var index = find(uuid, true);
+        var page = all[index];
+
+        page.onclosed(page.payload);
+
+        page.__wx = null;
+        page.destroy();
+
+        all.splice(index, 1);
+    }
 
 
 

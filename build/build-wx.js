@@ -11,7 +11,7 @@ new Compressor()
         'js/all/controls/page/(page|header|title|dialog).js',
         'js/wx/base/(init|event).js',
         'js/wx/renderer/base/(control|content-control|panel|repeater|tab).js',
-        'js/wx/renderer/page/header.js'
+        'js/wx/renderer/page/(page|header).js'
     ])
     .combine('\r\n\r\n\r\n\r\n')
     .output('dist/platforms/wx/yaxi/js/yaxi.js')

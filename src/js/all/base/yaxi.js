@@ -29,7 +29,7 @@ yaxi.impl.mixin = function (fn) {
         var prototype = this.prototype;
         var base = this.superclass;
         
-        fn.call(prototype, prototype.$mixin, base && base.prototype || null);
+        fn.call(prototype, prototype.$mixin, base && base.prototype || null, yaxi);
     }
 
     return this;
@@ -81,7 +81,7 @@ Object.extend = function (fn, Class) {
 
     if (fn)
     {
-        fn.call(prototype, Class, base);
+        fn.call(prototype, Class, base, yaxi);
         ctor = Class.ctor;
     }
 

@@ -6,6 +6,7 @@ return {
 	"children": [
 		{
 			"Class": "Swiper",
+			"autoplay": false,
 			"children": [
 				{
 					"Class": "Image",

@@ -13,11 +13,5 @@
     bindanimationstart="handleEvent"
     bindanimationiteration="handleEvent"
     bindanimationend="handleEvent">
-    <template 
-        wx:for="{{ pages }}" 
-        wx:key="index"  
-        wx:if="{{ item }}" 
-        is="{{ item.t }}" 
-        data="{{ ...item }}" />
+    <template wx:if="{{ data }}" is="{{ data.t }}" data="{{ ...data }}" />
 </view>
-<image wx:if="{{ !loaded }}" class="yx-splash-screen" mode="scaleToFill" src="/images/splash-screen.jpg"></image>

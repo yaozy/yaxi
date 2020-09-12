@@ -1,14 +1,14 @@
 {
-    "pages": [
-        "yaxi/pages/host"
-    ],
-    "window": {
-        "backgroundTextStyle": "light",
-        "navigationBarBackgroundColor": "#fff",
-        "navigationBarTitleText": "yaxi weixin",
-        "navigationBarTextStyle": "black",
-        "navigationStyle": "custom"
-    },
-    "style": "v2",
-    "sitemapLocation": "sitemap.json"
+  "pages": [
+    "yaxi/pages/host"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "yaxi weixin",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
 }
