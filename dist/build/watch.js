@@ -23,12 +23,12 @@ new Watcher('./images', './platforms/wx/images')
 
 
 
-new Watcher('./src', './platforms/h5/js')
+new Watcher('./src/js', './platforms/h5/js')
     .template(/\.html$/i)
     .sync()
     .watch();
 
-new Watcher('./src', './platforms/wx/js')
+new Watcher('./src/js', './platforms/wx/js')
     .template(/\.html$/i)
     .sync()
     .watch();

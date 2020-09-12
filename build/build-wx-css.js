@@ -3,8 +3,8 @@ const theme = require('./theme').theme
 
 
 new Compressor()
-    .load('less', [
-        'all/theme/' + theme + '/color.less',
+    .load('src/less', [
+        'theme/' + theme + '/color.less',
         'all/control/(control|text|button|iconbutton|panel).less',
         'all/control/*.less',
         'all/page/(page|header|host).less',
