@@ -20,6 +20,13 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
     });
 
 
+    this.__load_content = function (value) {
+
+        this.text = value;
+    }
+
+
+
 }, function Text() {
 
     yaxi.Control.apply(this, arguments);

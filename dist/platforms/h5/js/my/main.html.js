@@ -1,96 +1,126 @@
 module.exports = function (data) {
 
 
-return {
-	"Class": "box",
-	"theme": "level5-reverse",
-	"children": [
+with (data) return (
+	[
+		"box",
 		{
-			"Class": "band",
-			"theme": "level1",
-			"children": [
+			"theme": "level5-reverse"
+		},
+		[
+			[
+				"band",
 				{
-					"Class": "sidebar",
-					"children": [
-						{
-							"Class": "image"
-						}
-					]
+					"theme": "level1"
 				},
-				{
-					"Class": "box",
-					"layout": "column",
-					"children": [
+				[
+					[
+						"sidebar",
+						null,
+						[
+							[
+								"image",
+								null
+							]
+						]
+					],
+					[
+						"box",
 						{
-							"Class": "Text"
+							"layout": "column"
 						},
-						{
-							"Class": "Text"
-						},
-						{
-							"Class": "Text"
-						}
+						[
+							[
+								"Text",
+								null
+							],
+							[
+								"Text",
+								null
+							],
+							[
+								"Text",
+								null
+							]
+						]
 					]
-				}
-			]
-		},
-		{
-			"Class": "band",
-			"theme": "level1",
-			"style": "margin-top:20rem;",
-			"children": [
+				]
+			],
+			[
+				"band",
 				{
-					"Class": "band"
-				}
-			]
-		},
-		{
-			"Class": "band",
-			"theme": "level1",
-			"style": "margin-top:20rem;",
-			"children": [
-				{
-					"Class": "band"
+					"theme": "level1",
+					"style": "margin-top:20rem;"
 				},
+				[
+					[
+						"band",
+						null
+					]
+				]
+			],
+			[
+				"band",
 				{
-					"Class": "band"
+					"theme": "level1",
+					"style": "margin-top:20rem;"
 				},
+				[
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					]
+				]
+			],
+			[
+				"band",
 				{
-					"Class": "band"
-				}
+					"theme": "level1",
+					"style": "margin-top:20rem;"
+				},
+				[
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					]
+				]
+			],
+			[
+				"band",
+				{
+					"theme": "level1",
+					"style": "margin-top:20rem;"
+				},
+				[
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					]
+				]
 			]
-		},
-		{
-			"Class": "band",
-			"theme": "level1",
-			"style": "margin-top:20rem;",
-			"children": [
-				{
-					"Class": "band"
-				},
-				{
-					"Class": "band"
-				},
-				{
-					"Class": "band"
-				}
-			]
-		},
-		{
-			"Class": "band",
-			"theme": "level1",
-			"style": "margin-top:20rem;",
-			"children": [
-				{
-					"Class": "band"
-				},
-				{
-					"Class": "band"
-				}
-			]
-		}
+		]
 	]
-};
+)
 
 
 }

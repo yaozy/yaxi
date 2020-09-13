@@ -75,7 +75,6 @@ yaxi.showMessage = function (options) {
     options.class = 'yx-messagebox';
 
     options.footer = {
-        subtype: yaxi.Button,
         children: options.buttons || [
             {
                 key: 'OK',
@@ -97,7 +96,7 @@ yaxi.showMessage = function (options) {
         }
     };
     
-    return new yaxi.Dialog().assign(options).open();
+    return new yaxi.Dialog().load(options).open();
 }
 
 

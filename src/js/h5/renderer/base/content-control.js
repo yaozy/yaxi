@@ -11,12 +11,15 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         var view = base.render.call(this);
         var content = this.__content;
 
-        if (content == null)
+        if (this.__content_dirty)
         {
-            content = this.__no_content;
+            if (content == null)
+            {
+                content = this.__no_content;
+            }
+            
+            this.__render_content(view, content);
         }
-
-        this.__render_content(view, content);
 
         return view;
     }
@@ -47,12 +50,6 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     this.__render_text = function (view, text) {
 
         view.textContent = text;
-    }
-
-
-    mixin.content = function (view, value) {
-
-        this.__render_content(view, this.__content || '');
     }
 
 

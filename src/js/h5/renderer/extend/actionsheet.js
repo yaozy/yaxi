@@ -45,7 +45,7 @@ yaxi.Control.extend(function (Class, base) {
 
                 control = this.header = new (values.Class || yaxi.Text)();
                 control.parent = this;
-                control.assign(values);
+                control.load(values);
             }
         }
     };
@@ -71,7 +71,7 @@ yaxi.Control.extend(function (Class, base) {
 
                 control = this.content = new (values.Class || yaxi.Box)();
                 control.parent = this;
-                control.assign(values);
+                control.load(values);
             }
         }
 	};
@@ -97,7 +97,7 @@ yaxi.Control.extend(function (Class, base) {
 
                 control = this.cancel = new (values.Class || yaxi.Text)();
                 control.parent = this;
-                control.assign(values);
+                control.load(values);
             }
         }
 	};
@@ -239,7 +239,7 @@ yaxi.Control.extend(function (Class, base) {
             };
         }
 
-        return new Class().assign(data).show();
+        return new Class().load(data).show();
     }
     
 

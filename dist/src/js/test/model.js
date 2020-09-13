@@ -1,7 +1,11 @@
 const yaxi = require('../../yaxi/js/yaxi');
+const template = require('./model.html');
 
 
 module.exports = yaxi.Page.extend(function (Class, base) {
+
+
+    var id = 1;
 
 
     var arrayModel = yaxi.store = new (yaxi.arrayModel({
@@ -15,10 +19,11 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     }));
 
 
-    for (var i = 1; i < 5; i++)
+
+    for (var i = 1; i < 100; i++)
     {
         arrayModel.push({
-            name: 'name' + i,
+            name: 'name' + id++,
             value: Math.random()
         })
     }
@@ -27,103 +32,37 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
+        this.load(template(this), arrayModel);
+    }
 
-        var id = 1;
+
+    this.handleAppend = function () {
+
+        arrayModel.push({
+            name: 'name' + id++,
+            value: Math.random()
+        })
+    }
 
 
-        this.assign({
-            children: [
-                {
-                    Class: yaxi.Header,
-                    content: 'yaxi model page'
-                },
-                {
-                    Class: yaxi.Box,
-                    layout: 'column',
-                    children: [
-                        {
-                            Class: yaxi.Band,
-                            style: 'background-color: @bg-level2-color',
-                            subtype: yaxi.Button,
-                            layout: 'row',
-                            children: [
-                                {
-                                    content: 'Append',
-                                    events: {
+    this.handleReplace = function () {
 
-                                        tap: function () {
+        arrayModel.forEach(function (item) {
 
-                                            arrayModel.push({
-                                                name: 'name' + id++,
-                                                value: Math.random()
-                                            })
-                                        }
-                                    }
-                                },
-                                {
-                                    content: 'Replace',
-                                    events: {
-
-                                        tap: function () {
-
-                                            arrayModel.forEach(function (item) {
-
-                                                item.value = Math.random();
-                                            });
-                                        }
-                                    }
-                                },
-                                {
-                                    content: 'Remove',
-                                    events: {
-
-                                        tap: function () {
-
-                                            arrayModel.pop();
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            Class: yaxi.Repeater,
-                            arrayModel: arrayModel,
-                            layout: 'column',
-                            template: {
-                                Class: yaxi.Band,
-                                subtype: yaxi.Text,
-                                style: 'height:auto;padding:20rem;',
-                                children: [
-                                    // {
-                                    //     style: 'width:200rem;',
-                                    //     bindings: {
-                                    //         text: 'index'
-                                    //     }
-                                    // },
-                                    {
-                                        style: 'width:200rem;',
-                                        bindings: {
-                                            text: 'name'
-                                        }
-                                    },
-                                    {
-                                        bindings: {
-                                            text: 'value'
-                                        }
-                                    },
-                                    {
-                                        style: 'display:block;',
-                                        bindings: {
-                                            text: 'computed'
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            ]
+            item.value = Math.random();
         });
+    }
+
+
+    this.handleRemove = function () {
+
+        arrayModel.pop();
+    }
+
+
+    this.handleReorder = function () {
+
+        arrayModel.reverse();
     }
 
 

@@ -1,13 +1,6 @@
 yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
-
-    var classes = yaxi.classes;
-
-    var controls = yaxi.$controls;
-
-    var Control = yaxi.Control;
-
     
     var array = Array.prototype;
 
@@ -17,10 +10,13 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     var splice = array.splice;
 
+
+    var $patch = yaxi.patch;
+
+
+    var controls = yaxi.$controls;
+
     var released = false;
-
-
-    var check = yaxi.__check_parent;
 
 
 
@@ -50,96 +46,24 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-
-    function checkSubtype(parent) {
-
-        var subtype;
-
-        if (subtype = parent.subtype)
-        {
-            switch (typeof subtype)
-            {
-                case 'string':
-                    subtype = classes[subtype];
-                    break;
-
-                case 'function':
-                    break;
-
-                default:
-                    throw 'not a valid subtype, must be a function or a type name!';
-            }
-        }
-        
-        check(subtype || (subtype = Control), parent);
-
-        return subtype;
-    }
-
-
-    function createControl(parent, subtype, options) {
-
-        var Class, control;
-
-        if (options)
-        {
-            if (options.$storage && (Class = options.constructor))
-            {
-                check(Class, parent);
-
-                control = options;
-
-                if (control.parent && control.parent !== parent)
-                {
-                    control.remove();
-                }
-
-                control.parent = parent;
-                return control;
-            }
-
-            if (Class = options.Class)
-            {
-                if (typeof Class === 'string' && !(Class = classes[Class]))
-                {
-                    throw '"' + options.Class + '" doesn\'t register!';
-                }
-                
-                check(Class, parent);
-            }
-
-            control = new (Class || subtype)();
-            control.parent = parent;
-            control.assign(options);
-        }
-        else
-        {
-            control = new subtype();
-            control.parent = parent;
-        }
-
-        return control;
-    }
-
-
-
     function patch(target) {
 
         target.__last = slice.call(target, 0);
 
-        if ((target = target.$uuid) && (target = controls[target]) && !target.__dirty)
+        if (target = controls[target.$uuid])
         {
-            yaxi.patch(target);
+            target.__dirty || $patch(target);
+        }
+        else
+        {
+            debugger
         }
     }
 
 
+    function createControls(parent, list, index, outputs) {
 
-    this.createControls = function (list, index, outputs) {
-
-        var parent = controls[this.$uuid],
-            subtype = checkSubtype(parent),
-            length = list.length,
+        var length = list.length,
             control;
 
         if ((index |= 0) < 0)
@@ -151,7 +75,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         while (index < length)
         {
-            if (control = createControl(parent, subtype, list[index++]))
+            if (control = parent.$createSubControl(list[index++]))
             {
                 outputs.push(control);
             }
@@ -177,42 +101,34 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    this.assign = function (values) {
+    this.load = function (values, model) {
 
-        var parent = controls[this.$uuid],
-            subtype = checkSubtype(parent),
-            index = 0,
-            control;
+        var parent = controls[this.$uuid];
+        var length = values.length;
 
         if (this.__length > 0)
         {
             this.clear();
         }
 
-        for (var i = 0, l = values.length; i < l; i++)
+        for (var i = 0; i < length; i++)
         {
-            if (control = createControl(parent, subtype, values[i]))
-            {
-                this[index++] = control;
-            }
+            this[i] = parent.$createSubControl(values[i], model);
         }
 
-        this.__length = index;
+        this.__length = length;
     }
+
 
 
     this.set = function (index, value) {
 
         if ((index |= 0) >= 0 && this.__length > index)
         {
-            var parent = controls[this.$uuid];
-            var subtype = parent.subtype || yaxi.Control;
+            value = controls[this.$uuid].$createSubControl(value);
 
-            check(subtype, parent);
-            value = createControl(parent, subtype, value);
-
-            this.__last || patch(this);
-            this[0] = value;
+            this.__last || patch();
+            this[index] = value;
         }
     }
 
@@ -221,12 +137,12 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 0)
         {
-            var controls = this.createControls(arguments, 0, []);
+            var list = createControls(controls[this.$uuid], arguments, 0, []);
 
             this.__last || patch(this);
 
             released = true;
-            return push.apply(this, controls);
+            return push.apply(this, list);
         }
 
         return this.__length;
@@ -257,12 +173,12 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 0)
         {
-            var controls = this.createControls(arguments, 0, []);
+            var list = createControls(controls[this.$uuid], arguments, 0, []);
 
             this.__last || patch(this);
 
             released = true;
-            return array.unshift.apply(this, controls);
+            return array.unshift.apply(this, list);
         }
 
         return this.__length;
@@ -291,7 +207,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     this.splice = function (index, length) {
 
-        var controls;
+        var list;
 
         this.__last || patch(this);
 
@@ -299,44 +215,44 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 2)
         {
-            controls = this.createControls(arguments, 2, [index, length]);
-            controls = splice.apply(this, controls);
+            list = createControls(controls[this.$uuid], arguments, 2, [index, length]);
+            list = splice.apply(this, list);
         }
         else
         {
-            controls = splice.apply(this, arguments);
+            list = splice.apply(this, arguments);
         }
 
-        if (controls.length > 0)
+        if (list.length > 0)
         {
-            for (var i = controls.length; i--;)
+            for (var i = list.length; i--;)
             {
-                controls[i].parent = null;
+                list[i].parent = null;
             }
         }
 
-        return controls;
+        return list;
     }
 
 
     this.clear = function () {
 
-        var controls;
+        var list;
 
         if (this.__length > 0)
         {
             this.__last || patch(this);
 
             released = true;
-            controls = splice.call(this, 0)
+            list = splice.call(this, 0)
 
-            for (var i = controls.length; i--;)
+            for (var i = list.length; i--;)
             {
-                controls[i].parent = null;
+                list[i].parent = null;
             }
         }
 
-        return controls || [];
+        return list || [];
     }
 
 
@@ -362,6 +278,26 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         }
 
         return this;
+    }
+
+
+
+    // 直接插入控件(给repeater控件用)
+    this.__insert = function (index, controls) {
+
+        this.__last || patch(this);
+
+        released = true;
+
+        if (index < 0)
+        {
+            controls.push.apply(this, controls);
+        }
+        else
+        {
+            controls.unshift(index, 0);
+            controls.splice.apply(this, controls);
+        }
     }
 
 

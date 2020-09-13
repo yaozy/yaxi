@@ -1618,110 +1618,6 @@ yaxi.Stream = Object.extend(function (Class) {
 
 
 
-yaxi.impl.binding = function () {
-
-
-
-    this.__model = null;
-
-
-    // 不转换model
-    this.$converts.model = false;
-
-
-    // 当前模型
-    Object.defineProperty(this, 'model', {
-
-        get: function () {
-
-            return this.__model;
-        },
-        set: function (value) {
-
-            if (value)
-            {
-                if (!value.__model_type)
-                {
-                    value = this.__find_model('' + value);
-                }
-            }
-            else
-            {
-                value = null;
-            }
-
-            this.__model = value;
-        }
-    })
-
-    
-    // 处理绑定
-    this.__set_bindings = function (values) {
-
-        var model;
-
-        if (values && (model = this.__find_model()))
-        {
-            yaxi.__bind_model.call(model, this, values);
-        }
-    }
-
-
-
-    // 查找关联的模型
-    this.__find_model = function () {
-    
-        var target = this,
-            model;
-
-        while (target)
-        {
-            if (model = target.__model)
-            {
-                return model;
-            }
-
-            target = target.parent;
-        }
-    }
-
-
-
-    // 模型名称缓存
-    var cache = Object.create(null);
-
-
-    // 查找关联的数组模型
-    this.__find_arrayModel = function (name) {
-
-        var model;
-
-        if (model = this.__find_model())
-        {
-            var keys = cache[name] || (cache[name] = name.split('.')),
-                index = 0,
-                key;
-
-            while (model && (key = keys[index++]))
-            {
-                model = model[key];
-            }
-
-            if (model && model.__model_type === 2)
-            {
-                return model;
-            }
-        }
-
-        throw 'can not find array model "' + name + '"!';
-    }
-
-
-}
-
-
-
-
 ;(function () {
 
 
@@ -1736,6 +1632,10 @@ yaxi.impl.binding = function () {
 
     // expression缓存
     var cache = create(null);
+
+
+    // 观察器对象集合
+    var controls;
 
 
     // 绑定的目标
@@ -1758,24 +1658,24 @@ yaxi.impl.binding = function () {
 
         return function () {
 
-            var bindings, any;
+            var target, bindings, any;
 
-            if (bindingTarget)
+            if (target = bindingTarget)
             {
                 if (bindings = this.__bindings)
                 {
                     if (any = bindings[name])
                     {
-                        any.push(bindingTarget);
+                        any.push(target);
                     }
                     else
                     {
-                        bindings[name] = [bindingTarget];
+                        bindings[name] = [target];
                     }
                 }
                 else
                 {
-                    (this.__bindings = {})[name] = [bindingTarget];
+                    (this.__bindings = {})[name] = [target];
                 }
             }
 
@@ -1815,6 +1715,68 @@ yaxi.impl.binding = function () {
 
 
 
+    // 数组项索引属性
+    define(this, '__item_index', {
+
+        get: function () {
+
+            var bindings, any;
+
+            if (bindingTarget)
+            {
+                if (bindings = this.__bindings)
+                {
+                    if (any = bindings.__item_index)
+                    {
+                        any.push(bindingTarget);
+                    }
+                    else
+                    {
+                        bindings.__item_index = [bindingTarget];
+                    }
+                }
+                else
+                {
+                    (this.__bindings = {}).__item_index = [bindingTarget];
+                }
+            }
+
+            return this.__index + 1 || 0;
+        },
+
+        set: function (value) {
+
+            value |= 0;
+
+            if (this.__index === value)
+            {
+                return;
+            }
+
+            var bindings = this.__bindings;
+
+            this.__index = value;
+
+            if (bindings && (bindings = bindings.__item_index))
+            {
+                value += 1;
+                
+                for (var name in bindings)
+                {
+                    var binding = bindings[name];
+                    var control = (controls || (controls = yaxi.$controls))[binding.control];
+        
+                    if (control)
+                    {
+                        control[binding.property] = binding.pipe ? binding.pipe(value) : value;
+                    }
+                }
+            }
+        }
+    });
+
+
+
     // 定义模型
     yaxi.model = function (properties) {
 
@@ -1838,6 +1800,11 @@ yaxi.impl.binding = function () {
         
         for (var name in properties)
         {
+            if (name[0] === '$' || name[0] === '_' && name[1] === '_')
+            {
+                throw 'model field can not use "$" or "__" to start!';
+            }
+
             if ((options = properties[name]) && typeof options === 'function')
             {
                 if (type = options.model)
@@ -1878,7 +1845,7 @@ yaxi.impl.binding = function () {
                 {
                     if (value != null)
                     {
-                        (model || (this[name] = new Model(this))).$assign(value);
+                        (model || (this[name] = new Model(this))).$load(value);
                     }
                 }
                 else if (model)
@@ -1931,47 +1898,49 @@ yaxi.impl.binding = function () {
 
     function syncBindings(model, bindings) {
 
-        var binding, value, pipe;
+        var binding, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
-            value = model[binding.name];
+            value = model[binding.field];
 
-            if (pipe = binding.pipe)
+            if (any = binding.pipe)
             {
-                value = pipe(value);
+                value = any(value);
             }
 
-            binding.observe[binding.property] = value;
+            if (any = (controls || (controls = yaxi.$controls))[binding.control])
+            {
+                any[binding.property] = value;
+            }
         }
     }
 
     
 
     // 编译绑定
-    function compileBinding(observe, model, name, expression) {
+    function compileBinding(control, model, name, rule) {
     
-        var rule = cache[expression] || parseExpression(expression);
         var binding, value;
 
         if (rule !== 1)
         {
             binding = bindingTarget = createBinding(model, rule);
-            binding.observe = observe;
+            binding.control = control.uuid;
 
-            value = binding.model[binding.name];
+            value = binding.model[binding.field];
 
             if (rule.pipe)
             {
                 value = rule.pipe(value);
             }
 
-            observe[binding.property = name] = value;
+            control[binding.property = name] = value;
 
             if (binding.model.__model_type === 1)
             {
-                (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+                (control.__bindings || (control.__bindings = {}))[name] = binding;
             }
         }
         else
@@ -1981,13 +1950,14 @@ yaxi.impl.binding = function () {
     }
 
 
+    // 解析绑定表达式
     function parseExpression(expression) {
 
         var value, pipe, any;
 
         if ((any = expression.indexOf('|')) > 0)
         {
-            pipe = expression.substring(any);
+            pipe = compile(expression.substring(any));
             value = expression.substring(0, any);
         }
         else
@@ -1998,7 +1968,6 @@ yaxi.impl.binding = function () {
         if (any = value.match(/\w+/g))
         {
             value = {
-                name: any.pop(),
                 path: any,
                 pipe: pipe,
                 bind: value
@@ -2012,54 +1981,100 @@ yaxi.impl.binding = function () {
     // 创建绑定对象
     function createBinding(model, rule) {
 
-        var name = rule.path[0] || rule.name;
+        var path = rule.path;
+        var name = path[0];
+        var item;
 
-        if (model[name] === void 0)
+        // 绑定结构
+        var binding = {
+            type: 0,        // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定
+            model: null,    // 模型对象
+            field: name,    // 模型字段名
+            control: 0,     // 控件id
+            property: ''    // 控件属性名
+        };
+
+        while (model)
         {
-            while (model = model.$parent)
+            // 如果是数组模型子项时只能通过设定的项名或索引名绑定, 不支持直接绑定
+            if (item = model.__item)
             {
-                if (name in model)
+                // 数组模型子项
+                if (name === item[0])
                 {
-                    break;
+                    binding.type = 1;
+    
+                    if (path[1])
+                    {
+                        return findSubModel(model, binding, rule);
+                    }
+
+                    binding.model = model;
+                    return binding;
+                }
+
+                // 数组模型子项索引
+                if (name === item[1])
+                {
+                    if (path[1])
+                    {
+                        throw '"' + name + '" is model index, can not supports sub model!';
+                    }
+
+                    binding.type = 2;
+                    binding.model = model;
+                    binding.field = '__item_index';
+
+                    return binding;
                 }
             }
+            else if (name in model)
+            {
+                if (path[1])
+                {
+                    return findSubModel(model, binding, rule);
+                }
+ 
+                binding.model = model;
+                return binding;
+            }
+            
+            model = model.$parent;
         }
 
-        if (model)
-        {
-            return {
-                model: model,
-                name: name 
-            };
-        }
-
-        throw '"' + rule.bind + '" is a invalid binding!';
+        throw 'model field "' + name + '" not exists!';
     }
 
 
-    // 编译推送
-    function compilePush(observe, model, expression) {
+    function findSubModel(model, binding, rule) {
 
-        var rule = cache[expression] || parseExpression(expression);
-        var binding;
+        var path = rule.path;
+        var last = path.length - 1;
 
-        if (rule !== 1)
+        for (var i = 1; i < last; i++)
         {
-            binding = createBinding(model, rule);
+            model = model[path[i]];
 
-            if (pipe)
+            if (!model)
             {
-                binding.pipe = compile(pipe);
+                throw 'binding "' + rule.bind + '" error, can not find submodel "' + path[i] + '"!';
             }
-
-            observe.__binding_push = binding;
         }
+
+        if (path[last] in model)
+        {
+            binding.field = path[last];
+            binding.model = model;
+            return binding;
+        }
+
+        throw 'binding "' + rule.bind + '" error, can not find model field "' + path[last] + '"!';
     }
 
 
 
     // 绑定
-    this.$bind = yaxi.__bind_model = function (observe, bindings) {
+    this.$bind = function (control, bindings) {
 
         try
         {
@@ -2069,13 +2084,18 @@ yaxi.impl.binding = function () {
             {
                 if (expression = bindings[name])
                 {
-                    if (name === 'change')
+                    var rule = cache[expression] || parseExpression(expression);
+        
+                    if (name === 'model')
                     {
-                        compilePush(observe, this, expression);
+                        if (rule !== 1)
+                        {
+                            control.__binding_push = createBinding(model, rule);
+                        }
                     }
                     else
                     {
-                        compileBinding(observe, this, name, expression);
+                        compileBinding(control, this, name, rule);
                     }
                 }
             }
@@ -2089,6 +2109,7 @@ yaxi.impl.binding = function () {
     }
 
 
+
     // 解除绑定
     this.$unbind = function (binding) {
 
@@ -2098,7 +2119,7 @@ yaxi.impl.binding = function () {
         if (bindings)
         {
             // 属性字段绑定
-            if (values = bindings[binding.name])
+            if (values = bindings[binding.field])
             {
                 for (var i = values.length; i--;)
                 {
@@ -2256,18 +2277,18 @@ yaxi.impl.binding = function () {
     // 手动同步绑定
     this.$sync = function (name) {
 
-        var binding;
+        var bindings = this.__bindings;
 
-        if ((binding = this.__bindings) && (binding = binding[name]))
+        if (bindings && (bindings = bindings[name]))
         {
-            syncBindings(this, binding);
+            syncBindings(this, bindings);
         }
     }
 
 
 
-    // 赋值
-    this.$assign = function (values) {
+    // 加载
+    this.$load = function (values) {
 
         if (values)
         {
@@ -2345,34 +2366,23 @@ yaxi.impl.binding = function () {
     var base = this;
 
 
+    // 所有控件集合
+    var controls;
+
+
 
 
     // 定义数组模型
-    yaxi.arrayModel = function (properties, indexName) {
+    yaxi.arrayModel = function (properties, itemName, indexName) {
     
         var prototype = create(base);
 
         properties || (properties = {});
 
-        // 创建索引计算属性
-        if (indexName)
-        {
-            if (indexName in properties)
-            {
-                throw 'array model index name "' + indexName + '" can not in properties!'; 
-            }
-            else
-            {
-                properties[prototype.__indexName = indexName] = function () {
-
-                    return this.__index;
-                }
-            }
-        }
-
         function ArrayModel(parent) {
 
             this.$parent = parent || null;
+            this.__item = [itemName || 'item', indexName || 'index'];
         }
 
         prototype.$Model = yaxi.model(properties);
@@ -2426,36 +2436,6 @@ yaxi.impl.binding = function () {
 
 
 
-    this.$bind = function (repeater) {
-
-        (this.__bindings || (this.__bindings = [])).push(repeater);
-    }
-
-
-    this.$unbind = function (repeater) {
-
-        var bindings;
-
-        if (bindings = this.__bindings)
-        {
-            for (var i = bindings.length; i--;)
-            {
-                if (bindings[i] === repeater)
-                {
-                    bindings.splice(i, 1);
-
-                    if (!bindings[0])
-                    {
-                        this.__bindings = null;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-
-
 
     function createModels(arrayModel, list, index) {
 
@@ -2468,7 +2448,11 @@ yaxi.impl.binding = function () {
         while (index < length)
         {
             model = new Model(parent);
-            model.$assign(list[index++]);
+
+            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
+            model.__item = arrayModel.__item;
+            model.$load(list[index++]);
+
             outputs.push(model);
         }
 
@@ -2478,45 +2462,49 @@ yaxi.impl.binding = function () {
 
     function reindex(arrayModel, index) {
 
-        var name = arrayModel.__indexName;
         var model;
 
         index |= 0;
 
-        if (name)
+        while (model = arrayModel[index])
         {
-            while (model = arrayModel[index])
-            {
-                if (model.__index !== index)
-                {
-                    model.__index = index;
-                    model.$sync(name);
-                }
+            var old = model.__index;
 
-                index++;
-            }
-        }
-        else
-        {
-            while (model = arrayModel[index])
+            if (old == null)
             {
-                model.__index !== index++;
+                model.__index = index;
             }
+            else if (old !== index)
+            {
+                model.__item_index = index;
+            }
+
+            index++;
         }
     }
 
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var bindings;
+        var repeaters = controls || (controls = yaxi.$controls);
+        var bindings, repeater;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                bindings[i][type](arg1, arg2);
+                if (repeater = repeaters[bindings[i]])
+                {
+                    repeater[type](arg1, arg2);
+                }
             }
         }
+    }
+
+
+    function destroyItem(item) {
+
+        item.$parent = item.__item = item.__bindings = null;
     }
 
 
@@ -2527,7 +2515,10 @@ yaxi.impl.binding = function () {
         {
             var model = new this.$Model(this.$parent);
 
-            model.$assign(value);
+            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
+            model.__item = this.__item;
+            model.$load(value);
+
             this[index] = model;
 
             notify(this, '__on_set', index, model);
@@ -2565,7 +2556,7 @@ yaxi.impl.binding = function () {
 
             if (item = array.pop.call(this))
             {
-                item.$parent = item.__bindings = null;
+                destroyItem(item);
                 notify(this, '__on_remove', -1, 1);
             }
         }
@@ -2601,8 +2592,10 @@ yaxi.impl.binding = function () {
 
             if (item = array.shift.call(this))
             {
-                item.$parent = item.__bindings = null;
+                destroyItem(item);
+
                 notify(this, '__on_remove', 0, 1);
+                reindex(this, 0);
             }
         }
 
@@ -2631,12 +2624,12 @@ yaxi.impl.binding = function () {
             released = true;
             removed = splice.apply(this, arguments);
         }
-
+        
         if (removed.length > 0)
         {
             for (var i = removed.length; i--;)
             {
-                removed[i].$parent = removed[i].__bindings = null;
+                destroyItem(removed[i]);
             }
 
             notify(this, '__on_remove', index, removed.length);
@@ -2644,10 +2637,10 @@ yaxi.impl.binding = function () {
 
         if (inserted)
         {
-            reindex(this, index);
             notify(this, '__on_insert', index, inserted);
         }
 
+        reindex(this, index);
         return removed;
     }
 
@@ -2663,7 +2656,7 @@ yaxi.impl.binding = function () {
     
             for (var i = list.length; i--;)
             {
-                list[i].$parent = list[i].__bindings = null;
+                destroyItem(list[i]);
             }
 
             notify(this, '__on_clear');
@@ -2677,7 +2670,7 @@ yaxi.impl.binding = function () {
 
         array.sort.call(this, sortFn);
 
-
+        reindex(this, 0);
         notify(this, '__on_sort', 0);
     }
 
@@ -2685,6 +2678,8 @@ yaxi.impl.binding = function () {
     this.reverse = function () {
 
         array.reverse.call(this);
+        
+        reindex(this, 0);
         notify(this, '__on_sort', 1);
     }
 
@@ -4129,27 +4124,24 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
     // 赋值
-    this.assign = function (values) {
+    this.load = function (values, model) {
 
-        if (values)
+        var attributes, converts, convert, changes, value, any;
+
+        if (attributes = values[1])
         {
-            var converts = this.$converts,
-                convert,
-                changes,
-                value,
-                any;
+            converts = this.$converts;
 
-            // 优先处理模型
-            if (any = values.model)
+            for (var name in attributes)
             {
-                this.model = any;
-            }
+                value = attributes[name];
 
-            for (var name in values)
-            {
-                value = values[name];
-
-                if (convert = converts[name])
+                // 模型特殊处理
+                if (name === 'bindings')
+                {
+                    this.setBindings(model, value);
+                }
+                else if (convert = converts[name])
                 {
                     // 从转换器中获取存储名以解决别名存储的问题
                     name = convert.name;
@@ -4175,43 +4167,47 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             }
         }
 
+        if ((values = values[2]) && (any = this.__load_content))
+        {
+            any.call(this, values, model);
+        }
+
         return this;
     }
     
 
 
-    // 扩展查找实现
-    yaxi.impl.find.call(this);
-    
+    // 设置绑定
+    this.setBindings = function (model, bindings) {
 
-    // 扩展绑定实现
-    yaxi.impl.binding.call(this);
-
-
-    // 转换bindings
-    this.$converts.bindings = {
-
-        fn: this.__set_bindings
-    };
+        if (model.__model_type === 1)
+        {
+            model.$bind(this, bindings);
+        }
+        else
+        {
+            throw 'not a valid model object';
+        }
+    }
 
 
     // 推送绑定
     this.$push = function (value) {
 
-        var binding = this.__binding_push,
-            pipe;
+        var binding;
 
-        if (binding)
+        if (binding = this.__binding_push)
         {
-            if (pipe = binding.pipe)
-            {
-                value = pipe(value);
-            }
-
-            binding.model[binding.name] = value;
+            binding.model[binding.field] = value;
         }
     }
 
+
+
+
+    // 扩展查找实现
+    yaxi.impl.find.call(this);
+    
 
 
     
@@ -4303,7 +4299,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = this.__binding_push = null;
+        this.parent = this.__binding_push = this.__model = null;
     }
 
 
@@ -4357,7 +4353,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     
 
     // 检查父控件
-    yaxi.__check_parent = function (Class, parent) {
+    var check = yaxi.__check_parent = function (Class, parent) {
 
         var check;
 
@@ -4388,6 +4384,49 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
         }
     }
 
+    
+    this.$createSubControl = function (options, model) {
+
+        var Class, control;
+
+        if (options)
+        {
+            if (options.$storage && (Class = options.constructor))
+            {
+                check(Class, this);
+
+                control = options;
+
+                if (control.parent && control.parent !== this)
+                {
+                    control.remove();
+                }
+
+                control.parent = this;
+                return control;
+            }
+
+            if (Class = options[0])
+            {
+                if (typeof Class === 'string' && !(Class = classes[Class]))
+                {
+                    throw '"' + options.Class + '" doesn\'t register!';
+                }
+                
+                check(Class, this);
+
+                control = new Class();
+                control.parent = this;
+                control.load(options, model);
+
+                return control;
+            }
+        }
+
+        return 'can not create control, does not input type!';
+    }
+
+
 
 
 }, function Control() {
@@ -4409,13 +4448,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
-
-    var classes = yaxi.classes;
-
-    var controls = yaxi.$controls;
-
-    var Control = yaxi.Control;
-
     
     var array = Array.prototype;
 
@@ -4425,10 +4457,13 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     var splice = array.splice;
 
+
+    var $patch = yaxi.patch;
+
+
+    var controls = yaxi.$controls;
+
     var released = false;
-
-
-    var check = yaxi.__check_parent;
 
 
 
@@ -4458,96 +4493,24 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-
-    function checkSubtype(parent) {
-
-        var subtype;
-
-        if (subtype = parent.subtype)
-        {
-            switch (typeof subtype)
-            {
-                case 'string':
-                    subtype = classes[subtype];
-                    break;
-
-                case 'function':
-                    break;
-
-                default:
-                    throw 'not a valid subtype, must be a function or a type name!';
-            }
-        }
-        
-        check(subtype || (subtype = Control), parent);
-
-        return subtype;
-    }
-
-
-    function createControl(parent, subtype, options) {
-
-        var Class, control;
-
-        if (options)
-        {
-            if (options.$storage && (Class = options.constructor))
-            {
-                check(Class, parent);
-
-                control = options;
-
-                if (control.parent && control.parent !== parent)
-                {
-                    control.remove();
-                }
-
-                control.parent = parent;
-                return control;
-            }
-
-            if (Class = options.Class)
-            {
-                if (typeof Class === 'string' && !(Class = classes[Class]))
-                {
-                    throw '"' + options.Class + '" doesn\'t register!';
-                }
-                
-                check(Class, parent);
-            }
-
-            control = new (Class || subtype)();
-            control.parent = parent;
-            control.assign(options);
-        }
-        else
-        {
-            control = new subtype();
-            control.parent = parent;
-        }
-
-        return control;
-    }
-
-
-
     function patch(target) {
 
         target.__last = slice.call(target, 0);
 
-        if ((target = target.$uuid) && (target = controls[target]) && !target.__dirty)
+        if (target = controls[target.$uuid])
         {
-            yaxi.patch(target);
+            target.__dirty || $patch(target);
+        }
+        else
+        {
+            debugger
         }
     }
 
 
+    function createControls(parent, list, index, outputs) {
 
-    this.createControls = function (list, index, outputs) {
-
-        var parent = controls[this.$uuid],
-            subtype = checkSubtype(parent),
-            length = list.length,
+        var length = list.length,
             control;
 
         if ((index |= 0) < 0)
@@ -4559,7 +4522,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         while (index < length)
         {
-            if (control = createControl(parent, subtype, list[index++]))
+            if (control = parent.$createSubControl(list[index++]))
             {
                 outputs.push(control);
             }
@@ -4585,42 +4548,34 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    this.assign = function (values) {
+    this.load = function (values, model) {
 
-        var parent = controls[this.$uuid],
-            subtype = checkSubtype(parent),
-            index = 0,
-            control;
+        var parent = controls[this.$uuid];
+        var length = values.length;
 
         if (this.__length > 0)
         {
             this.clear();
         }
 
-        for (var i = 0, l = values.length; i < l; i++)
+        for (var i = 0; i < length; i++)
         {
-            if (control = createControl(parent, subtype, values[i]))
-            {
-                this[index++] = control;
-            }
+            this[i] = parent.$createSubControl(values[i], model);
         }
 
-        this.__length = index;
+        this.__length = length;
     }
+
 
 
     this.set = function (index, value) {
 
         if ((index |= 0) >= 0 && this.__length > index)
         {
-            var parent = controls[this.$uuid];
-            var subtype = parent.subtype || yaxi.Control;
+            value = controls[this.$uuid].$createSubControl(value);
 
-            check(subtype, parent);
-            value = createControl(parent, subtype, value);
-
-            this.__last || patch(this);
-            this[0] = value;
+            this.__last || patch();
+            this[index] = value;
         }
     }
 
@@ -4629,12 +4584,12 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 0)
         {
-            var controls = this.createControls(arguments, 0, []);
+            var list = createControls(controls[this.$uuid], arguments, 0, []);
 
             this.__last || patch(this);
 
             released = true;
-            return push.apply(this, controls);
+            return push.apply(this, list);
         }
 
         return this.__length;
@@ -4665,12 +4620,12 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 0)
         {
-            var controls = this.createControls(arguments, 0, []);
+            var list = createControls(controls[this.$uuid], arguments, 0, []);
 
             this.__last || patch(this);
 
             released = true;
-            return array.unshift.apply(this, controls);
+            return array.unshift.apply(this, list);
         }
 
         return this.__length;
@@ -4699,7 +4654,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     this.splice = function (index, length) {
 
-        var controls;
+        var list;
 
         this.__last || patch(this);
 
@@ -4707,44 +4662,44 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (arguments.length > 2)
         {
-            controls = this.createControls(arguments, 2, [index, length]);
-            controls = splice.apply(this, controls);
+            list = createControls(controls[this.$uuid], arguments, 2, [index, length]);
+            list = splice.apply(this, list);
         }
         else
         {
-            controls = splice.apply(this, arguments);
+            list = splice.apply(this, arguments);
         }
 
-        if (controls.length > 0)
+        if (list.length > 0)
         {
-            for (var i = controls.length; i--;)
+            for (var i = list.length; i--;)
             {
-                controls[i].parent = null;
+                list[i].parent = null;
             }
         }
 
-        return controls;
+        return list;
     }
 
 
     this.clear = function () {
 
-        var controls;
+        var list;
 
         if (this.__length > 0)
         {
             this.__last || patch(this);
 
             released = true;
-            controls = splice.call(this, 0)
+            list = splice.call(this, 0)
 
-            for (var i = controls.length; i--;)
+            for (var i = list.length; i--;)
             {
-                controls[i].parent = null;
+                list[i].parent = null;
             }
         }
 
-        return controls || [];
+        return list || [];
     }
 
 
@@ -4774,6 +4729,26 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
+    // 直接插入控件(给repeater控件用)
+    this.__insert = function (index, controls) {
+
+        this.__last || patch(this);
+
+        released = true;
+
+        if (index < 0)
+        {
+            controls.push.apply(this, controls);
+        }
+        else
+        {
+            controls.unshift(index, 0);
+            controls.splice.apply(this, controls);
+        }
+    }
+
+
+
 }, function Collection(control) {
 
     this.$uuid = control.uuid;
@@ -4790,61 +4765,36 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
 
+
+    var A = Array;
     
+
     var classes = yaxi.classes;
 
-    var check = yaxi.__check_parent;
+    var patch = yaxi.patch;
 
+
+    var check = yaxi.__check_parent;
+    
 
     
     // 内容
     this.$property('content', null, {
 
-        convert: function (value) {
+        change: false,
 
-            var content = this.__content;
-    
-            if (content && typeof content !== 'string')
-            {
-                for (var i = list.length; i--;)
-                {
-                    list[i].destroy();
-                }
-            }
-    
-            if (!value || typeof value !== 'object')
-            {
-                content = this.__text_content(value = '' + value);
-            }
-            else if (value instanceof Array)
-            {
-                content = createControls(this, value);
-            }
-            else if (value.Class)
-            {
-                content = [createControl(this, value)];
-            }
-            else
-            {
-                content = value = '' + value; 
-            }
-    
-            this.__content = content;
-            this.__content_dirty = true;  // 标记内容已变更
+        get: function () {
 
-            return value;
+            return this.$storage.content;
+        },
+
+        set: function (value) {
+
+            this.$storage.content = this.__load_content(value);
         }
 
     });
 
-
-
-
-    this.__text_content = function (text) {
-
-        return text;
-    }
-    
 
 
     function createControls(parent, values) {
@@ -4863,12 +4813,12 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
     function createControl(parent, options) {
 
-        var Class = options.Class;
+        var Class = options[0];
         var control;
 
         if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            throw '"' + options.Class + '" doesn\'t register!';
+            throw '"' + options[0] + '" doesn\'t register!';
         }
 
         if (Class)
@@ -4882,9 +4832,48 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
         control = new Class();
         control.parent = parent;
-        control.assign(options);
+        control.load(options);
 
         return control;
+    }
+
+
+
+    // 加载内容
+    this.__load_content = function (values) {
+
+        var content = this.__content;
+    
+        if (content && typeof content !== 'string')
+        {
+            for (var i = list.length; i--;)
+            {
+                list[i].destroy();
+            }
+        }
+
+        if (values instanceof A)
+        {
+            if (values[0] instanceof A)
+            {
+                content = createControls(this, values);
+            }
+            else
+            {
+                content = [createControl(this, values)];
+            }
+        }
+        else
+        {
+            content = values = '' + values; 
+        }
+
+        this.__content = content;
+        this.__content_dirty = true;  // 标记内容已变更
+
+        this.__dirty || patch(this);
+
+        return values;
     }
 
 
@@ -4956,10 +4945,16 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.load(values);
             }
         }
     };
+
+
+    this.__load_content = function (values, model) {
+
+        this.__children.load(values, model);
+    }
 
 
 
@@ -5008,8 +5003,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    var assign = Object.assign;
-
+    var A = Array;
 
     
     // 标记不能被继承
@@ -5031,85 +5025,35 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         convert: function (value) {
 
-            var storage = this.$storage;
-            var arrayModel = storage.arrayModel;
-
-            if (value && typeof value !== 'object')
+            if (value != null)
             {
-                value = null;
-            }
-            else if (arrayModel && value !== storage.template)
-            {
-                rebuild(this, arrayModel, value);
-            }
-
-            return value;
-        }
-
-    });
-
-
-
-    // 数组模型
-    this.$property('arrayModel', null, {
-
-        change: false,
-
-        convert: function (value) {
-
-            if (value)
-            {
-                var arrayModel, template;
-
-                if (typeof value !== 'object')
+                if (value instanceof A)
                 {
-                    arrayModel = this.__find_arrayModel(value = '' + value);
-                }
-                else if (value.__model_type === 2)
-                {
-                    arrayModel = value;
+                    // 只有一个子控件直接设置成单个控件
+                    if (value.length === 1 && value[0] instanceof A)
+                    {
+                        value = value[0];
+                    }
                 }
                 else
                 {
-                    return null;
+                    value = ['text', null, '' + value];
                 }
-
-                if (arrayModel !== this.__arrayModel)
-                {
-                    arrayModel.$bind(this);
-                    this.__arrayModel = arrayModel;
-
-                    if (template = this.$storage.template)
-                    {
-                        rebuild(this, value, template);
-                    }
-                }
-            }
-            else
-            {
-                value = null;
             }
 
             return value;
         }
+    });
 
+
+
+    // 子模型名称
+    this.$property('submodel', '', {
+
+        change: false
     });
 
     
-
-    // 子项名称
-    this.$property('item', 'item', {
-
-        change: false
-    });
-
-
-    // 索引名称
-    this.$property('index', 'index', {
-        
-        change: false
-    });
-
 
     // 子控件集合
     this.$property('children', null, {
@@ -5122,7 +5066,168 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function no_children () {
 
-        throw 'Repeater doesn\'t supports children property, please use template and arrayModel!';
+        throw 'Repeater doesn\'t supports children, please use model and template!';
+    }
+
+
+
+    this.__load_content = function (value) {
+
+        this.template = value;
+    }
+
+
+    this.load = function (values, model) {
+
+        var storage = this.$storage;
+        var name;
+
+        if (!model)
+        {
+            throw 'repeater does not specify a model!';
+        }
+
+        base.load.call(this, values, model);
+        
+        if (name = storage.submodel)
+        {
+            model = model[name];
+
+            if (!model)
+            {
+                throw 'can not find repeater submodel "' + name + '"!';
+            }
+
+            if (model.__model_type !== 2)
+            {
+                throw 'repeater model "' + name + '" not a valid array model!';
+            }
+        }
+
+        this.reload(model);
+    }
+
+
+    this.reload = function (arrayModel) {
+
+        if (!arrayModel || arrayModel.__model_type !== 2)
+        {
+            throw 'repeater reload method need a array model!';
+        }
+
+        var template = this.template;
+        var any;
+
+        if (!template)
+        {
+            throw 'repeater does not specify a template!';
+        }
+
+        var children = this.__children;
+
+        if (children.length > 0)
+        {
+            children.clear();
+        }
+
+        if (any = this.__arrayModel)
+        {
+            if (any !== arrayModel)
+            {
+                unbind(this, any);
+                bind(this, arrayModel);
+            }
+        }
+        else
+        {
+            bind(this, arrayModel);
+        }
+
+        if (arrayModel.length > 0)
+        {
+            any = createControls(this, arrayModel, template);
+            children.__insert(-1, any);
+        }
+    }
+
+
+    function bind(repeater, arrayModel) {
+
+        var bindings;
+
+        if (bindings = arrayModel.__bindings)
+        {
+            bindings.push(repeater.uuid);
+        }
+        else
+        {
+            arrayModel.__bindings = [repeater.uuid];
+        }
+
+        repeater.__arrayModel = arrayModel;
+    }
+
+
+    function unbind(repeater, arrayModel) {
+
+        var bindings;
+
+        if (bindings = arrayModel.__bindings)
+        {
+            var index = bindings.indexOf(repeater.uuid);
+
+            if (index >= 0)
+            {
+                bindings.splice(index, 1);
+            }
+        }
+
+        repeater.__arrayModel = null;
+    }
+
+
+    function createControls(parent, arrayModel, template) {
+
+        var length = arrayModel.length;
+        var list, control, model;
+
+        // [['xxx', ...]]形式为多子控件模板
+        if (template[0] instanceof A)
+        {
+            var template_length = template.length;
+            var index = 0;
+            
+            list = new A(length * template_length);
+
+            for (var i = 0; i < length; i++)
+            {
+                model = arrayModel[i];
+    
+                for (var j = 0; j < template_length; j++)
+                {
+                    control = parent.$createSubControl(template, model);
+                    control.__model = model;
+
+                    list[index++] = control;
+                }
+            }
+        }
+        else // ['xxx', ...]为单个子控件
+        {
+            list = new A(length);
+
+            for (var i = 0; i < length; i++)
+            {
+                model = arrayModel[i];
+
+                control = parent.$createSubControl(template, model);
+                control.__model = model;
+
+                list[i] = control;
+            }
+        }
+
+        return list;
     }
 
 
@@ -5131,68 +5236,29 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     yaxi.impl.query.call(this);
 
 
-    
 
-    function rebuild(repeater, arrayModel, template) {
-
-        var children = repeater.__children;
-
-        if (children[0])
-        {
-            children.clear();
-        }
-
-        if (arrayModel && arrayModel[0])
-        {
-            children.push.apply(children, createItems(arrayModel, template));
-        }
-    }
-
-
-
-    function createItems(arrayModel, template) {
-
-        var length = arrayModel.length;
-        var list = new Array(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = assign({ __model: arrayModel[i] }, template);
-        }
-
-        return list;
-    }
-
-
-    this.__on_set = function (index, item) {
+    this.__on_set = function (index, model) {
 
         var template;
 
         if (template = this.template)
         {
-            this.__children.set(index, assign({ __model: item }, template))
+            var control = this.$createSubControl(template, model);
+
+            control.__model = model;
+            this.__children.set(index, control);
         }
     }
 
 
     this.__on_insert = function (index, list) {
 
-        var template, children;
+        var template;
 
         if (template = this.template)
         {
-            children = this.__children;
-            list = createItems(list, template);
-
-            if (index < 0)
-            {
-                children.push.apply(children, list);
-            }
-            else
-            {
-                list.unshift(index, 0);
-                children.splice.apply(children, list);
-            }
+            list = createControls(this, list, template);
+            this.__children.__insert(index, list);
         }
     }
 
@@ -5234,9 +5300,9 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.arrayModel)
+        if (any = this.__arrayModel)
         {
-            any.$unbind(this);
+            unbind(this, any);
         }
 
         base.destroy.call(this);
@@ -5279,6 +5345,10 @@ yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 
 
 
+    this.__no_content = 'content is empty';
+    
+
+    
     // 布局
     this.$property('layout', '', {
 
@@ -5534,10 +5604,6 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.subtype = yaxi.IconButton;
-
-
-
     // 线条(目前只支持top及bottom)
     this.$property('line', 'bottom', {
 
@@ -5775,6 +5841,13 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
         }
         
     });
+
+
+    this.__load_content = function (value) {
+
+        this.text = value;
+    }
+
 
 
 }, function Text() {
@@ -6968,25 +7041,6 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
-    this.__render_content = function (view, content) {
-
-        if (typeof content === 'string')
-        {
-            view.textContent = content;
-        }
-        else
-        {
-            var index = 0;
-            var control;
-
-            while (control = content[index++])
-            {
-                view.appendChild(control.render());
-            }
-        }
-    }
-
-
 
     mixin.id = function (view, value) {
 
@@ -7027,12 +7081,15 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         var view = base.render.call(this);
         var content = this.__content;
 
-        if (content == null)
+        if (this.__content_dirty)
         {
-            content = this.__no_content;
+            if (content == null)
+            {
+                content = this.__no_content;
+            }
+            
+            this.__render_content(view, content);
         }
-
-        this.__render_content(view, content);
 
         return view;
     }
@@ -7063,12 +7120,6 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     this.__render_text = function (view, text) {
 
         view.textContent = text;
-    }
-
-
-    mixin.content = function (view, value) {
-
-        this.__render_content(view, this.__content || '');
     }
 
 
@@ -7215,10 +7266,6 @@ yaxi.Button.mixin(function (mixin, base) {
 
     yaxi.template(this, '<div class="$class"></div>');
 
-
-
-    this.__no_content = 'content is empty';
-    
 
 
 });

@@ -607,27 +607,24 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
     // 赋值
-    this.assign = function (values) {
+    this.load = function (values, model) {
 
-        if (values)
+        var attributes, converts, convert, changes, value, any;
+
+        if (attributes = values[1])
         {
-            var converts = this.$converts,
-                convert,
-                changes,
-                value,
-                any;
+            converts = this.$converts;
 
-            // 优先处理模型
-            if (any = values.model)
+            for (var name in attributes)
             {
-                this.model = any;
-            }
+                value = attributes[name];
 
-            for (var name in values)
-            {
-                value = values[name];
-
-                if (convert = converts[name])
+                // 模型特殊处理
+                if (name === 'bindings')
+                {
+                    this.setBindings(model, value);
+                }
+                else if (convert = converts[name])
                 {
                     // 从转换器中获取存储名以解决别名存储的问题
                     name = convert.name;
@@ -653,43 +650,47 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             }
         }
 
+        if ((values = values[2]) && (any = this.__load_content))
+        {
+            any.call(this, values, model);
+        }
+
         return this;
     }
     
 
 
-    // 扩展查找实现
-    yaxi.impl.find.call(this);
-    
+    // 设置绑定
+    this.setBindings = function (model, bindings) {
 
-    // 扩展绑定实现
-    yaxi.impl.binding.call(this);
-
-
-    // 转换bindings
-    this.$converts.bindings = {
-
-        fn: this.__set_bindings
-    };
+        if (model.__model_type === 1)
+        {
+            model.$bind(this, bindings);
+        }
+        else
+        {
+            throw 'not a valid model object';
+        }
+    }
 
 
     // 推送绑定
     this.$push = function (value) {
 
-        var binding = this.__binding_push,
-            pipe;
+        var binding;
 
-        if (binding)
+        if (binding = this.__binding_push)
         {
-            if (pipe = binding.pipe)
-            {
-                value = pipe(value);
-            }
-
-            binding.model[binding.name] = value;
+            binding.model[binding.field] = value;
         }
     }
 
+
+
+
+    // 扩展查找实现
+    yaxi.impl.find.call(this);
+    
 
 
     
@@ -781,7 +782,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             this.ondestroy();
         }
 
-        this.parent = this.__binding_push = null;
+        this.parent = this.__binding_push = this.__model = null;
     }
 
 
@@ -835,7 +836,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
     
 
     // 检查父控件
-    yaxi.__check_parent = function (Class, parent) {
+    var check = yaxi.__check_parent = function (Class, parent) {
 
         var check;
 
@@ -865,6 +866,49 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             throw JSON.stringify(Class).substring(0, 20) + '... not a valid type!';
         }
     }
+
+    
+    this.$createSubControl = function (options, model) {
+
+        var Class, control;
+
+        if (options)
+        {
+            if (options.$storage && (Class = options.constructor))
+            {
+                check(Class, this);
+
+                control = options;
+
+                if (control.parent && control.parent !== this)
+                {
+                    control.remove();
+                }
+
+                control.parent = this;
+                return control;
+            }
+
+            if (Class = options[0])
+            {
+                if (typeof Class === 'string' && !(Class = classes[Class]))
+                {
+                    throw '"' + options.Class + '" doesn\'t register!';
+                }
+                
+                check(Class, this);
+
+                control = new Class();
+                control.parent = this;
+                control.load(options, model);
+
+                return control;
+            }
+        }
+
+        return 'can not create control, does not input type!';
+    }
+
 
 
 

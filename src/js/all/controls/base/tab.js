@@ -2,10 +2,6 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.subtype = yaxi.IconButton;
-
-
-
     // 线条(目前只支持top及bottom)
     this.$property('line', 'bottom', {
 

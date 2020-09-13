@@ -1,52 +1,71 @@
 module.exports = function (data) {
 
 
-return {
-	"Class": "box",
-	"children": [
-		{
-			"Class": "swiper",
-			"children": [
-				{
-					"Class": "image",
-					"src": "/images/splash-screen.jpg"
-				},
-				{
-					"Class": "image",
-					"src": "/images/splash-screen.jpg"
-				},
-				{
-					"Class": "image",
-					"src": "/images/splash-screen.jpg"
-				},
-				{
-					"Class": "image",
-					"src": "/images/splash-screen.jpg"
-				}
+with (data) return (
+	[
+		"box",
+		null,
+		[
+			[
+				"swiper",
+				null,
+				[
+					[
+						"image",
+						{
+							"src": "/images/splash-screen.jpg"
+						}
+					],
+					[
+						"image",
+						{
+							"src": "/images/splash-screen.jpg"
+						}
+					],
+					[
+						"image",
+						{
+							"src": "/images/splash-screen.jpg"
+						}
+					],
+					[
+						"image",
+						{
+							"src": "/images/splash-screen.jpg"
+						}
+					]
+				]
+			],
+			[
+				"band",
+				null,
+				[
+					[
+						"button",
+						{
+							"events": {
+								"tap": openTest
+							}
+						},
+						"Open Test"
+					]
+				]
+			],
+			[
+				"band",
+				null
+			],
+			[
+				"band",
+				null
+			],
+			[
+				"band",
+				null
 			]
-		},
-		{
-			"Class": "band",
-			"children": [
-				{
-					"Class": "button",
-					"events": {
-						"tap": data.openPage
-					}
-				}
-			]
-		},
-		{
-			"Class": "band"
-		},
-		{
-			"Class": "band"
-		},
-		{
-			"Class": "band"
-		}
+		]
 	]
-};
+)
 
 
 }

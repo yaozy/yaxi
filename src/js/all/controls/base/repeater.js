@@ -6,8 +6,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-    var assign = Object.assign;
-
+    var A = Array;
 
     
     // 标记不能被继承
@@ -29,85 +28,35 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         convert: function (value) {
 
-            var storage = this.$storage;
-            var arrayModel = storage.arrayModel;
-
-            if (value && typeof value !== 'object')
+            if (value != null)
             {
-                value = null;
-            }
-            else if (arrayModel && value !== storage.template)
-            {
-                rebuild(this, arrayModel, value);
-            }
-
-            return value;
-        }
-
-    });
-
-
-
-    // 数组模型
-    this.$property('arrayModel', null, {
-
-        change: false,
-
-        convert: function (value) {
-
-            if (value)
-            {
-                var arrayModel, template;
-
-                if (typeof value !== 'object')
+                if (value instanceof A)
                 {
-                    arrayModel = this.__find_arrayModel(value = '' + value);
-                }
-                else if (value.__model_type === 2)
-                {
-                    arrayModel = value;
+                    // 只有一个子控件直接设置成单个控件
+                    if (value.length === 1 && value[0] instanceof A)
+                    {
+                        value = value[0];
+                    }
                 }
                 else
                 {
-                    return null;
+                    value = ['text', null, '' + value];
                 }
-
-                if (arrayModel !== this.__arrayModel)
-                {
-                    arrayModel.$bind(this);
-                    this.__arrayModel = arrayModel;
-
-                    if (template = this.$storage.template)
-                    {
-                        rebuild(this, value, template);
-                    }
-                }
-            }
-            else
-            {
-                value = null;
             }
 
             return value;
         }
+    });
 
+
+
+    // 子模型名称
+    this.$property('submodel', '', {
+
+        change: false
     });
 
     
-
-    // 子项名称
-    this.$property('item', 'item', {
-
-        change: false
-    });
-
-
-    // 索引名称
-    this.$property('index', 'index', {
-        
-        change: false
-    });
-
 
     // 子控件集合
     this.$property('children', null, {
@@ -120,7 +69,168 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function no_children () {
 
-        throw 'Repeater doesn\'t supports children property, please use template and arrayModel!';
+        throw 'Repeater doesn\'t supports children, please use model and template!';
+    }
+
+
+
+    this.__load_content = function (value) {
+
+        this.template = value;
+    }
+
+
+    this.load = function (values, model) {
+
+        var storage = this.$storage;
+        var name;
+
+        if (!model)
+        {
+            throw 'repeater does not specify a model!';
+        }
+
+        base.load.call(this, values, model);
+        
+        if (name = storage.submodel)
+        {
+            model = model[name];
+
+            if (!model)
+            {
+                throw 'can not find repeater submodel "' + name + '"!';
+            }
+
+            if (model.__model_type !== 2)
+            {
+                throw 'repeater model "' + name + '" not a valid array model!';
+            }
+        }
+
+        this.reload(model);
+    }
+
+
+    this.reload = function (arrayModel) {
+
+        if (!arrayModel || arrayModel.__model_type !== 2)
+        {
+            throw 'repeater reload method need a array model!';
+        }
+
+        var template = this.template;
+        var any;
+
+        if (!template)
+        {
+            throw 'repeater does not specify a template!';
+        }
+
+        var children = this.__children;
+
+        if (children.length > 0)
+        {
+            children.clear();
+        }
+
+        if (any = this.__arrayModel)
+        {
+            if (any !== arrayModel)
+            {
+                unbind(this, any);
+                bind(this, arrayModel);
+            }
+        }
+        else
+        {
+            bind(this, arrayModel);
+        }
+
+        if (arrayModel.length > 0)
+        {
+            any = createControls(this, arrayModel, template);
+            children.__insert(-1, any);
+        }
+    }
+
+
+    function bind(repeater, arrayModel) {
+
+        var bindings;
+
+        if (bindings = arrayModel.__bindings)
+        {
+            bindings.push(repeater.uuid);
+        }
+        else
+        {
+            arrayModel.__bindings = [repeater.uuid];
+        }
+
+        repeater.__arrayModel = arrayModel;
+    }
+
+
+    function unbind(repeater, arrayModel) {
+
+        var bindings;
+
+        if (bindings = arrayModel.__bindings)
+        {
+            var index = bindings.indexOf(repeater.uuid);
+
+            if (index >= 0)
+            {
+                bindings.splice(index, 1);
+            }
+        }
+
+        repeater.__arrayModel = null;
+    }
+
+
+    function createControls(parent, arrayModel, template) {
+
+        var length = arrayModel.length;
+        var list, control, model;
+
+        // [['xxx', ...]]形式为多子控件模板
+        if (template[0] instanceof A)
+        {
+            var template_length = template.length;
+            var index = 0;
+            
+            list = new A(length * template_length);
+
+            for (var i = 0; i < length; i++)
+            {
+                model = arrayModel[i];
+    
+                for (var j = 0; j < template_length; j++)
+                {
+                    control = parent.$createSubControl(template, model);
+                    control.__model = model;
+
+                    list[index++] = control;
+                }
+            }
+        }
+        else // ['xxx', ...]为单个子控件
+        {
+            list = new A(length);
+
+            for (var i = 0; i < length; i++)
+            {
+                model = arrayModel[i];
+
+                control = parent.$createSubControl(template, model);
+                control.__model = model;
+
+                list[i] = control;
+            }
+        }
+
+        return list;
     }
 
 
@@ -129,68 +239,29 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     yaxi.impl.query.call(this);
 
 
-    
 
-    function rebuild(repeater, arrayModel, template) {
-
-        var children = repeater.__children;
-
-        if (children[0])
-        {
-            children.clear();
-        }
-
-        if (arrayModel && arrayModel[0])
-        {
-            children.push.apply(children, createItems(arrayModel, template));
-        }
-    }
-
-
-
-    function createItems(arrayModel, template) {
-
-        var length = arrayModel.length;
-        var list = new Array(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = assign({ __model: arrayModel[i] }, template);
-        }
-
-        return list;
-    }
-
-
-    this.__on_set = function (index, item) {
+    this.__on_set = function (index, model) {
 
         var template;
 
         if (template = this.template)
         {
-            this.__children.set(index, assign({ __model: item }, template))
+            var control = this.$createSubControl(template, model);
+
+            control.__model = model;
+            this.__children.set(index, control);
         }
     }
 
 
     this.__on_insert = function (index, list) {
 
-        var template, children;
+        var template;
 
         if (template = this.template)
         {
-            children = this.__children;
-            list = createItems(list, template);
-
-            if (index < 0)
-            {
-                children.push.apply(children, list);
-            }
-            else
-            {
-                list.unshift(index, 0);
-                children.splice.apply(children, list);
-            }
+            list = createControls(this, list, template);
+            this.__children.__insert(index, list);
         }
     }
 
@@ -232,9 +303,9 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.arrayModel)
+        if (any = this.__arrayModel)
         {
-            any.$unbind(this);
+            unbind(this, any);
         }
 
         base.destroy.call(this);

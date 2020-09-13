@@ -16,34 +16,23 @@
     var base = this;
 
 
+    // 所有控件集合
+    var controls;
+
+
 
 
     // 定义数组模型
-    yaxi.arrayModel = function (properties, indexName) {
+    yaxi.arrayModel = function (properties, itemName, indexName) {
     
         var prototype = create(base);
 
         properties || (properties = {});
 
-        // 创建索引计算属性
-        if (indexName)
-        {
-            if (indexName in properties)
-            {
-                throw 'array model index name "' + indexName + '" can not in properties!'; 
-            }
-            else
-            {
-                properties[prototype.__indexName = indexName] = function () {
-
-                    return this.__index;
-                }
-            }
-        }
-
         function ArrayModel(parent) {
 
             this.$parent = parent || null;
+            this.__item = [itemName || 'item', indexName || 'index'];
         }
 
         prototype.$Model = yaxi.model(properties);
@@ -97,36 +86,6 @@
 
 
 
-    this.$bind = function (repeater) {
-
-        (this.__bindings || (this.__bindings = [])).push(repeater);
-    }
-
-
-    this.$unbind = function (repeater) {
-
-        var bindings;
-
-        if (bindings = this.__bindings)
-        {
-            for (var i = bindings.length; i--;)
-            {
-                if (bindings[i] === repeater)
-                {
-                    bindings.splice(i, 1);
-
-                    if (!bindings[0])
-                    {
-                        this.__bindings = null;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-
-
 
     function createModels(arrayModel, list, index) {
 
@@ -139,7 +98,11 @@
         while (index < length)
         {
             model = new Model(parent);
-            model.$assign(list[index++]);
+
+            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
+            model.__item = arrayModel.__item;
+            model.$load(list[index++]);
+
             outputs.push(model);
         }
 
@@ -149,45 +112,49 @@
 
     function reindex(arrayModel, index) {
 
-        var name = arrayModel.__indexName;
         var model;
 
         index |= 0;
 
-        if (name)
+        while (model = arrayModel[index])
         {
-            while (model = arrayModel[index])
-            {
-                if (model.__index !== index)
-                {
-                    model.__index = index;
-                    model.$sync(name);
-                }
+            var old = model.__index;
 
-                index++;
-            }
-        }
-        else
-        {
-            while (model = arrayModel[index])
+            if (old == null)
             {
-                model.__index !== index++;
+                model.__index = index;
             }
+            else if (old !== index)
+            {
+                model.__item_index = index;
+            }
+
+            index++;
         }
     }
 
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var bindings;
+        var repeaters = controls || (controls = yaxi.$controls);
+        var bindings, repeater;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                bindings[i][type](arg1, arg2);
+                if (repeater = repeaters[bindings[i]])
+                {
+                    repeater[type](arg1, arg2);
+                }
             }
         }
+    }
+
+
+    function destroyItem(item) {
+
+        item.$parent = item.__item = item.__bindings = null;
     }
 
 
@@ -198,7 +165,10 @@
         {
             var model = new this.$Model(this.$parent);
 
-            model.$assign(value);
+            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
+            model.__item = this.__item;
+            model.$load(value);
+
             this[index] = model;
 
             notify(this, '__on_set', index, model);
@@ -236,7 +206,7 @@
 
             if (item = array.pop.call(this))
             {
-                item.$parent = item.__bindings = null;
+                destroyItem(item);
                 notify(this, '__on_remove', -1, 1);
             }
         }
@@ -272,8 +242,10 @@
 
             if (item = array.shift.call(this))
             {
-                item.$parent = item.__bindings = null;
+                destroyItem(item);
+
                 notify(this, '__on_remove', 0, 1);
+                reindex(this, 0);
             }
         }
 
@@ -302,12 +274,12 @@
             released = true;
             removed = splice.apply(this, arguments);
         }
-
+        
         if (removed.length > 0)
         {
             for (var i = removed.length; i--;)
             {
-                removed[i].$parent = removed[i].__bindings = null;
+                destroyItem(removed[i]);
             }
 
             notify(this, '__on_remove', index, removed.length);
@@ -315,10 +287,10 @@
 
         if (inserted)
         {
-            reindex(this, index);
             notify(this, '__on_insert', index, inserted);
         }
 
+        reindex(this, index);
         return removed;
     }
 
@@ -334,7 +306,7 @@
     
             for (var i = list.length; i--;)
             {
-                list[i].$parent = list[i].__bindings = null;
+                destroyItem(list[i]);
             }
 
             notify(this, '__on_clear');
@@ -348,7 +320,7 @@
 
         array.sort.call(this, sortFn);
 
-
+        reindex(this, 0);
         notify(this, '__on_sort', 0);
     }
 
@@ -356,6 +328,8 @@
     this.reverse = function () {
 
         array.reverse.call(this);
+        
+        reindex(this, 0);
         notify(this, '__on_sort', 1);
     }
 

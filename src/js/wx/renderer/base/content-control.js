@@ -1,49 +1,23 @@
 yaxi.ContentControl.mixin(function (mixin, base) {
 
-
-
-    function renderContent(self, content) {
-
-        self.__content_dirty = false;
-
-        if (typeof content === 'string')
-        {
-            return [{
-                t: 'Text',
-                u: self.__uuid,
-                text: content
-            }];
-        }
-
-        var length = content.length;
-        var list = new Array(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = content[i].render();
-        }
-
-        return list;
-    }
-
+    
 
     this.render = function () {
 
         var view = base.render.call(this);
         var content = this.__content;
 
-        if (content == null)
+        if (this.__content_dirty)
         {
-            content = this.__no_content;
-        }
-
-        if (content)
-        {
-            view.content = renderContent(this, content);
-        }
-        else
-        {
-            delete view.content;
+            if (content == null)
+            {
+                content = this.__no_content;
+            }
+    
+            if (content)
+            {
+                view.content = this.__render_content(content);
+            }
         }
         
         return view;
@@ -62,6 +36,31 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         {
             delete view.content;
         }
+    }
+
+
+    this.__render_content = function (content) {
+
+        this.__content_dirty = false;
+
+        if (typeof content === 'string')
+        {
+            return [{
+                t: 'Text',
+                u: this.uuid,
+                text: content
+            }];
+        }
+
+        var length = content.length;
+        var list = new Array(length);
+
+        for (var i = 0; i < length; i++)
+        {
+            list[i] = content[i].render();
+        }
+
+        return list;
     }
 
 

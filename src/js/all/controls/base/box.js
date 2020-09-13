@@ -44,10 +44,16 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
       
             if (values && values.length > 0)
             {
-                this.__children.assign(values);
+                this.__children.load(values);
             }
         }
     };
+
+
+    this.__load_content = function (values, model) {
+
+        this.__children.load(values, model);
+    }
 
 
 

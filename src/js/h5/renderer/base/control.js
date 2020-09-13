@@ -126,25 +126,6 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
-    this.__render_content = function (view, content) {
-
-        if (typeof content === 'string')
-        {
-            view.textContent = content;
-        }
-        else
-        {
-            var index = 0;
-            var control;
-
-            while (control = content[index++])
-            {
-                view.appendChild(control.render());
-            }
-        }
-    }
-
-
 
     mixin.id = function (view, value) {
 

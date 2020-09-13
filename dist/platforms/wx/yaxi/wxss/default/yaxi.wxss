@@ -343,3 +343,69 @@
   background-color: #999999;
   color: #eeeeee;
 }
+.yx-theme-level1-bg {
+  background-color: #31313d;
+}
+.yx-theme-level2-bg {
+  background-color: #6c768b;
+}
+.yx-theme-level3-bg {
+  background-color: #b8c0de;
+}
+.yx-theme-level4-bg {
+  background-color: #cccccc;
+}
+.yx-theme-level5-bg {
+  background-color: #f7f7f7;
+}
+.yx-theme-primary-bg {
+  background-color: #1c86ee;
+}
+.yx-theme-second-bg {
+  background-color: #48d1cc;
+}
+.yx-theme-success-bg {
+  background-color: #71c04a;
+}
+.yx-theme-warning-bg {
+  background-color: #e89518;
+}
+.yx-theme-danger-bg {
+  background-color: #ff6c6c;
+}
+.yx-theme-disabled-bg {
+  background-color: #999999;
+}
+.yx-theme-level1-font {
+  color: #31313d;
+}
+.yx-theme-level2-font {
+  color: #6c768b;
+}
+.yx-theme-level3-font {
+  color: #b8c0de;
+}
+.yx-theme-level4-font {
+  color: #cccccc;
+}
+.yx-theme-level5-font {
+  color: #f7f7f7;
+}
+.yx-theme-primary-font {
+  color: #1c86ee;
+}
+.yx-theme-second-font {
+  color: #48d1cc;
+}
+.yx-theme-success-font {
+  color: #71c04a;
+}
+.yx-theme-warning-font {
+  color: #e89518;
+}
+.yx-theme-danger-font {
+  color: #ff6c6c;
+}
+.yx-theme-disabled-font {
+  color: #999999;
+}

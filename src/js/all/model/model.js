@@ -14,6 +14,10 @@
     var cache = create(null);
 
 
+    // 观察器对象集合
+    var controls;
+
+
     // 绑定的目标
     var bindingTarget = null;
 
@@ -34,24 +38,24 @@
 
         return function () {
 
-            var bindings, any;
+            var target, bindings, any;
 
-            if (bindingTarget)
+            if (target = bindingTarget)
             {
                 if (bindings = this.__bindings)
                 {
                     if (any = bindings[name])
                     {
-                        any.push(bindingTarget);
+                        any.push(target);
                     }
                     else
                     {
-                        bindings[name] = [bindingTarget];
+                        bindings[name] = [target];
                     }
                 }
                 else
                 {
-                    (this.__bindings = {})[name] = [bindingTarget];
+                    (this.__bindings = {})[name] = [target];
                 }
             }
 
@@ -91,6 +95,68 @@
 
 
 
+    // 数组项索引属性
+    define(this, '__item_index', {
+
+        get: function () {
+
+            var bindings, any;
+
+            if (bindingTarget)
+            {
+                if (bindings = this.__bindings)
+                {
+                    if (any = bindings.__item_index)
+                    {
+                        any.push(bindingTarget);
+                    }
+                    else
+                    {
+                        bindings.__item_index = [bindingTarget];
+                    }
+                }
+                else
+                {
+                    (this.__bindings = {}).__item_index = [bindingTarget];
+                }
+            }
+
+            return this.__index + 1 || 0;
+        },
+
+        set: function (value) {
+
+            value |= 0;
+
+            if (this.__index === value)
+            {
+                return;
+            }
+
+            var bindings = this.__bindings;
+
+            this.__index = value;
+
+            if (bindings && (bindings = bindings.__item_index))
+            {
+                value += 1;
+                
+                for (var name in bindings)
+                {
+                    var binding = bindings[name];
+                    var control = (controls || (controls = yaxi.$controls))[binding.control];
+        
+                    if (control)
+                    {
+                        control[binding.property] = binding.pipe ? binding.pipe(value) : value;
+                    }
+                }
+            }
+        }
+    });
+
+
+
     // 定义模型
     yaxi.model = function (properties) {
 
@@ -114,6 +180,11 @@
         
         for (var name in properties)
         {
+            if (name[0] === '$' || name[0] === '_' && name[1] === '_')
+            {
+                throw 'model field can not use "$" or "__" to start!';
+            }
+
             if ((options = properties[name]) && typeof options === 'function')
             {
                 if (type = options.model)
@@ -154,7 +225,7 @@
                 {
                     if (value != null)
                     {
-                        (model || (this[name] = new Model(this))).$assign(value);
+                        (model || (this[name] = new Model(this))).$load(value);
                     }
                 }
                 else if (model)
@@ -207,47 +278,49 @@
 
     function syncBindings(model, bindings) {
 
-        var binding, value, pipe;
+        var binding, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
-            value = model[binding.name];
+            value = model[binding.field];
 
-            if (pipe = binding.pipe)
+            if (any = binding.pipe)
             {
-                value = pipe(value);
+                value = any(value);
             }
 
-            binding.observe[binding.property] = value;
+            if (any = (controls || (controls = yaxi.$controls))[binding.control])
+            {
+                any[binding.property] = value;
+            }
         }
     }
 
     
 
     // 编译绑定
-    function compileBinding(observe, model, name, expression) {
+    function compileBinding(control, model, name, rule) {
     
-        var rule = cache[expression] || parseExpression(expression);
         var binding, value;
 
         if (rule !== 1)
         {
             binding = bindingTarget = createBinding(model, rule);
-            binding.observe = observe;
+            binding.control = control.uuid;
 
-            value = binding.model[binding.name];
+            value = binding.model[binding.field];
 
             if (rule.pipe)
             {
                 value = rule.pipe(value);
             }
 
-            observe[binding.property = name] = value;
+            control[binding.property = name] = value;
 
             if (binding.model.__model_type === 1)
             {
-                (observe.__bindings || (observe.__bindings = {}))[name] = binding;
+                (control.__bindings || (control.__bindings = {}))[name] = binding;
             }
         }
         else
@@ -257,13 +330,14 @@
     }
 
 
+    // 解析绑定表达式
     function parseExpression(expression) {
 
         var value, pipe, any;
 
         if ((any = expression.indexOf('|')) > 0)
         {
-            pipe = expression.substring(any);
+            pipe = compile(expression.substring(any));
             value = expression.substring(0, any);
         }
         else
@@ -274,7 +348,6 @@
         if (any = value.match(/\w+/g))
         {
             value = {
-                name: any.pop(),
                 path: any,
                 pipe: pipe,
                 bind: value
@@ -288,54 +361,100 @@
     // 创建绑定对象
     function createBinding(model, rule) {
 
-        var name = rule.path[0] || rule.name;
+        var path = rule.path;
+        var name = path[0];
+        var item;
 
-        if (model[name] === void 0)
+        // 绑定结构
+        var binding = {
+            type: 0,        // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定
+            model: null,    // 模型对象
+            field: name,    // 模型字段名
+            control: 0,     // 控件id
+            property: ''    // 控件属性名
+        };
+
+        while (model)
         {
-            while (model = model.$parent)
+            // 如果是数组模型子项时只能通过设定的项名或索引名绑定, 不支持直接绑定
+            if (item = model.__item)
             {
-                if (name in model)
+                // 数组模型子项
+                if (name === item[0])
                 {
-                    break;
+                    binding.type = 1;
+    
+                    if (path[1])
+                    {
+                        return findSubModel(model, binding, rule);
+                    }
+
+                    binding.model = model;
+                    return binding;
+                }
+
+                // 数组模型子项索引
+                if (name === item[1])
+                {
+                    if (path[1])
+                    {
+                        throw '"' + name + '" is model index, can not supports sub model!';
+                    }
+
+                    binding.type = 2;
+                    binding.model = model;
+                    binding.field = '__item_index';
+
+                    return binding;
                 }
             }
+            else if (name in model)
+            {
+                if (path[1])
+                {
+                    return findSubModel(model, binding, rule);
+                }
+ 
+                binding.model = model;
+                return binding;
+            }
+            
+            model = model.$parent;
         }
 
-        if (model)
-        {
-            return {
-                model: model,
-                name: name 
-            };
-        }
-
-        throw '"' + rule.bind + '" is a invalid binding!';
+        throw 'model field "' + name + '" not exists!';
     }
 
 
-    // 编译推送
-    function compilePush(observe, model, expression) {
+    function findSubModel(model, binding, rule) {
 
-        var rule = cache[expression] || parseExpression(expression);
-        var binding;
+        var path = rule.path;
+        var last = path.length - 1;
 
-        if (rule !== 1)
+        for (var i = 1; i < last; i++)
         {
-            binding = createBinding(model, rule);
+            model = model[path[i]];
 
-            if (pipe)
+            if (!model)
             {
-                binding.pipe = compile(pipe);
+                throw 'binding "' + rule.bind + '" error, can not find submodel "' + path[i] + '"!';
             }
-
-            observe.__binding_push = binding;
         }
+
+        if (path[last] in model)
+        {
+            binding.field = path[last];
+            binding.model = model;
+            return binding;
+        }
+
+        throw 'binding "' + rule.bind + '" error, can not find model field "' + path[last] + '"!';
     }
 
 
 
     // 绑定
-    this.$bind = yaxi.__bind_model = function (observe, bindings) {
+    this.$bind = function (control, bindings) {
 
         try
         {
@@ -345,13 +464,18 @@
             {
                 if (expression = bindings[name])
                 {
-                    if (name === 'change')
+                    var rule = cache[expression] || parseExpression(expression);
+        
+                    if (name === 'model')
                     {
-                        compilePush(observe, this, expression);
+                        if (rule !== 1)
+                        {
+                            control.__binding_push = createBinding(model, rule);
+                        }
                     }
                     else
                     {
-                        compileBinding(observe, this, name, expression);
+                        compileBinding(control, this, name, rule);
                     }
                 }
             }
@@ -365,6 +489,7 @@
     }
 
 
+
     // 解除绑定
     this.$unbind = function (binding) {
 
@@ -374,7 +499,7 @@
         if (bindings)
         {
             // 属性字段绑定
-            if (values = bindings[binding.name])
+            if (values = bindings[binding.field])
             {
                 for (var i = values.length; i--;)
                 {
@@ -532,18 +657,18 @@
     // 手动同步绑定
     this.$sync = function (name) {
 
-        var binding;
+        var bindings = this.__bindings;
 
-        if ((binding = this.__bindings) && (binding = binding[name]))
+        if (bindings && (bindings = bindings[name]))
         {
-            syncBindings(this, binding);
+            syncBindings(this, bindings);
         }
     }
 
 
 
-    // 赋值
-    this.$assign = function (values) {
+    // 加载
+    this.$load = function (values) {
 
         if (values)
         {

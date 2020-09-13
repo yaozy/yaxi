@@ -7,13 +7,13 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.assign(template(this));
+        this.load(template(this));
     }
 
 
-    this.openPage = function () {
+    this.openTest = function () {
 
-        require('./test').open();
+        require('../test/main').open();
     }
 
 

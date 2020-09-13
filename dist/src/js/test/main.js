@@ -1,47 +1,31 @@
 const yaxi = require('../../yaxi/js/yaxi');
+const template = require('./main.html');
 
 
-module.exports = yaxi.Box.extend(function (Class, base) {
+module.exports = yaxi.Page.extend(function (Class, base) {
 
 
     this.init = function () {
 
-        this.assign({
-            children: [
-                {
-                    Class: yaxi.Button,
-                    content: {
-                        Class: yaxi.Box,
-                        children: [
-                            {
-                                Class: yaxi.Text,
-                                text: 'A '
-                            },
-                            {
-                                Class: yaxi.Text,
-                                text: '01 '
-                            }
-                        ]
-                    },
-                    events: {
-                        tap: function () {
+        this.load(template(this));
+    }
 
-                            require('./test').open();
-                        }
-                    }
-                },
-                {
-                    Class: yaxi.Button,
-                    content: 'open model',
-                    events: {
-                        tap: function () {
 
-                            require('./model').open();
-                        }
-                    }
-                }
-            ]
-        });
+    this.handleTap = function (event) {
+
+        var target = event.target;
+        var tag;
+
+        while (target)
+        {
+            if (tag = target.tag)
+            {
+                require(tag).open();
+                break;
+            }
+
+            target = target.parent;
+        }
     }
 
 

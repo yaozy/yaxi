@@ -5,61 +5,36 @@
 yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
 
+
+    var A = Array;
     
+
     var classes = yaxi.classes;
 
-    var check = yaxi.__check_parent;
+    var patch = yaxi.patch;
 
+
+    var check = yaxi.__check_parent;
+    
 
     
     // 内容
     this.$property('content', null, {
 
-        convert: function (value) {
+        change: false,
 
-            var content = this.__content;
-    
-            if (content && typeof content !== 'string')
-            {
-                for (var i = list.length; i--;)
-                {
-                    list[i].destroy();
-                }
-            }
-    
-            if (!value || typeof value !== 'object')
-            {
-                content = this.__text_content(value = '' + value);
-            }
-            else if (value instanceof Array)
-            {
-                content = createControls(this, value);
-            }
-            else if (value.Class)
-            {
-                content = [createControl(this, value)];
-            }
-            else
-            {
-                content = value = '' + value; 
-            }
-    
-            this.__content = content;
-            this.__content_dirty = true;  // 标记内容已变更
+        get: function () {
 
-            return value;
+            return this.$storage.content;
+        },
+
+        set: function (value) {
+
+            this.$storage.content = this.__load_content(value);
         }
 
     });
 
-
-
-
-    this.__text_content = function (text) {
-
-        return text;
-    }
-    
 
 
     function createControls(parent, values) {
@@ -78,12 +53,12 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
     function createControl(parent, options) {
 
-        var Class = options.Class;
+        var Class = options[0];
         var control;
 
         if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            throw '"' + options.Class + '" doesn\'t register!';
+            throw '"' + options[0] + '" doesn\'t register!';
         }
 
         if (Class)
@@ -97,9 +72,48 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
         control = new Class();
         control.parent = parent;
-        control.assign(options);
+        control.load(options);
 
         return control;
+    }
+
+
+
+    // 加载内容
+    this.__load_content = function (values) {
+
+        var content = this.__content;
+    
+        if (content && typeof content !== 'string')
+        {
+            for (var i = list.length; i--;)
+            {
+                list[i].destroy();
+            }
+        }
+
+        if (values instanceof A)
+        {
+            if (values[0] instanceof A)
+            {
+                content = createControls(this, values);
+            }
+            else
+            {
+                content = [createControl(this, values)];
+            }
+        }
+        else
+        {
+            content = values = '' + values; 
+        }
+
+        this.__content = content;
+        this.__content_dirty = true;  // 标记内容已变更
+
+        this.__dirty || patch(this);
+
+        return values;
     }
 
 

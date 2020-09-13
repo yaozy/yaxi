@@ -4,7 +4,7 @@ const theme = require('./theme').theme
 new Compressor()
     .load('src', [
         'js/all/base/(yaxi|extend|html|buffer|math|property|event|stream).js',
-        'js/all/model/(pipe|binding|model|arraymodel).js',
+        'js/all/model/(pipe|model|arraymodel).js',
         'less/theme/default/*.js',
         'js/all/controls/base/(query|control|collection|content-control|box|repeater).js',
         'js/all/controls/base/*.js',
