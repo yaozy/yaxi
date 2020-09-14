@@ -7,12 +7,12 @@
             <button content="Remove" e-tap="this.handleRemove" />
             <button content="Reorder" e-tap="this.handleReorder" />
         </band>
-        <repeater layout="column" item="item" index="index">
-            <band layout="row" style="height:auto;padding:20rem;">
-                <sidebar style="width:50rem;line-height:2;">
+        <repeater item="item" index="index">
+            <band style="height:120rem;">
+                <box style="width:50rem;height:120rem;line-height:120rem;position:absolute;top:0;left:20rem;">
                     <text b-text="index" />
-                </sidebar>
-                <box>
+                </box>
+                <box style="height:100rem;width:700rem;position:absolute;left:70rem;top:20rem;">
                     <text b-text="item.name" style="width:200rem;" />
                     <text b-text="item.value" />
                     <text b-text="item.computed" style="display:block;" />

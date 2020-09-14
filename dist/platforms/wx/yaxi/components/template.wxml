@@ -165,6 +165,20 @@
 </template>
 
 
+<template name="Repeater">
+
+<box 
+    data-id="{{ u }}"
+    id="{{ id }}"
+    class="yx-control yx-box{{ class }}" 
+    style="{{ style || '' }}"
+    bindtouchstart="handleEvent"
+    children="{{ c }}">
+</box>
+
+</template>
+
+
 <template name="ScrollBox">
 
     <scroll-view 

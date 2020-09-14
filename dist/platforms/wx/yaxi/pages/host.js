@@ -26,7 +26,6 @@ Page({
         }
         else
         {
-            wx.navigateBack();
             require('../../js/main').open();
         }
     },

@@ -109,7 +109,7 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
                 all.push(page);
                 page.payload = payload;
     
-                wx.navigateTo({
+                wx[Page.main ? 'redirectTo' : 'navigateTo']({
     
                     url: '../../yaxi/pages/host?uuid=' + page.uuid,
     

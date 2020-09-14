@@ -66,7 +66,6 @@ return (
 					[
 						"repeater",
 						{
-							"layout": "column",
 							"item": "item",
 							"index": "index"
 						},
@@ -74,14 +73,13 @@ return (
 							[
 								"band",
 								{
-									"layout": "row",
-									"style": "height:auto;padding:20rem;"
+									"style": "height:120rem;"
 								},
 								[
 									[
-										"sidebar",
+										"box",
 										{
-											"style": "width:50rem;line-height:2;"
+											"style": "width:50rem;height:120rem;line-height:120rem;position:absolute;top:0;left:20rem;"
 										},
 										[
 											[
@@ -96,7 +94,9 @@ return (
 									],
 									[
 										"box",
-										null,
+										{
+											"style": "height:100rem;width:700rem;position:absolute;left:70rem;top:20rem;"
+										},
 										[
 											[
 												"text",
