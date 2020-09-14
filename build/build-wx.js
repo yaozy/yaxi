@@ -2,7 +2,7 @@ const Compressor = require('jiac/js-compressor');
 
 new Compressor()
     .load('src', [
-        'js/all/base/(yaxi|extend|html|buffer|math|property|event|stream).js',
+        'js/all/base/(yaxi|extend|html|buffer|math|property|event|stream|http).js',
         'js/all/model/(pipe|model|arraymodel).js',
         'less/theme/default/*.js',
         'js/all/controls/base/(query|control|collection|content-control|box|repeater).js',

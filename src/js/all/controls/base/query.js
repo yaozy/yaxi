@@ -686,14 +686,14 @@ Object.extend.call(Array, function (Class, base) {
     }
 
 
-    this.trigger = function (type, payload) {
+    this.trigger = function (event) {
 
         var index = 0,
             item;
 
         while (item = this[index++])
         {
-            item.trigger(type, payload);
+            item.trigger(event);
         }
 
         return this;

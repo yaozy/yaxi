@@ -144,7 +144,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             var storage = this.$storage;
             var changes;
 
@@ -177,7 +177,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -186,12 +186,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-
+if (!name) debugger
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-
+            if (!name) debugger
             return this.$storage[name];
         }
     }
@@ -313,7 +313,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
         else
         {
-            throw 'class not null or space';
+            throw 'class name not allow null or empty!';
         }
     }
 
@@ -359,7 +359,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    function fix_active(active) {
+    function change_active(active) {
 
         if (this.__active !== active)
         {
@@ -371,10 +371,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-    // 处理微信自定义组件不支持active的问题
-    this.__fix_active = function (active) {
+    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
+    this.__change_active = function (active) {
 
-        setTimeout(fix_active.bind(this, !!active), 20);
+        if (active = !!active)
+        {
+            change_active.call(this, active);
+        }
+        else
+        {
+            setTimeout(change_active.bind(this, active), 50);
+        }
     }
 
     

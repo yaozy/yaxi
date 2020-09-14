@@ -20,18 +20,9 @@
 	}
 	
 	
-	// 在微信中打开时(微信自动排版会打乱网页布局)
-	if (yaxi.h5.weixin)
-	{
-        // 1rem = 100px
-		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
-	}
-	else
-	{
-		// 处理rem自适应
-		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
-        host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
-	}
+    // 处理rem自适应
+    document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
+    host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
 
 
 
@@ -58,22 +49,23 @@
     var bind = host.addEventListener.bind(host);
 
 
+    var touchControl, flag;
+
+
 
 
     function findControl(view) {
 
-        var control, uuid;
+        var control, uuid, f;
 
         while (view)
         {
+            f || (f = view.getAttribute('flag'));
+
             if ((uuid = view.$uuid) && (control = controls[uuid]))
             {
-                while (control.disabled)
-                {
-                    control = control.parent;
-                }
-
-                return control;
+                flag = f || '';
+                return control.findEventTarget();
             }
 
             view = view.parentNode;
@@ -88,7 +80,7 @@
 
         touch = touch || event.changedTouches[0];
 
-        e.key = event.target.getAttribute('key');
+        e.flag = flag;
         e.state = state;
         e.touches = event.changedTouches;
         e.clientX = touch.clientX;
@@ -107,7 +99,10 @@
 
         if (control = findControl(event.target))
         {
-            return control.trigger(event.type);
+            event = new Event(event.type);
+            event.flag = flag;
+
+            return control.trigger(event);
         }
     }
 
@@ -144,13 +139,14 @@
 
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0],
-                e = touchEvent(event, touch);
+            var touch = event.changedTouches[0];
+            var e = touchEvent(event, touch);
 
+            control.__change_active(true);
+            touchControl = control;
             tap = true;
 
             state.time = new Date();
-            state.control = control;
             state.clientX = touch.clientX;
             state.clientY = touch.clientY;
 
@@ -167,11 +163,10 @@
         
         var control;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
-            var e = touchEvent(event),
-                x,
-                y;
+            var e = touchEvent(event);
+            var x, y;
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -208,11 +203,12 @@
         
         var control, time;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
             var e = touchEvent(event);
 
-            state.control = null;
+            touchControl = null;
+            control.__change_active(false);
 
             if (call(control, '__on_touchend', e) === false || control.trigger(e) === false)
             {
@@ -229,8 +225,8 @@
                     return stop(event);
                 }
             }
-            // 500ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 500 || tapControl !== control))
+            // 350ms内不重复触发tap事件
+            else if (tap && (time - tapTime > 350 || tapControl !== control))
             {
                 tapControl = control;
                 tapTime = time;
@@ -251,11 +247,12 @@
         
         var control;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
             var e = touchEvent(event);
 
-            state.control = null;
+            touchControl = null;
+            control.__change_active(false);
 
             if (call(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
             {
@@ -279,6 +276,7 @@
             }
 
             e = new Event('input');
+            e.flag = flag;
             e.value = event.target.value;
 
             return control.trigger(e);
@@ -299,6 +297,7 @@
             }
 
             e = new Event('change');
+            e.flag = flag;
             e.value = event.target.value;
 
             return control.trigger(e);
@@ -321,19 +320,14 @@
 
     bind('focus', function (event) {
      
-        var target = event.target,
-            control;
+        var control;
 
-        // 页面刚打开时禁止自动弹出键盘
-        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
+        if (control = findControl(event.target))
         {
-            target.blur();
-            return;
-        }
+            event = new Event('focus');
+            event.flag = false;
 
-        if (control = findControl(target))
-        {
-            return control.trigger('focus');
+            return control.trigger(event);
         }
         
     }, true);
@@ -351,7 +345,10 @@
                 fn.call(control, event.target);
             }
 
-            return control.trigger('scroll');
+            event = new Event('scroll');
+            event.flag = false;
+
+            return control.trigger(event);
         }
 
     }, true);

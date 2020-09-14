@@ -1,10 +1,2 @@
-@import '../wxss/default/yaxi.wxss';
 @import '../../icon/iconfont.wxss';
-
-.iconfont {
-  font-family: "iconfont" !important;
-  font-size: 60rpx;
-  font-style: normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@import '../wxss/default/yaxi.wxss';

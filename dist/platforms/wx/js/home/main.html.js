@@ -10,7 +10,9 @@ return (
 		[
 			[
 				"swiper",
-				null,
+				{
+					autoplay: false
+				},
 				[
 					[
 						"image",

@@ -12,44 +12,49 @@
 
     var translates = create(null);
 
+
     var state = create(null);
 
-    var uuid, key;
+    var touchControl, uuid, flag;
 
 
 
     wx.translateEvent = function (event) {
 
-        var any;
+        var fn;
 
         uuid = this.__event_id;
-        key = this.__event_key;
+        flag = this.__event_flag || '';
 
-        if (any = translates[event.type])
+        if (fn = translates[event.type])
         {
-            any(event);
+            fn(event);
         }
         else
         {
             event = new Event(event.type);
-
-            event.target = any = controls[uuid];
-            event.key = key;
-
-            any.trigger(event);
+            event.flag = flag;
+            controls[uuid].trigger(event);
         }
 
     }.bind(wx);
     
+
+
+    function findControl() {
+
+        var control = controls[uuid];
+        return control ? control.findEventTarget() : null;
+    }
     
     
     function touchEvent(event, touch) {
     
         var e = new Event(event.type);
     
-        touch = touch || event.changedTouches[0];
+        touch || (touch = event.changedTouches[0]);
     
-        e.key = key;
+        e.flag = flag;
         e.state = state;
         e.touches = event.changedTouches;
         e.clientX = touch.clientX;
@@ -81,27 +86,23 @@
     
     translates.touchstart = function (event) {
             
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
-        if (control)
+        if (control && touch)
         {
-            if (!touch)
-            {
-                console.log(event)
-            }
-    
             // 修复自定义组件不支持active的问题
-            control.__fix_active(true);
+            control.__change_active(true);
+
+            touchControl = control;
 
             state.time = new Date();
-            state.control = control;
             state.clientX = touch.clientX;
             state.clientY = touch.clientY;
 
             event = touchEvent(event, touch);
             event.target = control;
-    
+
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
             {
@@ -115,11 +116,11 @@
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
             event = touchEvent(event);
             event.target = control;
-    
+
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
@@ -133,15 +134,15 @@
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
+            touchControl = null;
+    
             event = touchEvent(event);
             event.target = control;
 
-            control.__fix_active(false);
+            control.__change_active(false);
 
-            state.control = null;
-    
             if (call(control, '__on_touchend', event) === false || 
                 control.trigger(event) === false)
             {
@@ -155,15 +156,15 @@
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
+            touchControl = null;
+
             event = touchEvent(event);
             event.target = control;
 
-            control.__fix_active(false);
+            control.__change_active(false);
 
-            state.control = null;
-    
             if (call(control, '__on_touchcancel', event) === false || 
                 control.trigger(event) === false)
             {
@@ -175,8 +176,8 @@
 
     translates.tap = function (event) {
 
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
         event = touchEvent(event, touch);
         event.target = control;
@@ -191,8 +192,8 @@
 
     translates.longpress = function (event) {
 
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
         event = touchEvent(event, touch);
         event.target = control;
@@ -208,12 +209,12 @@
 
     translates.change = function (event) {
 
-        var control = controls[uuid];
+        var control = findControl();
         var current = event.detail.current;
 
         event = new Event(event.type);
         event.target = control;
-        event.key = key;
+        event.flag = flag;
         event.current = current;
 
         if (call(control, '__on_change', event) === false || 

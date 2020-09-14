@@ -98,7 +98,7 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view.className = this.$class + class1 + class2;
+        view.className = this.$class + class1 + class2 + (this.__active ? ' active' : '');
     }
 
 

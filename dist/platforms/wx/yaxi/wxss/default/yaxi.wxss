@@ -44,7 +44,6 @@
   flex-shrink: 0;
   text-align: center;
   line-height: 1.2;
-  font-size: 60rpx;
 }
 .yx-iconbutton-content {
   flex-grow: 1;
@@ -76,7 +75,12 @@
   flex-shrink: 0;
   text-align: center;
   line-height: 1;
-  font-size: 60rpx;
+}
+.iconfont {
+  font-size: 50rpx;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .yx-imagebutton {
   display: inline-flex;

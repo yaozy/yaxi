@@ -134,6 +134,7 @@ return (
 					[
 						"button",
 						{
+							key: 'test',
 							"events": {
 								"tap": this.openTest
 							}

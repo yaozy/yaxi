@@ -15,7 +15,7 @@ new Compressor()
 
     .replace(function (text) {
         
-        return text.replace(/rem/g, 'rpx').replace(/:active/g, '.active');
+        return text.replace(/rem/g, 'rpx');
     })
 
     .output('dist/platforms/wx/yaxi/wxss/' + theme + '/yaxi.wxss');
@@ -32,7 +32,7 @@ new Compressor()
 
     .replace(function (text) {
         
-        return text.replace(/rem/g, 'rpx').replace(/:active/g, '.active');
+        return text.replace(/rem/g, 'rpx');
     })
 
     .output('dist/platforms/wx/yaxi/pages/host.wxss');

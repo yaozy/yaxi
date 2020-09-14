@@ -23,7 +23,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
     this.__on_tap = function (event) {
 
-        if (event.key === 'back')
+        if (event.flag === 'back')
         {
             yaxi.closePage();
         }

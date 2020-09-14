@@ -47,7 +47,7 @@ Component({
                 time = t;
 
                 yaxi.__event_id = id;
-                yaxi.__event_key = dataset.key;
+                yaxi.__event_flag = dataset.flag;
             }
         },
 
@@ -60,7 +60,7 @@ Component({
             if (id = dataset.id)
             {
                 yaxi.__event_id = id;
-                yaxi.__event_key = dataset.key;
+                yaxi.__event_flag = dataset.flag;
 
                 translateEvent(event);
             }

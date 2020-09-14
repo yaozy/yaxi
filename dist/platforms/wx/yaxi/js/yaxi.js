@@ -1046,26 +1046,29 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (type, payload) {
+    this.trigger = yaxi.trigger = function (event) {
         
         var target = this,
             events,
             index,
-            event,
+            type,
             fn;
 
-        if (type && typeof type !== 'string')
+        if (!event)
         {
-            event = type;
-            event.target = this;
-            
-            if (payload)
-            {
-                event.payload = payload;
-            }
+            return false;
+        }
 
+        if (typeof event === 'object')
+        {
             type = event.type;
         }
+        else
+        {
+            event = new Event(type = '' + event);
+        }
+
+        event.target = this;
 
         do
         {
@@ -1075,17 +1078,6 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
                 while (fn = events[index++])
                 {
-                    if (!event)
-                    {
-                        event = new Event(type);
-                        event.target = this;
-
-                        if (payload)
-                        {
-                            event.payload = payload;
-                        }
-                    }
-
                     if (fn.call(target, event) === false)
                     {
                         event.defaultPrevented = true;
@@ -1500,6 +1492,211 @@ yaxi.Stream = Object.extend(function (Class) {
         }
     }
 });
+
+
+
+
+yaxi.http = Object.extend.call({}, function (Class) {
+
+
+
+    // 默认超时时间
+    Class.timeout = 10000;
+
+
+
+    function ajax_mock(method, url, data) {
+
+        var stream = new yaxi.Stream();
+    
+        setTimeout(function () {
+    
+            try
+            {
+                var response = require('../../mock/' + url);
+    
+                if (typeof response === 'function')
+                {
+                    stream.resolve(response(method, data));
+                }
+                else
+                {
+                    stream.resolve(response);
+                }
+            }
+            catch (e)
+            {
+                stream.reject(e);
+            }
+    
+        }, 500);
+    }
+    
+
+    function encodeData(data) {
+
+        if (!data)
+        {
+            return '';
+        }
+
+        var list = [],
+            encode = encodeURIComponent,
+            value,
+            any;
+
+        for (var name in data)
+        {
+            value = data[name];
+            name = encode(name);
+
+            if (value === null)
+            {
+                list.push(name, '=null', '&');
+                continue;
+            }
+
+            switch (typeof value)
+            {
+                case 'undefined':
+                    list.push(name, '=&');
+                    break;
+
+                case 'boolean':
+                case 'number':
+                    list.push(name, '=', value, '&');
+                    break;
+
+                case 'string':
+                case 'function':
+                    list.push(name, '=', encode(value), '&');
+                    break;
+
+                default:
+                    if (value instanceof Array)
+                    {
+                        for (var i = 0, l = value.length; i < l; i++)
+                        {
+                            if ((any = value[i]) === void 0)
+                            {
+                                list.push(name, '=&');
+                            }
+                            else
+                            {
+                                list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                            }
+                        }
+                    }
+                    else
+                    {
+                        list.push(name, '=', encodeData(value), '&');
+                    }
+                    break;
+            }
+        }
+
+        list.pop();
+
+        return list.join('');
+    }
+
+
+    function send(method, url, data, options, flag) {
+
+        if (Class.mock)
+        {
+            return ajax_mock(method, url, data);
+        }
+
+        if (data && !(data instanceof FormData))
+        {
+            if (flag || /GET|HEAD|OPTIONS/i.test(method))
+            {
+                url = url + (url.indexOf('?') >= 0 ? '&' : '?') + encodeData(data);
+                data = null;
+            }
+            else if (options.contentType === 'application/x-www-form-urlencoded')
+            {
+                data = encodeData(data);
+            }
+            else if (typeof data !== 'string')
+            {
+                if (!options.contentType)
+                {
+                    options.contentType = 'application/json';
+                }
+                
+                data = JSON.stringify(data);
+            }
+        }
+
+        options.method = method;
+        options.url = url;
+        options.data = data;
+        options.timeout = options.timeout || Class.timeout;
+
+        yaxi.__ajax_send(options);
+    }
+
+
+
+    Class.send = function (method, url, data, options) {
+
+        return send(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
+    }
+
+
+
+    Class.options = function (url, data, options) {
+
+        return send('OPTIONS', url, data, options || {}, true);
+    }
+
+
+    Class.head = function (url, data, options) {
+
+        return send('HEAD', url, data, options || {}, true);
+    }
+
+
+    Class.get = function (url, data, options) {
+
+        return send('GET', url, data, options || {}, true);
+    }
+
+
+    Class.post = function (url, data, options) {
+
+        return send('POST', url, data, options || {});
+    }
+
+
+    Class.put = function (url, data, options) {
+
+        return send('PUT', url, data, options || {});
+    }
+    
+
+    Class.delete = function (url, data, options) {
+
+        return send('DELETE', url, data, options || {});
+    }
+
+
+    Class.trace = function (url, data, options) {
+
+        return send('TRACE', url, data, options || {});
+    }
+
+
+    Class.connect = function (url, data, options) {
+
+        return send('CONNECT', url, data, options || {});
+    }
+
+
+});
+
 
 
 
@@ -3482,14 +3679,14 @@ Object.extend.call(Array, function (Class, base) {
     }
 
 
-    this.trigger = function (type, payload) {
+    this.trigger = function (event) {
 
         var index = 0,
             item;
 
         while (item = this[index++])
         {
-            item.trigger(type, payload);
+            item.trigger(event);
         }
 
         return this;
@@ -3661,7 +3858,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             var storage = this.$storage;
             var changes;
 
@@ -3694,7 +3891,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -3703,12 +3900,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-
+if (!name) debugger
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-
+            if (!name) debugger
             return this.$storage[name];
         }
     }
@@ -3830,7 +4027,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
         else
         {
-            throw 'class not null or space';
+            throw 'class name not allow null or empty!';
         }
     }
 
@@ -3875,15 +4072,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-    // 处理微信自定义组件不支持active的问题
-    this.__fix_active = function (active) {
 
-        if (this.__active !== (active = !!active))
+    function change_active(active) {
+
+        if (this.__active !== active)
         {
             this.__active = active;
 
             this.__class_dirty = true;
             this.__dirty || patch(this);
+        }
+    }
+
+
+    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
+    this.__change_active = function (active) {
+
+        if (active = !!active)
+        {
+            change_active.call(this, active);
+        }
+        else
+        {
+            setTimeout(change_active.bind(this, active), 50);
         }
     }
 
@@ -4283,6 +4494,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     };
 
+
+    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
+    this.findEventTarget = function () {
+
+        var target = this;
+        var parent = target;
+
+        while (parent)
+        {
+            if (parent.disabled)
+            {
+                target = parent.parent;
+            }
+            else if (parent.__is_content) // 记录下content控件, 仅最外层的content control触发事件
+            {
+                target = parent;
+            }
+
+            parent = parent.parent;
+        }
+
+        return target;
+    }
 
 
 
@@ -4816,6 +5050,13 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     var check = yaxi.__check_parent;
     
 
+
+
+    // 标记当前控件为content控件(事件检测用)
+    this.__is_content = true;
+
+
+    
     
     // 内容
     this.$property('content', null, {
@@ -6220,7 +6461,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
     this.__on_tap = function (event) {
 
-        if (event.key === 'back')
+        if (event.flag === 'back')
         {
             yaxi.closePage();
         }
@@ -6301,44 +6542,49 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     var translates = create(null);
 
+
     var state = create(null);
 
-    var uuid, key;
+    var touchControl, uuid, flag;
 
 
 
     wx.translateEvent = function (event) {
 
-        var any;
+        var fn;
 
         uuid = this.__event_id;
-        key = this.__event_key;
+        flag = this.__event_flag || '';
 
-        if (any = translates[event.type])
+        if (fn = translates[event.type])
         {
-            any(event);
+            fn(event);
         }
         else
         {
             event = new Event(event.type);
-
-            event.target = any = controls[uuid];
-            event.key = key;
-
-            any.trigger(event);
+            event.flag = flag;
+            controls[uuid].trigger(event);
         }
 
     }.bind(wx);
     
+
+
+    function findControl() {
+
+        var control = controls[uuid];
+        return control ? control.findEventTarget() : null;
+    }
     
     
     function touchEvent(event, touch) {
     
         var e = new Event(event.type);
     
-        touch = touch || event.changedTouches[0];
+        touch || (touch = event.changedTouches[0]);
     
-        e.key = key;
+        e.flag = flag;
         e.state = state;
         e.touches = event.changedTouches;
         e.clientX = touch.clientX;
@@ -6370,27 +6616,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
     translates.touchstart = function (event) {
             
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
-        if (control)
+        if (control && touch)
         {
-            if (!touch)
-            {
-                console.log(event)
-            }
-    
             // 修复自定义组件不支持active的问题
-            control.__fix_active(true);
+            control.__change_active(true);
+
+            touchControl = control;
 
             state.time = new Date();
-            state.control = control;
             state.clientX = touch.clientX;
             state.clientY = touch.clientY;
 
             event = touchEvent(event, touch);
             event.target = control;
-    
+
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
             {
@@ -6404,11 +6646,11 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
             event = touchEvent(event);
             event.target = control;
-    
+
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
@@ -6422,15 +6664,15 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
+            touchControl = null;
+    
             event = touchEvent(event);
             event.target = control;
 
-            control.__fix_active(false);
+            control.__change_active(false);
 
-            state.control = null;
-    
             if (call(control, '__on_touchend', event) === false || 
                 control.trigger(event) === false)
             {
@@ -6444,15 +6686,15 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control;
     
-        if (control = state.control)
+        if (control = touchControl)
         {
+            touchControl = null;
+
             event = touchEvent(event);
             event.target = control;
 
-            control.__fix_active(false);
+            control.__change_active(false);
 
-            state.control = null;
-    
             if (call(control, '__on_touchcancel', event) === false || 
                 control.trigger(event) === false)
             {
@@ -6464,8 +6706,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     translates.tap = function (event) {
 
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
         event = touchEvent(event, touch);
         event.target = control;
@@ -6480,8 +6722,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     translates.longpress = function (event) {
 
-        var control = controls[uuid],
-            touch = event.changedTouches[0];
+        var control = findControl();
+        var touch = event.changedTouches[0];
 
         event = touchEvent(event, touch);
         event.target = control;
@@ -6497,12 +6739,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     translates.change = function (event) {
 
-        var control = controls[uuid];
+        var control = findControl();
         var current = event.detail.current;
 
         event = new Event(event.type);
         event.target = control;
-        event.key = key;
+        event.flag = flag;
         event.current = current;
 
         if (call(control, '__on_change', event) === false || 
@@ -6550,7 +6792,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         this.__dirty = false;
 
         view.t = this.typeName;
-        view.u = yaxi.__content_uuid || this.uuid;
+        view.u = this.uuid;
 
         if (this.__class_dirty)
         {
@@ -6724,27 +6966,9 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         var length = content.length;
         var list = new Array(length);
 
-        var take_over_event;
-
-        // 如果当前控件未处于容器控件中, 则接管所有子控件的事件(content控件的子控件不能触发事件)
-        if (take_over_event = !yaxi.__content_uuid)
+        for (var i = 0; i < length; i++)
         {
-            yaxi.__content_uuid = this.uuid;
-        }
-        
-        try
-        {
-            for (var i = 0; i < length; i++)
-            {
-                list[i] = content[i].render();
-            }
-        }
-        finally
-        {
-            if (take_over_event)
-            {
-                yaxi.__content_uuid = 0;
-            }
+            list[i] = content[i].render();
         }
         
         return list;

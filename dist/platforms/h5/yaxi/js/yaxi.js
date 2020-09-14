@@ -1046,26 +1046,29 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (type, payload) {
+    this.trigger = yaxi.trigger = function (event) {
         
         var target = this,
             events,
             index,
-            event,
+            type,
             fn;
 
-        if (type && typeof type !== 'string')
+        if (!event)
         {
-            event = type;
-            event.target = this;
-            
-            if (payload)
-            {
-                event.payload = payload;
-            }
+            return false;
+        }
 
+        if (typeof event === 'object')
+        {
             type = event.type;
         }
+        else
+        {
+            event = new Event(type = '' + event);
+        }
+
+        event.target = this;
 
         do
         {
@@ -1075,17 +1078,6 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
                 while (fn = events[index++])
                 {
-                    if (!event)
-                    {
-                        event = new Event(type);
-                        event.target = this;
-
-                        if (payload)
-                        {
-                            event.payload = payload;
-                        }
-                    }
-
                     if (fn.call(target, event) === false)
                     {
                         event.defaultPrevented = true;
@@ -1500,6 +1492,211 @@ yaxi.Stream = Object.extend(function (Class) {
         }
     }
 });
+
+
+
+
+yaxi.http = Object.extend.call({}, function (Class) {
+
+
+
+    // 默认超时时间
+    Class.timeout = 10000;
+
+
+
+    function ajax_mock(method, url, data) {
+
+        var stream = new yaxi.Stream();
+    
+        setTimeout(function () {
+    
+            try
+            {
+                var response = require('../../mock/' + url);
+    
+                if (typeof response === 'function')
+                {
+                    stream.resolve(response(method, data));
+                }
+                else
+                {
+                    stream.resolve(response);
+                }
+            }
+            catch (e)
+            {
+                stream.reject(e);
+            }
+    
+        }, 500);
+    }
+    
+
+    function encodeData(data) {
+
+        if (!data)
+        {
+            return '';
+        }
+
+        var list = [],
+            encode = encodeURIComponent,
+            value,
+            any;
+
+        for (var name in data)
+        {
+            value = data[name];
+            name = encode(name);
+
+            if (value === null)
+            {
+                list.push(name, '=null', '&');
+                continue;
+            }
+
+            switch (typeof value)
+            {
+                case 'undefined':
+                    list.push(name, '=&');
+                    break;
+
+                case 'boolean':
+                case 'number':
+                    list.push(name, '=', value, '&');
+                    break;
+
+                case 'string':
+                case 'function':
+                    list.push(name, '=', encode(value), '&');
+                    break;
+
+                default:
+                    if (value instanceof Array)
+                    {
+                        for (var i = 0, l = value.length; i < l; i++)
+                        {
+                            if ((any = value[i]) === void 0)
+                            {
+                                list.push(name, '=&');
+                            }
+                            else
+                            {
+                                list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                            }
+                        }
+                    }
+                    else
+                    {
+                        list.push(name, '=', encodeData(value), '&');
+                    }
+                    break;
+            }
+        }
+
+        list.pop();
+
+        return list.join('');
+    }
+
+
+    function send(method, url, data, options, flag) {
+
+        if (Class.mock)
+        {
+            return ajax_mock(method, url, data);
+        }
+
+        if (data && !(data instanceof FormData))
+        {
+            if (flag || /GET|HEAD|OPTIONS/i.test(method))
+            {
+                url = url + (url.indexOf('?') >= 0 ? '&' : '?') + encodeData(data);
+                data = null;
+            }
+            else if (options.contentType === 'application/x-www-form-urlencoded')
+            {
+                data = encodeData(data);
+            }
+            else if (typeof data !== 'string')
+            {
+                if (!options.contentType)
+                {
+                    options.contentType = 'application/json';
+                }
+                
+                data = JSON.stringify(data);
+            }
+        }
+
+        options.method = method;
+        options.url = url;
+        options.data = data;
+        options.timeout = options.timeout || Class.timeout;
+
+        yaxi.__ajax_send(options);
+    }
+
+
+
+    Class.send = function (method, url, data, options) {
+
+        return send(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
+    }
+
+
+
+    Class.options = function (url, data, options) {
+
+        return send('OPTIONS', url, data, options || {}, true);
+    }
+
+
+    Class.head = function (url, data, options) {
+
+        return send('HEAD', url, data, options || {}, true);
+    }
+
+
+    Class.get = function (url, data, options) {
+
+        return send('GET', url, data, options || {}, true);
+    }
+
+
+    Class.post = function (url, data, options) {
+
+        return send('POST', url, data, options || {});
+    }
+
+
+    Class.put = function (url, data, options) {
+
+        return send('PUT', url, data, options || {});
+    }
+    
+
+    Class.delete = function (url, data, options) {
+
+        return send('DELETE', url, data, options || {});
+    }
+
+
+    Class.trace = function (url, data, options) {
+
+        return send('TRACE', url, data, options || {});
+    }
+
+
+    Class.connect = function (url, data, options) {
+
+        return send('CONNECT', url, data, options || {});
+    }
+
+
+});
+
 
 
 
@@ -3482,14 +3679,14 @@ Object.extend.call(Array, function (Class, base) {
     }
 
 
-    this.trigger = function (type, payload) {
+    this.trigger = function (event) {
 
         var index = 0,
             item;
 
         while (item = this[index++])
         {
-            item.trigger(type, payload);
+            item.trigger(event);
         }
 
         return this;
@@ -3661,7 +3858,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             var storage = this.$storage;
             var changes;
 
@@ -3694,7 +3891,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-
+            if (!name) debugger
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -3703,12 +3900,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-
+if (!name) debugger
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-
+            if (!name) debugger
             return this.$storage[name];
         }
     }
@@ -3830,7 +4027,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
         else
         {
-            throw 'class not null or space';
+            throw 'class name not allow null or empty!';
         }
     }
 
@@ -3875,15 +4072,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-    // 处理微信自定义组件不支持active的问题
-    this.__fix_active = function (active) {
 
-        if (this.__active !== (active = !!active))
+    function change_active(active) {
+
+        if (this.__active !== active)
         {
             this.__active = active;
 
             this.__class_dirty = true;
             this.__dirty || patch(this);
+        }
+    }
+
+
+    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
+    this.__change_active = function (active) {
+
+        if (active = !!active)
+        {
+            change_active.call(this, active);
+        }
+        else
+        {
+            setTimeout(change_active.bind(this, active), 50);
         }
     }
 
@@ -4283,6 +4494,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     };
 
+
+    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
+    this.findEventTarget = function () {
+
+        var target = this;
+        var parent = target;
+
+        while (parent)
+        {
+            if (parent.disabled)
+            {
+                target = parent.parent;
+            }
+            else if (parent.__is_content) // 记录下content控件, 仅最外层的content control触发事件
+            {
+                target = parent;
+            }
+
+            parent = parent.parent;
+        }
+
+        return target;
+    }
 
 
 
@@ -4816,6 +5050,13 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     var check = yaxi.__check_parent;
     
 
+
+
+    // 标记当前控件为content控件(事件检测用)
+    this.__is_content = true;
+
+
+    
     
     // 内容
     this.$property('content', null, {
@@ -6220,7 +6461,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
     this.__on_tap = function (event) {
 
-        if (event.key === 'back')
+        if (event.flag === 'back')
         {
             yaxi.closePage();
         }
@@ -6324,18 +6565,9 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 	}
 	
 	
-	// 在微信中打开时(微信自动排版会打乱网页布局)
-	if (yaxi.h5.weixin)
-	{
-        // 1rem = 100px
-		document.documentElement.style.fontSize = (yaxi.rem = 100) + 'px';
-	}
-	else
-	{
-		// 处理rem自适应
-		document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
-        host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
-	}
+    // 处理rem自适应
+    document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
+    host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
 
 
 
@@ -6362,22 +6594,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     var bind = host.addEventListener.bind(host);
 
 
+    var touchControl, flag;
+
+
 
 
     function findControl(view) {
 
-        var control, uuid;
+        var control, uuid, f;
 
         while (view)
         {
+            f || (f = view.getAttribute('flag'));
+
             if ((uuid = view.$uuid) && (control = controls[uuid]))
             {
-                while (control.disabled)
-                {
-                    control = control.parent;
-                }
-
-                return control;
+                flag = f || '';
+                return control.findEventTarget();
             }
 
             view = view.parentNode;
@@ -6392,7 +6625,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         touch = touch || event.changedTouches[0];
 
-        e.key = event.target.getAttribute('key');
+        e.flag = flag;
         e.state = state;
         e.touches = event.changedTouches;
         e.clientX = touch.clientX;
@@ -6411,7 +6644,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            return control.trigger(event.type);
+            event = new Event(event.type);
+            event.flag = flag;
+
+            return control.trigger(event);
         }
     }
 
@@ -6448,13 +6684,14 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0],
-                e = touchEvent(event, touch);
+            var touch = event.changedTouches[0];
+            var e = touchEvent(event, touch);
 
+            control.__change_active(true);
+            touchControl = control;
             tap = true;
 
             state.time = new Date();
-            state.control = control;
             state.clientX = touch.clientX;
             state.clientY = touch.clientY;
 
@@ -6471,11 +6708,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
-            var e = touchEvent(event),
-                x,
-                y;
+            var e = touchEvent(event);
+            var x, y;
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -6512,11 +6748,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control, time;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
             var e = touchEvent(event);
 
-            state.control = null;
+            touchControl = null;
+            control.__change_active(false);
 
             if (call(control, '__on_touchend', e) === false || control.trigger(e) === false)
             {
@@ -6533,8 +6770,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                     return stop(event);
                 }
             }
-            // 500ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 500 || tapControl !== control))
+            // 350ms内不重复触发tap事件
+            else if (tap && (time - tapTime > 350 || tapControl !== control))
             {
                 tapControl = control;
                 tapTime = time;
@@ -6555,11 +6792,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         
         var control;
 
-        if (control = state.control)
+        if (control = touchControl)
         {
             var e = touchEvent(event);
 
-            state.control = null;
+            touchControl = null;
+            control.__change_active(false);
 
             if (call(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
             {
@@ -6583,6 +6821,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             }
 
             e = new Event('input');
+            e.flag = flag;
             e.value = event.target.value;
 
             return control.trigger(e);
@@ -6603,6 +6842,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             }
 
             e = new Event('change');
+            e.flag = flag;
             e.value = event.target.value;
 
             return control.trigger(e);
@@ -6625,19 +6865,14 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     bind('focus', function (event) {
      
-        var target = event.target,
-            control;
+        var control;
 
-        // 页面刚打开时禁止自动弹出键盘
-        if ((control = yaxi.Page.current) && (new Date() - control.openTime) < 200)
+        if (control = findControl(event.target))
         {
-            target.blur();
-            return;
-        }
+            event = new Event('focus');
+            event.flag = false;
 
-        if (control = findControl(target))
-        {
-            return control.trigger('focus');
+            return control.trigger(event);
         }
         
     }, true);
@@ -6655,7 +6890,10 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                 fn.call(control, event.target);
             }
 
-            return control.trigger('scroll');
+            event = new Event('scroll');
+            event.flag = false;
+
+            return control.trigger(event);
         }
 
     }, true);
@@ -6680,289 +6918,90 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
-// http
-yaxi.HTTP = yaxi.http = Object.extend.call({}, function (Class) {
+yaxi.__ajax_send = function (options) {
 
-
-
-    // 重定向状态码
-    Class.redirectStatus = 299;
-
-
-    // 默认超时时间
-    Class.timeout = 10000;
-
-
-
-
-    // 重定向
-    this.redirect = function () {
-        
-        location.href = 'index.html';
+    var stream = new yaxi.Stream();
+    var ajax = new XMLHttpRequest();
+    var timeout, any;
+    
+    // CORS
+    if (options.CORS)
+    {
+        // withCredentials是XMLHTTPRequest2中独有的
+        if ('withCredentials' in ajax)
+        {
+            ajax.withCredentials = true;
+        }
+        else if (any = window.XDomainRequest)
+        {
+            ajax = new any();
+        }
     }
 
+    ajax.onreadystatechange = function () {
 
-
-    this.send = function (options) {
-
-        var self = this,
-            stream = new yaxi.Stream(),
-            ajax = new XMLHttpRequest(),
-            any;
-        
-        // CORS
-        if (options.CORS)
+        if (this.readyState === 4)
         {
-            // withCredentials是XMLHTTPRequest2中独有的
-            if ('withCredentials' in ajax)
-            {
-                ajax.withCredentials = true;
-            }
-            else if (any = window.XDomainRequest)
-            {
-                ajax = new any();
-            }
-        }
+            this.onreadystatechange = null;
 
-        ajax.onreadystatechange = function () {
-
-            if (this.readyState === 4)
+            if (timeout)
             {
-                this.onreadystatechange = null;
+                clearTimeout(timeout);
 
-                if (self)
+                if (this.status >= 100 && this.status < 300)
                 {
-                    clearTimeout(this.__timeout);
-                    self.receive(this, stream, options);
+                    stream.resolve(this.responseText || this.responseXML);
+                }
+                else
+                {
+                    stream.reject({
+                        url: options.url,
+                        status: this.status || 600,
+                        message: this.statusText || this.responseText,
+                        options: options
+                    });
                 }
             }
         }
-
-        ajax.open(options.method, options.url, options.async !== false);
-
-        if (options.contentType)
-        {
-            ajax.setRequestHeader('Content-Type', options.contentType);
-
-            // if (any = options.data)
-            // {
-            //     ajax.setRequestHeader('Content-Length', any.length);
-            // }
-        }
-
-        if (any = options.header)
-        {
-            for (var name in any)
-            {
-                ajax.setRequestHeader(name, any[name]);
-            }
-        }
-
-        ajax.__timeout = setTimeout(function () {
-
-            self = null;
-            ajax.abort();
-
-            stream.reject({
-                url: options.url,
-                status: 601,
-                message: yaxi.i18n.ajax.timeout
-            });
-
-        }, options.timeout || Class.timeout);
-
-        ajax.send(options.data);
-
-        return stream;
     }
 
+    ajax.open(options.method, options.url, options.async !== false);
 
-    this.receive = function (ajax, stream, options) {
+    if (options.contentType)
+    {
+        ajax.setRequestHeader('Content-Type', options.contentType);
 
-        if (ajax.status >= 100 && ajax.status < 300)
+        // if (any = options.data)
+        // {
+        //     ajax.setRequestHeader('Content-Length', any.length);
+        // }
+    }
+
+    if (any = options.header)
+    {
+        for (var name in any)
         {
-            this.response(ajax, stream, options);
-        }
-        else
-        {
-            stream.reject({
-                url: options.url,
-                status: ajax.status || 600,
-                message: ajax.statusText || ajax.responseText || yaxi.i18n.ajax.network,
-                options: options
-            });
+            ajax.setRequestHeader(name, any[name]);
         }
     }
 
+    timeout = setTimeout(function () {
 
-    this.response = function (ajax, stream, options) {
+        timeout = 0;
+        ajax.abort();
 
-        if (ajax.status === Class.redirectStatus)
-        {
-            this.redirect();
-        }
-        else
-        {
-            stream.resolve(ajax.responseText || ajax.responseXML);
-        }
-    }
+        stream.reject({
+            url: options.url,
+            status: 601,
+            message: 'ajax request timeout'
+        });
 
+    }, options.timeout);
 
+    ajax.send(options.data);
 
-    
-    function encodeData(data) {
-
-        if (!data)
-        {
-            return '';
-        }
-
-        var list = [],
-            encode = encodeURIComponent,
-            value,
-            any;
-
-        for (var name in data)
-        {
-            value = data[name];
-            name = encode(name);
-
-            if (value === null)
-            {
-                list.push(name, '=null', '&');
-                continue;
-            }
-
-            switch (typeof value)
-            {
-                case 'undefined':
-                    list.push(name, '=&');
-                    break;
-
-                case 'boolean':
-                case 'number':
-                    list.push(name, '=', value, '&');
-                    break;
-
-                case 'string':
-                case 'function':
-                    list.push(name, '=', encode(value), '&');
-                    break;
-
-                default:
-                    if (value instanceof Array)
-                    {
-                        for (var i = 0, l = value.length; i < l; i++)
-                        {
-                            if ((any = value[i]) === void 0)
-                            {
-                                list.push(name, '=&');
-                            }
-                            else
-                            {
-                                list.push(name, '=', encode(any), '&'); //数组不支持嵌套
-                            }
-                        }
-                    }
-                    else
-                    {
-                        list.push(name, '=', encodeData(value), '&');
-                    }
-                    break;
-            }
-        }
-
-        list.pop();
-
-        return list.join('');
-    }
-
-
-    function parseOptions(method, url, data, options, flag) {
-
-        if (data && !(data instanceof FormData))
-        {
-            if (flag || /GET|HEAD|OPTIONS/i.test(method))
-            {
-                url = url + (url.indexOf('?') >= 0 ? '&' : '?') + encodeData(data);
-                data = null;
-            }
-            else if (options.contentType === 'application/x-www-form-urlencoded')
-            {
-                data = encodeData(data);
-            }
-            else if (typeof data !== 'string')
-            {
-                if (!options.contentType)
-                {
-                    options.contentType = 'application/json';
-                }
-                
-                data = JSON.stringify(data);
-            }
-        }
-
-        options.method = method;
-        options.url = url;
-        options.data = data;
-
-        return options;
-    }
-
-
-
-    ;(this.__class_init = function (Class) {
-
-
-        var parse = parseOptions;
-
-
-        Class.send = function (method, url, data, options) {
-
-            options = parse(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
-            return new Class().send(options);
-        }
-    
-    
-        Class.head = function (url, data, options) {
-    
-            options = parse('HEAD', url, data, options || {}, true);
-            return new Class().send(options);
-        }
-    
-    
-        Class.get = function (url, data, options) {
-    
-            options = parse('GET', url, data, options || {}, true);
-            return new Class().send(options);
-        }
-    
-    
-        Class.post = function (url, data, options) {
-    
-            options = parse('POST', url, data, options || {});
-            return new Class().send(options);
-        }
-    
-    
-        Class.put = function (url, data, options) {
-    
-            options = parse('PUT', url, data, options || {});
-            return new Class().send(options);
-        }
-        
-    
-        Class.del = function (url, data, options) {
-    
-            options = parse('DELETE', url, data, options || {});
-            return new Class().send(options);
-        }
-        
-    })(Class);
-
-
-
-}, function HTTP() {});
+    return stream;
+}
 
 
 
@@ -7068,7 +7107,7 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view.className = this.$class + class1 + class2;
+        view.className = this.$class + class1 + class2 + (this.__active ? ' active' : '');
     }
 
 
@@ -8397,7 +8436,7 @@ yaxi.Header.mixin(function (mixin, base) {
 
 
     yaxi.template(this, '<div class="$class">'
-            + '<span class="yx-header-back iconfont icon-common-back" key="back" style="display:none;"></span>'
+            + '<span class="yx-header-back iconfont icon-common-back" flag="back" style="display:none;"></span>'
             + '<span class="yx-header-hide"></span>'
             + '<span class="yx-header-host"></span>'
         + '</div>');

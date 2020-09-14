@@ -207,7 +207,7 @@
                 wx:for="{{ c }}"
                 wx:key="u"
                 data-id="{{ u }}" 
-                data-key="{{ index }}" 
+                data-flag="{{ index }}" 
                 class="yx-swiper-dot{{ (current || 0) === index ? ' yx-swiper-active-dot' : ''}}"
                 style="{{ ((current || 0) === index ? activeDotStyle : dotStyle) || '' }}" />
         </view>
@@ -248,7 +248,7 @@
         class="yx-control yx-header{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent">
-        <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-key="back" />
+        <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-flag="back" />
         <view class="{{ icon ? 'yx-header-icon ' + icon : 'yx-header-hide' }}" data-id="{{ u }}" />
         <box class="yx-header-host" data-id="{{ u }}" children="{{ content }}" />
     </view>
