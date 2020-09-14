@@ -1,0 +1,86 @@
+{
+  "id": "2065147",
+  "name": "edu",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "教育软件项目",
+  "glyphs": [
+    {
+      "icon_id": "454695",
+      "name": "直播",
+      "font_class": "-home-live",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "2407265",
+      "name": "更多",
+      "font_class": "-common-more",
+      "unicode": "e656",
+      "unicode_decimal": 58966
+    },
+    {
+      "icon_id": "2675007",
+      "name": "我的",
+      "font_class": "-home-my",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "15726878",
+      "name": "热门",
+      "font_class": "-home-hot",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "816606",
+      "name": "返回",
+      "font_class": "-common-back",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "5158031",
+      "name": "消息",
+      "font_class": "-tabbar-message",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "683383",
+      "name": "活动推广",
+      "font_class": "-tabbar-spread",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "1314475",
+      "name": "我的",
+      "font_class": "-tabbar-my",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "5122094",
+      "name": "课程",
+      "font_class": "-tabbar-lesson",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "6010906",
+      "name": "搜索",
+      "font_class": "-common-search",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "14435324",
+      "name": "首页",
+      "font_class": "-tabbar-home",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    }
+  ]
+}

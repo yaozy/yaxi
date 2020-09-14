@@ -4,9 +4,10 @@
 
     </box>
     <tab host="<* >@host" selected-index="0">
-        <imagebutton src="/images/home/home.png" content="首页" d-module="require('home/main.js')" d-selected-status="{ theme: 'primary', src: '/images/home/home-selected.png' }" />
-        <imagebutton src="/images/home/category.png" content="分类" d-module="require('category/main.js')" d-selected-status="{ theme: 'primary', src: '/images/home/category-selected.png' }" />
-        <imagebutton src="/images/home/bought.png" content="已购" d-module="require('bought/main.js')" d-selected-status="{ theme: 'primary', src: '/images/home/bought-selected.png' }" />
-        <imagebutton src="/images/home/my.png" content="我的" d-module="require('my/main.js')" d-selected-status="{ theme: 'primary', src: '/images/home/my-selected.png' }" />
+        <iconbutton icon="tabbar-home" content="首页" d-module="require('home/main.js')" d-selected-status="{ theme: 'primary' }" />
+        <iconbutton icon="tabbar-lesson" content="课程" d-module="require('lesson/main.js')" d-selected-status="{ theme: 'primary' }" />
+        <iconbutton icon="tabbar-spread" content="推广" d-module="require('spread/main.js')" d-selected-status="{ theme: 'primary' }" />
+        <iconbutton icon="tabbar-message" content="消息" d-module="require('message/main.js')" d-selected-status="{ theme: 'primary' }" />
+        <iconbutton icon="tabbar-my" content="我的" d-module="require('my/main.js')" d-selected-status="{ theme: 'primary' }" />
     </tab>
 </page>

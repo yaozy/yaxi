@@ -3,7 +3,7 @@ yaxi.Header.mixin(function (mixin, base) {
 
 
     yaxi.template(this, '<div class="$class">'
-            + '<span class="yx-header-back iconfont icon-yaxi-back" key="back" style="display:none;"></span>'
+            + '<span class="yx-header-back iconfont icon-common-back" key="back" style="display:none;"></span>'
             + '<span class="yx-header-hide"></span>'
             + '<span class="yx-header-host"></span>'
         + '</div>');

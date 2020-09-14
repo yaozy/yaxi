@@ -1,8 +1,8 @@
 /*
- * ContentControl主要作为自定义内容展示用
+ * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件
  * 不支持对子控件进行操作
 */
-yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
+yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
@@ -17,6 +17,13 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
     var check = yaxi.__check_parent;
     
 
+
+
+    // 标记当前控件为content控件(事件检测用)
+    this.__is_content = true;
+
+
+    
     
     // 内容
     this.$property('content', null, {
@@ -78,7 +85,6 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
     }
 
 
-
     // 加载内容
     this.__load_content = function (values) {
 
@@ -94,13 +100,22 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
         if (values instanceof A)
         {
-            if (values[0] instanceof A)
+            try
             {
-                content = createControls(this, values);
+                yaxi.__content_count++;
+
+                if (values[0] instanceof A)
+                {
+                    content = createControls(this, values);
+                }
+                else
+                {
+                    content = [createControl(this, values)];
+                }
             }
-            else
+            finally
             {
-                content = [createControl(this, values)];
+                yaxi.__content_count--;
             }
         }
         else

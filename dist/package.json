@@ -2,7 +2,7 @@
   "name": "yaxi",
   "version": "1.0.15",
   "description": "",
-  "main": "build/server.js",
+  "main": "build/watch.js",
   "scripts": {
     "server:h5": "node build/server.js",
     "watch": "node build/watch.js"

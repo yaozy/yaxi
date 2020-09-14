@@ -20,14 +20,15 @@ Component({
      * 组件的属性列表
      */
     properties: {
-        children: Array
+        children: Array,
+        active: String
     },
 
     /**
      * 组件的初始数据
      */
     data: {
-
+        active: ''
     },
 
     /**

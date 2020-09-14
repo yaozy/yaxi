@@ -3515,7 +3515,7 @@ Object.extend.call(Array, function (Class, base) {
 
 
 
-yaxi.Control = Object.extend.call({}, function (Class, base) {
+yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
@@ -3873,39 +3873,48 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             this.__dirty || patch(this);
         }
     }
+
+
+    // 处理微信自定义组件不支持active的问题
+    this.__fix_active = function (active) {
+
+        if (this.__active !== (active = !!active))
+        {
+            this.__active = active;
+
+            this.__class_dirty = true;
+            this.__dirty || patch(this);
+        }
+    }
+
     
-    
+
+
+    var color = yaxi.color;
+
+    function translateColor(_, key) {
+
+        return color[key];
+    }
+
+
 
     // 样式
     this.$property('style', '', {
 
-        change: false,
+        convert: function (value) {
 
-        get: function () {
-
-            var style = this.__style;
-            return style ? style.join('') : '';
-        },
-
-        set: function (value) {
-
-            if (value = '' + value)
+            if (value)
             {
-                value = value.match(/[:;]|[^:;\s]+/g);
+                value = ('' + value).replace(/\s+:/g, ':').replace(/@([\w-]+)/g, translateColor);
 
                 if (value[value.length - 1] !== ';')
                 {
-                    value.push(';');
+                    value += ';';
                 }
             }
-            else
-            {
-                value = null;
-            }
-            
-            this.__style = value;
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+
+            return value || '';
         }
     });
 
@@ -3917,24 +3926,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         if (name)
         {
-            if (style = this.__style)
+            name += ':';
+
+            if (style = this.style)
             {
                 if ((index = style.indexOf(name)) >= 0)
                 {
-                    style.splice(index, style.indexOf(';', index) - index + 1);
+                    style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
                 }
-                else
+ 
+                if (value)
                 {
-                    style.push(name, ':', value, ';');
+                    style += name + value + ';';
                 }
+
+                this.style = style;
             }
             else if (value)
             {
-                this.__style = [name, ':', value, ';'];
+                this.style = name + value + ';';
             }
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
         }
     }
 
@@ -3943,12 +3954,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         var style, index;
 
-        if (name && (style = this.__style) && (index = style.indexOf(name)) >= 0)
+        if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
         {
-            style.splice(index, style.indexOf(';', index) - index + 1);
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+            this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
         }
     }
 
@@ -4254,10 +4262,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
 
+    // content控件加载计数器, 如果大于0表示正在加载content控件内部子控件
+    yaxi.__content_count = 0;
+
 
     this.$converts.events = {
         
         fn: function (events) {
+
+            // 容器控件内部不允许绑定事件
+            if (yaxi.__content_count > 0)
+            {
+                throw 'does not support to bind event inside the content control!'
+            }
 
             for (var name in events)
             {
@@ -4781,10 +4798,10 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 /*
- * ContentControl主要作为自定义内容展示用
+ * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件
  * 不支持对子控件进行操作
 */
-yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
+yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
@@ -4860,7 +4877,6 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
     }
 
 
-
     // 加载内容
     this.__load_content = function (values) {
 
@@ -4876,13 +4892,22 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
         if (values instanceof A)
         {
-            if (values[0] instanceof A)
+            try
             {
-                content = createControls(this, values);
+                yaxi.__content_count++;
+
+                if (values[0] instanceof A)
+                {
+                    content = createControls(this, values);
+                }
+                else
+                {
+                    content = [createControl(this, values)];
+                }
             }
-            else
+            finally
             {
-                content = [createControl(this, values)];
+                yaxi.__content_count--;
             }
         }
         else
@@ -5389,6 +5414,14 @@ yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 
 
 yaxi.Icon = yaxi.Control.extend(function (Class, base) {
+
+
+    
+    // 图标名
+    this.$property('icon', '', {
+
+        class: 'icon-'
+    });
 
 
 
@@ -6943,7 +6976,6 @@ yaxi.Control.mixin(function (mixin) {
 
     var div = document.createElement('div');
 
-    var color = yaxi.color;
 
     
 
@@ -7005,12 +7037,6 @@ yaxi.Control.mixin(function (mixin) {
             this.__render_class(view);
         }
 
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view);
-        }
-
         if (changes = this.__changes)
         {
             var storage = this.$storage;
@@ -7046,22 +7072,11 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
-    this.__render_style = function (view) {
 
-        var style = this.__style;
+    mixin.style = function (view, value) {
 
-        if (style && (style = style.join('')))
-        {
-            // 替换颜色值
-            style = style.replace(/@([\w-]+)/g, function (_, key) {
-
-                return color[key];
-            });
-        }
-
-        view.style.cssText = style || '';
+        view.style.cssText = value;
     }
-
 
 
     mixin.id = function (view, value) {
@@ -7296,6 +7311,22 @@ yaxi.Button.mixin(function (mixin, base) {
 
 
 
+yaxi.Icon.mixin(function (mixin, base) {
+
+
+
+    this.$class += ' iconfont';
+
+
+    yaxi.template(this, '<div class="$class"></div>');
+
+
+
+});
+
+
+
+
 yaxi.IconButton.mixin(function (mixin, base) {
 
 
@@ -7309,7 +7340,7 @@ yaxi.IconButton.mixin(function (mixin, base) {
     
     mixin.icon = function (view, value) {
 
-        view.firstChild.className = 'yx-iconbutton-icon iconfont ' + value;
+        view.firstChild.className = 'yx-iconbutton-icon iconfont' + (value ? ' icon-' + value : '');
     }
 
 
@@ -7324,6 +7355,18 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
         base.__render_content.call(this, view.lastChild, content);
     }
+
+
+});
+
+
+
+
+yaxi.Image.mixin(function (mixin, base) {
+
+
+
+    yaxi.template(this, '<image class="$class"></image>');
 
 
 });
@@ -7562,6 +7605,18 @@ yaxi.SideBar.mixin(function (mixin, base) {
     
     yaxi.template(this, '<div class="$class"></div>');
 
+
+
+});
+
+
+
+
+yaxi.Swiper.mixin(function (mixin, base) {
+
+
+
+    yaxi.template(this, '<div class="$class"></div>');
 
 
 });
@@ -8342,7 +8397,7 @@ yaxi.Header.mixin(function (mixin, base) {
 
 
     yaxi.template(this, '<div class="$class">'
-            + '<span class="yx-header-back iconfont icon-yaxi-back" key="back" style="display:none;"></span>'
+            + '<span class="yx-header-back iconfont icon-common-back" key="back" style="display:none;"></span>'
             + '<span class="yx-header-hide"></span>'
             + '<span class="yx-header-host"></span>'
         + '</div>');

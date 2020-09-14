@@ -84,23 +84,29 @@
         var control = controls[uuid],
             touch = event.changedTouches[0];
 
-        state.time = new Date();
-        state.control = control;
-        state.clientX = touch.clientX;
-        state.clientY = touch.clientY;
-
-        if (!touch)
+        if (control)
         {
-            console.log(event)
-        }
+            if (!touch)
+            {
+                console.log(event)
+            }
+    
+            // 修复自定义组件不支持active的问题
+            control.__fix_active(true);
 
-        event = touchEvent(event, touch);
-        event.target = control;
+            state.time = new Date();
+            state.control = control;
+            state.clientX = touch.clientX;
+            state.clientY = touch.clientY;
 
-        if (call(control, '__on_touchstart', event) === false || 
-            control.trigger(event) === false)
-        {
-            return false;
+            event = touchEvent(event, touch);
+            event.target = control;
+    
+            if (call(control, '__on_touchstart', event) === false || 
+                control.trigger(event) === false)
+            {
+                return false;
+            }
         }
     }
     
@@ -132,6 +138,8 @@
             event = touchEvent(event);
             event.target = control;
 
+            control.__fix_active(false);
+
             state.control = null;
     
             if (call(control, '__on_touchend', event) === false || 
@@ -151,6 +159,8 @@
         {
             event = touchEvent(event);
             event.target = control;
+
+            control.__fix_active(false);
 
             state.control = null;
     

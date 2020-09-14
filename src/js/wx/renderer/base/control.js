@@ -1,4 +1,4 @@
-yaxi.Control.mixin(function (mixin) {
+yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
@@ -9,7 +9,9 @@ yaxi.Control.mixin(function (mixin) {
     var owner = Object.getOwnPropertyNames; 
 
 
-    var color = yaxi.color;
+
+    // 正在加载的容器控件的uuid, 容器控件的所有事件都由容器触发, 所在需要把子控件的uuid设置成容器的uuid
+    yaxi.__content_uuid = 0;
 
 
 
@@ -32,12 +34,6 @@ yaxi.Control.mixin(function (mixin) {
         {
             this.__class_dirty = false;
             this.__render_class(view, '');
-        }
-
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view, '');
         }
 
         if (value = this.__changes)
@@ -87,11 +83,6 @@ yaxi.Control.mixin(function (mixin) {
             this.__render_class(view, prefix);
         }
 
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view, prefix);
-        }
     
         if (changes = this.__changes)
         {
@@ -130,28 +121,16 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view[prefix + 'class'] = this.$class + class1 + class2;
+        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
     }
 
 
 
-    this.__render_style = function (view, prefix) {
 
-        var style = this.__style;
+    mixin.style = function (view, prefix, value) {
 
-        if (style && (style = style.join('')))
-        {
-            // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-            style = style.replace(/rem/g, 'rpx');
-
-            // 替换颜色值
-            style = style.replace(/@([\w-]+)/g, function (_, key) {
-
-                return color[key];
-            });;
-        }
-
-        view[prefix + 'style'] = style || '';
+        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
     }
 
 

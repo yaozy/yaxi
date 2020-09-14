@@ -70,9 +70,13 @@
 .yx-icon {
   display: inline-block;
   overflow: hidden;
-  min-width: 40rpx;
+  width: 60rpx;
   height: 60rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
   text-align: center;
+  line-height: 1;
+  font-size: 60rpx;
 }
 .yx-imagebutton {
   display: inline-flex;

@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function () {
 
 
 return (
@@ -26,39 +26,48 @@ return (
 				},
 				[
 					[
-						"imagebutton",
+						"iconbutton",
 						{
-							"src": "/images/home/home.png",
+							"icon": "tabbar-home",
 							"content": "首页",
 							"module": require('home/main.js'),
-							"selected-status": { theme: 'primary', src: '/images/home/home-selected.png' }
+							"selected-status": { theme: 'primary' }
 						}
 					],
 					[
-						"imagebutton",
+						"iconbutton",
 						{
-							"src": "/images/home/category.png",
-							"content": "分类",
-							"module": require('category/main.js'),
-							"selected-status": { theme: 'primary', src: '/images/home/category-selected.png' }
+							"icon": "tabbar-lesson",
+							"content": "课程",
+							"module": require('lesson/main.js'),
+							"selected-status": { theme: 'primary' }
 						}
 					],
 					[
-						"imagebutton",
+						"iconbutton",
 						{
-							"src": "/images/home/bought.png",
-							"content": "已购",
-							"module": require('bought/main.js'),
-							"selected-status": { theme: 'primary', src: '/images/home/bought-selected.png' }
+							"icon": "tabbar-spread",
+							"content": "推广",
+							"module": require('spread/main.js'),
+							"selected-status": { theme: 'primary' }
 						}
 					],
 					[
-						"imagebutton",
+						"iconbutton",
 						{
-							"src": "/images/home/my.png",
+							"icon": "tabbar-message",
+							"content": "消息",
+							"module": require('message/main.js'),
+							"selected-status": { theme: 'primary' }
+						}
+					],
+					[
+						"iconbutton",
+						{
+							"icon": "tabbar-my",
 							"content": "我的",
 							"module": require('my/main.js'),
-							"selected-status": { theme: 'primary', src: '/images/home/my-selected.png' }
+							"selected-status": { theme: 'primary' }
 						}
 					]
 				]

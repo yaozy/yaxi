@@ -17,4 +17,10 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     }
 
 
+    this.handleSearch = function () {
+
+        require('./search').open();
+    }
+
+
 });

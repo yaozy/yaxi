@@ -30,7 +30,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         if (this.__content_dirty)
         {
-            view[prefix + 'content'] = renderContent(this, this.__content || '');
+            view[prefix + 'content'] = this.__render_content(this.__content || '');
         }
         else
         {
@@ -59,7 +59,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         {
             list[i] = content[i].render();
         }
-
+        
         return list;
     }
 

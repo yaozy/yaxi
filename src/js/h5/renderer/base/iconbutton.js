@@ -11,7 +11,7 @@ yaxi.IconButton.mixin(function (mixin, base) {
     
     mixin.icon = function (view, value) {
 
-        view.firstChild.className = 'yx-iconbutton-icon iconfont ' + value;
+        view.firstChild.className = 'yx-iconbutton-icon iconfont' + (value ? ' icon-' + value : '');
     }
 
 

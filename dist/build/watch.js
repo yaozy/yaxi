@@ -7,7 +7,7 @@ new Watcher('./icon', './platforms/h5/icon')
     .watch();
 
 new Watcher('./icon', './platforms/wx/icon')
-    .plugin(/\.css$/i, file => file.replace(/\.css$/i, '.wxss'))
+    .plugin(/\.css$/i, null, file => file.replace(/\.css$/gi, '.wxss'))
     .sync()
     .watch();
 

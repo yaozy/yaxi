@@ -6,7 +6,6 @@ yaxi.Control.mixin(function (mixin) {
 
     var div = document.createElement('div');
 
-    var color = yaxi.color;
 
     
 
@@ -68,12 +67,6 @@ yaxi.Control.mixin(function (mixin) {
             this.__render_class(view);
         }
 
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view);
-        }
-
         if (changes = this.__changes)
         {
             var storage = this.$storage;
@@ -109,22 +102,11 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
-    this.__render_style = function (view) {
 
-        var style = this.__style;
+    mixin.style = function (view, value) {
 
-        if (style && (style = style.join('')))
-        {
-            // 替换颜色值
-            style = style.replace(/@([\w-]+)/g, function (_, key) {
-
-                return color[key];
-            });
-        }
-
-        view.style.cssText = style || '';
+        view.style.cssText = value;
     }
-
 
 
     mixin.id = function (view, value) {

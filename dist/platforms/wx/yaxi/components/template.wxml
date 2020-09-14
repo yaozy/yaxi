@@ -1,17 +1,9 @@
-<template name="content">
-
-    <template wx:if="{{ content.length === 1 }}" is="{{ content[0].t }}" data="{{ ...content[0] }}" />
-    <box wx:else children="{{ content }}" />
-
-</template>
-
-
 <template name="Text">
 
     <text
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-text{{ class }}" 
+        class="yx-control yx-text{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         decode
         bindtouchstart="handleEvent">{{ text }}</text>
@@ -24,24 +16,22 @@
     <input
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-textbox{{ class }}"
+        class="yx-control yx-textbox{{ active }}{{ class }}"
         style="{{ style || '' }}"
-        bindtouchstart="handleEvent"></input>
+        bindtouchstart="handleEvent" />
 
 </template>
 
 
 <template name="Button">
 
-    <view
+    <box
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-button{{ class }}" 
+        class="yx-control yx-button{{ active }}{{ class }}" 
         style="{{ style || '' }}"
-        hover-class="active"
-        bindtouchstart="handleEvent">
-        <template wx:if="{{ content }}" is="content" data="{{ content: content }}"></template>
-    </view>
+        bindtouchstart="handleEvent"
+        children="{{ content }}" />
 
 </template>
 
@@ -51,10 +41,9 @@
     <view
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-icon iconfont {{ icon }} {{ class }}"
+        class="yx-control yx-icon iconfont{{ active }}{{ class }}"
         style="{{ style || '' }}"
-        hover-class="active"
-        bindtouchstart="handleEvent"></view>
+        bindtouchstart="handleEvent" />
 
 </template>
 
@@ -64,7 +53,7 @@
     <image
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-image{{ class }}"
+        class="yx-control yx-image{{ active }}{{ class }}"
         style="{{ style || '' }}"
         src="{{ src }}"
         mode="{{ mode }}"
@@ -72,40 +61,35 @@
         show-menu-by-longpress
         bindtouchstart="handleEvent"
         bindload="handleEvent"
-        binderror="handleEvent"
-        ></image>
+        binderror="handleEvent" />
 
 </template>
 
 
 <template name="IconButton">
 
-<view data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-iconbutton{{ class }}" 
-    style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
-    bindtouchstart="handleEvent">
-    <view class="{{ icon ? 'yx-iconbutton-icon iconfont ' + icon : '' }}" data-id="{{ u }}" />
-    <view class="yx-iconbutton-content" data-id="{{ u }}">
-        <template wx:if="{{ content }}" is="content" data="{{ content: content }}"></template>
+    <view data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-iconbutton{{ active }}{{ class }}" 
+        style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        bindtouchstart="handleEvent">
+        <view class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" data-id="{{ u }}" />
+        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ content }}" />
     </view>
-</view>
 
 </template>
 
 
 <template name="ImageButton">
 
-<view data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-imagebutton{{ class }}" 
-    style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
-    bindtouchstart="handleEvent">
-    <image class="yx-imagebutton-image" data-id="{{ u }}" src="{{ src }}" />
-    <view class="yx-imagebutton-content" data-id="{{ u }}">
-        <template wx:if="{{ content }}" is="content" data="{{ content: content }}"></template>
+    <view data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-imagebutton{{ active }}{{ class }}" 
+        style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        bindtouchstart="handleEvent">
+        <image class="yx-imagebutton-image" data-id="{{ u }}" src="{{ src }}" />
+        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ content }}" />
     </view>
-</view>
 
 </template>
 
@@ -115,10 +99,10 @@
     <rich-text
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-richtext{{ class }}" 
+        class="yx-control yx-richtext{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         nodes="{{ data }}" 
-        bindtouchstart="handleEvent"/>
+        bindtouchstart="handleEvent" />
 
 </template>
 
@@ -128,39 +112,36 @@
     <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box{{ class }}" 
+        class="yx-control yx-box{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent"
-        children="{{ c }}">
-    </box>
+        children="{{ c }}" />
 
 </template>
 
 
 <template name="Band">
 
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-band{{ class }}" 
-    style="{{ style || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}">
-</box>
+    <box 
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-box yx-band{{ active }}{{ class }}" 
+        style="{{ style || '' }}"
+        bindtouchstart="handleEvent"
+        children="{{ c }}" />
 
 </template>
 
 
 <template name="SideBar">
 
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-sidebar{{ class }}" 
-    style="{{ style || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}">
-</box>
+    <box 
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-box yx-sidebar{{ active }}{{ class }}" 
+        style="{{ style || '' }}"
+        bindtouchstart="handleEvent"
+        children="{{ c }}" />
 
 </template>
 
@@ -170,11 +151,10 @@
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-box{{ class }}" 
+    class="yx-control yx-box{{ active }}{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
-    children="{{ c }}">
-</box>
+    children="{{ c }}" />
 
 </template>
 
@@ -184,7 +164,7 @@
     <scroll-view 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-scrollbox{{ class }}" 
+        class="yx-control yx-box yx-scrollbox{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent">
         <box wx:if="{{ c }}" children="{{ c }}" />
@@ -197,7 +177,7 @@
 
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-swiper{{ class }}" 
+        class="yx-control yx-box yx-swiper{{ active }}{{ class }}" 
         style="{{ style || '' }}">
         <swiper 
             data-id="{{ u }}"
@@ -219,7 +199,7 @@
                 class="yx-swiper-item">
                 <template
                     is="{{ item.t }}"
-                    data="{{ ...item }}"></template>
+                    data="{{ ...item }}" />
             </swiper-item>
         </swiper>
         <view class="yx-swiper-dots" wx:if="{{ dots !== false }}">
@@ -229,7 +209,7 @@
                 data-id="{{ u }}" 
                 data-key="{{ index }}" 
                 class="yx-swiper-dot{{ (current || 0) === index ? ' yx-swiper-active-dot' : ''}}"
-                style="{{ ((current || 0) === index ? activeDotStyle : dotStyle) || '' }}"></view>
+                style="{{ ((current || 0) === index ? activeDotStyle : dotStyle) || '' }}" />
         </view>
     </view>
 
@@ -238,28 +218,26 @@
 
 <template name="Tab">
 
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-tab yx-tab-bottom{{ class }}" 
-    style="{{ style || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}">
-</box>
+    <box 
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-box yx-tab yx-tab-bottom{{ active }}{{ class }}" 
+        style="{{ style || '' }}"
+        bindtouchstart="handleEvent"
+        children="{{ c }}" />
 
 </template>
 
 
 <template name="Page">
 
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-page{{ class }}" 
-    style="{{ style || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}">
-</box>
+    <box 
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-box yx-page{{ active }}{{ class }}" 
+        style="{{ style || '' }}"
+        bindtouchstart="handleEvent"
+        children="{{ c }}" />
 
 </template>
 
@@ -267,14 +245,12 @@
 <template name="Header">
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-header{{ class }}" 
+        class="yx-control yx-header{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent">
-        <view class="yx-header-back iconfont icon-yaxi-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-key="back" />
+        <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-key="back" />
         <view class="{{ icon ? 'yx-header-icon ' + icon : 'yx-header-hide' }}" data-id="{{ u }}" />
-        <view class="yx-header-host" data-id="{{ u }}">
-            <template wx:if="{{ content }}" is="content" data="{{ content: content }}"></template>
-        </view>
+        <box class="yx-header-host" data-id="{{ u }}" children="{{ content }}" />
     </view>
 </template>
 

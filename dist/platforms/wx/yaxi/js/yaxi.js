@@ -3515,7 +3515,7 @@ Object.extend.call(Array, function (Class, base) {
 
 
 
-yaxi.Control = Object.extend.call({}, function (Class, base) {
+yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
@@ -3873,39 +3873,48 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             this.__dirty || patch(this);
         }
     }
+
+
+    // 处理微信自定义组件不支持active的问题
+    this.__fix_active = function (active) {
+
+        if (this.__active !== (active = !!active))
+        {
+            this.__active = active;
+
+            this.__class_dirty = true;
+            this.__dirty || patch(this);
+        }
+    }
+
     
-    
+
+
+    var color = yaxi.color;
+
+    function translateColor(_, key) {
+
+        return color[key];
+    }
+
+
 
     // 样式
     this.$property('style', '', {
 
-        change: false,
+        convert: function (value) {
 
-        get: function () {
-
-            var style = this.__style;
-            return style ? style.join('') : '';
-        },
-
-        set: function (value) {
-
-            if (value = '' + value)
+            if (value)
             {
-                value = value.match(/[:;]|[^:;\s]+/g);
+                value = ('' + value).replace(/\s+:/g, ':').replace(/@([\w-]+)/g, translateColor);
 
                 if (value[value.length - 1] !== ';')
                 {
-                    value.push(';');
+                    value += ';';
                 }
             }
-            else
-            {
-                value = null;
-            }
-            
-            this.__style = value;
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+
+            return value || '';
         }
     });
 
@@ -3917,24 +3926,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         if (name)
         {
-            if (style = this.__style)
+            name += ':';
+
+            if (style = this.style)
             {
                 if ((index = style.indexOf(name)) >= 0)
                 {
-                    style.splice(index, style.indexOf(';', index) - index + 1);
+                    style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
                 }
-                else
+ 
+                if (value)
                 {
-                    style.push(name, ':', value, ';');
+                    style += name + value + ';';
                 }
+
+                this.style = style;
             }
             else if (value)
             {
-                this.__style = [name, ':', value, ';'];
+                this.style = name + value + ';';
             }
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
         }
     }
 
@@ -3943,12 +3954,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         var style, index;
 
-        if (name && (style = this.__style) && (index = style.indexOf(name)) >= 0)
+        if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
         {
-            style.splice(index, style.indexOf(';', index) - index + 1);
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+            this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
         }
     }
 
@@ -4254,10 +4262,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
 
+    // content控件加载计数器, 如果大于0表示正在加载content控件内部子控件
+    yaxi.__content_count = 0;
+
 
     this.$converts.events = {
         
         fn: function (events) {
+
+            // 容器控件内部不允许绑定事件
+            if (yaxi.__content_count > 0)
+            {
+                throw 'does not support to bind event inside the content control!'
+            }
 
             for (var name in events)
             {
@@ -4781,10 +4798,10 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 /*
- * ContentControl主要作为自定义内容展示用
+ * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件
  * 不支持对子控件进行操作
 */
-yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
+yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
@@ -4860,7 +4877,6 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
     }
 
 
-
     // 加载内容
     this.__load_content = function (values) {
 
@@ -4876,13 +4892,22 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base) {
 
         if (values instanceof A)
         {
-            if (values[0] instanceof A)
+            try
             {
-                content = createControls(this, values);
+                yaxi.__content_count++;
+
+                if (values[0] instanceof A)
+                {
+                    content = createControls(this, values);
+                }
+                else
+                {
+                    content = [createControl(this, values)];
+                }
             }
-            else
+            finally
             {
-                content = [createControl(this, values)];
+                yaxi.__content_count--;
             }
         }
         else
@@ -5389,6 +5414,14 @@ yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 
 
 yaxi.Icon = yaxi.Control.extend(function (Class, base) {
+
+
+    
+    // 图标名
+    this.$property('icon', '', {
+
+        class: 'icon-'
+    });
 
 
 
@@ -6340,23 +6373,29 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         var control = controls[uuid],
             touch = event.changedTouches[0];
 
-        state.time = new Date();
-        state.control = control;
-        state.clientX = touch.clientX;
-        state.clientY = touch.clientY;
-
-        if (!touch)
+        if (control)
         {
-            console.log(event)
-        }
+            if (!touch)
+            {
+                console.log(event)
+            }
+    
+            // 修复自定义组件不支持active的问题
+            control.__fix_active(true);
 
-        event = touchEvent(event, touch);
-        event.target = control;
+            state.time = new Date();
+            state.control = control;
+            state.clientX = touch.clientX;
+            state.clientY = touch.clientY;
 
-        if (call(control, '__on_touchstart', event) === false || 
-            control.trigger(event) === false)
-        {
-            return false;
+            event = touchEvent(event, touch);
+            event.target = control;
+    
+            if (call(control, '__on_touchstart', event) === false || 
+                control.trigger(event) === false)
+            {
+                return false;
+            }
         }
     }
     
@@ -6388,6 +6427,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             event = touchEvent(event);
             event.target = control;
 
+            control.__fix_active(false);
+
             state.control = null;
     
             if (call(control, '__on_touchend', event) === false || 
@@ -6407,6 +6448,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             event = touchEvent(event);
             event.target = control;
+
+            control.__fix_active(false);
 
             state.control = null;
     
@@ -6477,7 +6520,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
-yaxi.Control.mixin(function (mixin) {
+yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
@@ -6488,7 +6531,9 @@ yaxi.Control.mixin(function (mixin) {
     var owner = Object.getOwnPropertyNames; 
 
 
-    var color = yaxi.color;
+
+    // 正在加载的容器控件的uuid, 容器控件的所有事件都由容器触发, 所在需要把子控件的uuid设置成容器的uuid
+    yaxi.__content_uuid = 0;
 
 
 
@@ -6505,18 +6550,12 @@ yaxi.Control.mixin(function (mixin) {
         this.__dirty = false;
 
         view.t = this.typeName;
-        view.u = this.uuid;
+        view.u = yaxi.__content_uuid || this.uuid;
 
         if (this.__class_dirty)
         {
             this.__class_dirty = false;
             this.__render_class(view, '');
-        }
-
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view, '');
         }
 
         if (value = this.__changes)
@@ -6566,11 +6605,6 @@ yaxi.Control.mixin(function (mixin) {
             this.__render_class(view, prefix);
         }
 
-        if (this.__style_dirty)
-        {
-            this.__style_dirty = false;
-            this.__render_style(view, prefix);
-        }
     
         if (changes = this.__changes)
         {
@@ -6609,28 +6643,16 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view[prefix + 'class'] = this.$class + class1 + class2;
+        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
     }
 
 
 
-    this.__render_style = function (view, prefix) {
 
-        var style = this.__style;
+    mixin.style = function (view, prefix, value) {
 
-        if (style && (style = style.join('')))
-        {
-            // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-            style = style.replace(/rem/g, 'rpx');
-
-            // 替换颜色值
-            style = style.replace(/@([\w-]+)/g, function (_, key) {
-
-                return color[key];
-            });;
-        }
-
-        view[prefix + 'style'] = style || '';
+        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
     }
 
 
@@ -6677,7 +6699,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         if (this.__content_dirty)
         {
-            view[prefix + 'content'] = renderContent(this, this.__content || '');
+            view[prefix + 'content'] = this.__render_content(this.__content || '');
         }
         else
         {
@@ -6702,11 +6724,29 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         var length = content.length;
         var list = new Array(length);
 
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = content[i].render();
-        }
+        var take_over_event;
 
+        // 如果当前控件未处于容器控件中, 则接管所有子控件的事件(content控件的子控件不能触发事件)
+        if (take_over_event = !yaxi.__content_uuid)
+        {
+            yaxi.__content_uuid = this.uuid;
+        }
+        
+        try
+        {
+            for (var i = 0; i < length; i++)
+            {
+                list[i] = content[i].render();
+            }
+        }
+        finally
+        {
+            if (take_over_event)
+            {
+                yaxi.__content_uuid = 0;
+            }
+        }
+        
         return list;
     }
 
@@ -7097,7 +7137,6 @@ yaxi.Header.mixin(function (mixin, base) {
 
     mixin.onrender = function (view, prefix) {
 
-        var root = this.root;
         view[prefix + 'back'] = yaxi.currentPages.length > 1;
     }
 

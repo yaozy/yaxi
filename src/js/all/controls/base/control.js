@@ -1,4 +1,4 @@
-yaxi.Control = Object.extend.call({}, function (Class, base) {
+yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
@@ -356,39 +356,55 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
             this.__dirty || patch(this);
         }
     }
+
+
+
+    function fix_active(active) {
+
+        if (this.__active !== active)
+        {
+            this.__active = active;
+
+            this.__class_dirty = true;
+            this.__dirty || patch(this);
+        }
+    }
+
+
+    // 处理微信自定义组件不支持active的问题
+    this.__fix_active = function (active) {
+
+        setTimeout(fix_active.bind(this, !!active), 20);
+    }
+
     
-    
+
+
+    var color = yaxi.color;
+
+    function translateColor(_, key) {
+
+        return color[key];
+    }
+
+
 
     // 样式
     this.$property('style', '', {
 
-        change: false,
+        convert: function (value) {
 
-        get: function () {
-
-            var style = this.__style;
-            return style ? style.join('') : '';
-        },
-
-        set: function (value) {
-
-            if (value = '' + value)
+            if (value)
             {
-                value = value.match(/[:;]|[^:;\s]+/g);
+                value = ('' + value).replace(/\s+:/g, ':').replace(/@([\w-]+)/g, translateColor);
 
                 if (value[value.length - 1] !== ';')
                 {
-                    value.push(';');
+                    value += ';';
                 }
             }
-            else
-            {
-                value = null;
-            }
-            
-            this.__style = value;
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+
+            return value || '';
         }
     });
 
@@ -400,24 +416,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         if (name)
         {
-            if (style = this.__style)
+            name += ':';
+
+            if (style = this.style)
             {
                 if ((index = style.indexOf(name)) >= 0)
                 {
-                    style.splice(index, style.indexOf(';', index) - index + 1);
+                    style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
                 }
-                else
+ 
+                if (value)
                 {
-                    style.push(name, ':', value, ';');
+                    style += name + value + ';';
                 }
+
+                this.style = style;
             }
             else if (value)
             {
-                this.__style = [name, ':', value, ';'];
+                this.style = name + value + ';';
             }
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
         }
     }
 
@@ -426,12 +444,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
         var style, index;
 
-        if (name && (style = this.__style) && (index = style.indexOf(name)) >= 0)
+        if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
         {
-            style.splice(index, style.indexOf(';', index) - index + 1);
-
-            this.__style_dirty = true;
-            this.__dirty || patch(this);
+            this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
         }
     }
 
@@ -737,10 +752,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
 
+    // content控件加载计数器, 如果大于0表示正在加载content控件内部子控件
+    yaxi.__content_count = 0;
+
 
     this.$converts.events = {
         
         fn: function (events) {
+
+            // 容器控件内部不允许绑定事件
+            if (yaxi.__content_count > 0)
+            {
+                throw 'does not support to bind event inside the content control!'
+            }
 
             for (var name in events)
             {
@@ -749,6 +773,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
         }
     };
 
+
+    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
+    this.findEventTarget = function () {
+
+        var target = this;
+        var parent = target;
+
+        while (parent)
+        {
+            if (parent.disabled)
+            {
+                target = parent.parent;
+            }
+            else if (parent.__is_content) // 记录下content控件, 仅最外层的content control触发事件
+            {
+                target = parent;
+            }
+
+            parent = parent.parent;
+        }
+
+        return target;
+    }
 
 
 
