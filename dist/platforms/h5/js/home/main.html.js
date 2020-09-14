@@ -1,7 +1,7 @@
-module.exports = function (data) {
+module.exports = function (scope) {
 
 
-with (data) return (
+return (
 	[
 		"box",
 		null,
@@ -44,7 +44,7 @@ with (data) return (
 						"button",
 						{
 							"events": {
-								"tap": openTest
+								"tap": this.openTest
 							}
 						},
 						"Open Test"

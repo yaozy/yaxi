@@ -1,7 +1,7 @@
-module.exports = function (data) {
+module.exports = function (scope) {
 
 
-with (data) return (
+return (
 	[
 		"page",
 		null,
@@ -45,7 +45,7 @@ with (data) return (
 										{
 											"content": "append",
 											"events": {
-												"tap": handleAppend
+												"tap": this.handleAppend
 											}
 										}
 									],
@@ -55,7 +55,7 @@ with (data) return (
 											"content": "remove last",
 											"style": "margin-top:10rem;",
 											"events": {
-												"tap": handleRemove
+												"tap": this.handleRemove
 											}
 										}
 									]

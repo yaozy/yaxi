@@ -1,7 +1,7 @@
-module.exports = function (data) {
+module.exports = function (scope) {
 
 
-with (data) return (
+return (
 	[
 		"box",
 		{

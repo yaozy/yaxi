@@ -4123,7 +4123,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base) {
 
 
 
-    // 赋值
+    // 从html自动生成的模板函数加载组件
+    this.loadTemplate = function (templateFn, model) {
+
+        if (typeof templateFn !== 'function')
+        {
+            throw 'argument templateFn of method loadTemplate must be a function!'
+        }
+
+        this.load(templateFn.call(this), model);
+    }
+
+
+    // 从json结构加载组件
+    /*
+     * [
+     *   'box',
+     *   null,
+     *   [
+     *       ['text', null, 'test1'],
+     *       ['text', null, 'test2'],
+     *   ]
+     * ]
+    */
     this.load = function (values, model) {
 
         var attributes, converts, convert, changes, value, any;

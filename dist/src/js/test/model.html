@@ -2,10 +2,10 @@
     <header content="yaxi model page" />
     <box layout="column">
         <band layout="row" style="background-color:@bg-level2-color">
-            <button content="Append" e-tap="handleAppend" />
-            <button content="Replace" e-tap="handleReplace" />
-            <button content="Remove" e-tap="handleRemove" />
-            <button content="Reorder" e-tap="handleReorder" />
+            <button content="Append" e-tap="this.handleAppend" />
+            <button content="Replace" e-tap="this.handleReplace" />
+            <button content="Remove" e-tap="this.handleRemove" />
+            <button content="Reorder" e-tap="this.handleReorder" />
         </band>
         <repeater layout="column" item="item" index="index">
             <band layout="row" style="height:auto;padding:20rem;">

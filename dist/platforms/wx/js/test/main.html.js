@@ -1,12 +1,12 @@
-module.exports = function (data) {
+module.exports = function (scope) {
 
 
-with (data) return (
+return (
 	[
 		"page",
 		{
 			"events": {
-				"tap": handleTap
+				"tap": this.handleTap
 			}
 		},
 		[
