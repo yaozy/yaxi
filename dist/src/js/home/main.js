@@ -1,19 +1,33 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
+const MainBand = require('./main-band');
+
 
 
 module.exports = yaxi.Box.extend(function (Class, base) {
 
 
-    this.init = function () {
 
-        this.loadTemplate(template);
+    function render(data) {
+
+        var children = this.find('>>@host').children;
+        var list = [];
+
+        for (var name in data)
+        {
+            list.push(new MainBand(data[name]));
+        }
+
+        children.clear();
+        children.push.apply(children, list);
     }
 
 
-    this.openTest = function () {
 
-        require('../test/main').open();
+    this.init = function () {
+
+        this.loadTemplate(template);
+        yaxi.http.get('home').json(render.bind(this));
     }
 
 

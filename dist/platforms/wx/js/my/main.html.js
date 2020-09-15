@@ -31,15 +31,15 @@ return (
 						},
 						[
 							[
-								"Text",
+								"text",
 								null
 							],
 							[
-								"Text",
+								"text",
 								null
 							],
 							[
-								"Text",
+								"text",
 								null
 							]
 						]
@@ -50,7 +50,7 @@ return (
 				"band",
 				{
 					"theme": "level1",
-					"style": "margin-top:20rem;"
+					"style": "margin-top:10rem;"
 				},
 				[
 					[
@@ -63,28 +63,7 @@ return (
 				"band",
 				{
 					"theme": "level1",
-					"style": "margin-top:20rem;"
-				},
-				[
-					[
-						"band",
-						null
-					],
-					[
-						"band",
-						null
-					],
-					[
-						"band",
-						null
-					]
-				]
-			],
-			[
-				"band",
-				{
-					"theme": "level1",
-					"style": "margin-top:20rem;"
+					"style": "margin-top:10rem;"
 				},
 				[
 					[
@@ -105,7 +84,7 @@ return (
 				"band",
 				{
 					"theme": "level1",
-					"style": "margin-top:20rem;"
+					"style": "margin-top:10rem;"
 				},
 				[
 					[
@@ -115,6 +94,44 @@ return (
 					[
 						"band",
 						null
+					],
+					[
+						"band",
+						null
+					]
+				]
+			],
+			[
+				"band",
+				{
+					"theme": "level1",
+					"style": "margin-top:10rem;"
+				},
+				[
+					[
+						"band",
+						null
+					],
+					[
+						"band",
+						null
+					]
+				]
+			],
+			[
+				"band",
+				{
+					"style": "margin-top:10rem;"
+				},
+				[
+					[
+						"button",
+						{
+							"events": {
+								"tap": this.openTest
+							}
+						},
+						"Open Test"
 					]
 				]
 			]

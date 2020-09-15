@@ -38,12 +38,9 @@
   text-align: center;
 }
 .yx-iconbutton-icon {
-  width: 60rpx;
-  height: 60rpx;
   flex-grow: 0;
   flex-shrink: 0;
   text-align: center;
-  line-height: 1.2;
 }
 .yx-iconbutton-content {
   flex-grow: 1;
@@ -69,12 +66,9 @@
 .yx-icon {
   display: inline-block;
   overflow: hidden;
-  width: 60rpx;
-  height: 60rpx;
   flex-grow: 0;
   flex-shrink: 0;
   text-align: center;
-  line-height: 1;
 }
 .iconfont {
   font-size: 50rpx;
@@ -283,6 +277,10 @@
   background-color: #ffffff;
   color: #f7f7f7;
 }
+.yx-theme-important {
+  background-color: #ffffff;
+  color: #a00101;
+}
 .yx-theme-primary {
   background-color: #ffffff;
   color: #1c86ee;
@@ -327,6 +325,10 @@
   background-color: #f7f7f7;
   color: #ffffff;
 }
+.yx-theme-important-reverse {
+  background-color: #a00101;
+  color: #ffffff;
+}
 .yx-theme-primary-reverse {
   background-color: #1c86ee;
   color: #ffffff;
@@ -366,6 +368,9 @@
 .yx-theme-level5-bg {
   background-color: #f7f7f7;
 }
+.yx-theme-important-bg {
+  background-color: #a00101;
+}
 .yx-theme-primary-bg {
   background-color: #1c86ee;
 }
@@ -398,6 +403,9 @@
 }
 .yx-theme-level5-font {
   color: #f7f7f7;
+}
+.yx-theme-important-font {
+  color: #a00101;
 }
 .yx-theme-primary-font {
   color: #1c86ee;

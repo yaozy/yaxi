@@ -2,6 +2,10 @@ const yaxi = require('../yaxi/js/yaxi');
 const template = require('./main.html');
 
 
+// 标记使用模拟数据
+yaxi.http.mock = true;
+
+
 module.exports = yaxi.Page.extend(function (Class, base) {
 
 

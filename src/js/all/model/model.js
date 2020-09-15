@@ -491,34 +491,20 @@
 
 
     // 解除绑定
-    this.$unbind = function (binding) {
+    this.$unbind = function (uuid) {
 
         var bindings = this.__bindings;
         var values;
 
         if (bindings)
         {
-            // 属性字段绑定
-            if (values = bindings[binding.field])
+            for (var name in bindings)
             {
-                for (var i = values.length; i--;)
+                if (values = bindings[name])
                 {
-                    if (values[i] === binding)
-                    {
-                        values.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-            else // 计算字段绑定
-            {
-                for (var name in bindings)
-                {
-                    values = bindings[name];
-
                     for (var i = values.length; i--;)
                     {
-                        if (values[i] === binding)
+                        if (values[i].control === uuid)
                         {
                             values.splice(i, 1);
                             break;

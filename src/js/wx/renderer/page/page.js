@@ -190,14 +190,13 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
             console.log(data);
 
+            page.__wx_page = wxPage;
+            page.__wx_name = wxName;
+
             wxPage.setData(data, function () {
 
                 notifyRender(rendereds);
-
                 page.onopened(page.payload);
-    
-                page.__wx_page = wxPage;
-                page.__wx_name = wxName;
             });
         }
         catch (e)

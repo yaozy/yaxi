@@ -17,8 +17,7 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
     mixin.size = function (view, value) {
 
-        var style = view.firstChild.style;
-        style.width = style.height = value;
+        view.firstChild.style.fontSize = value > 0 ? value + 'rem' : value;
     }
 
 

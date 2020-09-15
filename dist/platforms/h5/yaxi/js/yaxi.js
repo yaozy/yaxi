@@ -1530,6 +1530,8 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
     
         }, 500);
+
+        return stream;
     }
     
 
@@ -1635,7 +1637,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         options.data = data;
         options.timeout = options.timeout || Class.timeout;
 
-        yaxi.__ajax_send(options);
+        return yaxi.__ajax_send(options);
     }
 
 
@@ -2308,34 +2310,20 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
     // 解除绑定
-    this.$unbind = function (binding) {
+    this.$unbind = function (uuid) {
 
         var bindings = this.__bindings;
         var values;
 
         if (bindings)
         {
-            // 属性字段绑定
-            if (values = bindings[binding.field])
+            for (var name in bindings)
             {
-                for (var i = values.length; i--;)
+                if (values = bindings[name])
                 {
-                    if (values[i] === binding)
-                    {
-                        values.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-            else // 计算字段绑定
-            {
-                for (var name in bindings)
-                {
-                    values = bindings[name];
-
                     for (var i = values.length; i--;)
                     {
-                        if (values[i] === binding)
+                        if (values[i].control === uuid)
                         {
                             values.splice(i, 1);
                             break;
@@ -2912,6 +2900,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     bg.level4 = '#888888';
     bg.level5 = '#555555';
 
+    bg.important = '#c40606';
     bg.primary = '#1c86ee';
     bg.second = '#48d1cc';
     bg.success = '#71c04a';
@@ -2926,6 +2915,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     font.level4 = '#cccccc';
     font.level5 = '#f7f7f7';
 
+    font.important = '#c40606';
     font.primary = '#1c86ee';
     font.second = '#48d1cc';
     font.success = '#71c04a';
@@ -2940,6 +2930,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     border.level4 = '#cccccc';
     border.level5 = '#ffffff';
 
+    border.important = '#c40606';
     border.primary = '#1c86ee';
     border.second = '#48d1cc';
     border.success = '#71c04a';
@@ -2954,6 +2945,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     icon.level4 = '#cccccc';
     icon.level5 = '#ffffff';
 
+    icon.important = '#c40606';
     icon.primary = '#1c86ee';
     icon.second = '#48d1cc';
     icon.success = '#71c04a';
@@ -3858,7 +3850,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             var storage = this.$storage;
             var changes;
 
@@ -3891,7 +3883,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -3900,12 +3892,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-if (!name) debugger
+
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-            if (!name) debugger
+
             return this.$storage[name];
         }
     }
@@ -4532,26 +4524,29 @@ if (!name) debugger
         }
     }
 
-    
+
+
     
     this.destroy = function () {
 
-        var bindings, any;
+        var bindings, uuid, model, any;
 
-        if (any = this.__uuid)
+        if (uuid = this.__uuid)
         {
-            delete controls[any];
+            delete controls[uuid];
         }
 
         if (bindings = this.__bindings)
         {
+            any = [];
             this.__bindings = null;
 
             for (var name in bindings)
             {
-                if ((any = bindings[name]) && (any = any.model) && any.__bindings)
+                if ((model = bindings[name].model) && any.indexOf(model) < 0)
                 {
-                    any.$unbind(bindings[name]);
+                    model.$unbind(uuid);
+                    any.push(model);
                 }
             }
         }
@@ -4773,10 +4768,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         if (target = controls[target.$uuid])
         {
             target.__dirty || $patch(target);
-        }
-        else
-        {
-            debugger
         }
     }
 
@@ -6577,8 +6568,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     var Event = yaxi.Event;
 
     
-    // 滑动事件按下时的状态
-    var state = Object.create(null);
+    var bind = host.addEventListener.bind(host);
+
 
 
     // 是否检查点击
@@ -6590,11 +6581,11 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     // 上次tap事件触发时的时间
     var tapTime = new Date();
 
-
-    var bind = host.addEventListener.bind(host);
-
-
-    var touchControl, flag;
+    // 开始触摸时的控件及时间
+    var touchControl, touchTime;
+    
+    // dom标记
+    var flag;
 
 
 
@@ -6619,19 +6610,13 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     
 
-    function touchEvent(event, touch) {
+    function touchEvent(event) {
 
         var e = new Event(event.type);
 
-        touch = touch || event.changedTouches[0];
-
         e.flag = flag;
-        e.state = state;
-        e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = e.clientX - state.clientX;
-        e.distanceY = e.clientY - state.clientY;
+        e.changedTouches = event.changedTouches;
+        e.touches = event.touches;
 
         return e;
     }
@@ -6684,16 +6669,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
-            var e = touchEvent(event, touch);
+            var e = touchEvent(event);
 
             control.__change_active(true);
             touchControl = control;
+            touchTime = new Date();
             tap = true;
-
-            state.time = new Date();
-            state.clientX = touch.clientX;
-            state.clientY = touch.clientY;
 
             if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
             {
@@ -6711,7 +6692,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         if (control = touchControl)
         {
             var e = touchEvent(event);
-            var x, y;
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -6721,18 +6701,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             if (control.trigger(e) === false)
             {
                 return tap = stop(event);
-            }
-            
-            if (tap)
-            {
-                x = e.distanceX;
-                y = e.distanceY;
-
-                // 如果移动了指定距离
-                if (x < -8 || x > 8 || y < -8 || y > 8)
-                {
-                    tap = false;
-                }
             }
         }
 
@@ -6761,7 +6729,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             }
 
             // 按下大于350毫秒则触发longpress事件
-            if ((time = new Date()) - state.time > 350)
+            if ((time = new Date()) - touchTime > 350)
             {
                 e.type = 'longpress';
 
@@ -7385,8 +7353,7 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
     mixin.size = function (view, value) {
 
-        var style = view.firstChild.style;
-        style.width = style.height = value;
+        view.firstChild.style.fontSize = value > 0 ? value + 'rem' : value;
     }
 
 
@@ -7406,6 +7373,14 @@ yaxi.Image.mixin(function (mixin, base) {
 
 
     yaxi.template(this, '<image class="$class"></image>');
+
+
+
+    mixin.src = function (view, value) {
+
+        view.src = value;
+    }
+
 
 
 });
@@ -7452,185 +7427,6 @@ yaxi.ScrollBox.mixin(function (mixin, base) {
 
 
 
-    var pulldown, loading, host;
-
-
-
-    // loading设置
-    this.$property('loading', null, {
-    
-        get: function () {
-
-            return this.__loading;
-        },
-        set: function (value) {
-
-            if (value)
-            {
-                var loading = yaxi.Loading;
-
-                if (typeof value === 'function')
-                {
-                    loading = new loading();
-                    loading.onload = value;
-                }
-                else
-                {
-                    if (typeof value.onload !== 'function')
-                    {
-                        throw 'loading onload must be a function!'
-                    }
-                    
-                    loading = value instanceof loading ? value : new loading(value);
-                }
-
-                loading.parent = this;
-
-                this.__loading = loading;
-                this.__on_scroll = scroll;
-            }
-            else
-            {
-                this.__on_scroll = null;
-            }
-        }
-    });
-
-    
-    // 下拉设置
-    this.$property('pulldown', null, {
-
-        get: function () {
-
-            return this.__pulldown;
-        },
-        set: function (value) {
-
-            var pulldown;
-
-            if (value)
-            {
-                pulldown = yaxi.Pulldown;
-
-                if (typeof value === 'function')
-                {
-                    pulldown = new pulldown();
-                    pulldown.onload = value;
-                }
-                else
-                {
-                    if (typeof value.onload !== 'function')
-                    {
-                        throw 'pulldown onload must be a function!'
-                    }
-
-                    pulldown = value instanceof pulldown ? value : new pulldown(value);
-                }
-            }
-
-            this.__pulldown = pulldown;
-        }
-    });
-
-
-    function scroll() {
-
-        var loading;
-
-        if (!pulldown && (loading = this.__loading) && loading.status !== 'completed')
-        {
-            // 延时处理以避免加载太快
-            var time = new Date().getTime();
-
-            if (time - (loading.__time || 0) < 100)
-            {
-                return;
-            }
-
-            var view = this.$view;
-
-            if (view.scrollTop + view.offsetHeight < view.scrollHeight)
-            {
-                return;
-            }
-
-            loading.index++ || (loading.index = 1);
-            loading.__time = time;
-            loading.onload.call(this, loading);
-        }
-    }
-
-
-
-    this.__on_touchmove = function (event) {
-
-        if (pulldown && pulldown.$view)
-        {
-            pulldown.move(event.distanceY);
-
-            event.stop(true);
-            return false;
-        }
-
-        if ((pulldown = this.__pulldown) && this.$view.scrollTop < 1 && 
-            (event.distanceY > 16 && event.distanceY > event.distanceX + 4))
-        {
-            var state = event.state,
-                style = this.$view.style;
-
-            if (loading = this.__loading)
-            {
-                if (loading.$view)
-                {
-                    loading.$view.style.visibility = 'hidden';
-                }
-                else
-                {
-                    loading = null;
-                }
-            }
-
-            // 以当前控件和位置开始滑动
-            state.control = this;
-            state.clientX = event.clientX;
-            state.clientY = event.clientY;
-    
-            // 记录前当滚动的容器
-            host = style.overflowY === 'auto' ? this.$view : null;
-
-            pulldown.start(this);
-
-            event.stop(true);
-            return false;
-        }
-        else
-        {
-            pulldown = host = null;
-        }
-    }
-
-
-    this.__on_touchend = this.__on_touchcancel = function (event) {
-
-        if (pulldown)
-        {
-            if (pulldown.$view)
-            {
-                if (host)
-                {
-                    host.style.overflowY = 'auto';
-                }
-
-                pulldown.stop(this, loading);
-                pulldown = null;
-
-                event.stop(true);
-                return false;
-            }
-
-            pulldown = loading = host = null;
-        }
-    }
 
 
 });

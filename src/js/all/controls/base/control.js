@@ -144,7 +144,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             var storage = this.$storage;
             var changes;
 
@@ -177,7 +177,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -186,12 +186,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-if (!name) debugger
+
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-            if (!name) debugger
+
             return this.$storage[name];
         }
     }
@@ -818,26 +818,29 @@ if (!name) debugger
         }
     }
 
-    
+
+
     
     this.destroy = function () {
 
-        var bindings, any;
+        var bindings, uuid, model, any;
 
-        if (any = this.__uuid)
+        if (uuid = this.__uuid)
         {
-            delete controls[any];
+            delete controls[uuid];
         }
 
         if (bindings = this.__bindings)
         {
+            any = [];
             this.__bindings = null;
 
             for (var name in bindings)
             {
-                if ((any = bindings[name]) && (any = any.model) && any.__bindings)
+                if ((model = bindings[name].model) && any.indexOf(model) < 0)
                 {
-                    any.$unbind(bindings[name]);
+                    model.$unbind(uuid);
+                    any.push(model);
                 }
             }
         }

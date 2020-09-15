@@ -35,7 +35,7 @@ return (
 								"text",
 								{
 									"text": "model",
-									"theme": "danger-font",
+									"theme": "important-font",
 									"style": "margin-left:.5em;font-weight:bold;"
 								}
 							]
@@ -57,7 +57,7 @@ return (
 								"text",
 								{
 									"text": "test",
-									"theme": "danger-font",
+									"theme": "important-font",
 									"style": "margin-left:.5em;font-weight:bold;"
 								}
 							]

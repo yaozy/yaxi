@@ -23,6 +23,7 @@
     bg.level4 = '#888888';
     bg.level5 = '#555555';
 
+    bg.important = '#c40606';
     bg.primary = '#1c86ee';
     bg.second = '#48d1cc';
     bg.success = '#71c04a';
@@ -37,6 +38,7 @@
     font.level4 = '#cccccc';
     font.level5 = '#f7f7f7';
 
+    font.important = '#c40606';
     font.primary = '#1c86ee';
     font.second = '#48d1cc';
     font.success = '#71c04a';
@@ -51,6 +53,7 @@
     border.level4 = '#cccccc';
     border.level5 = '#ffffff';
 
+    border.important = '#c40606';
     border.primary = '#1c86ee';
     border.second = '#48d1cc';
     border.success = '#71c04a';
@@ -65,6 +68,7 @@
     icon.level4 = '#cccccc';
     icon.level5 = '#ffffff';
 
+    icon.important = '#c40606';
     icon.primary = '#1c86ee';
     icon.second = '#48d1cc';
     icon.success = '#71c04a';

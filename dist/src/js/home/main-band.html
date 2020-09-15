@@ -1,0 +1,28 @@
+<box theme="level1" style="margin-top:10rem;padding:0 20rem;">
+    <band style="height:60rem;line-height:60rem;">
+        <icon theme="level2" d-icon="this.icon" style="position:absolute;font-size:50rem;" />
+        <text theme="level2" d-text="this.text" style="position:absolute;left:60rem;" />
+        <box layout="row" theme="level4" style="position:absolute;top:0;right:0;bottom:0;font-size:28rem;">
+            <text>查看更多</text>
+            <icon icon="common-more" />
+        </box>
+    </band>
+    <box>
+        <for list="this.data" item="item" index="index">
+            <box d-tag="item.id" style="height:160rem;margin:20rem 0;overflow:hidden;">
+                <image d-src="item.image" style="width:200rem;height:100%;" />
+                <box style="display:inline-block;width:500rem;height:100%;padding-left:20rem;">
+                    <band style="height:50rem;overflow:hidden;">
+                        <text d-text="item.name" />
+                    </band>
+                    <band theme="level4" style="height:70rem;font-size:24rem;overflow:hidden;">
+                        <text d-text="item.remark" />
+                    </band>
+                    <band theme="primary" style="height:40rem;overflow:hidden;">
+                        <text d-text="'￥' + item.price" />
+                    </band>
+                </box>
+            </box>
+        </for>
+    </box>
+</box>

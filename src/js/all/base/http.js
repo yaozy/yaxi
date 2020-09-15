@@ -32,6 +32,8 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
     
         }, 500);
+
+        return stream;
     }
     
 
@@ -137,7 +139,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         options.data = data;
         options.timeout = options.timeout || Class.timeout;
 
-        yaxi.__ajax_send(options);
+        return yaxi.__ajax_send(options);
     }
 
 

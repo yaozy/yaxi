@@ -11,4 +11,10 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     }
 
 
+    this.openTest = function () {
+
+        require('../test/main').open();
+    }
+
+    
 });

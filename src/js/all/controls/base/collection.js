@@ -54,10 +54,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             target.__dirty || $patch(target);
         }
-        else
-        {
-            debugger
-        }
     }
 
 

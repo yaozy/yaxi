@@ -1,36 +1,18 @@
-<box theme="level5-bg">
-    <swiper>
+<box theme="level5-bg" layout="column">
+    <swiper style="flex-shrink:0;">
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
     </swiper>
     <band style="height:60rem;">
-
     </band>
-    <band theme="level1" style="height:100rem;margin-top:10rem;padding:10rem 20rem;">
-        <button layout="row" theme="level4" style="line-height:80rem;border-radius:80rem;border:.5px solid @border-level4-color" e-tap="this.handleSearch">
+    <band theme="level1" style="height:80rem;margin-top:10rem;padding:10rem 20rem;">
+        <button layout="row" theme="level4" style="height:60rem;line-height:60rem;border-radius:60rem;border:.5px solid @border-level4-color" e-tap="this.handleSearch">
             <icon icon="common-search" />
             <text>搜索老师、机构、课程</text>
         </button>
     </band>
-    <band theme="level1" style="height:100rem;margin-top:10rem;padding:10rem;">
-        <template src="./box-title.html" data="{ icon: 'home-hot', text: '热门课程' }" />
-        <band key="hot"></band>
-    </band>
-    <band theme="level1" style="height:100rem;margin-top:10rem;padding:10rem;">
-        <template src="./box-title.html" data="{ icon: 'home-live', text: '直播课程' }" />
-        <band key="live"></band>
-    </band>
-    <band theme="level1" style="height:100rem;margin-top:10rem;padding:10rem;">
-        <template src="./box-title.html" data="{ icon: 'home-my', text: '我的课程' }" />
-        <band key="my"></band>
-    </band>
-    <band style="margin-top:10rem;">
-        <button e-tap="this.openTest">Open Test</button>
-    </band>
-    <button>
-        <text>dwwwwwwwwwww</text>
-        <button>ddddddddddd</button>
-    </button>
+    <box key="host" style="min-height:200rem;">
+    </box>
 </box>

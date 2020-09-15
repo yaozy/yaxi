@@ -22,6 +22,16 @@ new Watcher('./images', './platforms/wx/images')
     .watch();
 
 
+new Watcher('./mock', './platforms/h5/mock')
+    .template(/\.html$/i)
+    .sync()
+    .watch();
+
+new Watcher('./mock', './platforms/wx/mock')
+    .template(/\.html$/i)
+    .sync()
+    .watch();
+
 
 new Watcher('./src/js', './platforms/h5/js')
     .template(/\.html$/i)

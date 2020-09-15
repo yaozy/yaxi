@@ -32,8 +32,8 @@
     var Event = yaxi.Event;
 
     
-    // 滑动事件按下时的状态
-    var state = Object.create(null);
+    var bind = host.addEventListener.bind(host);
+
 
 
     // 是否检查点击
@@ -45,11 +45,11 @@
     // 上次tap事件触发时的时间
     var tapTime = new Date();
 
-
-    var bind = host.addEventListener.bind(host);
-
-
-    var touchControl, flag;
+    // 开始触摸时的控件及时间
+    var touchControl, touchTime;
+    
+    // dom标记
+    var flag;
 
 
 
@@ -74,19 +74,19 @@
 
     
 
-    function touchEvent(event, touch) {
+    function touchEvent(event) {
 
         var e = new Event(event.type);
 
-        touch = touch || event.changedTouches[0];
-
         e.flag = flag;
-        e.state = state;
-        e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = e.clientX - state.clientX;
-        e.distanceY = e.clientY - state.clientY;
+        e.changedTouches = event.changedTouches;
+        e.touches = event.touches;
+
+// identifier: 0
+// pageX: 32
+// pageY: 546
+// clientX: 32
+// clientY: 546
 
         return e;
     }
@@ -139,16 +139,12 @@
 
         if (control = findControl(event.target))
         {
-            var touch = event.changedTouches[0];
-            var e = touchEvent(event, touch);
+            var e = touchEvent(event);
 
             control.__change_active(true);
             touchControl = control;
+            touchTime = new Date();
             tap = true;
-
-            state.time = new Date();
-            state.clientX = touch.clientX;
-            state.clientY = touch.clientY;
 
             if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
             {
@@ -166,7 +162,6 @@
         if (control = touchControl)
         {
             var e = touchEvent(event);
-            var x, y;
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -176,18 +171,6 @@
             if (control.trigger(e) === false)
             {
                 return tap = stop(event);
-            }
-            
-            if (tap)
-            {
-                x = e.distanceX;
-                y = e.distanceY;
-
-                // 如果移动了指定距离
-                if (x < -8 || x > 8 || y < -8 || y > 8)
-                {
-                    tap = false;
-                }
             }
         }
 
@@ -216,7 +199,7 @@
             }
 
             // 按下大于350毫秒则触发longpress事件
-            if ((time = new Date()) - state.time > 350)
+            if ((time = new Date()) - touchTime > 350)
             {
                 e.type = 'longpress';
 

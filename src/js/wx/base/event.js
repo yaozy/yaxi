@@ -13,8 +13,6 @@
     var translates = create(null);
 
 
-    var state = create(null);
-
     var touchControl, uuid, flag;
 
 
@@ -48,19 +46,14 @@
     }
     
     
-    function touchEvent(event, touch) {
+    function touchEvent(event, control) {
     
         var e = new Event(event.type);
     
-        touch || (touch = event.changedTouches[0]);
-    
+        e.target = control;
         e.flag = flag;
-        e.state = state;
-        e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = e.clientX - state.clientX;
-        e.distanceY = e.clientY - state.clientY;
+        e.changedTouches = event.changedTouches;
+        e.touches = event.touches;
     
         return e;
     }
@@ -95,13 +88,7 @@
             control.__change_active(true);
 
             touchControl = control;
-
-            state.time = new Date();
-            state.clientX = touch.clientX;
-            state.clientY = touch.clientY;
-
-            event = touchEvent(event, touch);
-            event.target = control;
+            event = touchEvent(event, control);
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
@@ -118,8 +105,7 @@
     
         if (control = touchControl)
         {
-            event = touchEvent(event);
-            event.target = control;
+            event = touchEvent(event, control);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -138,9 +124,7 @@
         {
             touchControl = null;
     
-            event = touchEvent(event);
-            event.target = control;
-
+            event = touchEvent(event, control);
             control.__change_active(false);
 
             if (call(control, '__on_touchend', event) === false || 
@@ -160,9 +144,7 @@
         {
             touchControl = null;
 
-            event = touchEvent(event);
-            event.target = control;
-
+            event = touchEvent(event, control);
             control.__change_active(false);
 
             if (call(control, '__on_touchcancel', event) === false || 
@@ -177,10 +159,8 @@
     translates.tap = function (event) {
 
         var control = findControl();
-        var touch = event.changedTouches[0];
 
-        event = touchEvent(event, touch);
-        event.target = control;
+        event = touchEvent(event, control);
 
         if (call(control, '__on_tap', event) === false || 
             control.trigger(event) === false)
@@ -193,10 +173,8 @@
     translates.longpress = function (event) {
 
         var control = findControl();
-        var touch = event.changedTouches[0];
 
-        event = touchEvent(event, touch);
-        event.target = control;
+        event = touchEvent(event, control);
 
         if (call(control, '__on_longpress', event) === false || 
             control.trigger(event) === false)

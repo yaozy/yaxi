@@ -1530,6 +1530,8 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
     
         }, 500);
+
+        return stream;
     }
     
 
@@ -1635,7 +1637,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         options.data = data;
         options.timeout = options.timeout || Class.timeout;
 
-        yaxi.__ajax_send(options);
+        return yaxi.__ajax_send(options);
     }
 
 
@@ -2308,34 +2310,20 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
     // 解除绑定
-    this.$unbind = function (binding) {
+    this.$unbind = function (uuid) {
 
         var bindings = this.__bindings;
         var values;
 
         if (bindings)
         {
-            // 属性字段绑定
-            if (values = bindings[binding.field])
+            for (var name in bindings)
             {
-                for (var i = values.length; i--;)
+                if (values = bindings[name])
                 {
-                    if (values[i] === binding)
-                    {
-                        values.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-            else // 计算字段绑定
-            {
-                for (var name in bindings)
-                {
-                    values = bindings[name];
-
                     for (var i = values.length; i--;)
                     {
-                        if (values[i] === binding)
+                        if (values[i].control === uuid)
                         {
                             values.splice(i, 1);
                             break;
@@ -2912,6 +2900,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     bg.level4 = '#888888';
     bg.level5 = '#555555';
 
+    bg.important = '#c40606';
     bg.primary = '#1c86ee';
     bg.second = '#48d1cc';
     bg.success = '#71c04a';
@@ -2926,6 +2915,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     font.level4 = '#cccccc';
     font.level5 = '#f7f7f7';
 
+    font.important = '#c40606';
     font.primary = '#1c86ee';
     font.second = '#48d1cc';
     font.success = '#71c04a';
@@ -2940,6 +2930,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     border.level4 = '#cccccc';
     border.level5 = '#ffffff';
 
+    border.important = '#c40606';
     border.primary = '#1c86ee';
     border.second = '#48d1cc';
     border.success = '#71c04a';
@@ -2954,6 +2945,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     icon.level4 = '#cccccc';
     icon.level5 = '#ffffff';
 
+    icon.important = '#c40606';
     icon.primary = '#1c86ee';
     icon.second = '#48d1cc';
     icon.success = '#71c04a';
@@ -3858,7 +3850,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             var storage = this.$storage;
             var changes;
 
@@ -3891,7 +3883,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_unchange(name, convert) {
 
         return function (value) {
-            if (!name) debugger
+
             this.$storage[name] = convert ? convert.call(this, value) : value;
         }
     }
@@ -3900,12 +3892,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_get = function (name, options) {
 
         return options.change && !options.class ? function () {
-if (!name) debugger
+
             var value = this.__changes;
             return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
 
         } : function () {
-            if (!name) debugger
+
             return this.$storage[name];
         }
     }
@@ -4532,26 +4524,29 @@ if (!name) debugger
         }
     }
 
-    
+
+
     
     this.destroy = function () {
 
-        var bindings, any;
+        var bindings, uuid, model, any;
 
-        if (any = this.__uuid)
+        if (uuid = this.__uuid)
         {
-            delete controls[any];
+            delete controls[uuid];
         }
 
         if (bindings = this.__bindings)
         {
+            any = [];
             this.__bindings = null;
 
             for (var name in bindings)
             {
-                if ((any = bindings[name]) && (any = any.model) && any.__bindings)
+                if ((model = bindings[name].model) && any.indexOf(model) < 0)
                 {
-                    any.$unbind(bindings[name]);
+                    model.$unbind(uuid);
+                    any.push(model);
                 }
             }
         }
@@ -4773,10 +4768,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         if (target = controls[target.$uuid])
         {
             target.__dirty || $patch(target);
-        }
-        else
-        {
-            debugger
         }
     }
 
@@ -6543,8 +6534,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     var translates = create(null);
 
 
-    var state = create(null);
-
     var touchControl, uuid, flag;
 
 
@@ -6578,19 +6567,14 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     }
     
     
-    function touchEvent(event, touch) {
+    function touchEvent(event, control) {
     
         var e = new Event(event.type);
     
-        touch || (touch = event.changedTouches[0]);
-    
+        e.target = control;
         e.flag = flag;
-        e.state = state;
-        e.touches = event.changedTouches;
-        e.clientX = touch.clientX;
-        e.clientY = touch.clientY;
-        e.distanceX = e.clientX - state.clientX;
-        e.distanceY = e.clientY - state.clientY;
+        e.changedTouches = event.changedTouches;
+        e.touches = event.touches;
     
         return e;
     }
@@ -6625,13 +6609,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             control.__change_active(true);
 
             touchControl = control;
-
-            state.time = new Date();
-            state.clientX = touch.clientX;
-            state.clientY = touch.clientY;
-
-            event = touchEvent(event, touch);
-            event.target = control;
+            event = touchEvent(event, control);
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
@@ -6648,8 +6626,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
         if (control = touchControl)
         {
-            event = touchEvent(event);
-            event.target = control;
+            event = touchEvent(event, control);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -6668,9 +6645,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             touchControl = null;
     
-            event = touchEvent(event);
-            event.target = control;
-
+            event = touchEvent(event, control);
             control.__change_active(false);
 
             if (call(control, '__on_touchend', event) === false || 
@@ -6690,9 +6665,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             touchControl = null;
 
-            event = touchEvent(event);
-            event.target = control;
-
+            event = touchEvent(event, control);
             control.__change_active(false);
 
             if (call(control, '__on_touchcancel', event) === false || 
@@ -6707,10 +6680,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     translates.tap = function (event) {
 
         var control = findControl();
-        var touch = event.changedTouches[0];
 
-        event = touchEvent(event, touch);
-        event.target = control;
+        event = touchEvent(event, control);
 
         if (call(control, '__on_tap', event) === false || 
             control.trigger(event) === false)
@@ -6723,10 +6694,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     translates.longpress = function (event) {
 
         var control = findControl();
-        var touch = event.changedTouches[0];
 
-        event = touchEvent(event, touch);
-        event.target = control;
+        event = touchEvent(event, control);
 
         if (call(control, '__on_longpress', event) === false || 
             control.trigger(event) === false)
@@ -7317,14 +7286,13 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
             console.log(data);
 
+            page.__wx_page = wxPage;
+            page.__wx_name = wxName;
+
             wxPage.setData(data, function () {
 
                 notifyRender(rendereds);
-
                 page.onopened(page.payload);
-    
-                page.__wx_page = wxPage;
-                page.__wx_name = wxName;
             });
         }
         catch (e)
