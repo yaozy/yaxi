@@ -79,25 +79,19 @@ yaxi.Page.mixin(function (mixin, base) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, payload, callback) {
+	yaxi.openPage = function (Page, options) {
 
-        if (typeof payload === 'function')
-        {
-            callback = payload;
-            payload = void 0;
-		}
-
-        var page = new Page(payload);
+        var page = new Page(options);
         
-        if (page.onopening(payload) !== false)
+        if (page.onloading(options) !== false)
         {
             all.push(page);
-			page.payload = payload;
+			page.options = options;
 			
 			host.appendChild(page.render());
 
 			notifyRender(renderings);
-			page.onopened(page.payload);
+			page.onload(page.options);
 		}
 	}
 
@@ -121,7 +115,7 @@ yaxi.Page.mixin(function (mixin, base) {
 		{
 			host.removeChild(page.$view);
 
-			page.onclosed();
+			page.onunload();
 			page.destroy();
 
 			if (--delta <= 0)

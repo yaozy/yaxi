@@ -1,6 +1,29 @@
-<band theme="level1" style="height:80rem;margin-top:10rem;padding:10rem 20rem;">
-    <button layout="row" theme="level4" style="height:60rem;line-height:60rem;border-radius:60rem;border:.5px solid @border-level4-color" e-tap="this.handleSearch">
-        <icon icon="common-search" />
-        <text>搜索老师、机构、课程</text>
-    </button>
+<band style="position:static;overflow:visible;z-index:1;height:80rem;">
+    <maskbox b-hidden="hidden" e-tap="this.handleClear.bind(this)" />
+    <band layout="row" theme="level1" style="height:80rem;">
+        <textbox placeholder="搜索老师、机构、课程" 
+            style="position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4-color;border-radius:60rem;padding:0 120rem 0 60rem;" 
+            b-value="text" 
+            e-input="this.handleInput.bind(this)"
+            e-focus="this.handleFocus.bind(this)" />
+        <icon icon="common-search" style="position:absolute;top:50%;left:28rem;transform:translateY(-50%);" />
+        <text theme="font-level2" b-hidden="hidden" 
+            style="position:absolute;width:120rem;height:80rem;line-height:80rem;right:20rem;text-align:center;"
+            e-tap="this.handleClear.bind(this)">清除</text>
+    </band>
+    <box theme="level1" b-hidden="hidden">
+        <band layout="row" style="height:80rem;line-height:80rem;padding:0 20rem;" e-tap="this.handleSearch.bind(this)">
+            <icon icon="common-search" />
+            <text>搜索</text>
+            <text theme="font-primary" b-text="text" />
+            <text theme="font-level4" e-tap="this.handleCancel.bind(this)" style="margin-left:50rem;">取消搜索</text>
+        </band>
+        <repeater submodel="data" e-tap="this.handleSuggest.bind(this)">
+            <band layout="row" style="height:80rem;line-height:80rem;border-top:.5px solid @border-level4-color;padding:0 20rem;">
+                <text b-text="item.before" />
+                <text theme="font-primary" b-text="text" />
+                <text b-text="item.after" />
+            </band>
+        </repeater>
+    </box>
 </band>

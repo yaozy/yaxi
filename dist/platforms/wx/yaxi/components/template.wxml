@@ -14,11 +14,28 @@
 <template name="TextBox">
 
     <input
+        type="{{ type || 'text' }}"
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-textbox{{ active }}{{ class }}"
         style="{{ style || '' }}"
-        bindtouchstart="handleEvent" />
+        value="{{ value || '' }}"
+        disabled="{{ disabled }}"
+        maxlength="{{ maxlength == null ? -1 : maxlength }}"
+        focus="{{ focus }}"
+        confirm-type="{{ confirmType || 'done' }}"
+        confirm-hold="{{ confirmHold }}"
+        selection-start="{{ selectionStart }}"
+        selection-end="{{ selectionEnd }}"
+        adjust-position="{{ adjustPosition }}"
+        hold-keyboard="{{ holdKeyboard }}"
+        bindtouchstart="handleEvent"
+        bindinput="translateEvent"
+        bindchange="translateEvent"
+        bindfocus="translateEvent"
+        bindblur="translateEvent"
+        bindconfirm="translateEvent"
+        bindkeyboardheightchange="translateEvent" />
 
 </template>
 
@@ -182,7 +199,7 @@
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
-            autoplay="{{ autoplay !== false }}"
+            autoplay="{{ false }}"
             current="{{ current || 0 }}"
             interval="{{ interval || 5000 }}"
             duration="{{ duration || 500 }}"
@@ -254,3 +271,14 @@
     </view>
 </template>
 
+
+
+<template name="MaskBox">
+
+    <view data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-header{{ active }}{{ class }}" 
+        style="{{ style || '' }}"
+        bindtouchstart="handleEvent" />
+
+</template>

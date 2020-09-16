@@ -62,5 +62,26 @@ Page({
    */
   onShareAppMessage: function () {
 
+  },
+
+  // 冒泡事件处理方法
+  handleEvent: function (event) {
+      
+    var dataset = event.target.dataset;
+    var id, t;
+
+    if ((id = dataset.id) && ((t = new Date()) - time) > 50)
+    {
+        time = t;
+
+        yaxi.__event_id = id;
+        yaxi.__event_flag = dataset.flag;
+    }
+  },
+
+
+  translateEvent: function (event) {
+
+    console.log(event)
   }
 })

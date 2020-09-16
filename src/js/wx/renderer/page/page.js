@@ -92,31 +92,20 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 	// 打开指定页面
-    yaxi.openPage = function (Page, payload, callback) {
-
-        if (typeof payload === 'function')
-        {
-            callback = payload;
-            payload = void 0;
-        }
+    yaxi.openPage = function (Page, options) {
 
         try
         {
-            var page = new Page(payload);
+            var page = new Page(options);
         
-            if (page.onopening(payload) !== false)
+            if (page.onloading(options) !== false)
             {
                 all.push(page);
-                page.payload = payload;
+                page.options = options;
     
                 wx[Page.main ? 'redirectTo' : 'navigateTo']({
     
-                    url: '../../yaxi/pages/host?uuid=' + page.uuid,
-    
-                    success: function () {
-    
-                        callback && callback(page);
-                    }
+                    url: '../../yaxi/pages/host?uuid=' + page.uuid
                 });
             }
         }
@@ -129,22 +118,46 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 	// 关闭当前页面
-    yaxi.closePage = function (delta, callback) {
-
-        if (typeof delta === 'function')
-        {
-            callback = delta;
-            delta = 1;
-        }
+    yaxi.closePage = function (delta) {
 
         wx.navigateBack({
 
-            delta: delta || 1,
-            success: callback
+            delta: delta || 1
         });
 	}
     
     
+
+    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
+
+        try
+        {
+            var page = find(uuid);
+            var data;
+
+            notifyRender(renderings);
+
+            data = {};
+            data[wxName || (wxName = 'data')] = page.render();
+
+            console.log(data);
+
+            page.__wx_page = wxPage;
+            page.__wx_name = wxName;
+
+            wxPage.setData(data, function () {
+
+                notifyRender(rendereds);
+                page.onload(page.options);
+            });
+        }
+        catch (e)
+        {
+            console.error(e);
+            throw e;
+        }
+    }
+
 
     yaxi.__on_page_patch = function (patches) {
 
@@ -175,44 +188,12 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
     }
 
 
-
-    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
-
-        try
-        {
-            var page = find(uuid);
-            var data;
-
-            notifyRender(renderings);
-
-            data = {};
-            data[wxName || (wxName = 'data')] = page.render();
-
-            console.log(data);
-
-            page.__wx_page = wxPage;
-            page.__wx_name = wxName;
-
-            wxPage.setData(data, function () {
-
-                notifyRender(rendereds);
-                page.onopened(page.payload);
-            });
-        }
-        catch (e)
-        {
-            console.error(e);
-            throw e;
-        }
-    }
-
-
     yaxi.__on_page_close = function (uuid) {
 
         var index = find(uuid, true);
         var page = all[index];
 
-        page.onclosed();
+        page.onunload();
 
         page.__wx = null;
         page.destroy();

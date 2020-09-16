@@ -845,7 +845,7 @@ yaxi.impl.property = function (target) {
 
         if (/[^\w-]/.test(name))
         {
-            throw '"' + name + '" not a valid property name!'; 
+            throw 'define property error: "' + name + '" not a valid property name!'; 
         }
 
         var converts = this.$converts;
@@ -866,7 +866,7 @@ yaxi.impl.property = function (target) {
             options.set || (options.set = function () {
 
                 var type = this.typeName;
-                throw '"' + name + '"' + (type ? ' of ' + type : '') + ' is readonly!';
+                throw 'property "' + name + '"' + (type ? ' of ' + type : '') + ' is readonly!';
             });
         }
         else
@@ -1771,7 +1771,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 }
                 else
                 {
-                    throw 'not exist pipe function "' + list[0] + '"!';
+                    throw 'compile pipe error: not exist pipe function "' + list[0] + '"!';
                 }
             }
         }
@@ -1907,7 +1907,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
             if ((any = this.__bindings) && (any = any[name]))
             {
-                syncBindings(this, any);
+                syncBindings(any);
             }
         }
     }
@@ -1979,12 +1979,10 @@ yaxi.http = Object.extend.call({}, function (Class) {
     // 定义模型
     yaxi.model = function (properties) {
 
-        var extend = create,
-            prototype = extend(base),
-            subkeys = prototype.$subkeys = extend(null),
-            defaults = prototype.$defaults = extend(null),
-            options,
-            type;
+        var extend = create;
+        var prototype = extend(base);
+        var subkeys = prototype.$subkeys = extend(null);
+        var defaults = prototype.$defaults = extend(null);
 
         function Model(parent) {
 
@@ -1992,28 +1990,61 @@ yaxi.http = Object.extend.call({}, function (Class) {
             this.$storage = extend(defaults);
         }
         
+        prototype.$converts = extend(null);
+        
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
 
-        prototype.$converts = extend(null);
-        
+        defineProperties(prototype, properties, subkeys);
+
+        return Model;
+    }
+
+
+    function defineProperties(prototype, properties, subkeys) {
+
+        var options, type;
+
         for (var name in properties)
         {
             if (name[0] === '$' || name[0] === '_' && name[1] === '_')
             {
-                throw 'model field can not use "$" or "__" to start!';
+                throw 'define model error: field can not use "$" or "__" to start!';
             }
 
-            if ((options = properties[name]) && typeof options === 'function')
+            if (options = properties[name])
             {
-                if (type = options.model)
+                switch (typeof options)
                 {
-                    subkeys[name] = type;
-                    define(prototype, name, (type === 1 ? submodel : subarrayModel)(name, options));
-                }
-                else
-                {
-                    define(prototype, name, { get: options });
+                    case 'function':
+                        // 子模型
+                        if (type = options.model)
+                        {
+                            define(prototype, name, (type === 1 ? defineSubModel : defineSubArrayModel)(name, options));
+                            subkeys[name] = type;
+                        }
+                        else // 计算字段
+                        {
+                            define(prototype, name, { get: options });
+                        }
+                        break;
+                    
+                    case 'object': // 对象
+                        if (options instanceof Array) // 子数组模型
+                        {
+                            define(prototype, name, defineSubArrayModel(name, type = checkSubArrayModel(options)));
+                        }
+                        else // 子模型
+                        {
+                            define(prototype, name, defineSubModel(name, type = yaxi.model(options)));
+                        }
+
+                        subkeys[name] = type;
+                        break;
+
+                    default:
+                        property.call(prototype, name, options);
+                        break; 
                 }
             }
             else
@@ -2021,13 +2052,37 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 property.call(prototype, name, options);
             }
         }
+    }
 
-        return Model;
+
+    function checkSubArrayModel(options) {
+
+        var message = 'define model error: ';
+        var properties = options[0];
+        var itemName = options[1];
+        var itemIndex = options[2];
+
+        if (!properties || typeof properties !== 'object')
+        {
+            throw message + 'the first item of sub array model must be a none empty object!'
+        }
+
+        if (itemName != null && typeof itemName !== 'string')
+        {
+            throw message + 'the second item for sub array model must be a string or null!';
+        }
+
+        if (itemIndex != null && typeof itemIndex !== 'string')
+        {
+            throw message + 'the third item for sub array model must be a string or null!';
+        }
+
+        return yaxi.arrayModel(properties, itemName, itemIndex);
     }
 
 
 
-    function submodel(name, Model) {
+    function defineSubModel(name, Model) {
     
         name = '__sub_' + name;
 
@@ -2056,7 +2111,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
-    function subarrayModel(name, ArrayModel) {
+    function defineSubArrayModel(name, ArrayModel) {
 
         name = '__sub_' + name;
 
@@ -2095,14 +2150,16 @@ yaxi.http = Object.extend.call({}, function (Class) {
     
 
 
-    function syncBindings(model, bindings) {
+    function syncBindings(bindings) {
 
         var binding, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
-            value = model[binding.field];
+
+            // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
+            value = binding.model[binding.field];
 
             if (any = binding.pipe)
             {
@@ -2144,7 +2201,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         }
         else
         {
-            throw 'binding expression "' + expression + '" is invalid!';
+            throw 'bind error: binding expression "' + expression + '" is invalid!';
         }
     }
 
@@ -2217,7 +2274,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 {
                     if (path[1])
                     {
-                        throw '"' + name + '" is model index, can not supports sub model!';
+                        throw 'bind error: "' + name + '" is model index, can not supports sub model!';
                     }
 
                     binding.type = 2;
@@ -2231,7 +2288,12 @@ yaxi.http = Object.extend.call({}, function (Class) {
             {
                 if (path[1])
                 {
-                    return findSubModel(model, binding, rule);
+                    if ((model = model[name]) && model.__model_type === 1)
+                    {
+                        return findSubModel(model, binding, rule);
+                    }
+                    
+                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
                 }
  
                 binding.model = model;
@@ -2241,7 +2303,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             model = model.$parent;
         }
 
-        throw 'model field "' + name + '" not exists!';
+        throw 'bind error: model field "' + name + '" not exists!';
     }
 
 
@@ -2256,7 +2318,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
             if (!model)
             {
-                throw 'binding "' + rule.bind + '" error, can not find submodel "' + path[i] + '"!';
+                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[i] + '"!';
             }
         }
 
@@ -2267,7 +2329,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             return binding;
         }
 
-        throw 'binding "' + rule.bind + '" error, can not find model field "' + path[last] + '"!';
+        throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
     }
 
 
@@ -2466,7 +2528,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
         if (bindings && (bindings = bindings[name]))
         {
-            syncBindings(this, bindings);
+            syncBindings(bindings);
         }
     }
 
@@ -2600,7 +2662,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
             else
             {
-                throw 'length is readonly!';
+                throw 'the length of array mode is readonly!';
             }
         }
     });
@@ -2891,8 +2953,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     var border = color.border = create(null);
 
-    var icon = color.icon = create(null);
-
+ 
 
     bg.level1 = '#ffffff';
     bg.level2 = '#f7f7f7';
@@ -2937,21 +2998,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
     border.warning = '#e89518';
     border.danger = '#ff6c6c';
     border.disabled = '#999999';
-
-
-    icon.level1 = '#31313d';
-    icon.level2 = '#6c768b';
-    icon.level3 = '#b8c0de';
-    icon.level4 = '#cccccc';
-    icon.level5 = '#ffffff';
-
-    icon.important = '#c40606';
-    icon.primary = '#1c86ee';
-    icon.second = '#48d1cc';
-    icon.success = '#71c04a';
-    icon.warning = '#e89518';
-    icon.danger = '#ff6c6c';
-    icon.disabled = '#999999';
 
 
     color.mask = '#000000';
@@ -3774,10 +3820,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$converts = create(null);
 
 
-    // 不转换Class
-    this.$converts.Class = false;
-
-
     // 混入存储器(h5用来放置自定义渲染逻辑)
     this.$mixin = create(null);
 
@@ -4019,7 +4061,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
         else
         {
-            throw 'class name not allow null or empty!';
+            throw 'add class error: class name not allow null or empty!';
         }
     }
 
@@ -4180,6 +4222,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
 
 
+    // 是否切换为不活动状态
+    this.$property('inactive', false, {
+
+        type: 'boolean',
+        class: 'yx-inactive'
+    });
+
+
     // 是否禁用
     this.$property('disabled', false);
 
@@ -4306,7 +4356,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
     // 父控件
     this.parent = null;
 
@@ -4339,7 +4388,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if (typeof templateFn !== 'function')
         {
-            throw 'argument templateFn of method loadTemplate must be a function!'
+            throw 'load template error: argument templateFn of method loadTemplate must be a function!'
         }
 
         this.load(templateFn.call(this), model);
@@ -4417,9 +4466,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         {
             model.$bind(this, bindings);
         }
+        else if (model.__model_type === 2)
+        {
+            throw 'bind error: require a model object, but input a array model!';
+        }
         else
         {
-            throw 'not a valid model object';
+            throw 'bind error: not a model object';
         }
     }
 
@@ -4476,7 +4529,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             // 容器控件内部不允许绑定事件
             if (yaxi.__content_count > 0)
             {
-                throw 'does not support to bind event inside the content control!'
+                throw 'register event error: no support event inside the content control!'
             }
 
             for (var name in events)
@@ -4567,7 +4620,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             this.ondestroy();
         }
 
-        this.parent = this.__binding_push = this.__model = null;
+        this.parent = this.__binding_push = this.currentModel = null;
     }
 
 
@@ -4615,6 +4668,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     
+    var message = 'create control error: ';
+
     var message1 = ' can not be a sub type';
 
     var message2 = ' can not be null!';
@@ -4627,28 +4682,28 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if (!Class)
         {
-            throw 'Class' + message2;
+            throw message + 'type' + message2;
         }
 
         if (!parent)
         {
-            throw 'parent' + message2;
+            throw message + 'parent' + message2;
         }
 
         if (check = Class.allowParent)
         {
             if (check !== true && !check(parent))
             {
-                throw Class.typeName + message1 + ' of ' + parent.typeName + '!';
+                throw message + Class.typeName + message1 + ' of ' + parent.typeName + '!';
             }
         }
         else if (check = Class.typeName)
         {
-            throw check + message1 + '!';
+            throw message + check + message1 + '!';
         }
         else
         {
-            throw JSON.stringify(Class).substring(0, 20) + '... not a valid type!';
+            throw message + JSON.stringify(Class).substring(0, 20) + '... not a valid type!';
         }
     }
 
@@ -4678,7 +4733,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
-                    throw '"' + options.Class + '" doesn\'t register!';
+                    throw 'create control error: "' + options[0] + '" doesn\'t register!';
                 }
                 
                 check(Class, this);
@@ -4691,7 +4746,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
 
-        return 'can not create control, does not input type!';
+        return message + 'no options!';
     }
 
 
@@ -4754,7 +4809,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             }
             else
             {
-                throw 'length is readonly!';
+                throw 'the length of collection is readonly!';
             }
         }
     });
@@ -5089,7 +5144,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
         if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            throw '"' + options[0] + '" doesn\'t register!';
+            throw 'create control error: class "' + options[0] + '" doesn\'t register!';
         }
 
         if (Class)
@@ -5356,6 +5411,10 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     }
 
 
+
+    var message = 'control load error: ';
+
+
     this.load = function (values, model) {
 
         var storage = this.$storage;
@@ -5363,7 +5422,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!model)
         {
-            throw 'repeater does not specify a model!';
+            throw message + 'repeater control must bind a model!';
         }
 
         base.load.call(this, values, model);
@@ -5374,12 +5433,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             if (!model)
             {
-                throw 'can not find repeater submodel "' + name + '"!';
+                throw message + 'can not find submodel "' + name + '" of repeater control!';
             }
 
             if (model.__model_type !== 2)
             {
-                throw 'repeater model "' + name + '" not a valid array model!';
+                throw message + 'model "' + name + '" not a valid array model of repeater control!';
             }
         }
 
@@ -5391,7 +5450,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!arrayModel || arrayModel.__model_type !== 2)
         {
-            throw 'repeater reload method need a array model!';
+            throw  message + 'repeater control must bind a array model!';
         }
 
         var template = this.template;
@@ -5399,7 +5458,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!template)
         {
-            throw 'repeater does not specify a template!';
+            throw message + 'repeater control does not specify a template!';
         }
 
         var children = this.__children;
@@ -5485,7 +5544,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 for (var j = 0; j < template_length; j++)
                 {
                     control = parent.$createSubControl(template, model);
-                    control.__model = model;
+                    control.currentModel = model;
 
                     list[index++] = control;
                 }
@@ -5500,7 +5559,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 model = arrayModel[i];
 
                 control = parent.$createSubControl(template, model);
-                control.__model = model;
+                control.currentModel = model;
 
                 list[i] = control;
             }
@@ -5524,7 +5583,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         {
             var control = this.$createSubControl(template, model);
 
-            control.__model = model;
+            control.currentModel = model;
             this.__children.set(index, control);
         }
     }
@@ -5562,8 +5621,8 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.__model.__index;
-        b = b.__model.__index;
+        a = a.currentModel.__index;
+        b = b.currentModel.__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
@@ -5774,6 +5833,24 @@ yaxi.ImageButton = yaxi.ContentControl.extend(function (Class, base) {
 
 
 
+yaxi.MaskBox = yaxi.Control.extend(function (Class, base) {
+
+
+    
+
+
+
+}, function MaskBox() {
+
+
+    yaxi.Control.apply(this, arguments);
+
+
+}).register('MaskBox');
+
+
+
+
 yaxi.Popup = yaxi.Box.extend(function (Class, base) {
 	
 
@@ -5965,12 +6042,12 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (!host)
             {
-                throw 'Tab host not allow empty!'; 
+                throw 'host of tab control not allow empty!'; 
             }
 
             if (host[0] !== '<')
             {
-                throw 'Tab host must use "<" or "<<" to find up!';
+                throw 'host of tab control host must use "<" or "<<" to find up!';
             }
 
             if (host = this.find(host))
@@ -5980,10 +6057,10 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
                     return host;
                 }
 
-                throw 'Tab host must be a Box!';
+                throw 'host of must be a Box!';
             }
 
-            throw 'Tab can not find host "' + this.host + '"!';
+            throw 'tab control can not find host "' + this.host + '"!';
         }
     });
 
@@ -6013,7 +6090,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.addClass('yx-hidden');
+                item.inactive = true;
             }
 
             if (item = event.lastItem)
@@ -6053,7 +6130,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
         if (page.__tab)
         {
-            page.removeClass('yx-hidden');
+            page.inactive = false;
         }
         else
         {
@@ -6154,16 +6231,12 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('value', '');
 
 
-
     this.$property('text', {
 
         get: function () {
 
-            return (any = this.__format) ? any(this.value) : this.value;
-        },
-        set: function (value) {
-
-            this.value = value;
+            var format = this.__format;
+            return format ? format(this.value) : this.value;
         }
     });
 
@@ -6171,10 +6244,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('placeholder', '');
 
 
-    this.$property('align', 'left');
-
-
-    this.$property('maxlength', 0);
+    this.$property('maxlength', -1);
 
 
     this.$property('pattern', '');
@@ -6191,6 +6261,25 @@ yaxi.TextBox = yaxi.Control.extend(function () {
         }
         
     });
+
+
+    
+    this.$property('focus', false);
+
+
+
+    this.$property('selectionStart', 0, {
+
+        alias: 'selection-start'
+    });
+
+
+    
+    this.$property('selectionEnd', 0, {
+
+        alias: 'selection-end'
+    });
+
 
 
 }, function TextBox() {
@@ -6391,22 +6480,26 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 
 	
 	
-	this.onopening = function (payload) {
+	// 页面加载前处理
+	this.onloading = function (options) {
 	}
 	
 	
-	this.onopened = function (payload) {
+
+	// 页面加载后处理
+	this.onload = function (options) {
 	}
 	
-	
-	this.onclosed = function () {
+
+	// 页面卸载后处理
+	this.onunload = function () {
 	}
 
 
 
-	function open(payload, callback) {
+	function open(options) {
 
-		yaxi.openPage(this, payload, callback);
+		yaxi.openPage(this, options);
 	}
 
 
@@ -6441,7 +6534,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
             return true;
         }
 
-        throw 'Header can only add to Page!';
+        throw 'Header component can only add to Page!';
     }
 
 
@@ -6615,10 +6708,28 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         var e = new Event(event.type);
 
         e.flag = flag;
-        e.changedTouches = event.changedTouches;
-        e.touches = event.touches;
+        e.changedTouches = parseTouches(event.changedTouches);
+        e.touches = parseTouches(event.touches);
 
         return e;
+    }
+
+
+    function parseTouches(touches) {
+
+        for (var i = touches.length; i--;)
+        {
+            var touch = touches[i];
+
+            // 微信小程序只支持以下touch属性
+            touches[i] = {
+                identifier: touch.identifier,
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                clientX: touch.clientX,
+                clientY: touch.clientY 
+            }
+        }
     }
 
 
@@ -6738,18 +6849,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                     return stop(event);
                 }
             }
-            // 350ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 350 || tapControl !== control))
+            // 200ms内不重复触发tap事件
+            else if (tap && (time - tapTime > 200 || tapControl !== control))
             {
-                tapControl = control;
-                tapTime = time;
+                // 延时触发tap事件解决input先触发change事件的问题
+                setTimeout(function () {
 
-                e.type = 'tap';
- 
-                if (call(control, '__on_tap', e) === false || control.trigger(e) === false)
-                {
-                    return stop(event);
-                }
+                    tapControl = control;
+                    tapTime = time;
+    
+                    e.type = 'tap';
+     
+                    if (call(control, '__on_tap', e) !== false)
+                    {
+                        control.trigger(e) === false
+                    }
+
+                }, 0);
             }
         }
 
@@ -6991,7 +7107,6 @@ yaxi.Control.mixin(function (mixin) {
         if (target && html)
         {
             target.__html_template = html;
-            target.__dom_template = null;
         }
     }
 
@@ -7008,7 +7123,7 @@ yaxi.Control.mixin(function (mixin) {
         view = div.firstChild;
         div.removeChild(view);
 
-        return target.constructor.prototype.__dom_template = view;
+        return target.constructor.__dom_template = view;
     }
 
 
@@ -7016,7 +7131,7 @@ yaxi.Control.mixin(function (mixin) {
     // 渲染控件
     this.render = function () {
 
-        var view = this.$view || (this.$view = (this.__dom_template || init_template(this)).cloneNode(true));
+        var view = this.$view || (this.$view = (this.constructor.__dom_template || init_template(this)).cloneNode(true));
 
         view.$uuid = this.uuid;
 
@@ -7516,62 +7631,53 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    yaxi.template(this, '<span class="$class"><input type="text" /></span>');
+    yaxi.template(this, '<input type="text" class="$class" />');
 
 
 
-    this.focus = function () {
 
-        var view;
+    mixin.focus = function (view, value) {
 
-        if (view = this.$view)
+        if (value)
         {
             view.focus();
         }
-    }
-
-    
-    this.blur = function () {
-
-        var view;
-
-        if (view = this.$view)
+        else
         {
             view.blur();
         }
     }
 
 
-
     mixin.value = function (view, value) {
 
-        var format = this.__format;
+        var format;
 
-        if (format)
+        if (format = this.__format)
         {
             value = format(value);
         }
 
-        view.firstChild.value = value;
+        view.value = value;
     }
 
 
 
     mixin.placeholder = function (view, value) {
 
-        view.firstChild.setAttribute('placeholder', value);
+        view.setAttribute('placeholder', value);
     }
 
 
     mixin.maxlength = function (view, value) {
 
-        view.firstChild.setAttribute('maxlength', value);
+        view.setAttribute('maxlength', value);
     }
 
 
     mixin.pattern = function (view, value) {
 
-        view.firstChild.setAttribute('pattern', value);
+        view.setAttribute('pattern', value);
     }
 
 
@@ -8148,25 +8254,19 @@ yaxi.Page.mixin(function (mixin, base) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, payload, callback) {
+	yaxi.openPage = function (Page, options) {
 
-        if (typeof payload === 'function')
-        {
-            callback = payload;
-            payload = void 0;
-		}
-
-        var page = new Page(payload);
+        var page = new Page(options);
         
-        if (page.onopening(payload) !== false)
+        if (page.onloading(options) !== false)
         {
             all.push(page);
-			page.payload = payload;
+			page.options = options;
 			
 			host.appendChild(page.render());
 
 			notifyRender(renderings);
-			page.onopened(page.payload);
+			page.onload(page.options);
 		}
 	}
 
@@ -8190,7 +8290,7 @@ yaxi.Page.mixin(function (mixin, base) {
 		{
 			host.removeChild(page.$view);
 
-			page.onclosed();
+			page.onunload();
 			page.destroy();
 
 			if (--delta <= 0)

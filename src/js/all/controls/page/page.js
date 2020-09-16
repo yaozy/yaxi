@@ -14,22 +14,26 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 
 	
 	
-	this.onopening = function (payload) {
+	// 页面加载前处理
+	this.onloading = function (options) {
 	}
 	
 	
-	this.onopened = function (payload) {
+
+	// 页面加载后处理
+	this.onload = function (options) {
 	}
 	
-	
-	this.onclosed = function () {
+
+	// 页面卸载后处理
+	this.onunload = function () {
 	}
 
 
 
-	function open(payload, callback) {
+	function open(options) {
 
-		yaxi.openPage(this, payload, callback);
+		yaxi.openPage(this, options);
 	}
 
 

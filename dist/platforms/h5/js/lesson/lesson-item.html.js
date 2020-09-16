@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = function (scope) {
 
 
 return (
@@ -44,27 +44,27 @@ return (
 						},
 						(function () {
 
-						    var __for_5_1 = this.remark;
-						    var __for_5_2 = [];
+						    var __for_2_1 = this.remark;
+						    var __for_2_2 = [];
 
-						    for (var index = 0, __for_5_len = __for_5_1.length; index < __for_5_len; index++)
+						    for (var index = 0, __for_2_len = __for_2_1.length; index < __for_2_len; index++)
 						    {
-						        var item = __for_5_1[index];
+						        var item = __for_2_1[index];
 
-						        __for_5_2.push.apply(__for_5_2,
+						        __for_2_2.push.apply(__for_2_2,
 									[
 										[
 											"text",
 											{
-												"text": item,
-												"theme": "level5-bg",
+												"text": this.item,
+												"theme": "bg-level5",
 												"style": "display:inline-block;border-radius:20rem;padding:0 20rem;margin-right:10rem;"
 											}
 										]
 									] || []);
 						    }
 
-						    return __for_5_2;
+						    return __for_2_2;
 
 						}).call(this)
 					],

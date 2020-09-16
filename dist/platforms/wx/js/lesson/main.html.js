@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = function (scope) {
 
 
 return (
@@ -15,8 +15,10 @@ return (
 				}
 			],
 			[
-				"band",
-				null
+				require("./toolbar"),
+				{
+
+				}
 			],
 			[
 				"scrollbox",

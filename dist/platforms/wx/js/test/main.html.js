@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = function (scope) {
 
 
 return (
@@ -35,7 +35,7 @@ return (
 								"text",
 								{
 									"text": "model",
-									"theme": "important-font",
+									"theme": "font-important",
 									"style": "margin-left:.5em;font-weight:bold;"
 								}
 							]
@@ -57,7 +57,7 @@ return (
 								"text",
 								{
 									"text": "test",
-									"theme": "important-font",
+									"theme": "font-important",
 									"style": "margin-left:.5em;font-weight:bold;"
 								}
 							]

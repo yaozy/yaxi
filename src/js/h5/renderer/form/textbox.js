@@ -2,62 +2,53 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    yaxi.template(this, '<span class="$class"><input type="text" /></span>');
+    yaxi.template(this, '<input type="text" class="$class" />');
 
 
 
-    this.focus = function () {
 
-        var view;
+    mixin.focus = function (view, value) {
 
-        if (view = this.$view)
+        if (value)
         {
             view.focus();
         }
-    }
-
-    
-    this.blur = function () {
-
-        var view;
-
-        if (view = this.$view)
+        else
         {
             view.blur();
         }
     }
 
 
-
     mixin.value = function (view, value) {
 
-        var format = this.__format;
+        var format;
 
-        if (format)
+        if (format = this.__format)
         {
             value = format(value);
         }
 
-        view.firstChild.value = value;
+        view.value = value;
     }
 
 
 
     mixin.placeholder = function (view, value) {
 
-        view.firstChild.setAttribute('placeholder', value);
+        view.setAttribute('placeholder', value);
     }
 
 
     mixin.maxlength = function (view, value) {
 
-        view.firstChild.setAttribute('maxlength', value);
+        view.setAttribute('maxlength', value);
     }
 
 
     mixin.pattern = function (view, value) {
 
-        view.firstChild.setAttribute('pattern', value);
+        view.setAttribute('pattern', value);
     }
 
 

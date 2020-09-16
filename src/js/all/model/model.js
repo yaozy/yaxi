@@ -88,7 +88,7 @@
 
             if ((any = this.__bindings) && (any = any[name]))
             {
-                syncBindings(this, any);
+                syncBindings(any);
             }
         }
     }
@@ -160,12 +160,10 @@
     // 定义模型
     yaxi.model = function (properties) {
 
-        var extend = create,
-            prototype = extend(base),
-            subkeys = prototype.$subkeys = extend(null),
-            defaults = prototype.$defaults = extend(null),
-            options,
-            type;
+        var extend = create;
+        var prototype = extend(base);
+        var subkeys = prototype.$subkeys = extend(null);
+        var defaults = prototype.$defaults = extend(null);
 
         function Model(parent) {
 
@@ -173,28 +171,61 @@
             this.$storage = extend(defaults);
         }
         
+        prototype.$converts = extend(null);
+        
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
 
-        prototype.$converts = extend(null);
-        
+        defineProperties(prototype, properties, subkeys);
+
+        return Model;
+    }
+
+
+    function defineProperties(prototype, properties, subkeys) {
+
+        var options, type;
+
         for (var name in properties)
         {
             if (name[0] === '$' || name[0] === '_' && name[1] === '_')
             {
-                throw 'model field can not use "$" or "__" to start!';
+                throw 'define model error: field can not use "$" or "__" to start!';
             }
 
-            if ((options = properties[name]) && typeof options === 'function')
+            if (options = properties[name])
             {
-                if (type = options.model)
+                switch (typeof options)
                 {
-                    subkeys[name] = type;
-                    define(prototype, name, (type === 1 ? submodel : subarrayModel)(name, options));
-                }
-                else
-                {
-                    define(prototype, name, { get: options });
+                    case 'function':
+                        // 子模型
+                        if (type = options.model)
+                        {
+                            define(prototype, name, (type === 1 ? defineSubModel : defineSubArrayModel)(name, options));
+                            subkeys[name] = type;
+                        }
+                        else // 计算字段
+                        {
+                            define(prototype, name, { get: options });
+                        }
+                        break;
+                    
+                    case 'object': // 对象
+                        if (options instanceof Array) // 子数组模型
+                        {
+                            define(prototype, name, defineSubArrayModel(name, type = checkSubArrayModel(options)));
+                        }
+                        else // 子模型
+                        {
+                            define(prototype, name, defineSubModel(name, type = yaxi.model(options)));
+                        }
+
+                        subkeys[name] = type;
+                        break;
+
+                    default:
+                        property.call(prototype, name, options);
+                        break; 
                 }
             }
             else
@@ -202,13 +233,37 @@
                 property.call(prototype, name, options);
             }
         }
+    }
 
-        return Model;
+
+    function checkSubArrayModel(options) {
+
+        var message = 'define model error: ';
+        var properties = options[0];
+        var itemName = options[1];
+        var itemIndex = options[2];
+
+        if (!properties || typeof properties !== 'object')
+        {
+            throw message + 'the first item of sub array model must be a none empty object!'
+        }
+
+        if (itemName != null && typeof itemName !== 'string')
+        {
+            throw message + 'the second item for sub array model must be a string or null!';
+        }
+
+        if (itemIndex != null && typeof itemIndex !== 'string')
+        {
+            throw message + 'the third item for sub array model must be a string or null!';
+        }
+
+        return yaxi.arrayModel(properties, itemName, itemIndex);
     }
 
 
 
-    function submodel(name, Model) {
+    function defineSubModel(name, Model) {
     
         name = '__sub_' + name;
 
@@ -237,7 +292,7 @@
     }
 
 
-    function subarrayModel(name, ArrayModel) {
+    function defineSubArrayModel(name, ArrayModel) {
 
         name = '__sub_' + name;
 
@@ -276,14 +331,16 @@
     
 
 
-    function syncBindings(model, bindings) {
+    function syncBindings(bindings) {
 
         var binding, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
-            value = model[binding.field];
+
+            // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
+            value = binding.model[binding.field];
 
             if (any = binding.pipe)
             {
@@ -325,7 +382,7 @@
         }
         else
         {
-            throw 'binding expression "' + expression + '" is invalid!';
+            throw 'bind error: binding expression "' + expression + '" is invalid!';
         }
     }
 
@@ -398,7 +455,7 @@
                 {
                     if (path[1])
                     {
-                        throw '"' + name + '" is model index, can not supports sub model!';
+                        throw 'bind error: "' + name + '" is model index, can not supports sub model!';
                     }
 
                     binding.type = 2;
@@ -412,7 +469,12 @@
             {
                 if (path[1])
                 {
-                    return findSubModel(model, binding, rule);
+                    if ((model = model[name]) && model.__model_type === 1)
+                    {
+                        return findSubModel(model, binding, rule);
+                    }
+                    
+                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
                 }
  
                 binding.model = model;
@@ -422,7 +484,7 @@
             model = model.$parent;
         }
 
-        throw 'model field "' + name + '" not exists!';
+        throw 'bind error: model field "' + name + '" not exists!';
     }
 
 
@@ -437,7 +499,7 @@
 
             if (!model)
             {
-                throw 'binding "' + rule.bind + '" error, can not find submodel "' + path[i] + '"!';
+                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[i] + '"!';
             }
         }
 
@@ -448,7 +510,7 @@
             return binding;
         }
 
-        throw 'binding "' + rule.bind + '" error, can not find model field "' + path[last] + '"!';
+        throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
     }
 
 
@@ -647,7 +709,7 @@
 
         if (bindings && (bindings = bindings[name]))
         {
-            syncBindings(this, bindings);
+            syncBindings(bindings);
         }
     }
 

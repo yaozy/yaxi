@@ -31,9 +31,11 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     }
 
 
-    this.handleSearch = function () {
+    this.handleSearch = function (event) {
 
-        require('./search').open();
+        var tab = this.parent.find('>>Tab');
+
+        console.log(tab)
     }
 
 

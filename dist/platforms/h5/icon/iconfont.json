@@ -6,6 +6,27 @@
   "description": "教育软件项目",
   "glyphs": [
     {
+      "icon_id": "4251726",
+      "name": "更多",
+      "font_class": "gengduo",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "1146281",
+      "name": "iconfont_up",
+      "font_class": "-common-collapse",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "1146282",
+      "name": "iconfont_down",
+      "font_class": "-common-expand",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
       "icon_id": "454695",
       "name": "直播",
       "font_class": "-home-live",

@@ -14,7 +14,6 @@ yaxi.Control.mixin(function (mixin) {
         if (target && html)
         {
             target.__html_template = html;
-            target.__dom_template = null;
         }
     }
 
@@ -31,7 +30,7 @@ yaxi.Control.mixin(function (mixin) {
         view = div.firstChild;
         div.removeChild(view);
 
-        return target.constructor.prototype.__dom_template = view;
+        return target.constructor.__dom_template = view;
     }
 
 
@@ -39,7 +38,7 @@ yaxi.Control.mixin(function (mixin) {
     // 渲染控件
     this.render = function () {
 
-        var view = this.$view || (this.$view = (this.__dom_template || init_template(this)).cloneNode(true));
+        var view = this.$view || (this.$view = (this.constructor.__dom_template || init_template(this)).cloneNode(true));
 
         view.$uuid = this.uuid;
 

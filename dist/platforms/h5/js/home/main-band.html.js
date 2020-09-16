@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = function (scope) {
 
 
 return (
@@ -71,14 +71,14 @@ return (
 								[
 									"box",
 									{
-										"tag": item.id,
+										"tag": this.item.id,
 										"style": "height:160rem;margin:20rem 0;overflow:hidden;"
 									},
 									[
 										[
 											"image",
 											{
-												"src": item.image,
+												"src": this.item.image,
 												"style": "width:200rem;height:100%;"
 											}
 										],
@@ -97,7 +97,7 @@ return (
 														[
 															"text",
 															{
-																"text": item.name
+																"text": this.item.name
 															}
 														]
 													]
@@ -112,7 +112,7 @@ return (
 														[
 															"text",
 															{
-																"text": item.remark
+																"text": this.item.remark
 															}
 														]
 													]
@@ -127,7 +127,7 @@ return (
 														[
 															"text",
 															{
-																"text": '￥' + item.price
+																"text": '￥' + this.item.price
 															}
 														]
 													]

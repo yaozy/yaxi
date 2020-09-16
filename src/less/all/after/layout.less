@@ -4,10 +4,26 @@
     flex-direction: row;
 }
 
+.yx-layout-row-center {
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: row;
+    justify-self: center;
+    justify-content: center;
+}
+
 .yx-layout-row-reverse {
     display: -webkit-flex;
     display: flex;
     flex-direction: row-reverse;
+}
+
+.yx-layout-row-reverse-center {
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-self: center;
+    justify-content: center;
 }
 
 .yx-layout-column {
@@ -23,6 +39,11 @@
 }
 
 
-.yx-hidden {
+
+.yx-inactive {
     visibility: hidden;
+}
+
+.yx-hidden {
+    display: none;
 }

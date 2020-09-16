@@ -76,12 +76,12 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (!host)
             {
-                throw 'Tab host not allow empty!'; 
+                throw 'host of tab control not allow empty!'; 
             }
 
             if (host[0] !== '<')
             {
-                throw 'Tab host must use "<" or "<<" to find up!';
+                throw 'host of tab control host must use "<" or "<<" to find up!';
             }
 
             if (host = this.find(host))
@@ -91,10 +91,10 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
                     return host;
                 }
 
-                throw 'Tab host must be a Box!';
+                throw 'host of must be a Box!';
             }
 
-            throw 'Tab can not find host "' + this.host + '"!';
+            throw 'tab control can not find host "' + this.host + '"!';
         }
     });
 
@@ -124,7 +124,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.addClass('yx-hidden');
+                item.inactive = true;
             }
 
             if (item = event.lastItem)
@@ -164,7 +164,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
         if (page.__tab)
         {
-            page.removeClass('yx-hidden');
+            page.inactive = false;
         }
         else
         {

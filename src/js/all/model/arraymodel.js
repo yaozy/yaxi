@@ -65,7 +65,7 @@
             }
             else
             {
-                throw 'length is readonly!';
+                throw 'the length of array mode is readonly!';
             }
         }
     });

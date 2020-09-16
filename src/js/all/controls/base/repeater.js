@@ -80,6 +80,10 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     }
 
 
+
+    var message = 'control load error: ';
+
+
     this.load = function (values, model) {
 
         var storage = this.$storage;
@@ -87,7 +91,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!model)
         {
-            throw 'repeater does not specify a model!';
+            throw message + 'repeater control must bind a model!';
         }
 
         base.load.call(this, values, model);
@@ -98,12 +102,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             if (!model)
             {
-                throw 'can not find repeater submodel "' + name + '"!';
+                throw message + 'can not find submodel "' + name + '" of repeater control!';
             }
 
             if (model.__model_type !== 2)
             {
-                throw 'repeater model "' + name + '" not a valid array model!';
+                throw message + 'model "' + name + '" not a valid array model of repeater control!';
             }
         }
 
@@ -115,7 +119,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!arrayModel || arrayModel.__model_type !== 2)
         {
-            throw 'repeater reload method need a array model!';
+            throw  message + 'repeater control must bind a array model!';
         }
 
         var template = this.template;
@@ -123,7 +127,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!template)
         {
-            throw 'repeater does not specify a template!';
+            throw message + 'repeater control does not specify a template!';
         }
 
         var children = this.__children;
@@ -209,7 +213,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 for (var j = 0; j < template_length; j++)
                 {
                     control = parent.$createSubControl(template, model);
-                    control.__model = model;
+                    control.currentModel = model;
 
                     list[index++] = control;
                 }
@@ -224,7 +228,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 model = arrayModel[i];
 
                 control = parent.$createSubControl(template, model);
-                control.__model = model;
+                control.currentModel = model;
 
                 list[i] = control;
             }
@@ -248,7 +252,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         {
             var control = this.$createSubControl(template, model);
 
-            control.__model = model;
+            control.currentModel = model;
             this.__children.set(index, control);
         }
     }
@@ -286,8 +290,8 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.__model.__index;
-        b = b.__model.__index;
+        a = a.currentModel.__index;
+        b = b.currentModel.__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }

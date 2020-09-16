@@ -6,16 +6,12 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('value', '');
 
 
-
     this.$property('text', {
 
         get: function () {
 
-            return (any = this.__format) ? any(this.value) : this.value;
-        },
-        set: function (value) {
-
-            this.value = value;
+            var format = this.__format;
+            return format ? format(this.value) : this.value;
         }
     });
 
@@ -23,10 +19,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('placeholder', '');
 
 
-    this.$property('align', 'left');
-
-
-    this.$property('maxlength', 0);
+    this.$property('maxlength', -1);
 
 
     this.$property('pattern', '');
@@ -43,6 +36,25 @@ yaxi.TextBox = yaxi.Control.extend(function () {
         }
         
     });
+
+
+    
+    this.$property('focus', false);
+
+
+
+    this.$property('selectionStart', 0, {
+
+        alias: 'selection-start'
+    });
+
+
+    
+    this.$property('selectionEnd', 0, {
+
+        alias: 'selection-end'
+    });
+
 
 
 }, function TextBox() {

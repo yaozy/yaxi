@@ -12,7 +12,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
             return true;
         }
 
-        throw 'Header can only add to Page!';
+        throw 'Header component can only add to Page!';
     }
 
 

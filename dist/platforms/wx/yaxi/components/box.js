@@ -53,7 +53,7 @@ Component({
 
         // 不冒泡事件直接转换
         translateEvent: function (event) {
-
+            console.log(event)
             var dataset = event.target.dataset;
             var id;
 

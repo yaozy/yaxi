@@ -103,6 +103,15 @@
   flex-shrink: 1;
   font-size: 28rpx;
 }
+.yx-maskbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #000000;
+  opacity: 0.3;
+}
 .yx-repeater {
   position: relative;
   display: block;
@@ -121,6 +130,8 @@
 }
 .yx-swiper {
   height: 300rpx;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 .yx-swiper-host,
 .yx-swiper-item > .yx-control {
@@ -254,8 +265,11 @@
   display: flex;
   flex-direction: column-reverse;
 }
-.yx-hidden {
+.yx-inactive {
   visibility: hidden;
+}
+.yx-hidden {
+  display: none;
 }
 .yx-theme-level1 {
   background-color: #ffffff;
@@ -353,75 +367,75 @@
   background-color: #999999;
   color: #eeeeee;
 }
-.yx-theme-level1-bg {
+.yx-theme-bg-level1 {
   background-color: #31313d;
 }
-.yx-theme-level2-bg {
+.yx-theme-bg-level2 {
   background-color: #6c768b;
 }
-.yx-theme-level3-bg {
+.yx-theme-bg-level3 {
   background-color: #b8c0de;
 }
-.yx-theme-level4-bg {
+.yx-theme-bg-level4 {
   background-color: #cccccc;
 }
-.yx-theme-level5-bg {
+.yx-theme-bg-level5 {
   background-color: #f7f7f7;
 }
-.yx-theme-important-bg {
+.yx-theme-bg-important {
   background-color: #a00101;
 }
-.yx-theme-primary-bg {
+.yx-theme-bg-primary {
   background-color: #1c86ee;
 }
-.yx-theme-second-bg {
+.yx-theme-bg-second {
   background-color: #48d1cc;
 }
-.yx-theme-success-bg {
+.yx-theme-bg-success {
   background-color: #71c04a;
 }
-.yx-theme-warning-bg {
+.yx-theme-bg-warning {
   background-color: #e89518;
 }
-.yx-theme-danger-bg {
+.yx-theme-bg-danger {
   background-color: #ff6c6c;
 }
-.yx-theme-disabled-bg {
+.yx-theme-bg-disabled {
   background-color: #999999;
 }
-.yx-theme-level1-font {
+.yx-theme-font-level1 {
   color: #31313d;
 }
-.yx-theme-level2-font {
+.yx-theme-font-level2 {
   color: #6c768b;
 }
-.yx-theme-level3-font {
+.yx-theme-font-level3 {
   color: #b8c0de;
 }
-.yx-theme-level4-font {
+.yx-theme-font-level4 {
   color: #cccccc;
 }
-.yx-theme-level5-font {
+.yx-theme-font-level5 {
   color: #f7f7f7;
 }
-.yx-theme-important-font {
+.yx-theme-font-important {
   color: #a00101;
 }
-.yx-theme-primary-font {
+.yx-theme-font-primary {
   color: #1c86ee;
 }
-.yx-theme-second-font {
+.yx-theme-font-second {
   color: #48d1cc;
 }
-.yx-theme-success-font {
+.yx-theme-font-success {
   color: #71c04a;
 }
-.yx-theme-warning-font {
+.yx-theme-font-warning {
   color: #e89518;
 }
-.yx-theme-danger-font {
+.yx-theme-font-danger {
   color: #ff6c6c;
 }
-.yx-theme-disabled-font {
+.yx-theme-font-disabled {
   color: #999999;
 }

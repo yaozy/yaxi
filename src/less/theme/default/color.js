@@ -14,8 +14,7 @@
 
     var border = color.border = create(null);
 
-    var icon = color.icon = create(null);
-
+ 
 
     bg.level1 = '#ffffff';
     bg.level2 = '#f7f7f7';
@@ -60,21 +59,6 @@
     border.warning = '#e89518';
     border.danger = '#ff6c6c';
     border.disabled = '#999999';
-
-
-    icon.level1 = '#31313d';
-    icon.level2 = '#6c768b';
-    icon.level3 = '#b8c0de';
-    icon.level4 = '#cccccc';
-    icon.level5 = '#ffffff';
-
-    icon.important = '#c40606';
-    icon.primary = '#1c86ee';
-    icon.second = '#48d1cc';
-    icon.success = '#71c04a';
-    icon.warning = '#e89518';
-    icon.danger = '#ff6c6c';
-    icon.disabled = '#999999';
 
 
     color.mask = '#000000';

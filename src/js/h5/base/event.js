@@ -79,16 +79,28 @@
         var e = new Event(event.type);
 
         e.flag = flag;
-        e.changedTouches = event.changedTouches;
-        e.touches = event.touches;
-
-// identifier: 0
-// pageX: 32
-// pageY: 546
-// clientX: 32
-// clientY: 546
+        e.changedTouches = parseTouches(event.changedTouches);
+        e.touches = parseTouches(event.touches);
 
         return e;
+    }
+
+
+    function parseTouches(touches) {
+
+        for (var i = touches.length; i--;)
+        {
+            var touch = touches[i];
+
+            // 微信小程序只支持以下touch属性
+            touches[i] = {
+                identifier: touch.identifier,
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                clientX: touch.clientX,
+                clientY: touch.clientY 
+            }
+        }
     }
 
 
@@ -208,18 +220,23 @@
                     return stop(event);
                 }
             }
-            // 350ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 350 || tapControl !== control))
+            // 200ms内不重复触发tap事件
+            else if (tap && (time - tapTime > 200 || tapControl !== control))
             {
-                tapControl = control;
-                tapTime = time;
+                // 延时触发tap事件解决input先触发change事件的问题
+                setTimeout(function () {
 
-                e.type = 'tap';
- 
-                if (call(control, '__on_tap', e) === false || control.trigger(e) === false)
-                {
-                    return stop(event);
-                }
+                    tapControl = control;
+                    tapTime = time;
+    
+                    e.type = 'tap';
+     
+                    if (call(control, '__on_tap', e) !== false)
+                    {
+                        control.trigger(e) === false
+                    }
+
+                }, 0);
             }
         }
 
