@@ -20,6 +20,7 @@
         class="yx-control yx-textbox{{ active }}{{ class }}"
         style="{{ style || '' }}"
         value="{{ value || '' }}"
+        placeholder="{{ placeholder || '' }}"
         disabled="{{ disabled }}"
         maxlength="{{ maxlength == null ? -1 : maxlength }}"
         focus="{{ focus }}"
@@ -183,6 +184,8 @@
         id="{{ id }}"
         class="yx-control yx-box yx-scrollbox{{ active }}{{ class }}" 
         style="{{ style || '' }}"
+        scroll-x="{{ scrollX }}"
+        scroll-y="{{ scrollY !== false }}"
         bindtouchstart="handleEvent">
         <box wx:if="{{ c }}" children="{{ c }}" />
     </scroll-view>
@@ -277,7 +280,7 @@
 
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-header{{ active }}{{ class }}" 
+        class="yx-control yx-maskbox{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent" />
 

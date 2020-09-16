@@ -65,7 +65,7 @@ module.exports = yaxi.Band.extend(function () {
     this.handleClear = function () {
 
         model.hidden = true;
-        model.text = '';
+        model.text = model.last = '';
     }
 
 

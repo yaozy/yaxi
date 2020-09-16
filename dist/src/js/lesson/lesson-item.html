@@ -1,16 +1,16 @@
-<box d-tag="this.id" style="height:160rem;margin:20rem 0;overflow:hidden;">
-    <image d-src="this.image" style="width:200rem;height:100%;" />
+<box d-tag="id" style="height:160rem;margin:20rem 0;overflow:hidden;">
+    <image d-src="image" style="width:200rem;height:100%;" />
     <box style="display:inline-block;width:500rem;height:100%;padding-left:20rem;">
         <band style="height:80rem;overflow:hidden;">
-            <text d-text="this.name" />
+            <text d-text="name" />
         </band>
         <band theme="level3" style="height:40rem;line-height:40rem;font-size:24rem;overflow:hidden;">
-            <for list="this.remark" item="item">
+            <for list="remark" item="item">
                 <text d-text="item" theme="bg-level5" style="display:inline-block;border-radius:20rem;padding:0 20rem;margin-right:10rem;" />
             </for>
         </band>
         <band theme="important" style="height:40rem;overflow:hidden;">
-            <text d-text="this.price > 0 ? '￥' + this.price : '免费'" />
+            <text d-text="price > 0 ? '￥' + price : '免费'" />
         </band>
     </box>
 </box>

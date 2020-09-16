@@ -25,6 +25,6 @@
   "homepage": "https://github.com/y4d/yaxi#readme",
   "dependencies": {},
   "devDependencies": {
-    "jiac": "^1.0.5"
+    "jiac": "^1.0.25"
   }
 }

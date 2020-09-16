@@ -128,7 +128,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": this.openTest
+								"tap": this.openTest.bind(this)
 							}
 						},
 						"Open Test"

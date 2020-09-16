@@ -30,7 +30,7 @@ return (
 								{
 									"content": "Append",
 									"events": {
-										"tap": this.handleAppend
+										"tap": this.handleAppend.bind(this)
 									}
 								}
 							],
@@ -39,7 +39,7 @@ return (
 								{
 									"content": "Replace",
 									"events": {
-										"tap": this.handleReplace
+										"tap": this.handleReplace.bind(this)
 									}
 								}
 							],
@@ -48,7 +48,7 @@ return (
 								{
 									"content": "Remove",
 									"events": {
-										"tap": this.handleRemove
+										"tap": this.handleRemove.bind(this)
 									}
 								}
 							],
@@ -57,7 +57,7 @@ return (
 								{
 									"content": "Reorder",
 									"events": {
-										"tap": this.handleReorder
+										"tap": this.handleReorder.bind(this)
 									}
 								}
 							]

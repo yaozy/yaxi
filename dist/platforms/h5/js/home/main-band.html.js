@@ -71,14 +71,14 @@ return (
 								[
 									"box",
 									{
-										"tag": this.item.id,
+										"tag": item.id,
 										"style": "height:160rem;margin:20rem 0;overflow:hidden;"
 									},
 									[
 										[
 											"image",
 											{
-												"src": this.item.image,
+												"src": item.image,
 												"style": "width:200rem;height:100%;"
 											}
 										],
@@ -97,7 +97,7 @@ return (
 														[
 															"text",
 															{
-																"text": this.item.name
+																"text": item.name
 															}
 														]
 													]
@@ -112,7 +112,7 @@ return (
 														[
 															"text",
 															{
-																"text": this.item.remark
+																"text": item.remark
 															}
 														]
 													]
@@ -127,7 +127,7 @@ return (
 														[
 															"text",
 															{
-																"text": '￥' + this.item.price
+																"text": '￥' + item.price
 															}
 														]
 													]

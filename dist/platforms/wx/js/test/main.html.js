@@ -6,7 +6,7 @@ return (
 		"page",
 		{
 			"events": {
-				"tap": this.handleTap
+				"tap": this.handleTap.bind(this)
 			}
 		},
 		[

@@ -142,10 +142,22 @@
         {
             any = any + '\n//# sourceURL=' + url;
 
-            new Function(['require', 'exports', 'module'], any)(
-                factory(url.substring(0, url.lastIndexOf('/') + 1)),
-                module.exports,
-                module);
+            try
+            {
+                new Function(['require', 'exports', 'module'], any)(
+                    factory(url.substring(0, url.lastIndexOf('/') + 1)),
+                    module.exports,
+                    module);
+            }
+            catch (e)
+            {
+                if (typeof console !== 'undefined')
+                {
+                    console.error(url);
+                }
+
+                throw e;
+            }
         }
 
 		return module;
@@ -381,10 +393,22 @@ jiac.Thread = (function () {
             {
                 any = any + '\n//# sourceURL=' + url;
 
-                new Function(['require', 'exports', 'module'], any)(
-                    factory(url.substring(0, url.lastIndexOf('/') + 1)),
-                    module.exports,
-                    module);
+                try
+                {
+                    new Function(['require', 'exports', 'module'], any)(
+                        factory(url.substring(0, url.lastIndexOf('/') + 1)),
+                        module.exports,
+                        module);
+                }
+                catch (e)
+                {
+                    if (typeof console !== 'undefined')
+                    {
+                        console.error(url);
+                    }
+    
+                    throw e;
+                }
             }
 
             return module;

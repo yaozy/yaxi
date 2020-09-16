@@ -56,7 +56,7 @@ return (
 										[
 											"text",
 											{
-												"text": this.item,
+												"text": item,
 												"theme": "bg-level5",
 												"style": "display:inline-block;border-radius:20rem;padding:0 20rem;margin-right:10rem;"
 											}

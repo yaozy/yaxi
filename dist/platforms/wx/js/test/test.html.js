@@ -45,7 +45,7 @@ return (
 										{
 											"content": "append",
 											"events": {
-												"tap": this.handleAppend
+												"tap": this.handleAppend.bind(this)
 											}
 										}
 									],
@@ -55,7 +55,7 @@ return (
 											"content": "remove last",
 											"style": "margin-top:10rem;",
 											"events": {
-												"tap": this.handleRemove
+												"tap": this.handleRemove.bind(this)
 											}
 										}
 									]

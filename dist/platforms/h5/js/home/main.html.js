@@ -51,7 +51,7 @@ return (
 				require("../lesson/search"),
 				{
 					"events": {
-						"change": this.handleSearch
+						"change": this.handleSearch.bind(this)
 					}
 				}
 			],

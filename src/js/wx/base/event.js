@@ -32,7 +32,8 @@
         {
             event = new Event(event.type);
             event.flag = flag;
-            controls[uuid].trigger(event);
+
+            return controls[uuid].trigger(event);
         }
 
     }.bind(wx);
@@ -200,6 +201,20 @@
         {
             return false;
         }
+    }
+
+
+    translates.input = translates.change = function (event) {
+
+        var control = findControl();
+        var value = event.detail.value;
+
+        event = new Event(event.type);
+        event.target = control;
+        event.flag = flag;
+        event.value = value;
+
+        return control.trigger(event);
     }
 
     

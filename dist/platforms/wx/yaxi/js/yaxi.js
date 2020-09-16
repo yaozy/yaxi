@@ -1907,7 +1907,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
             if ((any = this.__bindings) && (any = any[name]))
             {
-                syncBindings(this, any);
+                syncBindings(any);
             }
         }
     }
@@ -1979,12 +1979,10 @@ yaxi.http = Object.extend.call({}, function (Class) {
     // 定义模型
     yaxi.model = function (properties) {
 
-        var extend = create,
-            prototype = extend(base),
-            subkeys = prototype.$subkeys = extend(null),
-            defaults = prototype.$defaults = extend(null),
-            options,
-            type;
+        var extend = create;
+        var prototype = extend(base);
+        var subkeys = prototype.$subkeys = extend(null);
+        var defaults = prototype.$defaults = extend(null);
 
         function Model(parent) {
 
@@ -1992,11 +1990,21 @@ yaxi.http = Object.extend.call({}, function (Class) {
             this.$storage = extend(defaults);
         }
         
+        prototype.$converts = extend(null);
+        
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
 
-        prototype.$converts = extend(null);
-        
+        defineProperties(prototype, properties, subkeys);
+
+        return Model;
+    }
+
+
+    function defineProperties(prototype, properties, subkeys) {
+
+        var options, type;
+
         for (var name in properties)
         {
             if (name[0] === '$' || name[0] === '_' && name[1] === '_')
@@ -2004,16 +2012,39 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 throw 'define model error: field can not use "$" or "__" to start!';
             }
 
-            if ((options = properties[name]) && typeof options === 'function')
+            if (options = properties[name])
             {
-                if (type = options.model)
+                switch (typeof options)
                 {
-                    subkeys[name] = type;
-                    define(prototype, name, (type === 1 ? submodel : subarrayModel)(name, options));
-                }
-                else
-                {
-                    define(prototype, name, { get: options });
+                    case 'function':
+                        // 子模型
+                        if (type = options.model)
+                        {
+                            define(prototype, name, (type === 1 ? defineSubModel : defineSubArrayModel)(name, options));
+                            subkeys[name] = type;
+                        }
+                        else // 计算字段
+                        {
+                            define(prototype, name, { get: options });
+                        }
+                        break;
+                    
+                    case 'object': // 对象
+                        if (options instanceof Array) // 子数组模型
+                        {
+                            define(prototype, name, defineSubArrayModel(name, type = checkSubArrayModel(options)));
+                        }
+                        else // 子模型
+                        {
+                            define(prototype, name, defineSubModel(name, type = yaxi.model(options)));
+                        }
+
+                        subkeys[name] = type;
+                        break;
+
+                    default:
+                        property.call(prototype, name, options);
+                        break; 
                 }
             }
             else
@@ -2021,13 +2052,37 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 property.call(prototype, name, options);
             }
         }
+    }
 
-        return Model;
+
+    function checkSubArrayModel(options) {
+
+        var message = 'define model error: ';
+        var properties = options[0];
+        var itemName = options[1];
+        var itemIndex = options[2];
+
+        if (!properties || typeof properties !== 'object')
+        {
+            throw message + 'the first item of sub array model must be a none empty object!'
+        }
+
+        if (itemName != null && typeof itemName !== 'string')
+        {
+            throw message + 'the second item for sub array model must be a string or null!';
+        }
+
+        if (itemIndex != null && typeof itemIndex !== 'string')
+        {
+            throw message + 'the third item for sub array model must be a string or null!';
+        }
+
+        return yaxi.arrayModel(properties, itemName, itemIndex);
     }
 
 
 
-    function submodel(name, Model) {
+    function defineSubModel(name, Model) {
     
         name = '__sub_' + name;
 
@@ -2056,7 +2111,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
-    function subarrayModel(name, ArrayModel) {
+    function defineSubArrayModel(name, ArrayModel) {
 
         name = '__sub_' + name;
 
@@ -2095,14 +2150,16 @@ yaxi.http = Object.extend.call({}, function (Class) {
     
 
 
-    function syncBindings(model, bindings) {
+    function syncBindings(bindings) {
 
         var binding, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
-            value = model[binding.field];
+
+            // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
+            value = binding.model[binding.field];
 
             if (any = binding.pipe)
             {
@@ -2231,7 +2288,12 @@ yaxi.http = Object.extend.call({}, function (Class) {
             {
                 if (path[1])
                 {
-                    return findSubModel(model, binding, rule);
+                    if ((model = model[name]) && model.__model_type === 1)
+                    {
+                        return findSubModel(model, binding, rule);
+                    }
+                    
+                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
                 }
  
                 binding.model = model;
@@ -2466,7 +2528,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
         if (bindings && (bindings = bindings[name]))
         {
-            syncBindings(this, bindings);
+            syncBindings(bindings);
         }
     }
 
@@ -4294,7 +4356,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
     // 父控件
     this.parent = null;
 
@@ -4559,7 +4620,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             this.ondestroy();
         }
 
-        this.parent = this.__binding_push = this.__model = null;
+        this.parent = this.__binding_push = this.currentModel = null;
     }
 
 
@@ -5483,7 +5544,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 for (var j = 0; j < template_length; j++)
                 {
                     control = parent.$createSubControl(template, model);
-                    control.__model = model;
+                    control.currentModel = model;
 
                     list[index++] = control;
                 }
@@ -5498,7 +5559,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
                 model = arrayModel[i];
 
                 control = parent.$createSubControl(template, model);
-                control.__model = model;
+                control.currentModel = model;
 
                 list[i] = control;
             }
@@ -5522,7 +5583,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         {
             var control = this.$createSubControl(template, model);
 
-            control.__model = model;
+            control.currentModel = model;
             this.__children.set(index, control);
         }
     }
@@ -5560,8 +5621,8 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.__model.__index;
-        b = b.__model.__index;
+        a = a.currentModel.__index;
+        b = b.currentModel.__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
@@ -6170,7 +6231,6 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('value', '');
 
 
-
     this.$property('text', {
 
         get: function () {
@@ -6184,10 +6244,7 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     this.$property('placeholder', '');
 
 
-    this.$property('align', 'left');
-
-
-    this.$property('maxlength', 0);
+    this.$property('maxlength', -1);
 
 
     this.$property('pattern', '');
@@ -6204,6 +6261,25 @@ yaxi.TextBox = yaxi.Control.extend(function () {
         }
         
     });
+
+
+    
+    this.$property('focus', false);
+
+
+
+    this.$property('selectionStart', 0, {
+
+        alias: 'selection-start'
+    });
+
+
+    
+    this.$property('selectionEnd', 0, {
+
+        alias: 'selection-end'
+    });
+
 
 
 }, function TextBox() {
@@ -6404,22 +6480,26 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 
 	
 	
-	this.onopening = function (payload) {
+	// 页面加载前处理
+	this.onloading = function (options) {
 	}
 	
 	
-	this.onopened = function (payload) {
+
+	// 页面加载后处理
+	this.onload = function (options) {
 	}
 	
-	
-	this.onclosed = function () {
+
+	// 页面卸载后处理
+	this.onunload = function () {
 	}
 
 
 
-	function open(payload, callback) {
+	function open(options) {
 
-		yaxi.openPage(this, payload, callback);
+		yaxi.openPage(this, options);
 	}
 
 
@@ -6566,7 +6646,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             event = new Event(event.type);
             event.flag = flag;
-            controls[uuid].trigger(event);
+
+            return controls[uuid].trigger(event);
         }
 
     }.bind(wx);
@@ -6734,6 +6815,20 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             return false;
         }
+    }
+
+
+    translates.input = translates.change = function (event) {
+
+        var control = findControl();
+        var value = event.detail.value;
+
+        event = new Event(event.type);
+        event.target = control;
+        event.flag = flag;
+        event.value = value;
+
+        return control.trigger(event);
     }
 
     
@@ -7201,31 +7296,20 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 	// 打开指定页面
-    yaxi.openPage = function (Page, payload, callback) {
-
-        if (typeof payload === 'function')
-        {
-            callback = payload;
-            payload = void 0;
-        }
+    yaxi.openPage = function (Page, options) {
 
         try
         {
-            var page = new Page(payload);
+            var page = new Page(options);
         
-            if (page.onopening(payload) !== false)
+            if (page.onloading(options) !== false)
             {
                 all.push(page);
-                page.payload = payload;
+                page.options = options;
     
                 wx[Page.main ? 'redirectTo' : 'navigateTo']({
     
-                    url: '../../yaxi/pages/host?uuid=' + page.uuid,
-    
-                    success: function () {
-    
-                        callback && callback(page);
-                    }
+                    url: '../../yaxi/pages/host?uuid=' + page.uuid
                 });
             }
         }
@@ -7238,22 +7322,46 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 	// 关闭当前页面
-    yaxi.closePage = function (delta, callback) {
-
-        if (typeof delta === 'function')
-        {
-            callback = delta;
-            delta = 1;
-        }
+    yaxi.closePage = function (delta) {
 
         wx.navigateBack({
 
-            delta: delta || 1,
-            success: callback
+            delta: delta || 1
         });
 	}
     
     
+
+    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
+
+        try
+        {
+            var page = find(uuid);
+            var data;
+
+            notifyRender(renderings);
+
+            data = {};
+            data[wxName || (wxName = 'data')] = page.render();
+
+            console.log(data);
+
+            page.__wx_page = wxPage;
+            page.__wx_name = wxName;
+
+            wxPage.setData(data, function () {
+
+                notifyRender(rendereds);
+                page.onload(page.options);
+            });
+        }
+        catch (e)
+        {
+            console.error(e);
+            throw e;
+        }
+    }
+
 
     yaxi.__on_page_patch = function (patches) {
 
@@ -7284,44 +7392,12 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
     }
 
 
-
-    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
-
-        try
-        {
-            var page = find(uuid);
-            var data;
-
-            notifyRender(renderings);
-
-            data = {};
-            data[wxName || (wxName = 'data')] = page.render();
-
-            console.log(data);
-
-            page.__wx_page = wxPage;
-            page.__wx_name = wxName;
-
-            wxPage.setData(data, function () {
-
-                notifyRender(rendereds);
-                page.onopened(page.payload);
-            });
-        }
-        catch (e)
-        {
-            console.error(e);
-            throw e;
-        }
-    }
-
-
     yaxi.__on_page_close = function (uuid) {
 
         var index = find(uuid, true);
         var page = all[index];
 
-        page.onclosed();
+        page.onunload();
 
         page.__wx = null;
         page.destroy();
