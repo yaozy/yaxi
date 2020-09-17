@@ -103,7 +103,7 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
                 all.push(page);
                 page.options = options;
     
-                wx[Page.main ? 'redirectTo' : 'navigateTo']({
+                wx.navigateTo({
     
                     url: '../../yaxi/pages/host?uuid=' + page.uuid
                 });
@@ -126,6 +126,23 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
         });
 	}
     
+
+
+    // 打开微信主页面
+    yaxi.openMainPage = function (Page, options, wxPage, wxName) {
+
+        var page = new Page(options);
+        var uuid = page.uuid;
+        
+        page.onloading(options);
+        page.options = options;
+            
+        all.push(page);
+
+        yaxi.__on_page_open(uuid, wxPage, wxName);
+
+        return uuid;
+    }
     
 
     yaxi.__on_page_open = function (uuid, wxPage, wxName) {

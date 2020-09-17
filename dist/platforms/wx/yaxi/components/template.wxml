@@ -49,7 +49,7 @@
         class="yx-control yx-button{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent"
-        children="{{ content }}" />
+        children="{{ c }}" />
 
 </template>
 
@@ -92,7 +92,7 @@
         style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
         <view class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" data-id="{{ u }}" />
-        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ content }}" />
+        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
     </view>
 
 </template>
@@ -106,7 +106,7 @@
         style="{{ style || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
         <image class="yx-imagebutton-image" data-id="{{ u }}" src="{{ src }}" />
-        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ content }}" />
+        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
     </view>
 
 </template>
@@ -270,7 +270,7 @@
         bindtouchstart="handleEvent">
         <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-flag="back" />
         <view class="{{ icon ? 'yx-header-icon ' + icon : 'yx-header-hide' }}" data-id="{{ u }}" />
-        <box class="yx-header-host" data-id="{{ u }}" children="{{ content }}" />
+        <box class="yx-header-host" data-id="{{ u }}" children="{{ c }}" />
     </view>
 </template>
 

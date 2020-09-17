@@ -44,14 +44,14 @@ return (
 						},
 						(function () {
 
-						    var __for_2_1 = this.remark;
-						    var __for_2_2 = [];
+						    var __for_11_1 = this.remark;
+						    var __for_11_2 = [];
 
-						    for (var index = 0, __for_2_len = __for_2_1.length; index < __for_2_len; index++)
+						    for (var index = 0, __for_11_len = __for_11_1.length; index < __for_11_len; index++)
 						    {
-						        var item = __for_2_1[index];
+						        var item = __for_11_1[index];
 
-						        __for_2_2.push.apply(__for_2_2,
+						        __for_11_2.push.apply(__for_11_2,
 									[
 										[
 											"text",
@@ -64,7 +64,7 @@ return (
 									] || []);
 						    }
 
-						    return __for_2_2;
+						    return __for_11_2;
 
 						}).call(this)
 					],

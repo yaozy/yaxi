@@ -238,6 +238,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         if (this.__length > 0)
         {
             this.__last || patch(this);
+            this.__last.clear = true;
 
             released = true;
             list = splice.call(this, 0)

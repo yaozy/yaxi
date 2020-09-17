@@ -26,7 +26,7 @@ Page({
         }
         else
         {
-            require('../../js/main').open(options);
+            this.__uuid = yaxi.openMainPage(require('../../js/main'), options, this, 'd');
         }
     },
 

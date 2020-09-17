@@ -2,15 +2,23 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    var box = yaxi.Box.prototype;
+    this.render = function () {
+
+        var view = base.render.call(this);
+        var children = this.__children;
+
+        children.__last = null;
+        view.c = this.renderChildren(children);
+
+        return view;
+    }
 
 
+    this.patch = function (view, prefix) {
 
-
-    this.render = box.render;
-
-
-    this.patch = box.patch;
+        this.patchChildren(view, prefix, this.__children);
+        base.patch.call(this, view, prefix);
+    }
 
 
 

@@ -48,14 +48,6 @@ return (
 				}
 			],
 			[
-				require("../lesson/search"),
-				{
-					"events": {
-						"change": this.handleSearch.bind(this)
-					}
-				}
-			],
-			[
 				"box",
 				{
 					"key": "host",

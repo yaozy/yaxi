@@ -4609,24 +4609,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             this.off();
         }
 
-        if (any = this.$view)
-        {
-            this.destroyView(any);
-            this.$view = null;
-        }
-        
-        if (this.ondestroy)
-        {
-            this.ondestroy();
-        }
+        this.$view = null;
+        this.ondestroy && this.ondestroy();
 
         this.parent = this.__binding_push = this.currentModel = null;
     }
 
 
-    this.destroyView = function (view) {
-    }
+    this.destroyChildren = function (children) {
 
+        var control;
+
+        for (var i = children.length; i--;)
+        {
+            // 无父窗口的控件则销毁
+            if ((control = children[i]) && !control.parent)
+            {
+                control.destroy();
+            }
+        }
+    }
 
 
     
@@ -5008,6 +5010,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         if (this.__length > 0)
         {
             this.__last || patch(this);
+            this.__last.clear = true;
 
             released = true;
             list = splice.call(this, 0)
@@ -7141,8 +7144,16 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
+    // 全新渲染子控件(给子类用)
+    this.renderChildren = function (view, children) {
 
-    this.destroyView = function (view) {
+        var index = 0;
+        var control;
+
+        while (control = children[index++])
+        {
+            view.appendChild(control.$view || control.render());
+        }
     }
 
 
@@ -7176,10 +7187,91 @@ yaxi.Control.mixin(function (mixin) {
                     fn.call(this, view, changes[name]);
                 }
             }
-
-            return changes;
         }
     }
+
+
+    // 子控件变化补丁(给子类用)
+    this.patchChildren = function (view, children) {
+
+        var control, last, any;
+
+        if (last = children.__last)
+        {
+            children.__last = null;
+
+            if (any = last.length > 0)
+            {
+                this.destroyChildren(last);
+            }
+
+            // 曾经清除过
+            if (!any || last.clear)
+            {
+                // 先清空原控件
+                view.textContent = '';
+
+                this.renderChildren(view, children);
+            }
+            else
+            {
+                patchChildren(view, children);
+            }
+        }
+        else if ((any = children.length) > 0)
+        {
+            for (var i = 0; i < any; i++)
+            {
+                if ((control = children[i]) && control.__dirty && (view = control.$view))
+                {
+                    control.patch(view);
+                }
+            }
+        }
+    }
+
+
+    function patchChildren(view, children) {
+
+        var refChild = view.firstChild;
+        var index = 0;
+        var control;
+        var newChild;
+
+        while (control = children[index++])
+        {
+            if (newChild = control.$view)
+            {
+                if (control.__dirty)
+                {
+                    control.patch(newChild);
+                }
+
+                if (newChild !== refChild)
+                {
+                    view.insertBefore(newChild, refChild);
+                }
+                else
+                {
+                    refChild = refChild.nextSibling;
+                }
+            }
+            else
+            {
+                view.insertBefore(control.render(), refChild);
+            }
+        }
+
+        while (refChild)
+        {
+            newChild = refChild;
+            refChild = refChild.nextSibling;
+
+            view.removeChild(newChild);
+        }
+    }
+
+
 
 
     this.__render_class = function (view) {
@@ -7242,7 +7334,15 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         if (this.__content_dirty)
         {
-            if (content == null)
+            if (content)
+            {
+                if (typeof content !== 'string')
+                {
+                    // 销毁原控件
+                    this.destroyChildren(content);
+                }
+            }
+            else if (content == null)
             {
                 content = this.__no_content;
             }
@@ -7252,7 +7352,6 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         return view;
     }
-
 
     
     this.__render_content = function (view, content) {
@@ -7265,13 +7364,8 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         }
         else
         {
-            var index = 0;
-            var control;
-
-            while (control = content[index++])
-            {
-                view.appendChild(control.render());
-            }
+            view.textContent = '';
+            this.renderChildren(view, content);
         }
     }
 
@@ -7280,6 +7374,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         view.textContent = text;
     }
+
 
 
 });
@@ -7298,15 +7393,11 @@ yaxi.Box.mixin(function (mixin, base) {
 
     this.render = function () {
 
-        var view = base.render.call(this),
-            children = this.__children,
-            index = 0,
-            control;
+        var view = base.render.call(this);
+        var children = this.__children;
 
-        while (control = children[index++])
-        {
-            view.appendChild(control.render());
-        }
+        children.__last = null;
+        this.renderChildren(view, this.children);
 
         return view;
     }
@@ -7315,64 +7406,8 @@ yaxi.Box.mixin(function (mixin, base) {
     
     this.patch = function (view) {
 
-        var children = this.__children,
-            control,
-            length;
-
+        this.patchChildren(view, this.__children);
         base.patch.call(this, view);
-
-        if (children.__last)
-        {
-            children.__last = null;
-            patch(children, view);
-        }
-
-        if ((length = children.length) > 0)
-        {
-            for (var i = 0; i < length; i++)
-            {
-                if ((control = children[i]) && control.__dirty && (view = control.$view))
-                {
-                    control.patch(view);
-                }
-            }
-        }
-    }
-
-
-    function patch(children, view) {
-
-        var refChild = view.firstChild;
-        var index = 0;
-        var control;
-        var newChild;
-
-        while (control = children[index++])
-        {
-            if (newChild = control.$view)
-            {
-                if (newChild !== refChild)
-                {
-                    view.insertBefore(newChild, refChild);
-                }
-                else
-                {
-                    refChild = refChild.nextSibling;
-                }
-            }
-            else
-            {
-                view.insertBefore(control.render(), refChild);
-            }
-        }
-
-        while (refChild)
-        {
-            newChild = refChild;
-            refChild = refChild.nextSibling;
-
-            view.removeChild(newChild);
-        }
     }
 
 
@@ -7386,18 +7421,28 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    var box = yaxi.Box.prototype;
-
-    
-
     yaxi.template(this, '<div class="$class"></div>');
 
 
 
-    this.render = box.render;
+    this.render = function () {
+
+        var view = base.render.call(this);
+        var children = this.__children;
+
+        children.__last = null;
+        this.renderChildren(view, children);
+
+        return view;
+    }
 
 
-    this.patch = box.patch;
+    
+    this.patch = function (view) {
+
+        this.patchChildren(view, this.__children);
+        base.patch.call(this, view);
+    }
 
     
 

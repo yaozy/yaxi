@@ -13,7 +13,15 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         if (this.__content_dirty)
         {
-            if (content == null)
+            if (content)
+            {
+                if (typeof content === 'object')
+                {
+                    // 销毁原控件
+                    this.destroyChildren(content);
+                }
+            }
+            else if (content == null)
             {
                 content = this.__no_content;
             }
@@ -23,7 +31,6 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         return view;
     }
-
 
     
     this.__render_content = function (view, content) {
@@ -36,13 +43,8 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         }
         else
         {
-            var index = 0;
-            var control;
-
-            while (control = content[index++])
-            {
-                view.appendChild(control.render());
-            }
+            view.textContent = '';
+            this.renderChildren(view, content);
         }
     }
 
@@ -51,6 +53,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
         view.textContent = text;
     }
+
 
 
 });

@@ -4109,20 +4109,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     function change_active(active) {
 
-        if (this.__active !== active)
-        {
-            this.__active = active;
+        this.__active = active;
 
-            this.__class_dirty = true;
-            this.__dirty || patch(this);
-        }
+        this.__class_dirty = true;
+        this.__dirty || patch(this);
     }
 
 
     // 处理微信自定义组件不支持active的问题, 全部统一使用.active
     this.__change_active = function (active) {
 
-        if (active = !!active)
+        if (active)
         {
             change_active.call(this, active);
         }
@@ -4609,24 +4606,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             this.off();
         }
 
-        if (any = this.$view)
-        {
-            this.destroyView(any);
-            this.$view = null;
-        }
-        
-        if (this.ondestroy)
-        {
-            this.ondestroy();
-        }
+        this.$view = null;
+        this.ondestroy && this.ondestroy();
 
         this.parent = this.__binding_push = this.currentModel = null;
     }
 
 
-    this.destroyView = function (view) {
-    }
+    this.destroyChildren = function (children) {
 
+        var control;
+
+        for (var i = children.length; i--;)
+        {
+            // 无父窗口的控件则销毁
+            if ((control = children[i]) && !control.parent)
+            {
+                control.destroy();
+            }
+        }
+    }
 
 
     
@@ -5008,6 +5007,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         if (this.__length > 0)
         {
             this.__last || patch(this);
+            this.__last.clear = true;
 
             released = true;
             list = splice.call(this, 0)
@@ -6851,11 +6851,6 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    // 正在加载的容器控件的uuid, 容器控件的所有事件都由容器触发, 所在需要把子控件的uuid设置成容器的uuid
-    yaxi.__content_uuid = 0;
-
-
-
 
     // 全局渲染
     this.render = function () {
@@ -6909,6 +6904,28 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     }
 
 
+    // 全新渲染子控件(给子类用)
+    this.renderChildren = function (children) {
+
+        var length = children.length;
+        
+        if (length > 0)
+        {
+            var list = new Array(length);
+
+            for (var i = 0; i < length; i++)
+            {
+                list[i] = children[i].render();
+            }
+            
+            return list;
+        }
+
+        return [];
+    }
+
+
+
     // 增量渲染
     this.patch = function (view, prefix) {
 
@@ -6952,156 +6969,26 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     }
 
 
+    // 子控件变化补丁(给子类用)
+    this.patchChildren = function (view, prefix, children) {
 
-
-    this.__render_class = function (view, prefix) {
-
-        var class1 = this.__class_list;
-        var class2 = this.__class_data;
-
-        class1 = class1 ? ' ' + class1.join(' ') : '';
-        class2 = class2 ? ' ' + class2.join(' ') : '';
-
-        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
-    }
-
-
-
-
-    mixin.style = function (view, prefix, value) {
-
-        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
-    }
-
-
-
-    mixin.onrender = function (view, prefix) {
-    }
-
-    
-
-});
-
-
-
-
-yaxi.ContentControl.mixin(function (mixin, base) {
-
-    
-
-    this.render = function () {
-
-        var view = base.render.call(this);
-        var content = this.__content;
-
-        if (this.__content_dirty)
-        {
-            if (content == null)
-            {
-                content = this.__no_content;
-            }
-    
-            if (content)
-            {
-                view.content = this.__render_content(content);
-            }
-        }
-        
-        return view;
-    }
-
-
-    this.patch = function (view, prefix) {
-
-        base.patch.call(this, view, prefix);
-
-        if (this.__content_dirty)
-        {
-            view[prefix + 'content'] = this.__render_content(this.__content || '');
-        }
-        else
-        {
-            delete view.content;
-        }
-    }
-
-
-    this.__render_content = function (content) {
-
-        this.__content_dirty = false;
-
-        if (typeof content === 'string')
-        {
-            return [{
-                t: 'Text',
-                u: this.uuid,
-                text: content
-            }];
-        }
-
-        var length = content.length;
-        var list = new Array(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = content[i].render();
-        }
-        
-        return list;
-    }
-
-
-
-});
-
-
-
-
-yaxi.Box.mixin(function (mixin, base) {
-
-
-
-    this.render = function () {
-
-        var view = base.render.call(this);
-        var children = this.__children;
-        var length = children.length;
-        
-        children.__last = null;
-
-        if (length > 0)
-        {
-            var list = new Array(length);
-
-            for (var i = 0; i < length; i++)
-            {
-                list[i] = children[i].render();
-            }
-
-            view.c = list;
-        }
-        else
-        {
-            delete view.c;
-        }
-
-        return view;
-    }
-
-
-    this.patch = function (view, prefix) {
-
-        var children = this.__children;
-        var last;
-
-        base.patch.call(this, view, prefix);
+        var last, any;
 
         if (last = children.__last)
         {
             children.__last = null;
 
-            if (children.length < last.length)
+            if (any = last.length > 0)
+            {
+                this.destroyChildren(last);
+            }
+
+            // 曾经清除过
+            if (!any || last.clear)
+            {
+                view[prefix + 'c'] = this.renderChildren(children);
+            }
+            else if (children.length < last.length)
             {
                 patchRemoved(children, view, prefix);
             }
@@ -7168,6 +7055,129 @@ yaxi.Box.mixin(function (mixin, base) {
     }
 
 
+
+
+    this.__render_class = function (view, prefix) {
+
+        var class1 = this.__class_list;
+        var class2 = this.__class_data;
+
+        class1 = class1 ? ' ' + class1.join(' ') : '';
+        class2 = class2 ? ' ' + class2.join(' ') : '';
+
+        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
+    }
+
+
+
+
+    mixin.style = function (view, prefix, value) {
+
+        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
+    }
+
+
+
+    mixin.onrender = function (view, prefix) {
+    }
+
+    
+
+});
+
+
+
+
+yaxi.ContentControl.mixin(function (mixin, base) {
+
+    
+
+    this.render = function () {
+
+        var view = base.render.call(this);
+        var content = this.__content;
+
+        if (this.__content_dirty)
+        {
+            if (content == null)
+            {
+                content = this.__no_content;
+            }
+            
+            view.c = this.__render_content(content);
+        }
+
+        return view;
+    }
+    
+
+    this.patch = function (view, prefix) {
+
+        var content;
+
+        if (this.__content_dirty)
+        {
+            if ((content = this.__content) && typeof content === 'object')
+            {
+                // 销毁原控件
+                this.destroyChildren(content);
+            }
+
+            view[prefix + 'c'] = this.__render_content(this.__content || '');
+        }
+
+        base.patch.call(this, view, prefix);
+    }
+
+
+    this.__render_content = function (content) {
+
+        this.__content_dirty = false;
+
+        if (typeof content === 'string')
+        {
+            return [{
+                t: 'Text',
+                u: this.uuid,
+                text: content
+            }];
+        }
+
+        return this.renderChildren(content);
+    }
+
+
+
+});
+
+
+
+
+yaxi.Box.mixin(function (mixin, base) {
+
+
+
+    this.render = function () {
+
+        var view = base.render.call(this);
+        var children = this.__children;
+
+        children.__last = null;
+        view.c = this.renderChildren(children);
+
+        return view;
+    }
+
+
+    this.patch = function (view, prefix) {
+
+        this.patchChildren(view, prefix, this.__children);
+        base.patch.call(this, view, prefix);
+    }
+
+
+
 });
 
 
@@ -7177,15 +7187,23 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-    var box = yaxi.Box.prototype;
+    this.render = function () {
+
+        var view = base.render.call(this);
+        var children = this.__children;
+
+        children.__last = null;
+        view.c = this.renderChildren(children);
+
+        return view;
+    }
 
 
+    this.patch = function (view, prefix) {
 
-
-    this.render = box.render;
-
-
-    this.patch = box.patch;
+        this.patchChildren(view, prefix, this.__children);
+        base.patch.call(this, view, prefix);
+    }
 
 
 
@@ -7307,7 +7325,7 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
                 all.push(page);
                 page.options = options;
     
-                wx[Page.main ? 'redirectTo' : 'navigateTo']({
+                wx.navigateTo({
     
                     url: '../../yaxi/pages/host?uuid=' + page.uuid
                 });
@@ -7330,6 +7348,23 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
         });
 	}
     
+
+
+    // 打开微信主页面
+    yaxi.openMainPage = function (Page, options, wxPage, wxName) {
+
+        var page = new Page(options);
+        var uuid = page.uuid;
+        
+        page.onloading(options);
+        page.options = options;
+            
+        all.push(page);
+
+        yaxi.__on_page_open(uuid, wxPage, wxName);
+
+        return uuid;
+    }
     
 
     yaxi.__on_page_open = function (uuid, wxPage, wxName) {

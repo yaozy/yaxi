@@ -357,20 +357,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     function change_active(active) {
 
-        if (this.__active !== active)
-        {
-            this.__active = active;
+        this.__active = active;
 
-            this.__class_dirty = true;
-            this.__dirty || patch(this);
-        }
+        this.__class_dirty = true;
+        this.__dirty || patch(this);
     }
 
 
     // 处理微信自定义组件不支持active的问题, 全部统一使用.active
     this.__change_active = function (active) {
 
-        if (active = !!active)
+        if (active)
         {
             change_active.call(this, active);
         }
@@ -857,24 +854,26 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             this.off();
         }
 
-        if (any = this.$view)
-        {
-            this.destroyView(any);
-            this.$view = null;
-        }
-        
-        if (this.ondestroy)
-        {
-            this.ondestroy();
-        }
+        this.$view = null;
+        this.ondestroy && this.ondestroy();
 
         this.parent = this.__binding_push = this.currentModel = null;
     }
 
 
-    this.destroyView = function (view) {
-    }
+    this.destroyChildren = function (children) {
 
+        var control;
+
+        for (var i = children.length; i--;)
+        {
+            // 无父窗口的控件则销毁
+            if ((control = children[i]) && !control.parent)
+            {
+                control.destroy();
+            }
+        }
+    }
 
 
     

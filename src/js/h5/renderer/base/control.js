@@ -48,8 +48,16 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
+    // 全新渲染子控件(给子类用)
+    this.renderChildren = function (view, children) {
 
-    this.destroyView = function (view) {
+        var index = 0;
+        var control;
+
+        while (control = children[index++])
+        {
+            view.appendChild(control.$view || control.render());
+        }
     }
 
 
@@ -83,10 +91,91 @@ yaxi.Control.mixin(function (mixin) {
                     fn.call(this, view, changes[name]);
                 }
             }
-
-            return changes;
         }
     }
+
+
+    // 子控件变化补丁(给子类用)
+    this.patchChildren = function (view, children) {
+
+        var control, last, any;
+
+        if (last = children.__last)
+        {
+            children.__last = null;
+
+            if (any = last.length > 0)
+            {
+                this.destroyChildren(last);
+            }
+
+            // 曾经清除过
+            if (!any || last.clear)
+            {
+                // 先清空原控件
+                view.textContent = '';
+
+                this.renderChildren(view, children);
+            }
+            else
+            {
+                patchChildren(view, children);
+            }
+        }
+        else if ((any = children.length) > 0)
+        {
+            for (var i = 0; i < any; i++)
+            {
+                if ((control = children[i]) && control.__dirty && (view = control.$view))
+                {
+                    control.patch(view);
+                }
+            }
+        }
+    }
+
+
+    function patchChildren(view, children) {
+
+        var refChild = view.firstChild;
+        var index = 0;
+        var control;
+        var newChild;
+
+        while (control = children[index++])
+        {
+            if (newChild = control.$view)
+            {
+                if (control.__dirty)
+                {
+                    control.patch(newChild);
+                }
+
+                if (newChild !== refChild)
+                {
+                    view.insertBefore(newChild, refChild);
+                }
+                else
+                {
+                    refChild = refChild.nextSibling;
+                }
+            }
+            else
+            {
+                view.insertBefore(control.render(), refChild);
+            }
+        }
+
+        while (refChild)
+        {
+            newChild = refChild;
+            refChild = refChild.nextSibling;
+
+            view.removeChild(newChild);
+        }
+    }
+
+
 
 
     this.__render_class = function (view) {

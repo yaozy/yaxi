@@ -10,11 +10,6 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    // 正在加载的容器控件的uuid, 容器控件的所有事件都由容器触发, 所在需要把子控件的uuid设置成容器的uuid
-    yaxi.__content_uuid = 0;
-
-
-
 
     // 全局渲染
     this.render = function () {
@@ -68,6 +63,28 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     }
 
 
+    // 全新渲染子控件(给子类用)
+    this.renderChildren = function (children) {
+
+        var length = children.length;
+        
+        if (length > 0)
+        {
+            var list = new Array(length);
+
+            for (var i = 0; i < length; i++)
+            {
+                list[i] = children[i].render();
+            }
+            
+            return list;
+        }
+
+        return [];
+    }
+
+
+
     // 增量渲染
     this.patch = function (view, prefix) {
 
@@ -107,6 +124,92 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             }
 
             mixin.onrender.call(this, view, prefix);
+        }
+    }
+
+
+    // 子控件变化补丁(给子类用)
+    this.patchChildren = function (view, prefix, children) {
+
+        var last, any;
+
+        if (last = children.__last)
+        {
+            children.__last = null;
+
+            if (any = last.length > 0)
+            {
+                this.destroyChildren(last);
+            }
+
+            // 曾经清除过
+            if (!any || last.clear)
+            {
+                view[prefix + 'c'] = this.renderChildren(children);
+            }
+            else if (children.length < last.length)
+            {
+                patchRemoved(children, view, prefix);
+            }
+            else
+            {
+                patchChanged(children, last, view, prefix);
+            }
+        }
+        else
+        {
+            patchUnchanged(children, view, prefix);
+        }
+    }
+
+
+    function patchUnchanged(children, view, prefix) {
+
+        var item;
+
+        prefix += '.c[';
+
+        for (var i = 0, l = children.length; i < l; i++)
+        {
+            if ((item = children[i]) && item.__dirty)
+            {
+                item.patch(view, prefix + i + ']');
+            }
+        }
+    }
+
+
+    function patchRemoved(children, view, prefix) {
+
+        var length = children.length;
+        var list = new Array(length);
+
+        for (var i = 0; i < length; i++)
+        {
+            list[i] = children[i].render();
+        }
+
+        view[prefix + '.c'] = view.children = list;
+    }
+
+
+    function patchChanged(children, last, view, prefix) {
+
+        var length = children.length;
+        var item;
+
+        prefix += '.c[';
+
+        for (var i = 0; i < length; i++)
+        {
+            if ((item = children[i]) !== last[i])
+            {
+                view[prefix + i + ']'] = item.render();
+            }
+            else if (item.__dirty)
+            {
+                item.patch(view, prefix + i + ']');
+            }
         }
     }
 

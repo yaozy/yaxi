@@ -13,29 +13,30 @@ yaxi.ContentControl.mixin(function (mixin, base) {
             {
                 content = this.__no_content;
             }
-    
-            if (content)
-            {
-                view.content = this.__render_content(content);
-            }
+            
+            view.c = this.__render_content(content);
         }
-        
+
         return view;
     }
-
+    
 
     this.patch = function (view, prefix) {
 
-        base.patch.call(this, view, prefix);
+        var content;
 
         if (this.__content_dirty)
         {
-            view[prefix + 'content'] = this.__render_content(this.__content || '');
+            if ((content = this.__content) && typeof content === 'object')
+            {
+                // 销毁原控件
+                this.destroyChildren(content);
+            }
+
+            view[prefix + 'c'] = this.__render_content(this.__content || '');
         }
-        else
-        {
-            delete view.content;
-        }
+
+        base.patch.call(this, view, prefix);
     }
 
 
@@ -52,15 +53,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
             }];
         }
 
-        var length = content.length;
-        var list = new Array(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = content[i].render();
-        }
-        
-        return list;
+        return this.renderChildren(content);
     }
 
 
