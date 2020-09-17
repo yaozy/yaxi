@@ -930,6 +930,23 @@ yaxi.Event = Object.extend.call({}, function (Class) {
         this.defaultPrevented = true;
     }
 
+
+    Class.from = function (type, values) {
+
+        var event = new this;
+
+        if (values)
+        {
+            for (var name in values)
+            {
+                event[name] = values[name];
+            }
+        }
+
+        return event;
+    }
+
+
     
 }, function Event(type) {
 
@@ -2262,7 +2279,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     
                     if (path[1])
                     {
-                        return findSubModel(model, binding, rule);
+                        return findSubModel(model, rule, binding, 1);
                     }
 
                     binding.model = model;
@@ -2288,12 +2305,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             {
                 if (path[1])
                 {
-                    if ((model = model[name]) && model.__model_type === 1)
-                    {
-                        return findSubModel(model, binding, rule);
-                    }
-                    
-                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+                    return findSubModel(model, rule, binding);
                 }
  
                 binding.model = model;
@@ -2307,29 +2319,60 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
-    function findSubModel(model, binding, rule) {
+    function findSubModel(model, rule, binding, index) {
 
         var path = rule.path;
         var last = path.length - 1;
 
-        for (var i = 1; i < last; i++)
-        {
-            model = model[path[i]];
+        index |= 0;
 
-            if (!model)
+        while (index < last)
+        {
+            if (model = model[path[index++]])
             {
-                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[i] + '"!';
+                if (model.__model_type === 1)
+                {
+                    continue;
+                }
+
+                throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+            }
+            else
+            {
+                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[index - 1] + '"!';
             }
         }
 
         if (path[last] in model)
         {
-            binding.field = path[last];
-            binding.model = model;
-            return binding;
+            if (binding)
+            {
+                binding.field = path[last];
+                binding.model = model;
+                return binding;
+            }
+
+            return model[path[last]];
         }
 
         throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
+    }
+
+
+
+    // 查找子模型
+    this.$findSubmodel = function (expression) {
+
+        var rule = cache[expression] || parseExpression(expression);
+        var item = this.__item;
+
+        // 数组子项模型
+        if (item && item[0] === rule.path[0])
+        {
+            return findSubModel(this, rule, null, 1);
+        }
+
+        return findSubModel(this, rule);
     }
 
 
@@ -3010,13 +3053,22 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
         if (typeof value !== 'object')
         {
-            color[prefix + 'color'] = value;
+            if (prefix)
+            {
+                color[prefix] = value;
+                color[prefix + '-color'] = value;    
+            }
         }
         else
         {
+            if (prefix)
+            {
+                prefix += '-';
+            }
+
             for (var name in value)
             {
-                combine(prefix + name + '-', value[name]);
+                combine(prefix + name, value[name]);
             }
         }
 
@@ -4129,7 +4181,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     }
 
+
+
+    // 伸缩属性, 当父类使用flex布局时是否拉伸及收拢
+    // none     不支持伸缩
+    // shrink   只支持收缩
+    // grow     只支持拉伸
+    // both     都支持
+    this.$property('flex', '', {
+
+        class: 'yx-flex-'
+    });
     
+
 
 
     var color = yaxi.color;
@@ -5234,6 +5298,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
 
+
     // 布局
     this.$property('layout', '', {
 
@@ -5422,7 +5487,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         
         if (name = storage.submodel)
         {
-            model = model[name];
+            model = model.$findSubmodel(name);
 
             if (!model)
             {
@@ -5536,7 +5601,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     
                 for (var j = 0; j < template_length; j++)
                 {
-                    control = parent.$createSubControl(template, model);
+                    control = parent.$createSubControl(template[j], model);
                     control.currentModel = model;
 
                     list[index++] = control;
@@ -5654,20 +5719,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     }
 
 }).register('Repeater');
-
-
-
-
-yaxi.Band = yaxi.Box.extend(function (Class, base) {
-
-
-
-
-}, function Band() {
-
-    yaxi.Box.apply(this, arguments);
-
-}).register('Band');
 
 
 
@@ -5826,6 +5877,46 @@ yaxi.ImageButton = yaxi.ContentControl.extend(function (Class, base) {
 
 
 
+yaxi.Line = yaxi.Control.extend(function (Class, base) {
+
+
+
+    this.$property('size', '5rem');
+
+
+    this.$property('color', 'font-level1-color');
+
+
+
+}, function Line() {
+
+    yaxi.Control.apply(this, arguments);
+
+}).register('Line');
+
+
+
+
+yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
+
+
+
+    this.$property('size', '5rem');
+
+
+    this.$property('color', 'font-level1-color');
+
+
+
+}, function VerticalLine() {
+
+    yaxi.Control.apply(this, arguments);
+
+}).register('VerticalLine');
+
+
+
+
 yaxi.MaskBox = yaxi.Control.extend(function (Class, base) {
 
 
@@ -5867,21 +5958,6 @@ yaxi.ScrollBox = yaxi.Box.extend(function () {
     yaxi.Box.call(this);
 
 }).register('ScrollBox');
-
-
-
-
-yaxi.SideBar = yaxi.Box.extend(function (Class, base) {
-
-
-    
-
-
-}, function SideBar() {
-
-    yaxi.Box.apply(this, arguments);
-
-}).register('SideBar');
 
 
 
@@ -6618,17 +6694,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     var translates = create(null);
 
 
-    // 是否检查点击
-    var tap = false;
-
-    // 上次tap事件触发时的控件
-    var tapControl = null;
-
-    // 上次tap事件触发时的时间
-    var tapTime = new Date();
-
-    // 开始触摸时的控件及时间
-    var touchControl, touchTime;
+    // 开始触摸时的控件
+    var touchControl;
     
     var uuid, flag;
 
@@ -6645,7 +6712,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
         {
             fn(event);
         }
-        else
+        else if (fn !== false)
         {
             event = new Event(event.type);
             event.flag = flag;
@@ -6706,9 +6773,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             control.__change_active(true);
 
             touchControl = control;
-            touchTime = new Date();
-
-            tap = true;
 
             event = touchEvent(event, control);
 
@@ -6732,7 +6796,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
-                tap = false;
                 return false;
             }
         }
@@ -6741,7 +6804,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
     translates.touchend = function (event) {
         
-        var control, time;
+        var control;
     
         if (control = touchControl)
         {
@@ -6754,37 +6817,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                 control.trigger(event) === false)
             {
                 return false;
-            }
-
-            // 按下大于350毫秒则触发longpress事件
-            if ((time = new Date()) - touchTime > 350)
-            {
-                event.type = 'longpress';
-
-                if (control.trigger(event) === false)
-                {
-                    return false;
-                }
-            }
-            
-            // 200ms内不重复触发tap事件
-            if (tap && (time - tapTime > 200 || tapControl !== control))
-            {
-                console.log('tap:' , new Date().getTime())
-                // 延时触发tap事件解决input先触发change事件的问题
-                setTimeout(function () {
-
-                    tapControl = control;
-                    tapTime = time;
-    
-                    event.type = 'tap';
-        
-                    if (call(control, '__on_tap', event) !== false)
-                    {
-                        control.trigger(event) === false
-                    }
-
-                }, 0);
             }
         }
     }
@@ -6810,33 +6842,32 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     }
 
 
-    // tap事件有延迟, 直接在touchend事件中触发
-    // translates.tap = function (event) {
+    translates.tap = function (event) {
 
-    //     var control = findControl();
+        var control = findControl();
 
-    //     event = touchEvent(event, control);
+        event = touchEvent(event, control);
 
-    //     if (call(control, '__on_tap', event) === false || 
-    //         control.trigger(event) === false)
-    //     {
-    //         return false;
-    //     }
-    // }
+        if (call(control, '__on_tap', event) === false || 
+            control.trigger(event) === false)
+        {
+            return false;
+        }
+    }
 
 
-    // translates.longpress = function (event) {
+    translates.longpress = function (event) {
 
-    //     var control = findControl();
+        var control = findControl();
 
-    //     event = touchEvent(event, control);
+        event = touchEvent(event, control);
 
-    //     if (call(control, '__on_longpress', event) === false || 
-    //         control.trigger(event) === false)
-    //     {
-    //         return false;
-    //     }
-    // }
+        if (call(control, '__on_longpress', event) === false || 
+            control.trigger(event) === false)
+        {
+            return false;
+        }
+    }
 
 
 
@@ -7461,8 +7492,6 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
                     {
                         notifyRender(rendereds);
                     }
-
-                    console.log('patch end: ', new Date().getTime())
                 });
             }
         }

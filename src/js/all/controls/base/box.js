@@ -6,6 +6,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
 
+
     // 布局
     this.$property('layout', '', {
 

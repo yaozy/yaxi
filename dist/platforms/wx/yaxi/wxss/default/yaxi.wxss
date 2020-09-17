@@ -1,7 +1,7 @@
 .yx-control {
   box-sizing: border-box;
-  flex-grow: 1;
-  flex-shrink: 1;
+  flex-grow: 0;
+  flex-shrink: 0;
   -webkit-overflow-scrolling: touch;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
@@ -9,7 +9,6 @@
 }
 .yx-text {
   display: inline-block;
-  flex-grow: 0;
 }
 .yx-button {
   display: inline-flex;
@@ -43,31 +42,17 @@
   text-align: center;
 }
 .yx-iconbutton-content {
-  flex-grow: 1;
-  flex-shrink: 1;
   font-size: 28rpx;
 }
 .yx-box {
   position: relative;
   display: block;
   overflow: auto;
-  width: auto;
   height: auto;
-  flex-grow: 1;
-  flex-shrink: 1;
-}
-.yx-band {
-  overflow: auto;
-  width: 100%;
-  height: 100rpx;
-  flex-grow: 0;
-  flex-shrink: 0;
 }
 .yx-icon {
   display: inline-block;
   overflow: hidden;
-  flex-grow: 0;
-  flex-shrink: 0;
   text-align: center;
 }
 .iconfont {
@@ -99,9 +84,17 @@
   background-size: contain;
 }
 .yx-imagebutton-content {
-  flex-grow: 1;
-  flex-shrink: 1;
   font-size: 28rpx;
+}
+.yx-line {
+  display: block;
+  width: 100%;
+  height: 5rpx;
+}
+.yx-verticalline {
+  display: block;
+  width: 5rpx;
+  height: 100%;
 }
 .yx-maskbox {
   position: absolute;
@@ -118,20 +111,9 @@
   overflow: auto;
   width: auto;
   height: auto;
-  flex-grow: 1;
-  flex-shrink: 1;
-}
-.yx-sidebar {
-  overflow: auto;
-  width: 200rpx;
-  height: 100%;
-  flex-grow: 0;
-  flex-shrink: 0;
 }
 .yx-swiper {
   height: 300rpx;
-  flex-grow: 0;
-  flex-shrink: 0;
 }
 .yx-swiper-host,
 .yx-swiper-item > .yx-control {
@@ -165,8 +147,6 @@
   display: flex;
   justify-items: stretch;
   height: 100rpx;
-  flex-grow: 0;
-  flex-shrink: 0;
   font-size: 30rpx;
   overflow: hidden;
 }
@@ -184,10 +164,10 @@
   width: 100%;
   height: 100%;
   background-color: #ffffff;
-  z-index: 0;
+  visibility: hidden;
 }
 .yx-tab-page-active {
-  z-index: 1;
+  visibility: visible;
 }
 .yx-page {
   position: absolute;
@@ -207,8 +187,6 @@
   width: 100%;
   height: 90rpx;
   padding-left: 20rpx;
-  flex-shrink: 0;
-  flex-grow: 0;
   flex-wrap: nowrap;
   align-items: center;
   white-space: nowrap;
@@ -255,6 +233,13 @@
   display: flex;
   flex-direction: row;
 }
+.yx-layout-row-left {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-self: flex-start;
+  justify-content: flex-start;
+}
 .yx-layout-row-center {
   display: -webkit-flex;
   display: flex;
@@ -262,10 +247,24 @@
   justify-self: center;
   justify-content: center;
 }
+.yx-layout-row-right {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-self: flex-end;
+  justify-content: flex-end;
+}
 .yx-layout-row-reverse {
   display: -webkit-flex;
   display: flex;
   flex-direction: row-reverse;
+}
+.yx-layout-row-reverse-left {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-self: flex-start;
+  justify-content: flex-start;
 }
 .yx-layout-row-reverse-center {
   display: -webkit-flex;
@@ -273,6 +272,13 @@
   flex-direction: row-reverse;
   justify-self: center;
   justify-content: center;
+}
+.yx-layout-row-reverse-right {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-self: flex-end;
+  justify-content: flex-end;
 }
 .yx-layout-column {
   display: -webkit-flex;
@@ -283,6 +289,16 @@
   display: -webkit-flex;
   display: flex;
   flex-direction: column-reverse;
+}
+.yx-flex-shrink {
+  flex-shrink: 1;
+}
+.yx-flex-grow {
+  flex-grow: 1;
+}
+.yx-flex-both {
+  flex-shrink: 1;
+  flex-grow: 1;
 }
 .yx-hidden {
   display: none;

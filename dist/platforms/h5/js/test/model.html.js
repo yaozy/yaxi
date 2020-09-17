@@ -15,11 +15,12 @@ return (
 			[
 				"box",
 				{
-					"layout": "column"
+					"layout": "column",
+					"flex": "both"
 				},
 				[
 					[
-						"band",
+						"box",
 						{
 							"layout": "row",
 							"style": "background-color:@bg-level2-color"
@@ -28,6 +29,7 @@ return (
 							[
 								"button",
 								{
+									"flex": "both",
 									"content": "Append",
 									"events": {
 										"tap": this.handleAppend.bind(this)
@@ -37,6 +39,7 @@ return (
 							[
 								"button",
 								{
+									"flex": "both",
 									"content": "Replace",
 									"events": {
 										"tap": this.handleReplace.bind(this)
@@ -46,6 +49,7 @@ return (
 							[
 								"button",
 								{
+									"flex": "both",
 									"content": "Remove",
 									"events": {
 										"tap": this.handleRemove.bind(this)
@@ -55,6 +59,7 @@ return (
 							[
 								"button",
 								{
+									"flex": "both",
 									"content": "Reorder",
 									"events": {
 										"tap": this.handleReorder.bind(this)
@@ -66,12 +71,13 @@ return (
 					[
 						"repeater",
 						{
+							"flex": "both",
 							"item": "item",
 							"index": "index"
 						},
 						[
 							[
-								"band",
+								"box",
 								{
 									"style": "height:120rem;"
 								},

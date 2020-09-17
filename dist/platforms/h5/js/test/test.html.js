@@ -15,69 +15,40 @@ return (
 			[
 				"box",
 				{
-					"layout": "row"
+					"key": "host",
+					"flex": "both"
+				}
+			],
+			[
+				"box",
+				{
+					"layout": "column"
 				},
 				[
 					[
-						"sidebar",
-						null
-					],
-					[
 						"box",
-						null,
-						[
-							[
-								"band",
-								null
-							],
-							[
-								"box",
-								{
-									"layout": "column"
-								},
-								[
-									[
-										"box",
-										null
-									],
-									[
-										"button",
-										{
-											"content": "append",
-											"events": {
-												"tap": this.handleAppend.bind(this)
-											}
-										}
-									],
-									[
-										"button",
-										{
-											"content": "remove last",
-											"style": "margin-top:10rem;",
-											"events": {
-												"tap": this.handleRemove.bind(this)
-											}
-										}
-									]
-								]
-							],
-							[
-								"band",
-								null
-							]
-						]
+						null
 					],
 					[
-						"sidebar",
-						null
+						"button",
+						{
+							"content": "append",
+							"events": {
+								"tap": this.handleAppend.bind(this)
+							}
+						}
+					],
+					[
+						"button",
+						{
+							"content": "remove last",
+							"style": "margin-top:10rem;",
+							"events": {
+								"tap": this.handleRemove.bind(this)
+							}
+						}
 					]
 				]
-			],
-			[
-				"band",
-				{
-					"style": "background-color:silver;"
-				}
 			]
 		]
 	]

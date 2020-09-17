@@ -17,14 +17,14 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                     layout: 'row',
                     children: [
                         {
-                            Class: yaxi.SideBar
+                            Class: yaxi.Box
                         },
                         {
                             Class: yaxi.Box,
                             layout: 'column',
                             children: [
                                 {
-                                    Class: yaxi.Band
+                                    Class: yaxi.Box
                                 },
                                 {
                                     Class: yaxi.Box,
@@ -63,17 +63,17 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                                     ]
                                 },
                                 {
-                                    Class: yaxi.Band
+                                    Class: yaxi.Box
                                 }
                             ]
                         },
                         {
-                            Class: yaxi.SideBar
+                            Class: yaxi.Box
                         }
                     ]
                 },
                 {
-                    Class: yaxi.Band,
+                    Class: yaxi.Box,
                     style: 'background-color: silver;'
                 }
             ]

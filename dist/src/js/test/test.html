@@ -1,21 +1,10 @@
 <page>
     <header content="yaxi test page" />
-    <box layout="row">
-        <sidebar>
-        </sidebar>
+    <box key="host" flex="both"></box>
+    <box layout="column">
         <box>
-            <band></band>
-            <box layout="column">
-                <box>
-                </box>
-                <button content="append" e-tap="handleAppend" />
-                <button content="remove last" style="margin-top:10rem;" e-tap="handleRemove" />
-            </box>
-            <band></band>
         </box>
-        <sidebar>
-        </sidebar>
+        <button content="append" e-tap="handleAppend" />
+        <button content="remove last" style="margin-top:10rem;" e-tap="handleRemove" />
     </box>
-    <band style="background-color:silver;">
-    </band>
 </page>

@@ -9,13 +9,13 @@ return (
 		},
 		[
 			[
-				"band",
+				"box",
 				{
 					"theme": "level1"
 				},
 				[
 					[
-						"sidebar",
+						"box",
 						null,
 						[
 							[
@@ -47,79 +47,79 @@ return (
 				]
 			],
 			[
-				"band",
+				"box",
 				{
 					"theme": "level1",
 					"style": "margin-top:10rem;"
 				},
 				[
 					[
-						"band",
+						"box",
 						null
 					]
 				]
 			],
 			[
-				"band",
+				"box",
 				{
 					"theme": "level1",
 					"style": "margin-top:10rem;"
 				},
 				[
 					[
-						"band",
+						"box",
 						null
 					],
 					[
-						"band",
+						"box",
 						null
 					],
 					[
-						"band",
+						"box",
 						null
 					]
 				]
 			],
 			[
-				"band",
+				"box",
 				{
 					"theme": "level1",
 					"style": "margin-top:10rem;"
 				},
 				[
 					[
-						"band",
+						"box",
 						null
 					],
 					[
-						"band",
+						"box",
 						null
 					],
 					[
-						"band",
+						"box",
 						null
 					]
 				]
 			],
 			[
-				"band",
+				"box",
 				{
 					"theme": "level1",
 					"style": "margin-top:10rem;"
 				},
 				[
 					[
-						"band",
+						"box",
 						null
 					],
 					[
-						"band",
+						"box",
 						null
 					]
 				]
 			],
 			[
-				"band",
+				"box",
 				{
 					"style": "margin-top:10rem;"
 				},

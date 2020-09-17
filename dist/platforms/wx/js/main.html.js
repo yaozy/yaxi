@@ -15,7 +15,8 @@ return (
 			[
 				"box",
 				{
-					"key": "host"
+					"key": "host",
+					"flex": "both"
 				}
 			],
 			[

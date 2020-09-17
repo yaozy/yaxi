@@ -138,32 +138,6 @@
 </template>
 
 
-<template name="Band">
-
-    <box 
-        data-id="{{ u }}"
-        id="{{ id }}"
-        class="yx-control yx-box yx-band{{ active }}{{ class }}" 
-        style="{{ style || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
-
-</template>
-
-
-<template name="SideBar">
-
-    <box 
-        data-id="{{ u }}"
-        id="{{ id }}"
-        class="yx-control yx-box yx-sidebar{{ active }}{{ class }}" 
-        style="{{ style || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
-
-</template>
-
-
 <template name="Repeater">
 
 <box 

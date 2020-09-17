@@ -1,0 +1,26 @@
+.yx-marquee {
+    position: relative;
+    height: 60rem;
+}
+
+.yx-marquee-content {
+    position: absolute;
+    top: 50%;
+    height: auto;
+    white-space: nowrap;
+}
+
+.yx-marquee-content>.yx-control {
+    display: inline-block;
+    height: 100%;
+    line-height: 1;
+}
+
+@keyframes marquee {
+    from {
+        transform: translate(0, -50%);
+    }
+    to {
+        transform: translate(-50%, -50%);
+    }
+}

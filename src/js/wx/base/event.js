@@ -13,17 +13,8 @@
     var translates = create(null);
 
 
-    // 是否检查点击
-    var tap = false;
-
-    // 上次tap事件触发时的控件
-    var tapControl = null;
-
-    // 上次tap事件触发时的时间
-    var tapTime = new Date();
-
-    // 开始触摸时的控件及时间
-    var touchControl, touchTime;
+    // 开始触摸时的控件
+    var touchControl;
     
     var uuid, flag;
 
@@ -40,7 +31,7 @@
         {
             fn(event);
         }
-        else
+        else if (fn !== false)
         {
             event = new Event(event.type);
             event.flag = flag;
@@ -101,9 +92,6 @@
             control.__change_active(true);
 
             touchControl = control;
-            touchTime = new Date();
-
-            tap = true;
 
             event = touchEvent(event, control);
 
@@ -127,7 +115,6 @@
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
-                tap = false;
                 return false;
             }
         }
@@ -136,7 +123,7 @@
     
     translates.touchend = function (event) {
         
-        var control, time;
+        var control;
     
         if (control = touchControl)
         {
@@ -149,37 +136,6 @@
                 control.trigger(event) === false)
             {
                 return false;
-            }
-
-            // 按下大于350毫秒则触发longpress事件
-            if ((time = new Date()) - touchTime > 350)
-            {
-                event.type = 'longpress';
-
-                if (control.trigger(event) === false)
-                {
-                    return false;
-                }
-            }
-            
-            // 200ms内不重复触发tap事件
-            if (tap && (time - tapTime > 200 || tapControl !== control))
-            {
-                console.log('tap:' , new Date().getTime())
-                // 延时触发tap事件解决input先触发change事件的问题
-                setTimeout(function () {
-
-                    tapControl = control;
-                    tapTime = time;
-    
-                    event.type = 'tap';
-        
-                    if (call(control, '__on_tap', event) !== false)
-                    {
-                        control.trigger(event) === false
-                    }
-
-                }, 0);
             }
         }
     }
@@ -205,33 +161,32 @@
     }
 
 
-    // tap事件有延迟, 直接在touchend事件中触发
-    // translates.tap = function (event) {
+    translates.tap = function (event) {
 
-    //     var control = findControl();
+        var control = findControl();
 
-    //     event = touchEvent(event, control);
+        event = touchEvent(event, control);
 
-    //     if (call(control, '__on_tap', event) === false || 
-    //         control.trigger(event) === false)
-    //     {
-    //         return false;
-    //     }
-    // }
+        if (call(control, '__on_tap', event) === false || 
+            control.trigger(event) === false)
+        {
+            return false;
+        }
+    }
 
 
-    // translates.longpress = function (event) {
+    translates.longpress = function (event) {
 
-    //     var control = findControl();
+        var control = findControl();
 
-    //     event = touchEvent(event, control);
+        event = touchEvent(event, control);
 
-    //     if (call(control, '__on_longpress', event) === false || 
-    //         control.trigger(event) === false)
-    //     {
-    //         return false;
-    //     }
-    // }
+        if (call(control, '__on_longpress', event) === false || 
+            control.trigger(event) === false)
+        {
+            return false;
+        }
+    }
 
 
 

@@ -3,7 +3,7 @@ module.exports = function (scope) {
 
 return (
 	[
-		"band",
+		"box",
 		{
 			"style": "position:static;overflow:visible;z-index:5;height:80rem;"
 		},
@@ -20,7 +20,7 @@ return (
 				}
 			],
 			[
-				"band",
+				"box",
 				{
 					"layout": "row",
 					"theme": "level1",
@@ -74,7 +74,7 @@ return (
 				},
 				[
 					[
-						"band",
+						"box",
 						{
 							"layout": "row",
 							"style": "height:80rem;line-height:80rem;padding:0 20rem;",
@@ -126,7 +126,7 @@ return (
 						},
 						[
 							[
-								"band",
+								"box",
 								{
 									"layout": "row",
 									"style": "height:80rem;line-height:80rem;border-top:.5px solid @border-level4;padding:0 20rem;"

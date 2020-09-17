@@ -6,7 +6,7 @@ new Compressor()
     .load('src/less', [
         'theme/' + theme + '/color.less',
         'all/base/scrollbar.less',
-        'all/control/(control|button|box|repeater|band|sidebar).less',
+        'all/control/(control|button|box|repeater).less',
         'all/control/*.less',
         'all/form/textbox.less',
         'all/form/*.less',

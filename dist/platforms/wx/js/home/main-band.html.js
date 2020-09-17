@@ -10,7 +10,7 @@ return (
 		},
 		[
 			[
-				"band",
+				"box",
 				{
 					"style": "height:60rem;line-height:60rem;"
 				},
@@ -59,14 +59,14 @@ return (
 				null,
 				(function () {
 
-				    var __for_86_1 = this.data;
-				    var __for_86_2 = [];
+				    var __for_3_1 = this.data;
+				    var __for_3_2 = [];
 
-				    for (var index = 0, __for_86_len = __for_86_1.length; index < __for_86_len; index++)
+				    for (var index = 0, __for_3_len = __for_3_1.length; index < __for_3_len; index++)
 				    {
-				        var item = __for_86_1[index];
+				        var item = __for_3_1[index];
 
-				        __for_86_2.push.apply(__for_86_2,
+				        __for_3_2.push.apply(__for_3_2,
 							[
 								[
 									"box",
@@ -89,7 +89,7 @@ return (
 											},
 											[
 												[
-													"band",
+													"box",
 													{
 														"style": "height:50rem;overflow:hidden;"
 													},
@@ -103,7 +103,7 @@ return (
 													]
 												],
 												[
-													"band",
+													"box",
 													{
 														"theme": "level4",
 														"style": "height:70rem;font-size:24rem;overflow:hidden;"
@@ -118,7 +118,7 @@ return (
 													]
 												],
 												[
-													"band",
+													"box",
 													{
 														"theme": "primary",
 														"style": "height:40rem;overflow:hidden;"
@@ -139,7 +139,7 @@ return (
 							] || []);
 				    }
 
-				    return __for_86_2;
+				    return __for_3_2;
 
 				}).call(this)
 			]

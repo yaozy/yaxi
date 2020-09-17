@@ -42,7 +42,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                     layout: 'column',
                     children: [
                         {
-                            Class: yaxi.Band,
+                            Class: yaxi.Box,
                             style: 'background-color: @bg-level2-color',
                             subtype: yaxi.Button,
                             layout: 'row',
@@ -90,7 +90,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                             arrayModel: arrayModel,
                             layout: 'column',
                             template: {
-                                Class: yaxi.Band,
+                                Class: yaxi.Box,
                                 subtype: yaxi.Text,
                                 style: 'height:auto;padding:20rem;',
                                 children: [

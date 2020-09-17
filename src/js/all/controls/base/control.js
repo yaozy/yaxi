@@ -377,7 +377,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     }
 
+
+
+    // 伸缩属性, 当父类使用flex布局时是否拉伸及收拢
+    // none     不支持伸缩
+    // shrink   只支持收缩
+    // grow     只支持拉伸
+    // both     都支持
+    this.$property('flex', '', {
+
+        class: 'yx-flex-'
+    });
     
+
 
 
     var color = yaxi.color;

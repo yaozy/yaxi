@@ -42,15 +42,17 @@ return (
 				]
 			],
 			[
-				"band",
+				"marquee",
 				{
-					"style": "height:60rem;"
+					"theme": "level1",
+					"text": this.marquee
 				}
 			],
 			[
 				"box",
 				{
 					"key": "host",
+					"flex": "both",
 					"style": "min-height:200rem;"
 				}
 			]

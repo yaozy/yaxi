@@ -1,14 +1,14 @@
 <page>
     <header content="yaxi model page" />
-    <box layout="column">
-        <band layout="row" style="background-color:@bg-level2-color">
-            <button content="Append" e-tap="handleAppend" />
-            <button content="Replace" e-tap="handleReplace" />
-            <button content="Remove" e-tap="handleRemove" />
-            <button content="Reorder" e-tap="handleReorder" />
-        </band>
-        <repeater item="item" index="index">
-            <band style="height:120rem;">
+    <box layout="column" flex="both">
+        <box layout="row" style="background-color:@bg-level2-color">
+            <button flex="both" content="Append" e-tap="handleAppend" />
+            <button flex="both" content="Replace" e-tap="handleReplace" />
+            <button flex="both" content="Remove" e-tap="handleRemove" />
+            <button flex="both" content="Reorder" e-tap="handleReorder" />
+        </box>
+        <repeater flex="both" item="item" index="index">
+            <box style="height:120rem;">
                 <box style="width:50rem;height:120rem;line-height:120rem;position:absolute;top:0;left:20rem;">
                     <text b-text="index" />
                 </box>
@@ -17,7 +17,7 @@
                     <text b-text="item.value" />
                     <text b-text="item.computed" style="display:block;" />
                 </box>
-            </band>
+            </box>
         </repeater>
     </box>
 </page>

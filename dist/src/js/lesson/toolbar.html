@@ -1,4 +1,4 @@
-<band style="position:static;overflow:visible;z-index:1;height:80rem;border-bottom:.5px solid @border-level4;">
+<box style="position:static;overflow:visible;z-index:1;height:80rem;border-bottom:.5px solid @border-level4;">
     <maskbox b-hidden="hidden" e-tap="handleClose" />
     <box layout="row" theme="level1" style="height:80rem;line-height:80rem;text-align:center;" e-tap="handleSwitch">
         <iconbutton layout="row-reverse" b-icon="sort.icon" b-content="sort.text" tag="sort" style="width:33%;height:100%;" />
@@ -7,10 +7,10 @@
     </box>
     <box theme="level1" b-hidden="sort.hidden">
         <repeater submodel="sort.data" e-tap="handleSort">
-            <band b-key="index" style="height:80rem;line-height:80rem;padding-left:30rem;border-top:.5px solid @border-level4;">
+            <box b-key="index" style="height:80rem;line-height:80rem;padding-left:30rem;border-top:.5px solid @border-level4;">
                 <verticalline b-color="item.theme" style="position:absolute;top:0;left:0;" />
                 <text b-theme="item.theme" b-text="item.text" />
-            </band>
+            </box>
         </repeater>
     </box>
     <box layout="row" b-hidden="category.hidden" theme="level1" style="max-height:640rem;">
@@ -27,17 +27,17 @@
     <box layout="column" theme="level1" b-hidden="filter.hidden" style="max-height:640rem;">
         <box style="font-size:28rem;">
             <repeater submodel="filter.data" style="border-top:.5px solid @border-level4;">
-                <band style="height:60rem;line-height:60rem;padding-left:20rem;">
+                <box style="height:60rem;line-height:60rem;padding-left:20rem;">
                     <text b-text="item.text" />
-                </band>
+                </box>
                 <repeater submodel="item.data" style="padding: 20rem;">
                     <text b-text="item.text" b-style="item.style" />
                 </repeater>
             </repeater>
         </box>
-        <band theme="level1" style="height:80rem;line-height:80rem;">
+        <box theme="level1" style="height:80rem;line-height:80rem;">
             <text>清空筛选</text>
             <button>确定</button>
-        </band>
+        </box>
     </box>
-</band>
+</box>

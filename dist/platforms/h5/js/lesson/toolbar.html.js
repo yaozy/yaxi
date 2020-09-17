@@ -3,7 +3,7 @@ module.exports = function (scope) {
 
 return (
 	[
-		"band",
+		"box",
 		{
 			"style": "position:static;overflow:visible;z-index:1;height:80rem;border-bottom:.5px solid @border-level4;"
 		},
@@ -87,7 +87,7 @@ return (
 						},
 						[
 							[
-								"band",
+								"box",
 								{
 									"style": "height:80rem;line-height:80rem;padding-left:30rem;border-top:.5px solid @border-level4;",
 									"bindings": {
@@ -225,7 +225,7 @@ return (
 								},
 								[
 									[
-										"band",
+										"box",
 										{
 											"style": "height:60rem;line-height:60rem;padding-left:20rem;"
 										},
@@ -263,7 +263,7 @@ return (
 						]
 					],
 					[
-						"band",
+						"box",
 						{
 							"theme": "level1",
 							"style": "height:80rem;line-height:80rem;"

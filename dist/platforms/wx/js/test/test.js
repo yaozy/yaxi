@@ -13,7 +13,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleAppend = function () {
 
-        var children = this.parent.children[0].children;
+        var children = this.find('>>@host').children;
 
         children.push([
             yaxi.Text,
@@ -28,7 +28,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleRemove = function () {
 
-        this.parent.children[0].children.pop();
+        this.find('>>@host').children.pop();
     }
 
 

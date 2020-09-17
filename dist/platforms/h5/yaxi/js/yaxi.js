@@ -4181,7 +4181,19 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     }
 
+
+
+    // 伸缩属性, 当父类使用flex布局时是否拉伸及收拢
+    // none     不支持伸缩
+    // shrink   只支持收缩
+    // grow     只支持拉伸
+    // both     都支持
+    this.$property('flex', '', {
+
+        class: 'yx-flex-'
+    });
     
+
 
 
     var color = yaxi.color;
@@ -5286,6 +5298,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
 
+
     // 布局
     this.$property('layout', '', {
 
@@ -5710,20 +5723,6 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.Band = yaxi.Box.extend(function (Class, base) {
-
-
-
-
-}, function Band() {
-
-    yaxi.Box.apply(this, arguments);
-
-}).register('Band');
-
-
-
-
 yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 
 
@@ -5918,6 +5917,21 @@ yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
 
 
 
+yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
+
+
+    this.$property('text', '');
+
+
+}, function Marquee() {
+
+    yaxi.Control.apply(this, arguments);
+
+}).register('Marquee');
+
+
+
+
 yaxi.MaskBox = yaxi.Control.extend(function (Class, base) {
 
 
@@ -5959,21 +5973,6 @@ yaxi.ScrollBox = yaxi.Box.extend(function () {
     yaxi.Box.call(this);
 
 }).register('ScrollBox');
-
-
-
-
-yaxi.SideBar = yaxi.Box.extend(function (Class, base) {
-
-
-    
-
-
-}, function SideBar() {
-
-    yaxi.Box.apply(this, arguments);
-
-}).register('SideBar');
 
 
 
@@ -7533,19 +7532,6 @@ yaxi.Repeater.mixin(function (mixin, base) {
 
 
 
-yaxi.Band.mixin(function (mixin, base) {
-
-
-    
-    yaxi.template(this, '<div class="$class"></div>');
-
-
-
-});
-
-
-
-
 yaxi.Button.mixin(function (mixin, base) {
 
 
@@ -7712,10 +7698,25 @@ yaxi.VerticalLine.mixin(function (mixin, base) {
 
 
 
-yaxi.ScrollBox.mixin(function (mixin, base) {
+yaxi.Marquee.mixin(function (mixin, base) {
 
 
+    yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
+    
+    mixin.text = function (view, value) {
+
+        var speed = value.length >> 5;
+        
+        if (speed < 10)
+        {
+            speed = 10;
+        }
+
+        view = view.firstChild;
+        view.textContent = value + value + value + value;
+        view.style.animation = 'marquee ' + speed + 's linear infinite';
+    }
 
 
 });
@@ -7723,11 +7724,9 @@ yaxi.ScrollBox.mixin(function (mixin, base) {
 
 
 
-yaxi.SideBar.mixin(function (mixin, base) {
+yaxi.ScrollBox.mixin(function (mixin, base) {
 
 
-    
-    yaxi.template(this, '<div class="$class"></div>');
 
 
 
