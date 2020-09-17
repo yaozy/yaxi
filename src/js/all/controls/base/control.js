@@ -467,13 +467,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
 
 
-    // 是否切换为不活动状态
-    this.$property('inactive', false, {
-
-        type: 'boolean',
-        class: 'yx-inactive'
-    });
-
 
     // 是否禁用
     this.$property('disabled', false);

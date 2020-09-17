@@ -156,6 +156,7 @@
             control.__change_active(true);
             touchControl = control;
             touchTime = new Date();
+            
             tap = true;
 
             if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
@@ -220,8 +221,9 @@
                     return stop(event);
                 }
             }
+
             // 200ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 200 || tapControl !== control))
+            if (tap && (time - tapTime > 200 || tapControl !== control))
             {
                 // 延时触发tap事件解决input先触发change事件的问题
                 setTimeout(function () {

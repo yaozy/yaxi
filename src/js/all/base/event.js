@@ -27,6 +27,23 @@ yaxi.Event = Object.extend.call({}, function (Class) {
         this.defaultPrevented = true;
     }
 
+
+    Class.from = function (type, values) {
+
+        var event = new this;
+
+        if (values)
+        {
+            for (var name in values)
+            {
+                event[name] = values[name];
+            }
+        }
+
+        return event;
+    }
+
+
     
 }, function Event(type) {
 

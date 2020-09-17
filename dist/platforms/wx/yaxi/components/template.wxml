@@ -193,6 +193,30 @@
 </template>
 
 
+<template name="Line">
+
+<view
+    data-id="{{ u }}"
+    id="{{ id }}"
+    class="yx-control yx-line{{ active }}{{ class }}" 
+    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ style || '' }}"
+    bindtouchstart="handleEvent" />
+
+</template>
+
+
+<template name="VerticalLine">
+
+<view
+    data-id="{{ u }}"
+    id="{{ id }}"
+    class="yx-control yx-verticalline{{ active }}{{ class }}" 
+    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ style || '' }}"
+    bindtouchstart="handleEvent" />
+
+</template>
+
+
 <template name="Swiper">
 
     <view data-id="{{ u }}"

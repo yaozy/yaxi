@@ -199,6 +199,8 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
                     {
                         notifyRender(rendereds);
                     }
+
+                    console.log('patch end: ', new Date().getTime())
                 });
             }
         }

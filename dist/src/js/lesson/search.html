@@ -1,8 +1,8 @@
-<band style="position:static;overflow:visible;z-index:1;height:80rem;">
+<band style="position:static;overflow:visible;z-index:5;height:80rem;">
     <maskbox b-hidden="hidden" e-tap="handleClear" />
     <band layout="row" theme="level1" style="height:80rem;">
         <textbox placeholder="搜索老师、机构、课程" 
-            style="position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4-color;border-radius:60rem;padding:0 120rem 0 60rem;" 
+            style="position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4;border-radius:60rem;padding:0 120rem 0 60rem;" 
             b-value="text" 
             e-input="handleInput"
             e-focus="handleFocus" />
@@ -19,7 +19,7 @@
             <text theme="font-level4" e-tap="handleCancel" style="margin-left:50rem;">取消搜索</text>
         </band>
         <repeater submodel="data" e-tap="handleSuggest">
-            <band layout="row" style="height:80rem;line-height:80rem;border-top:.5px solid @border-level4-color;padding:0 20rem;">
+            <band layout="row" style="height:80rem;line-height:80rem;border-top:.5px solid @border-level4;padding:0 20rem;">
                 <text b-text="item.before" />
                 <text theme="font-primary" b-text="text" />
                 <text b-text="item.after" />

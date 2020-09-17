@@ -5,7 +5,7 @@ return (
 	[
 		"band",
 		{
-			"style": "position:static;overflow:visible;z-index:1;height:80rem;"
+			"style": "position:static;overflow:visible;z-index:5;height:80rem;"
 		},
 		[
 			[
@@ -31,7 +31,7 @@ return (
 						"textbox",
 						{
 							"placeholder": "搜索老师、机构、课程",
-							"style": "position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4-color;border-radius:60rem;padding:0 120rem 0 60rem;",
+							"style": "position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4;border-radius:60rem;padding:0 120rem 0 60rem;",
 							"bindings": {
 								"value": "text"
 							},
@@ -129,7 +129,7 @@ return (
 								"band",
 								{
 									"layout": "row",
-									"style": "height:80rem;line-height:80rem;border-top:.5px solid @border-level4-color;padding:0 20rem;"
+									"style": "height:80rem;line-height:80rem;border-top:.5px solid @border-level4;padding:0 20rem;"
 								},
 								[
 									[

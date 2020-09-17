@@ -71,13 +71,22 @@
 
         if (typeof value !== 'object')
         {
-            color[prefix + 'color'] = value;
+            if (prefix)
+            {
+                color[prefix] = value;
+                color[prefix + '-color'] = value;    
+            }
         }
         else
         {
+            if (prefix)
+            {
+                prefix += '-';
+            }
+
             for (var name in value)
             {
-                combine(prefix + name + '-', value[name]);
+                combine(prefix + name, value[name]);
             }
         }
 

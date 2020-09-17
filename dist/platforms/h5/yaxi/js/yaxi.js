@@ -930,6 +930,23 @@ yaxi.Event = Object.extend.call({}, function (Class) {
         this.defaultPrevented = true;
     }
 
+
+    Class.from = function (type, values) {
+
+        var event = new this;
+
+        if (values)
+        {
+            for (var name in values)
+            {
+                event[name] = values[name];
+            }
+        }
+
+        return event;
+    }
+
+
     
 }, function Event(type) {
 
@@ -2262,7 +2279,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     
                     if (path[1])
                     {
-                        return findSubModel(model, binding, rule);
+                        return findSubModel(model, rule, binding, 1);
                     }
 
                     binding.model = model;
@@ -2288,12 +2305,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             {
                 if (path[1])
                 {
-                    if ((model = model[name]) && model.__model_type === 1)
-                    {
-                        return findSubModel(model, binding, rule);
-                    }
-                    
-                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+                    return findSubModel(model, rule, binding);
                 }
  
                 binding.model = model;
@@ -2307,29 +2319,60 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
-    function findSubModel(model, binding, rule) {
+    function findSubModel(model, rule, binding, index) {
 
         var path = rule.path;
         var last = path.length - 1;
 
-        for (var i = 1; i < last; i++)
-        {
-            model = model[path[i]];
+        index |= 0;
 
-            if (!model)
+        while (index < last)
+        {
+            if (model = model[path[index++]])
             {
-                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[i] + '"!';
+                if (model.__model_type === 1)
+                {
+                    continue;
+                }
+
+                throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+            }
+            else
+            {
+                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[index - 1] + '"!';
             }
         }
 
         if (path[last] in model)
         {
-            binding.field = path[last];
-            binding.model = model;
-            return binding;
+            if (binding)
+            {
+                binding.field = path[last];
+                binding.model = model;
+                return binding;
+            }
+
+            return model[path[last]];
         }
 
         throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
+    }
+
+
+
+    // 查找子模型
+    this.$findSubmodel = function (expression) {
+
+        var rule = cache[expression] || parseExpression(expression);
+        var item = this.__item;
+
+        // 数组子项模型
+        if (item && item[0] === rule.path[0])
+        {
+            return findSubModel(this, rule, null, 1);
+        }
+
+        return findSubModel(this, rule);
     }
 
 
@@ -3010,13 +3053,22 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
         if (typeof value !== 'object')
         {
-            color[prefix + 'color'] = value;
+            if (prefix)
+            {
+                color[prefix] = value;
+                color[prefix + '-color'] = value;    
+            }
         }
         else
         {
+            if (prefix)
+            {
+                prefix += '-';
+            }
+
             for (var name in value)
             {
-                combine(prefix + name + '-', value[name]);
+                combine(prefix + name, value[name]);
             }
         }
 
@@ -4109,20 +4161,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     function change_active(active) {
 
-        if (this.__active !== active)
-        {
-            this.__active = active;
+        this.__active = active;
 
-            this.__class_dirty = true;
-            this.__dirty || patch(this);
-        }
+        this.__class_dirty = true;
+        this.__dirty || patch(this);
     }
 
 
     // 处理微信自定义组件不支持active的问题, 全部统一使用.active
     this.__change_active = function (active) {
 
-        if (active = !!active)
+        if (active)
         {
             change_active.call(this, active);
         }
@@ -4221,13 +4270,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         class: 'yx-hidden'
     });
 
-
-    // 是否切换为不活动状态
-    this.$property('inactive', false, {
-
-        type: 'boolean',
-        class: 'yx-inactive'
-    });
 
 
     // 是否禁用
@@ -5432,7 +5474,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         
         if (name = storage.submodel)
         {
-            model = model[name];
+            model = model.$findSubmodel(name);
 
             if (!model)
             {
@@ -5546,7 +5588,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     
                 for (var j = 0; j < template_length; j++)
                 {
-                    control = parent.$createSubControl(template, model);
+                    control = parent.$createSubControl(template[j], model);
                     control.currentModel = model;
 
                     list[index++] = control;
@@ -5836,6 +5878,46 @@ yaxi.ImageButton = yaxi.ContentControl.extend(function (Class, base) {
 
 
 
+yaxi.Line = yaxi.Control.extend(function (Class, base) {
+
+
+
+    this.$property('size', '5rem');
+
+
+    this.$property('color', 'font-level1-color');
+
+
+
+}, function Line() {
+
+    yaxi.Control.apply(this, arguments);
+
+}).register('Line');
+
+
+
+
+yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
+
+
+
+    this.$property('size', '5rem');
+
+
+    this.$property('color', 'font-level1-color');
+
+
+
+}, function VerticalLine() {
+
+    yaxi.Control.apply(this, arguments);
+
+}).register('VerticalLine');
+
+
+
+
 yaxi.MaskBox = yaxi.Control.extend(function (Class, base) {
 
 
@@ -6093,7 +6175,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.inactive = true;
+                item.removeClass('yx-tab-page-active');
             }
 
             if (item = event.lastItem)
@@ -6131,15 +6213,13 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        if (page.__tab)
-        {
-            page.inactive = false;
-        }
-        else
+        if (!page.__tab)
         {
             page.__tab = item.uuid;
             page.addClass('yx-tab-page');
         }
+
+        page.addClass('yx-tab-page-active');
     }
 
 
@@ -6788,6 +6868,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
             control.__change_active(true);
             touchControl = control;
             touchTime = new Date();
+            
             tap = true;
 
             if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
@@ -6852,8 +6933,9 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                     return stop(event);
                 }
             }
+
             // 200ms内不重复触发tap事件
-            else if (tap && (time - tapTime > 200 || tapControl !== control))
+            if (tap && (time - tapTime > 200 || tapControl !== control))
             {
                 // 延时触发tap事件解决input先触发change事件的问题
                 setTimeout(function () {
@@ -7336,7 +7418,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
         {
             if (content)
             {
-                if (typeof content !== 'string')
+                if (typeof content === 'object')
                 {
                     // 销毁原控件
                     this.destroyChildren(content);
@@ -7579,6 +7661,53 @@ yaxi.ImageButton.mixin(function (mixin, base) {
 
 
 });
+
+
+
+
+yaxi.Line.mixin(function (mixin, base) {
+
+
+    var color = yaxi.color;
+
+
+    mixin.size = function (view, value) {
+
+        view.style.width = value;
+    }
+
+
+    mixin.color = function (view, value) {
+
+        view.style.backgroundColor = color[value] || value;
+    }
+
+
+});
+
+
+
+yaxi.VerticalLine.mixin(function (mixin, base) {
+
+
+    var color = yaxi.color;
+
+
+    mixin.size = function (view, value) {
+
+        view.style.height = value;
+    }
+
+
+    mixin.color = function (view, value) {
+
+        view.style.backgroundColor = color[value] || value;
+    }
+
+
+});
+
+
 
 
 

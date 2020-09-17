@@ -124,7 +124,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.inactive = true;
+                item.removeClass('yx-tab-page-active');
             }
 
             if (item = event.lastItem)
@@ -162,15 +162,13 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        if (page.__tab)
-        {
-            page.inactive = false;
-        }
-        else
+        if (!page.__tab)
         {
             page.__tab = item.uuid;
             page.addClass('yx-tab-page');
         }
+
+        page.addClass('yx-tab-page-active');
     }
 
 

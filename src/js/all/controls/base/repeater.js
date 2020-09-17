@@ -98,7 +98,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         
         if (name = storage.submodel)
         {
-            model = model[name];
+            model = model.$findSubmodel(name);
 
             if (!model)
             {
@@ -212,7 +212,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     
                 for (var j = 0; j < template_length; j++)
                 {
-                    control = parent.$createSubControl(template, model);
+                    control = parent.$createSubControl(template[j], model);
                     control.currentModel = model;
 
                     list[index++] = control;

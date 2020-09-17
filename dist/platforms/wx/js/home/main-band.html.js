@@ -59,14 +59,14 @@ return (
 				null,
 				(function () {
 
-				    var __for_10_1 = this.data;
-				    var __for_10_2 = [];
+				    var __for_86_1 = this.data;
+				    var __for_86_2 = [];
 
-				    for (var index = 0, __for_10_len = __for_10_1.length; index < __for_10_len; index++)
+				    for (var index = 0, __for_86_len = __for_86_1.length; index < __for_86_len; index++)
 				    {
-				        var item = __for_10_1[index];
+				        var item = __for_86_1[index];
 
-				        __for_10_2.push.apply(__for_10_2,
+				        __for_86_2.push.apply(__for_86_2,
 							[
 								[
 									"box",
@@ -139,7 +139,7 @@ return (
 							] || []);
 				    }
 
-				    return __for_10_2;
+				    return __for_86_2;
 
 				}).call(this)
 			]

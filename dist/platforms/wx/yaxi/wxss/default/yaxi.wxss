@@ -182,7 +182,12 @@
   top: 0;
   bottom: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  background-color: #ffffff;
+  z-index: 0;
+}
+.yx-tab-page-active {
+  z-index: 1;
 }
 .yx-page {
   position: absolute;
@@ -278,9 +283,6 @@
   display: -webkit-flex;
   display: flex;
   flex-direction: column-reverse;
-}
-.yx-inactive {
-  visibility: hidden;
 }
 .yx-hidden {
   display: none;

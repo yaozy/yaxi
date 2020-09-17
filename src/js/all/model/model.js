@@ -443,7 +443,7 @@
     
                     if (path[1])
                     {
-                        return findSubModel(model, binding, rule);
+                        return findSubModel(model, rule, binding, 1);
                     }
 
                     binding.model = model;
@@ -469,12 +469,7 @@
             {
                 if (path[1])
                 {
-                    if ((model = model[name]) && model.__model_type === 1)
-                    {
-                        return findSubModel(model, binding, rule);
-                    }
-                    
-                    throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+                    return findSubModel(model, rule, binding);
                 }
  
                 binding.model = model;
@@ -488,29 +483,60 @@
     }
 
 
-    function findSubModel(model, binding, rule) {
+    function findSubModel(model, rule, binding, index) {
 
         var path = rule.path;
         var last = path.length - 1;
 
-        for (var i = 1; i < last; i++)
-        {
-            model = model[path[i]];
+        index |= 0;
 
-            if (!model)
+        while (index < last)
+        {
+            if (model = model[path[index++]])
             {
-                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[i] + '"!';
+                if (model.__model_type === 1)
+                {
+                    continue;
+                }
+
+                throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+            }
+            else
+            {
+                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[index - 1] + '"!';
             }
         }
 
         if (path[last] in model)
         {
-            binding.field = path[last];
-            binding.model = model;
-            return binding;
+            if (binding)
+            {
+                binding.field = path[last];
+                binding.model = model;
+                return binding;
+            }
+
+            return model[path[last]];
         }
 
         throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
+    }
+
+
+
+    // 查找子模型
+    this.$findSubmodel = function (expression) {
+
+        var rule = cache[expression] || parseExpression(expression);
+        var item = this.__item;
+
+        // 数组子项模型
+        if (item && item[0] === rule.path[0])
+        {
+            return findSubModel(this, rule, null, 1);
+        }
+
+        return findSubModel(this, rule);
     }
 
 
