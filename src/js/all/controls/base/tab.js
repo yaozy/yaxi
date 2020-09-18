@@ -194,7 +194,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.__on_tap = function (event) {
+    this.__on_touchend = function (event) {
 
         var control = this.parentToThis(event.target);
 

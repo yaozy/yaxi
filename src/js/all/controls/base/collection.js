@@ -111,7 +111,8 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             this[i] = parent.$createSubControl(values[i], model);
         }
-
+        
+        this.__last || patch(this);
         this.__length = length;
     }
 

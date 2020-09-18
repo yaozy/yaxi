@@ -5,7 +5,7 @@ return (
 	[
 		"box",
 		{
-			"theme": "bg-level5",
+			"theme": "bg-level2",
 			"layout": "column"
 		},
 		[

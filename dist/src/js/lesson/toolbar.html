@@ -14,14 +14,14 @@
         </modelbox>
     </box>
     <box layout="row" b-hidden="category.hidden" theme="level1" style="max-height:640rem;">
-        <modelbox submodel="category.firsts" style="width:30%;" e-tap="handleCategoryFirst">
-            <iconbutton layout="row-left" b-icon="item.icon" b-content="item.text" b-theme="item.theme" style="height:80rem;padding-left:20rem;" />
+        <modelbox submodel="category.level1s" theme="bg-level3" style="width:25%;" e-tap="handleCategoryLevel1">
+            <iconbutton b-key="index" layout="row before" b-icon="item.icon" b-content="item.text" b-theme="item.theme" style="width:100%;height:80rem;padding-left:20rem;" />
         </modelbox>
-        <modelbox submodel="category.seconds" style="width:30%;" e-tap="handleCategorySecond">
-            <text b-text="item.text" b-theme="item.theme" style="height:80rem;line-height:80rem;" />
+        <modelbox submodel="category.level2s" theme="bg-level2" style="width:35%;" e-tap="handleCategoryLevel2">
+            <text b-key="index" b-text="item.text" b-theme="item.theme" style="width:100%;height:80rem;line-height:80rem;padding-left:20rem;" />
         </modelbox>
-        <modelbox submodel="category.thirds" style="width:40%;" e-tap="handleCategoryThird">
-            <text b-text="item.text" b-theme="item.theme" style="height:80rem;line-height:80rem;" />
+        <modelbox submodel="category.level3s" style="width:40%;" e-tap="handleCategoryLevel3">
+            <text b-key="index" b-text="item.text" b-theme="item.theme" style="width:100%;height:80rem;line-height:80rem;padding-left:20rem;" />
         </modelbox>
     </box>
     <box layout="column" theme="level1" b-hidden="filter.hidden" style="max-height:640rem;">

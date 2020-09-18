@@ -272,15 +272,24 @@
 
                 return this[name] || (this[name] = new Model(this));
             },
-            set: function (value) {
+            set: function (values) {
 
                 var model = this[name];
 
-                if (value)
+                if (values)
                 {
-                    if (value != null)
+                    values = values.$storage || values;
+
+                    if (model)
                     {
-                        (model || (this[name] = new Model(this))).$load(value);
+                        for (var key in values)
+                        {
+                            model[key] = values[key];
+                        }
+                    }
+                    else
+                    {
+                        (this[name] = new Model(this)).$load(values);
                     }
                 }
                 else if (model)
@@ -305,25 +314,21 @@
 
                 var arrayModel = this[name];
 
+                if (arrayModel)
+                {
+                    if (arrayModel.length > 0)
+                    {
+                        arrayModel.clear();
+                    }
+                }
+                else
+                {
+                    arrayModel = this[name] = new ArrayModel(this);
+                }
+
                 if (value && value.length > 0)
                 {
-                    if (arrayModel)
-                    {
-                        if (arrayModel.length > 0)
-                        {
-                            arrayModel.clear();
-                        }
-                    }
-                    else
-                    {
-                        this[name] = arrayModel = new ArrayModel(this);
-                    }
-                    
                     arrayModel.push.apply(arrayModel, value);
-                }
-                else if (arrayModel && arrayModel.length > 0)
-                {
-                    arrayModel.clear();
                 }
             }
         };
@@ -333,23 +338,26 @@
 
     function syncBindings(bindings) {
 
-        var binding, value, any;
+        var binding, model, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
 
             // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
-            value = binding.model[binding.field];
-
-            if (any = binding.pipe)
+            if (model = binding.model)
             {
-                value = any(value);
-            }
+                value = model[binding.field];
 
-            if (any = (controls || (controls = yaxi.$controls))[binding.control])
-            {
-                any[binding.property] = value;
+                if (any = binding.pipe)
+                {
+                    value = any(value);
+                }
+    
+                if (any = (controls || (controls = yaxi.$controls))[binding.control])
+                {
+                    any[binding.property] = value;
+                }
             }
         }
     }

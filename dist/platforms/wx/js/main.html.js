@@ -6,12 +6,7 @@ return (
 		"page",
 		null,
 		[
-			[
-				"header",
-				{
-					"content": "华旅教育"
-				}
-			],
+			require("./components/header.html").apply(this, []),
 			[
 				"box",
 				{

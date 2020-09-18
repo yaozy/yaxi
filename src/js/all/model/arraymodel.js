@@ -154,6 +154,24 @@
 
     function destroyItem(item) {
 
+        var bindings;
+
+        if (bindings = item.__bindings)
+        {
+            item.__bindings = null;
+
+            for (var name in bindings)
+            {
+                var list = bindings[name];
+
+                for (var i = list.length; i--;)
+                {
+                    // 清除绑定关联的模型
+                    list[i].model = null;
+                }
+            }
+        }
+
         item.$parent = item.__item = item.__bindings = null;
     }
 

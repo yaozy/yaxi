@@ -29,7 +29,7 @@ module.exports = yaxi.Box.extend(function () {
     this.init = function (size) {
 
         this.size = size || '100%';
-        this.loadTemplate(template, model);
+        this.load(template.call(this), model);
     }
 
 

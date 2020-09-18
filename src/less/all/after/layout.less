@@ -4,58 +4,10 @@
     flex-direction: row;
 }
 
-.yx-layout-row-left {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    justify-self: flex-start;
-    justify-content: flex-start;
-}
-
-.yx-layout-row-center {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    justify-self: center;
-    justify-content: center;
-}
-
-.yx-layout-row-right {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    justify-self: flex-end;
-    justify-content: flex-end;
-}
-
 .yx-layout-row-reverse {
     display: -webkit-flex;
     display: flex;
     flex-direction: row-reverse;
-}
-
-.yx-layout-row-reverse-left {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    justify-self: flex-start;
-    justify-content: flex-start;
-}
-
-.yx-layout-row-reverse-center {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row-reverse;
-    justify-self: center;
-    justify-content: center;
-}
-
-.yx-layout-row-reverse-right {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    justify-self: flex-end;
-    justify-content: flex-end;
 }
 
 .yx-layout-column {
@@ -69,6 +21,57 @@
     display: flex;
     flex-direction: column-reverse;
 }
+
+
+
+.yx-layout-before {
+    justify-items: flex-start;
+    justify-content: flex-start;
+}
+
+.yx-layout-center {
+    justify-items: center;
+    justify-content: center;
+}
+
+.yx-layout-after {
+    justify-items: flex-end;
+    justify-content: flex-end;
+}
+
+.yx-layout-space-between {
+    justify-items: space-between;
+    justify-content: space-between;
+}
+
+.yx-layout-space-around {
+    justify-items: space-around;
+    justify-content: space-around;
+}
+
+.yx-layout-stretch {
+    justify-items: stretch;
+    justify-content: stretch;
+}
+
+
+.yx-layout-left,
+.yx-layout-up {
+    align-content: flex-start;
+    align-items: flex-start;
+}
+
+.yx-layout-middle {
+    align-content: center;
+    align-items: center;
+}
+
+.yx-layout-right,
+.yx-layout-down {
+    align-content: flex-end;
+    align-items: flex-end;
+}
+
 
 
 

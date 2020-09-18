@@ -24,7 +24,7 @@
 
     bg.important = '#c40606';
     bg.primary = '#1c86ee';
-    bg.second = '#48d1cc';
+    bg.second = '#5eaadd';
     bg.success = '#71c04a';
     bg.warning = '#e89518';
     bg.danger = '#ff6c6c';
@@ -39,7 +39,7 @@
 
     font.important = '#c40606';
     font.primary = '#1c86ee';
-    font.second = '#48d1cc';
+    font.second = '#5eaadd';
     font.success = '#71c04a';
     font.warning = '#e89518';
     font.danger = '#ff6c6c';
@@ -54,7 +54,7 @@
 
     border.important = '#c40606';
     border.primary = '#1c86ee';
-    border.second = '#48d1cc';
+    border.second = '#5eaadd';
     border.success = '#71c04a';
     border.warning = '#e89518';
     border.danger = '#ff6c6c';

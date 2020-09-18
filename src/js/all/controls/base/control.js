@@ -629,18 +629,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
 
 
-
-    // 从html自动生成的模板函数加载组件
-    this.loadTemplate = function (templateFn, model) {
-
-        if (typeof templateFn !== 'function')
-        {
-            throw 'load template error: argument templateFn of method loadTemplate must be a function!'
-        }
-
-        this.load(templateFn.call(this), model);
-    }
-
+    
 
     // 从json结构加载组件
     /*
@@ -785,6 +774,40 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
     };
+
+
+
+
+    // 查找存在非空key值的控件
+    this.findHasKey = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.key)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
+
+
+    // 查找存在非空tag值的控件
+    this.findHasTag = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.tag != null)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
 
 
     // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件

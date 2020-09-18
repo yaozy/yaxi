@@ -57,22 +57,24 @@ return (
 			[
 				"box",
 				null,
-				(function () {
+				(function (__for_list) {
 
-				    var __for_26_1 = this.data;
-				    var __for_26_2 = [];
+				    var __for_data = [];
 
-				    for (var index = 0, __for_26_len = __for_26_1.length; index < __for_26_len; index++)
+				    for (var index = 0, __for_len = __for_list.length; index < __for_len; index++)
 				    {
-				        var item = __for_26_1[index];
+				        var item = __for_list[index];
 
-				        __for_26_2.push.apply(__for_26_2,
+				        __for_data.push.apply(__for_data,
 							[
 								[
 									"box",
 									{
 										"tag": item.id,
-										"style": "height:160rem;margin:20rem 0;overflow:hidden;"
+										"style": "height:160rem;margin:20rem 0;overflow:hidden;",
+										"events": {
+											"tap": this.handleOpenDetail.bind(this)
+										}
 									},
 									[
 										[
@@ -139,9 +141,9 @@ return (
 							] || []);
 				    }
 
-				    return __for_26_2;
+				    return __for_data;
 
-				}).call(this)
+				}).call(this, this.data)
 			]
 		]
 	]

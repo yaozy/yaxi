@@ -2101,15 +2101,24 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
                 return this[name] || (this[name] = new Model(this));
             },
-            set: function (value) {
+            set: function (values) {
 
                 var model = this[name];
 
-                if (value)
+                if (values)
                 {
-                    if (value != null)
+                    values = values.$storage || values;
+
+                    if (model)
                     {
-                        (model || (this[name] = new Model(this))).$load(value);
+                        for (var key in values)
+                        {
+                            model[key] = values[key];
+                        }
+                    }
+                    else
+                    {
+                        (this[name] = new Model(this)).$load(values);
                     }
                 }
                 else if (model)
@@ -2134,25 +2143,21 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
                 var arrayModel = this[name];
 
+                if (arrayModel)
+                {
+                    if (arrayModel.length > 0)
+                    {
+                        arrayModel.clear();
+                    }
+                }
+                else
+                {
+                    arrayModel = this[name] = new ArrayModel(this);
+                }
+
                 if (value && value.length > 0)
                 {
-                    if (arrayModel)
-                    {
-                        if (arrayModel.length > 0)
-                        {
-                            arrayModel.clear();
-                        }
-                    }
-                    else
-                    {
-                        this[name] = arrayModel = new ArrayModel(this);
-                    }
-                    
                     arrayModel.push.apply(arrayModel, value);
-                }
-                else if (arrayModel && arrayModel.length > 0)
-                {
-                    arrayModel.clear();
                 }
             }
         };
@@ -2162,23 +2167,26 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     function syncBindings(bindings) {
 
-        var binding, value, any;
+        var binding, model, value, any;
 
         for (var name in bindings)
         {
             binding = bindings[name];
 
             // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
-            value = binding.model[binding.field];
-
-            if (any = binding.pipe)
+            if (model = binding.model)
             {
-                value = any(value);
-            }
+                value = model[binding.field];
 
-            if (any = (controls || (controls = yaxi.$controls))[binding.control])
-            {
-                any[binding.property] = value;
+                if (any = binding.pipe)
+                {
+                    value = any(value);
+                }
+    
+                if (any = (controls || (controls = yaxi.$controls))[binding.control])
+                {
+                    any[binding.property] = value;
+                }
             }
         }
     }
@@ -2787,6 +2795,24 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     function destroyItem(item) {
 
+        var bindings;
+
+        if (bindings = item.__bindings)
+        {
+            item.__bindings = null;
+
+            for (var name in bindings)
+            {
+                var list = bindings[name];
+
+                for (var i = list.length; i--;)
+                {
+                    // 清除绑定关联的模型
+                    list[i].model = null;
+                }
+            }
+        }
+
         item.$parent = item.__item = item.__bindings = null;
     }
 
@@ -2999,7 +3025,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     bg.important = '#c40606';
     bg.primary = '#1c86ee';
-    bg.second = '#48d1cc';
+    bg.second = '#5eaadd';
     bg.success = '#71c04a';
     bg.warning = '#e89518';
     bg.danger = '#ff6c6c';
@@ -3014,7 +3040,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     font.important = '#c40606';
     font.primary = '#1c86ee';
-    font.second = '#48d1cc';
+    font.second = '#5eaadd';
     font.success = '#71c04a';
     font.warning = '#e89518';
     font.danger = '#ff6c6c';
@@ -3029,7 +3055,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     border.important = '#c40606';
     border.primary = '#1c86ee';
-    border.second = '#48d1cc';
+    border.second = '#5eaadd';
     border.success = '#71c04a';
     border.warning = '#e89518';
     border.danger = '#ff6c6c';
@@ -4426,18 +4452,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
 
 
-
-    // 从html自动生成的模板函数加载组件
-    this.loadTemplate = function (templateFn, model) {
-
-        if (typeof templateFn !== 'function')
-        {
-            throw 'load template error: argument templateFn of method loadTemplate must be a function!'
-        }
-
-        this.load(templateFn.call(this), model);
-    }
-
+    
 
     // 从json结构加载组件
     /*
@@ -4582,6 +4597,40 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
     };
+
+
+
+
+    // 查找存在非空key值的控件
+    this.findHasKey = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.key)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
+
+
+    // 查找存在非空tag值的控件
+    this.findHasTag = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.tag != null)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
 
 
     // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
@@ -4927,7 +4976,8 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             this[i] = parent.$createSubControl(values[i], model);
         }
-
+        
+        this.__last || patch(this);
         this.__length = length;
     }
 
@@ -6248,7 +6298,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.__on_tap = function (event) {
+    this.__on_touchend = function (event) {
 
         var control = this.parentToThis(event.target);
 
@@ -6789,10 +6839,11 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     
 
-    function touchEvent(event) {
+    function touchEvent(event, control) {
 
         var e = new Event(event.type);
 
+        e.target = control;
         e.flag = flag;
         e.changedTouches = parseTouches(event.changedTouches);
         e.touches = parseTouches(event.touches);
@@ -6866,7 +6917,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             control.__change_active(true);
             touchControl = control;
@@ -6889,7 +6940,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -6916,7 +6967,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             touchControl = null;
             control.__change_active(false);
@@ -6966,7 +7017,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             touchControl = null;
             control.__change_active(false);

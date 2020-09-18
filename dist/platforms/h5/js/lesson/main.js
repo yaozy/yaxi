@@ -1,6 +1,6 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
-const lessonItemTemplate = require('./lesson-item.html');
+const lessonTemplate = require('./main-lesson-list.html');
 
 
 
@@ -10,24 +10,29 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     function render(data) {
 
-        var children = this.find('>>@host').children;
-        var list = [];
-
-        for (var name in data)
-        {
-            list.push(lessonItemTemplate.call(data[name]));
-        }
-
-        children.clear();
-        children.push.apply(children, list);
+        this.data = data;
+        this.find('>>@host').load(lessonTemplate.call(this));
     }
 
 
     this.init = function () {
 
-        this.loadTemplate(template);
-        yaxi.http.get('lesson').json(render.bind(this));
+        this.load(template.call(this));
+        yaxi.http.get('lesson/list').json(render.bind(this));
     }
+
+
+    
+    this.handleOpenDetail = function (event) {
+
+        var control;
+
+        if (control = event.target.findHasTag())
+        {
+            require('../lesson/detail').open(control.tag);
+        }
+    }
+
 
 
 });

@@ -133,19 +133,21 @@ return (
 					[
 						"modelbox",
 						{
-							"submodel": "category.firsts",
-							"style": "width:30%;",
+							"submodel": "category.level1s",
+							"theme": "bg-level3",
+							"style": "width:25%;",
 							"events": {
-								"tap": this.handleCategoryFirst.bind(this)
+								"tap": this.handleCategoryLevel1.bind(this)
 							}
 						},
 						[
 							[
 								"iconbutton",
 								{
-									"layout": "row-left",
-									"style": "height:80rem;padding-left:20rem;",
+									"layout": "row before",
+									"style": "width:100%;height:80rem;padding-left:20rem;",
 									"bindings": {
+										"key": "index",
 										"icon": "item.icon",
 										"content": "item.text",
 										"theme": "item.theme"
@@ -157,18 +159,20 @@ return (
 					[
 						"modelbox",
 						{
-							"submodel": "category.seconds",
-							"style": "width:30%;",
+							"submodel": "category.level2s",
+							"theme": "bg-level2",
+							"style": "width:35%;",
 							"events": {
-								"tap": this.handleCategorySecond.bind(this)
+								"tap": this.handleCategoryLevel2.bind(this)
 							}
 						},
 						[
 							[
 								"text",
 								{
-									"style": "height:80rem;line-height:80rem;",
+									"style": "width:100%;height:80rem;line-height:80rem;padding-left:20rem;",
 									"bindings": {
+										"key": "index",
 										"text": "item.text",
 										"theme": "item.theme"
 									}
@@ -179,18 +183,19 @@ return (
 					[
 						"modelbox",
 						{
-							"submodel": "category.thirds",
+							"submodel": "category.level3s",
 							"style": "width:40%;",
 							"events": {
-								"tap": this.handleCategoryThird.bind(this)
+								"tap": this.handleCategoryLevel3.bind(this)
 							}
 						},
 						[
 							[
 								"text",
 								{
-									"style": "height:80rem;line-height:80rem;",
+									"style": "width:100%;height:80rem;line-height:80rem;padding-left:20rem;",
 									"bindings": {
+										"key": "index",
 										"text": "item.text",
 										"theme": "item.theme"
 									}

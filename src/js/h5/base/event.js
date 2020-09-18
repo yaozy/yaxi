@@ -74,10 +74,11 @@
 
     
 
-    function touchEvent(event) {
+    function touchEvent(event, control) {
 
         var e = new Event(event.type);
 
+        e.target = control;
         e.flag = flag;
         e.changedTouches = parseTouches(event.changedTouches);
         e.touches = parseTouches(event.touches);
@@ -151,7 +152,7 @@
 
         if (control = findControl(event.target))
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             control.__change_active(true);
             touchControl = control;
@@ -174,7 +175,7 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             if (call(control, '__on_touchmove', e) === false)
             {
@@ -201,7 +202,7 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             touchControl = null;
             control.__change_active(false);
@@ -251,7 +252,7 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event);
+            var e = touchEvent(event, control);
 
             touchControl = null;
             control.__change_active(false);

@@ -32,7 +32,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.loadTemplate(template, arrayModel);
+        this.load(template.call(this), arrayModel);
     }
 
 
