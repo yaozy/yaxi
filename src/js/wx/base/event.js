@@ -33,7 +33,7 @@
         }
         else if (fn !== false)
         {
-            event = new Event(event.type);
+            event = new Event(event.type, event.detail);
             event.flag = flag;
 
             return controls[uuid].trigger(event);
@@ -190,33 +190,13 @@
 
 
 
-    translates.change = function (event) {
-
-        var control = findControl();
-        var current = event.detail.current;
-
-        event = new Event(event.type);
-        event.target = control;
-        event.flag = flag;
-        event.current = current;
-
-        if (call(control, '__on_change', event) === false || 
-            control.trigger(event) === false)
-        {
-            return false;
-        }
-    }
-
-
     translates.input = translates.change = function (event) {
 
         var control = findControl();
-        var value = event.detail.value;
 
-        event = new Event(event.type);
+        event = new Event(event.type, event.detail);
         event.target = control;
         event.flag = flag;
-        event.value = value;
 
         return control.trigger(event);
     }

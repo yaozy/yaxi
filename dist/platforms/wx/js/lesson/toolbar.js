@@ -77,17 +77,21 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     id: 0,
                     text: '',
+                    checked: '',
+
                     data: [
                         {
                             id: 0,
                             text: '',
 
-                            style: function () {
+                            checked: function () {
 
-                                return 'width:30%;height:60rem;line-height:60rem;margin:0 3% 10rem 0;border-radius:40rem;text-align:center;' 
-                                    + (this.checked ? 
-                                        'border:.5px solid @border-primary;color:@font-primary;background-color:@bg-level1;' : 
-                                        'background-color:@bg-level2;')
+                                return this.$parent.checked.indexOf(this.id) >= 0;
+                            },
+
+                            theme: function () {
+
+                                return this.checked ? 'bg-level5 border-primary font-primary' :  'bg-level4';
                             }
                         }
                     ]
@@ -96,6 +100,35 @@ module.exports = yaxi.Box.extend(function (Class, base) {
         }
 
     }))();
+
+
+    
+    function computeIconFn(type) {
+
+        return function () {
+
+            return this.$parent.type === type ? 'common-expand' : 'common-collapse';
+        }
+    }
+
+
+    function computeHiddenFn(type) {
+
+        return function () {
+
+            return this.$parent.type !== type;
+        }
+    }
+
+
+    function computeCategoryThemeFn(name) {
+
+        return function () {
+
+            return this.$parent[name] === this.id ? 'font-primary' : '';
+        }
+    }
+
 
 
     model.sort.data = [
@@ -130,66 +163,41 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             id: 1,
             text: '课程类型',
             single: true,
+            checked: [],
             data: [
-                { id: 11, text: '随到随学', checked: false },
-                { id: 12, text: '正在直播', checked: false },
-                { id: 13, text: '系列课', checked: false },
+                { id: 11, text: '随到随学' },
+                { id: 12, text: '正在直播' },
+                { id: 13, text: '系列课' },
             ]
         },
         {
             id: 2,
             text: '价格区间',
             single: true,
+            checked: [],
             data: [
-                { id: 21, text: '免费', checked: false },
-                { id: 22, text: '￥50以下', checked: false },
-                { id: 23, text: '￥50-100', checked: false },
-                { id: 24, text: '￥100-500', checked: false },
-                { id: 25, text: '￥500-1000', checked: false },
-                { id: 26, text: '￥1000以上', checked: false },
+                { id: 21, text: '免费' },
+                { id: 22, text: '￥50以下' },
+                { id: 23, text: '￥50-100' },
+                { id: 24, text: '￥100-500' },
+                { id: 25, text: '￥500-1000' },
+                { id: 26, text: '￥1000以上' },
             ]
         },
         {
             id: 3,
             text: '课程内容包含(可多选)',
             single: false,
+            checked: [],
             data: [
-                { id: 31, text: '直播授课', checked: false },
-                { id: 32, text: '录播视频', checked: false },
-                { id: 33, text: '课程资料', checked: false },
-                { id: 34, text: '习题测验', checked: false },
-                { id: 35, text: '试听', checked: false },
+                { id: 31, text: '直播授课' },
+                { id: 32, text: '录播视频' },
+                { id: 33, text: '课程资料' },
+                { id: 34, text: '习题测验' },
+                { id: 35, text: '试听' },
             ]
         }
     ]
-
-
-
-    function computeIconFn(type) {
-
-        return function () {
-
-            return this.$parent.type === type ? 'common-expand' : 'common-collapse';
-        }
-    }
-
-
-    function computeHiddenFn(type) {
-
-        return function () {
-
-            return this.$parent.type !== type;
-        }
-    }
-
-
-    function computeCategoryThemeFn(name) {
-
-        return function () {
-
-            return this.$parent[name] === this.id ? 'font-primary' : '';
-        }
-    }
 
 
 
@@ -235,10 +243,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
             model.type = '';
 
-            this.trigger(yaxi.Event.from('sort', {
-    
-                item: item
-            }));
+            this.trigger(new yaxi.Event('sort', item));
         }
     }
 
@@ -257,6 +262,63 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     this.handleCategoryThird = function (event) {
 
         
+    }
+
+
+
+    this.handleChangeFilter = function (event) {
+
+        var target = event.target;
+        var parent = target.parent;
+
+        if (parent && parent.tag === 'filter')
+        {
+            var group = model.filter.data[+parent.key - 1];
+            var checked = group.checked;
+            var item = group.data[+target.key - 1];
+            var id = item.id + ',';
+
+            if (checked.indexOf(id) >= 0)
+            {
+                group.checked = checked.replace(id, '');
+            }
+            else
+            {
+                group.checked = group.single ? id : checked + id;
+            }
+        }
+    }
+
+
+    this.handleClearFilter = function (event) {
+
+        var group = model.filter.data;
+
+        for (var i = group.length; i--;)
+        {
+            group[i].checked = '';
+        }
+    }
+
+
+    this.handleFilter = function (event) {
+
+        var group = model.filter.data;
+        var detail;
+
+        for (var i = group.length; i--;)
+        {
+            var item = group[i];
+
+            if (item.checked)
+            {
+                (detail || (detail = {}))[item.id] = item.checked;
+            }
+        }
+
+        model.type = '';
+        
+        this.trigger('filter', detail);
     }
 
 

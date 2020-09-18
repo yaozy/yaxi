@@ -55,7 +55,7 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
     this.__on_change = function (event) {
 
-        this.current = event.current;
+        this.current = event.value;
     }
 
 

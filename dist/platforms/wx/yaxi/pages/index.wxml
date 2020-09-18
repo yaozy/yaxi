@@ -1,8 +1,0 @@
-<import src="../components/template.wxml" />
-
-
-
-<view style="height:300rpx;"></view>
-
-
-<template is="TextBox" />

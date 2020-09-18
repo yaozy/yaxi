@@ -1,14 +1,12 @@
 yaxi.Marquee.mixin(function (mixin, base) {
 
 
-    yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
-    
-    mixin.text = function (view, value) {
+    mixin.text = function (view, prefix, value) {
 
         var length = value.length;
 
-        view = view.firstChild;
+        view[prefix + 'text'] = value;
 
         if (length > 0)
         {
@@ -25,14 +23,10 @@ yaxi.Marquee.mixin(function (mixin, base) {
             }
 
             speed = speed * this.speed | 0;
-    
-            value = '<span "margin-right:100rem;">' + value + '</span>';
-    
-            view.innerHTML = value + value;
             value = 'marquee ' + speed + 's linear infinite';
         }
 
-        view.style.animation = value;
+        view[prefix + 'animation'] = value;
     }
 
 
@@ -40,6 +34,7 @@ yaxi.Marquee.mixin(function (mixin, base) {
 
         mixin.text.call(this, view, this.text);
     }
+
 
 
 });

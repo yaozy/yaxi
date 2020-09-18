@@ -27,27 +27,15 @@ yaxi.Event = Object.extend.call({}, function (Class) {
         this.defaultPrevented = true;
     }
 
-
-    Class.from = function (type, values) {
-
-        var event = new this;
-
-        if (values)
-        {
-            for (var name in values)
-            {
-                event[name] = values[name];
-            }
-        }
-
-        return event;
-    }
-
-
     
-}, function Event(type) {
+}, function Event(type, detail) {
 
     this.type = type;
+
+    if (detail)
+    {
+        this.detail = detail;
+    }
 });
 
 
@@ -160,7 +148,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (event) {
+    this.trigger = yaxi.trigger = function (event, detail) {
         
         var target = this,
             events,
@@ -183,6 +171,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
         }
 
         event.target = this;
+
+        if (detail)
+        {
+            event.detail = detail;
+        }
 
         do
         {

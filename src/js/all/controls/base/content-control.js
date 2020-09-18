@@ -28,18 +28,25 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     // 内容
     this.$property('content', null, {
 
-        change: false,
+        convert: function (value) {
 
-        get: function () {
+            var content = this.__content;
 
-            return this.$storage.content;
-        },
+            if (content)
+            {
+                this.__content = null;
 
-        set: function (value) {
+                if (typeof content === 'object')
+                {
+                    for (var i = content.length; i--;)
+                    {
+                        content[i].destroy();
+                    }
+                }
+            }
 
-            this.$storage.content = this.__load_content(value);
+            return value;
         }
-
     });
 
 
@@ -85,32 +92,38 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     }
 
 
-    // 加载内容
     this.__load_content = function (values) {
 
+        this.content = values;
+    }
+
+
+
+    // 初始化内容
+    this.__init_content = function () {
+
         var content = this.__content;
-    
-        if (content && typeof content !== 'string')
+
+        if (content)
         {
-            for (var i = list.length; i--;)
-            {
-                list[i].destroy();
-            }
+            return content;
         }
 
-        if (values instanceof A)
+        content = this.content;
+
+        if (content instanceof A)
         {
             try
             {
                 yaxi.__content_count++;
 
-                if (values[0] instanceof A)
+                if (content[0] instanceof A)
                 {
-                    content = createControls(this, values);
+                    content = createControls(this, content);
                 }
                 else
                 {
-                    content = [createControl(this, values)];
+                    content = [createControl(this, content)];
                 }
             }
             finally
@@ -120,15 +133,10 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
         }
         else
         {
-            content = values = '' + values; 
+            content = '' + content; 
         }
 
-        this.__content = content;
-        this.__content_dirty = true;  // 标记内容已变更
-
-        this.__dirty || patch(this);
-
-        return values;
+        return this.__content = content;
     }
 
 

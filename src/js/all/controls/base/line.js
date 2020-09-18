@@ -18,7 +18,7 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
+yaxi.Vline = yaxi.Control.extend(function (Class, base) {
 
 
 
@@ -29,8 +29,8 @@ yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
 
 
 
-}, function VerticalLine() {
+}, function Vline() {
 
     yaxi.Control.apply(this, arguments);
 
-}).register('VerticalLine');
+}).register('Vline');

@@ -24,7 +24,7 @@ return (
 				"scrollbox",
 				{
 					"key": "host",
-					"flex": "both",
+					"flex": "auto",
 					"style": "padding:0 20rem;"
 				}
 			]

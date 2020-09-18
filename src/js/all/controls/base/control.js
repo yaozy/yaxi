@@ -98,6 +98,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 storage[name] = value;
                 className = value === true ? prefix : prefix + value;
+                className = className.replace(/\s+/g, ' ' + prefix);
 
                 if (list = this.__class_data)
                 {
@@ -379,11 +380,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // 伸缩属性, 当父类使用flex布局时是否拉伸及收拢
-    // none     不支持伸缩
-    // shrink   只支持收缩
-    // grow     只支持拉伸
-    // both     都支持
+    // 当父类使用flex布局时拉伸设置, 目前只支持auto和none
     this.$property('flex', '', {
 
         class: 'yx-flex-'

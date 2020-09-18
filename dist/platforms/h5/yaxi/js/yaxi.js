@@ -811,7 +811,7 @@ yaxi.impl.property = function (target) {
 
     cache.boolean = function (value) {
         
-        return !!value;
+        return !!value && value !== 'false';
     }
 
 
@@ -930,27 +930,15 @@ yaxi.Event = Object.extend.call({}, function (Class) {
         this.defaultPrevented = true;
     }
 
-
-    Class.from = function (type, values) {
-
-        var event = new this;
-
-        if (values)
-        {
-            for (var name in values)
-            {
-                event[name] = values[name];
-            }
-        }
-
-        return event;
-    }
-
-
     
-}, function Event(type) {
+}, function Event(type, detail) {
 
     this.type = type;
+
+    if (detail)
+    {
+        this.detail = detail;
+    }
 });
 
 
@@ -1063,7 +1051,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (event) {
+    this.trigger = yaxi.trigger = function (event, detail) {
         
         var target = this,
             events,
@@ -1086,6 +1074,11 @@ yaxi.EventTarget = Object.extend(function (Class) {
         }
 
         event.target = this;
+
+        if (detail)
+        {
+            event.detail = detail;
+        }
 
         do
         {
@@ -2776,16 +2769,16 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var repeaters = controls || (controls = yaxi.$controls);
-        var bindings, repeater;
+        var modelboxs = controls || (controls = yaxi.$controls);
+        var bindings, modelbox;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                if (repeater = repeaters[bindings[i]])
+                if (modelbox = modelboxs[bindings[i]])
                 {
-                    repeater[type](arg1, arg2);
+                    modelbox[type](arg1, arg2);
                 }
             }
         }
@@ -3902,6 +3895,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 storage[name] = value;
                 className = value === true ? prefix : prefix + value;
+                className = className.replace(/\s+/g, ' ' + prefix);
 
                 if (list = this.__class_data)
                 {
@@ -4183,11 +4177,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // 伸缩属性, 当父类使用flex布局时是否拉伸及收拢
-    // none     不支持伸缩
-    // shrink   只支持收缩
-    // grow     只支持拉伸
-    // both     都支持
+    // 当父类使用flex布局时拉伸设置, 目前只支持auto和none
     this.$property('flex', '', {
 
         class: 'yx-flex-'
@@ -5105,7 +5095,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    // 直接插入控件(给repeater控件用)
+    // 直接插入控件(给modelbox控件用)
     this.__insert = function (index, controls) {
 
         this.__last || patch(this);
@@ -5164,18 +5154,25 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     // 内容
     this.$property('content', null, {
 
-        change: false,
+        convert: function (value) {
 
-        get: function () {
+            var content = this.__content;
 
-            return this.$storage.content;
-        },
+            if (content)
+            {
+                this.__content = null;
 
-        set: function (value) {
+                if (typeof content === 'object')
+                {
+                    for (var i = content.length; i--;)
+                    {
+                        content[i].destroy();
+                    }
+                }
+            }
 
-            this.$storage.content = this.__load_content(value);
+            return value;
         }
-
     });
 
 
@@ -5221,32 +5218,38 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     }
 
 
-    // 加载内容
     this.__load_content = function (values) {
 
+        this.content = values;
+    }
+
+
+
+    // 初始化内容
+    this.__init_content = function () {
+
         var content = this.__content;
-    
-        if (content && typeof content !== 'string')
+
+        if (content)
         {
-            for (var i = list.length; i--;)
-            {
-                list[i].destroy();
-            }
+            return content;
         }
 
-        if (values instanceof A)
+        content = this.content;
+
+        if (content instanceof A)
         {
             try
             {
                 yaxi.__content_count++;
 
-                if (values[0] instanceof A)
+                if (content[0] instanceof A)
                 {
-                    content = createControls(this, values);
+                    content = createControls(this, content);
                 }
                 else
                 {
-                    content = [createControl(this, values)];
+                    content = [createControl(this, content)];
                 }
             }
             finally
@@ -5256,15 +5259,10 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
         }
         else
         {
-            content = values = '' + values; 
+            content = '' + content; 
         }
 
-        this.__content = content;
-        this.__content_dirty = true;  // 标记内容已变更
-
-        this.__dirty || patch(this);
-
-        return values;
+        return this.__content = content;
     }
 
 
@@ -5388,10 +5386,10 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
 /*
- * Repeater是一个通过模型(arrayModel)和模板(template)进行重复展现的容器控件
+ * ModelBox是一个通过模型(arrayModel)和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
 */
-yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
+yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
 
 
@@ -5458,7 +5456,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function no_children () {
 
-        throw 'Repeater doesn\'t supports children, please use model and template!';
+        throw 'ModelBox doesn\'t supports children, please use model and template!';
     }
 
 
@@ -5480,7 +5478,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!model)
         {
-            throw message + 'repeater control must bind a model!';
+            throw message + 'modelbox control must bind a model!';
         }
 
         base.load.call(this, values, model);
@@ -5491,12 +5489,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             if (!model)
             {
-                throw message + 'can not find submodel "' + name + '" of repeater control!';
+                throw message + 'can not find submodel "' + name + '" of modelbox control!';
             }
 
             if (model.__model_type !== 2)
             {
-                throw message + 'model "' + name + '" not a valid array model of repeater control!';
+                throw message + 'model "' + name + '" not a valid array model of modelbox control!';
             }
         }
 
@@ -5508,7 +5506,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!arrayModel || arrayModel.__model_type !== 2)
         {
-            throw  message + 'repeater control must bind a array model!';
+            throw  message + 'modelbox control must bind a array model!';
         }
 
         var template = this.template;
@@ -5516,7 +5514,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!template)
         {
-            throw message + 'repeater control does not specify a template!';
+            throw message + 'modelbox control does not specify a template!';
         }
 
         var children = this.__children;
@@ -5547,30 +5545,30 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function bind(repeater, arrayModel) {
+    function bind(modelbox, arrayModel) {
 
         var bindings;
 
         if (bindings = arrayModel.__bindings)
         {
-            bindings.push(repeater.uuid);
+            bindings.push(modelbox.uuid);
         }
         else
         {
-            arrayModel.__bindings = [repeater.uuid];
+            arrayModel.__bindings = [modelbox.uuid];
         }
 
-        repeater.__arrayModel = arrayModel;
+        modelbox.__arrayModel = arrayModel;
     }
 
 
-    function unbind(repeater, arrayModel) {
+    function unbind(modelbox, arrayModel) {
 
         var bindings;
 
         if (bindings = arrayModel.__bindings)
         {
-            var index = bindings.indexOf(repeater.uuid);
+            var index = bindings.indexOf(modelbox.uuid);
 
             if (index >= 0)
             {
@@ -5578,7 +5576,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             }
         }
 
-        repeater.__arrayModel = null;
+        modelbox.__arrayModel = null;
     }
 
 
@@ -5706,7 +5704,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-}, function Repeater() {
+}, function ModelBox() {
 
     var init;
     
@@ -5718,7 +5716,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         init.apply(this, arguments);
     }
 
-}).register('Repeater');
+}).register('ModelBox');
 
 
 
@@ -5897,7 +5895,7 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
+yaxi.Vline = yaxi.Control.extend(function (Class, base) {
 
 
 
@@ -5908,11 +5906,11 @@ yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
 
 
 
-}, function VerticalLine() {
+}, function Vline() {
 
     yaxi.Control.apply(this, arguments);
 
-}).register('VerticalLine');
+}).register('Vline');
 
 
 
@@ -5920,9 +5918,15 @@ yaxi.VerticalLine = yaxi.Control.extend(function (Class, base) {
 yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
 
 
+
     this.$property('text', '');
 
 
+    // 速度, 每32字显示的秒数
+    this.$property('speed', 10);
+
+
+    
 }, function Marquee() {
 
     yaxi.Control.apply(this, arguments);
@@ -5932,20 +5936,20 @@ yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.MaskBox = yaxi.Control.extend(function (Class, base) {
+yaxi.MaskLayer = yaxi.Control.extend(function (Class, base) {
 
 
     
 
 
 
-}, function MaskBox() {
+}, function MaskLayer() {
 
 
     yaxi.Control.apply(this, arguments);
 
 
-}).register('MaskBox');
+}).register('MaskLayer');
 
 
 
@@ -6034,7 +6038,7 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
     this.__on_change = function (event) {
 
-        this.current = event.current;
+        this.current = event.value;
     }
 
 
@@ -7411,33 +7415,15 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     this.render = function () {
 
         var view = base.render.call(this);
-        var content = this.__content;
+        var content = this.__init_content() || this.__no_content;
 
-        if (this.__content_dirty)
-        {
-            if (content)
-            {
-                if (typeof content === 'object')
-                {
-                    // 销毁原控件
-                    this.destroyChildren(content);
-                }
-            }
-            else if (content == null)
-            {
-                content = this.__no_content;
-            }
-            
-            this.__render_content(view, content);
-        }
+        this.__render_content(view, content);
 
         return view;
     }
 
     
     this.__render_content = function (view, content) {
-
-        this.__content_dirty = false;
 
         if (typeof content === 'string')
         {
@@ -7454,6 +7440,12 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     this.__render_text = function (view, text) {
 
         view.textContent = text;
+    }
+
+
+    mixin.content = function (view) {
+
+        this.__render_content(view, this.__init_content());
     }
 
 
@@ -7498,7 +7490,7 @@ yaxi.Box.mixin(function (mixin, base) {
 
 
 
-yaxi.Repeater.mixin(function (mixin, base) {
+yaxi.ModelBox.mixin(function (mixin, base) {
 
 
 
@@ -7673,7 +7665,7 @@ yaxi.Line.mixin(function (mixin, base) {
 
 
 
-yaxi.VerticalLine.mixin(function (mixin, base) {
+yaxi.Vline.mixin(function (mixin, base) {
 
 
     var color = yaxi.color;
@@ -7706,16 +7698,39 @@ yaxi.Marquee.mixin(function (mixin, base) {
     
     mixin.text = function (view, value) {
 
-        var speed = value.length >> 5;
-        
-        if (speed < 10)
-        {
-            speed = 10;
-        }
+        var length = value.length;
 
         view = view.firstChild;
-        view.textContent = value + value + value + value;
-        view.style.animation = 'marquee ' + speed + 's linear infinite';
+
+        if (length > 0)
+        {
+            var speed = length >> 5;
+
+            if ((speed << 5) < length)
+            {
+                speed++;
+            }
+        
+            if (speed < 1)
+            {
+                speed = 1;
+            }
+
+            speed = speed * this.speed | 0;
+    
+            value = '<span "margin-right:100rem;">' + value + '</span>';
+    
+            view.innerHTML = value + value;
+            value = 'marquee ' + speed + 's linear infinite';
+        }
+
+        view.style.animation = value;
+    }
+
+
+    mixin.speed = function (view) {
+
+        mixin.text.call(this, view, this.text);
     }
 
 

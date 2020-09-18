@@ -9,7 +9,7 @@ return (
 		},
 		[
 			[
-				"maskbox",
+				"masklayer",
 				{
 					"bindings": {
 						"hidden": "hidden"
@@ -117,7 +117,7 @@ return (
 						]
 					],
 					[
-						"repeater",
+						"modelbox",
 						{
 							"submodel": "data",
 							"events": {

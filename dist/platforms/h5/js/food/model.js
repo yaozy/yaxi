@@ -86,7 +86,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
                             ]
                         },
                         {
-                            Class: yaxi.Repeater,
+                            Class: yaxi.ModelBox,
                             arrayModel: arrayModel,
                             layout: 'column',
                             template: {

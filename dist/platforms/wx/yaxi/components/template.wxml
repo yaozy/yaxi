@@ -138,12 +138,12 @@
 </template>
 
 
-<template name="Repeater">
+<template name="ModelBox">
 
 <box 
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-box{{ active }}{{ class }}" 
+    class="yx-control yx-box yx-modelbox{{ active }}{{ class }}" 
     style="{{ style || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}" />
@@ -179,12 +179,12 @@
 </template>
 
 
-<template name="VerticalLine">
+<template name="Vline">
 
 <view
     data-id="{{ u }}"
     id="{{ id }}"
-    class="yx-control yx-verticalline{{ active }}{{ class }}" 
+    class="yx-control yx-vline{{ active }}{{ class }}" 
     style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ style || '' }}"
     bindtouchstart="handleEvent" />
 
@@ -200,7 +200,7 @@
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
-            autoplay="{{ false }}"
+            autoplay="{{ autoplay !== false }}"
             current="{{ current || 0 }}"
             interval="{{ interval || 5000 }}"
             duration="{{ duration || 500 }}"
@@ -213,17 +213,18 @@
             <swiper-item 
                 wx:for="{{ c }}"
                 wx:key="u"
-                item-id="{{ item.uuid }}"
+                key="index"
+                data-id="{{ item.u }}" 
+                item-id="{{ item.u }}"
                 class="yx-swiper-item">
-                <template
-                    is="{{ item.t }}"
-                    data="{{ ...item }}" />
+                <template is="{{ item.t }}" data="{{ ...item }}" />
             </swiper-item>
         </swiper>
         <view class="yx-swiper-dots" wx:if="{{ dots !== false }}">
             <view 
                 wx:for="{{ c }}"
                 wx:key="u"
+                key="index"
                 data-id="{{ u }}" 
                 data-flag="{{ index }}" 
                 class="yx-swiper-dot{{ (current || 0) === index ? ' yx-swiper-active-dot' : ''}}"
@@ -274,12 +275,30 @@
 
 
 
-<template name="MaskBox">
+<template name="MaskLayer">
 
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-maskbox{{ active }}{{ class }}" 
+        class="yx-control yx-masklayer{{ active }}{{ class }}" 
         style="{{ style || '' }}"
         bindtouchstart="handleEvent" />
+
+</template>
+
+
+
+<template name="Marquee">
+
+<view
+    data-id="{{ u }}"
+    id="{{ id }}"
+    class="yx-control yx-marquee{{ active }}{{ class }}" 
+    style="{{ style || '' }}"
+    bindtouchstart="handleEvent">
+    <view class="yx-marquee-content" style="animation:{{ animation || '' }}">
+        <text style="margin-right:100rpx;">{{ text || '' }}</text>
+        <text style="margin-right:100rpx;">{{ text || '' }}</text>
+    </view>
+</view>
 
 </template>

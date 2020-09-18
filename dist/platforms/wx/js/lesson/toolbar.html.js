@@ -9,7 +9,7 @@ return (
 		},
 		[
 			[
-				"maskbox",
+				"masklayer",
 				{
 					"bindings": {
 						"hidden": "hidden"
@@ -24,7 +24,7 @@ return (
 				{
 					"layout": "row",
 					"theme": "level1",
-					"style": "height:80rem;line-height:80rem;text-align:center;",
+					"style": "height:80rem;line-height:80rem;text-align:center;border-bottom:.5px solid @border-level4;",
 					"events": {
 						"tap": this.handleSwitch.bind(this)
 					}
@@ -78,7 +78,7 @@ return (
 				},
 				[
 					[
-						"repeater",
+						"modelbox",
 						{
 							"submodel": "sort.data",
 							"events": {
@@ -96,7 +96,7 @@ return (
 								},
 								[
 									[
-										"verticalline",
+										"vline",
 										{
 											"style": "position:absolute;top:0;left:0;",
 											"bindings": {
@@ -131,7 +131,7 @@ return (
 				},
 				[
 					[
-						"repeater",
+						"modelbox",
 						{
 							"submodel": "category.firsts",
 							"style": "width:30%;",
@@ -155,7 +155,7 @@ return (
 						]
 					],
 					[
-						"repeater",
+						"modelbox",
 						{
 							"submodel": "category.seconds",
 							"style": "width:30%;",
@@ -177,7 +177,7 @@ return (
 						]
 					],
 					[
-						"repeater",
+						"modelbox",
 						{
 							"submodel": "category.thirds",
 							"style": "width:40%;",
@@ -214,11 +214,12 @@ return (
 					[
 						"box",
 						{
+							"flex": "auto",
 							"style": "font-size:28rem;"
 						},
 						[
 							[
-								"repeater",
+								"modelbox",
 								{
 									"submodel": "filter.data",
 									"style": "border-top:.5px solid @border-level4;"
@@ -227,7 +228,7 @@ return (
 									[
 										"box",
 										{
-											"style": "height:60rem;line-height:60rem;padding-left:20rem;"
+											"style": "height:80rem;line-height:80rem;padding-left:20rem;"
 										},
 										[
 											[
@@ -241,18 +242,27 @@ return (
 										]
 									],
 									[
-										"repeater",
+										"modelbox",
 										{
 											"submodel": "item.data",
-											"style": "padding: 20rem;"
+											"style": "padding-left:20rem;",
+											"tag": "filter",
+											"bindings": {
+												"key": "index"
+											},
+											"events": {
+												"tap": this.handleChangeFilter.bind(this)
+											}
 										},
 										[
 											[
 												"text",
 												{
+													"style": "width:220rem;height:60rem;line-height:60rem;margin:0 20rem 20rem 0;border-radius:40rem;text-align:center;",
 													"bindings": {
+														"key": "index",
 														"text": "item.text",
-														"style": "item.style"
+														"theme": "item.theme"
 													}
 												}
 											]
@@ -266,17 +276,28 @@ return (
 						"box",
 						{
 							"theme": "level1",
-							"style": "height:80rem;line-height:80rem;"
+							"style": "height:80rem;line-height:80rem;border-top:.5px solid @border-level4;"
 						},
 						[
 							[
 								"text",
-								null,
+								{
+									"theme": "primary",
+									"style": "padding:0 30rem;",
+									"events": {
+										"tap": this.handleClearFilter.bind(this)
+									}
+								},
 								"清空筛选"
 							],
 							[
 								"button",
-								null,
+								{
+									"style": "float:right;width:200rem;height:60rem;margin:10rem 30rem 0 0;",
+									"events": {
+										"tap": this.handleFilter.bind(this)
+									}
+								},
 								"确定"
 							]
 						]

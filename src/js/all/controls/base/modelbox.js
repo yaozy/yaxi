@@ -1,8 +1,8 @@
 /*
- * Repeater是一个通过模型(arrayModel)和模板(template)进行重复展现的容器控件
+ * ModelBox是一个通过模型(arrayModel)和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
 */
-yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
+yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
 
 
@@ -69,7 +69,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
     function no_children () {
 
-        throw 'Repeater doesn\'t supports children, please use model and template!';
+        throw 'ModelBox doesn\'t supports children, please use model and template!';
     }
 
 
@@ -91,7 +91,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!model)
         {
-            throw message + 'repeater control must bind a model!';
+            throw message + 'modelbox control must bind a model!';
         }
 
         base.load.call(this, values, model);
@@ -102,12 +102,12 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
             if (!model)
             {
-                throw message + 'can not find submodel "' + name + '" of repeater control!';
+                throw message + 'can not find submodel "' + name + '" of modelbox control!';
             }
 
             if (model.__model_type !== 2)
             {
-                throw message + 'model "' + name + '" not a valid array model of repeater control!';
+                throw message + 'model "' + name + '" not a valid array model of modelbox control!';
             }
         }
 
@@ -119,7 +119,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!arrayModel || arrayModel.__model_type !== 2)
         {
-            throw  message + 'repeater control must bind a array model!';
+            throw  message + 'modelbox control must bind a array model!';
         }
 
         var template = this.template;
@@ -127,7 +127,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
         if (!template)
         {
-            throw message + 'repeater control does not specify a template!';
+            throw message + 'modelbox control does not specify a template!';
         }
 
         var children = this.__children;
@@ -158,30 +158,30 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    function bind(repeater, arrayModel) {
+    function bind(modelbox, arrayModel) {
 
         var bindings;
 
         if (bindings = arrayModel.__bindings)
         {
-            bindings.push(repeater.uuid);
+            bindings.push(modelbox.uuid);
         }
         else
         {
-            arrayModel.__bindings = [repeater.uuid];
+            arrayModel.__bindings = [modelbox.uuid];
         }
 
-        repeater.__arrayModel = arrayModel;
+        modelbox.__arrayModel = arrayModel;
     }
 
 
-    function unbind(repeater, arrayModel) {
+    function unbind(modelbox, arrayModel) {
 
         var bindings;
 
         if (bindings = arrayModel.__bindings)
         {
-            var index = bindings.indexOf(repeater.uuid);
+            var index = bindings.indexOf(modelbox.uuid);
 
             if (index >= 0)
             {
@@ -189,7 +189,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
             }
         }
 
-        repeater.__arrayModel = null;
+        modelbox.__arrayModel = null;
     }
 
 
@@ -317,7 +317,7 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
 
 
 
-}, function Repeater() {
+}, function ModelBox() {
 
     var init;
     
@@ -329,4 +329,4 @@ yaxi.Repeater = yaxi.Control.extend(function (Class, base) {
         init.apply(this, arguments);
     }
 
-}).register('Repeater');
+}).register('ModelBox');

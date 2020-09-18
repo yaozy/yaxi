@@ -1,43 +1,43 @@
 <box style="position:static;overflow:visible;z-index:1;height:80rem;border-bottom:.5px solid @border-level4;">
-    <maskbox b-hidden="hidden" e-tap="handleClose" />
-    <box layout="row" theme="level1" style="height:80rem;line-height:80rem;text-align:center;" e-tap="handleSwitch">
+    <masklayer b-hidden="hidden" e-tap="handleClose" />
+    <box layout="row" theme="level1" style="height:80rem;line-height:80rem;text-align:center;border-bottom:.5px solid @border-level4;" e-tap="handleSwitch">
         <iconbutton layout="row-reverse" b-icon="sort.icon" b-content="sort.text" tag="sort" style="width:33%;height:100%;" />
         <iconbutton layout="row-reverse" b-icon="category.icon" b-content="category.text" tag="category" style="width:34%;height:100%;" />
         <iconbutton layout="row-reverse" b-icon="filter.icon" content="筛选" tag="filter" style="width:33%;height:100%;" />
     </box>
     <box theme="level1" b-hidden="sort.hidden">
-        <repeater submodel="sort.data" e-tap="handleSort">
+        <modelbox submodel="sort.data" e-tap="handleSort">
             <box b-key="index" style="height:80rem;line-height:80rem;padding-left:30rem;border-top:.5px solid @border-level4;">
-                <verticalline b-color="item.theme" style="position:absolute;top:0;left:0;" />
+                <vline b-color="item.theme" style="position:absolute;top:0;left:0;" />
                 <text b-theme="item.theme" b-text="item.text" />
             </box>
-        </repeater>
+        </modelbox>
     </box>
     <box layout="row" b-hidden="category.hidden" theme="level1" style="max-height:640rem;">
-        <repeater submodel="category.firsts" style="width:30%;" e-tap="handleCategoryFirst">
+        <modelbox submodel="category.firsts" style="width:30%;" e-tap="handleCategoryFirst">
             <iconbutton layout="row-left" b-icon="item.icon" b-content="item.text" b-theme="item.theme" style="height:80rem;padding-left:20rem;" />
-        </repeater>
-        <repeater submodel="category.seconds" style="width:30%;" e-tap="handleCategorySecond">
+        </modelbox>
+        <modelbox submodel="category.seconds" style="width:30%;" e-tap="handleCategorySecond">
             <text b-text="item.text" b-theme="item.theme" style="height:80rem;line-height:80rem;" />
-        </repeater>
-        <repeater submodel="category.thirds" style="width:40%;" e-tap="handleCategoryThird">
+        </modelbox>
+        <modelbox submodel="category.thirds" style="width:40%;" e-tap="handleCategoryThird">
             <text b-text="item.text" b-theme="item.theme" style="height:80rem;line-height:80rem;" />
-        </repeater>
+        </modelbox>
     </box>
     <box layout="column" theme="level1" b-hidden="filter.hidden" style="max-height:640rem;">
-        <box style="font-size:28rem;">
-            <repeater submodel="filter.data" style="border-top:.5px solid @border-level4;">
-                <box style="height:60rem;line-height:60rem;padding-left:20rem;">
+        <box flex="auto" style="font-size:28rem;">
+            <modelbox submodel="filter.data" style="border-top:.5px solid @border-level4;">
+                <box style="height:80rem;line-height:80rem;padding-left:20rem;">
                     <text b-text="item.text" />
                 </box>
-                <repeater submodel="item.data" style="padding: 20rem;">
-                    <text b-text="item.text" b-style="item.style" />
-                </repeater>
-            </repeater>
+                <modelbox submodel="item.data" style="padding-left:20rem;" b-key="index" tag="filter" e-tap="handleChangeFilter">
+                    <text b-key="index" b-text="item.text" b-theme="item.theme" style="width:220rem;height:60rem;line-height:60rem;margin:0 20rem 20rem 0;border-radius:40rem;text-align:center;" />
+                </modelbox>
+            </modelbox>
         </box>
-        <box theme="level1" style="height:80rem;line-height:80rem;">
-            <text>清空筛选</text>
-            <button>确定</button>
+        <box theme="level1" style="height:80rem;line-height:80rem;border-top:.5px solid @border-level4;">
+            <text theme="primary" style="padding:0 30rem;" e-tap="handleClearFilter">清空筛选</text>
+            <button style="float:right;width:200rem;height:60rem;margin:10rem 30rem 0 0;" e-tap="handleFilter">确定</button>
         </box>
     </box>
 </box>

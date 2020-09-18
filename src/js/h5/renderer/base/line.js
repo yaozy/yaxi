@@ -20,7 +20,7 @@ yaxi.Line.mixin(function (mixin, base) {
 
 
 
-yaxi.VerticalLine.mixin(function (mixin, base) {
+yaxi.Vline.mixin(function (mixin, base) {
 
 
     var color = yaxi.color;

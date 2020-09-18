@@ -85,12 +85,10 @@ module.exports = yaxi.Box.extend(function () {
 
     function raiseEvent(target, value) {
 
-        var event = new yaxi.Event('change');
+        var event = new yaxi.Event('change', { value: value });
 
         model.hidden = true;
         model.text = model.last = value;
-
-        event.value = value;
 
         target.trigger(event);
     }

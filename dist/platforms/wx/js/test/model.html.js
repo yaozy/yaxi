@@ -16,7 +16,7 @@ return (
 				"box",
 				{
 					"layout": "column",
-					"flex": "both"
+					"flex": "auto"
 				},
 				[
 					[
@@ -29,7 +29,7 @@ return (
 							[
 								"button",
 								{
-									"flex": "both",
+									"flex": "auto",
 									"content": "Append",
 									"events": {
 										"tap": this.handleAppend.bind(this)
@@ -39,7 +39,7 @@ return (
 							[
 								"button",
 								{
-									"flex": "both",
+									"flex": "auto",
 									"content": "Replace",
 									"events": {
 										"tap": this.handleReplace.bind(this)
@@ -49,7 +49,7 @@ return (
 							[
 								"button",
 								{
-									"flex": "both",
+									"flex": "auto",
 									"content": "Remove",
 									"events": {
 										"tap": this.handleRemove.bind(this)
@@ -59,7 +59,7 @@ return (
 							[
 								"button",
 								{
-									"flex": "both",
+									"flex": "auto",
 									"content": "Reorder",
 									"events": {
 										"tap": this.handleReorder.bind(this)
@@ -69,9 +69,9 @@ return (
 						]
 					],
 					[
-						"repeater",
+						"modelbox",
 						{
-							"flex": "both",
+							"flex": "auto",
 							"item": "item",
 							"index": "index"
 						},

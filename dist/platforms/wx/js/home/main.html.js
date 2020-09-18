@@ -52,7 +52,7 @@ return (
 				"box",
 				{
 					"key": "host",
-					"flex": "both",
+					"flex": "auto",
 					"style": "min-height:200rem;"
 				}
 			]

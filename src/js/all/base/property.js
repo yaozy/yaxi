@@ -11,7 +11,7 @@ yaxi.impl.property = function (target) {
 
     cache.boolean = function (value) {
         
-        return !!value;
+        return !!value && value !== 'false';
     }
 
 

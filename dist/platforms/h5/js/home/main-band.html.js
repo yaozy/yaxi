@@ -59,14 +59,14 @@ return (
 				null,
 				(function () {
 
-				    var __for_1_1 = this.data;
-				    var __for_1_2 = [];
+				    var __for_25_1 = this.data;
+				    var __for_25_2 = [];
 
-				    for (var index = 0, __for_1_len = __for_1_1.length; index < __for_1_len; index++)
+				    for (var index = 0, __for_25_len = __for_25_1.length; index < __for_25_len; index++)
 				    {
-				        var item = __for_1_1[index];
+				        var item = __for_25_1[index];
 
-				        __for_1_2.push.apply(__for_1_2,
+				        __for_25_2.push.apply(__for_25_2,
 							[
 								[
 									"box",
@@ -139,7 +139,7 @@ return (
 							] || []);
 				    }
 
-				    return __for_1_2;
+				    return __for_25_2;
 
 				}).call(this)
 			]

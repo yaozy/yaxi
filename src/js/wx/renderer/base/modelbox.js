@@ -1,4 +1,4 @@
-yaxi.Repeater.mixin(function (mixin, base) {
+yaxi.ModelBox.mixin(function (mixin, base) {
 
 
 
