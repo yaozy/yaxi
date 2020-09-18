@@ -23,7 +23,7 @@ return (
 						"box",
 						{
 							"layout": "row",
-							"style": "background-color:@bg-level2-color"
+							"background-color": "@bg-level2-color"
 						},
 						[
 							[
@@ -79,13 +79,18 @@ return (
 							[
 								"box",
 								{
-									"style": "height:120rem;"
+									"height": "120rem"
 								},
 								[
 									[
 										"box",
 										{
-											"style": "width:50rem;height:120rem;line-height:120rem;position:absolute;top:0;left:20rem;"
+											"width": "50rem",
+											"height": "120rem",
+											"line-height": "120rem",
+											"position": "absolute",
+											"top": "0",
+											"left": "20rem"
 										},
 										[
 											[
@@ -101,13 +106,17 @@ return (
 									[
 										"box",
 										{
-											"style": "height:100rem;width:700rem;position:absolute;left:70rem;top:20rem;"
+											"height": "100rem",
+											"width": "700rem",
+											"position": "absolute",
+											"left": "70rem",
+											"top": "20rem"
 										},
 										[
 											[
 												"text",
 												{
-													"style": "width:200rem;",
+													"width": "200rem",
 													"bindings": {
 														"text": "item.name"
 													}
@@ -124,7 +133,6 @@ return (
 											[
 												"text",
 												{
-													"style": "display:block;",
 													"bindings": {
 														"text": "item.computed"
 													}

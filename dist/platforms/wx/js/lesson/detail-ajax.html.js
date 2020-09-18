@@ -18,26 +18,29 @@ return (
 						"image",
 						{
 							"src": this.data.image,
-							"style": "width:100%;height:400rem;"
+							"width": "100%",
+							"height": "400rem"
 						}
 					],
 					[
 						"box",
 						{
-							"style": "padding:0 20rem;"
+							"padding": "0 20rem"
 						},
 						[
 							[
 								"box",
 								{
-									"style": "height:80rem;line-height:80rem;"
+									"layout": "row",
+									"height": "80rem",
+									"line-height": "80rem"
 								},
 								[
 									[
 										"text",
 										{
 											"text": this.data.name,
-											"style": "font-size:36rem;"
+											"font-size": "36rem"
 										}
 									],
 									[
@@ -45,7 +48,7 @@ return (
 										{
 											"text": '￥' + this.data.price,
 											"theme": "primary",
-											"style": "float:right;"
+											"align-self": "flex-end"
 										}
 									]
 								]
@@ -55,7 +58,9 @@ return (
 								{
 									"layout": "row space-between",
 									"theme": "level1",
-									"style": "height:80rem;font-size:28rem;border-bottom:.5px solid @border-level4;"
+									"height": "80rem",
+									"font-size": "28rem",
+									"border-bottom": ".5px solid @border-level4"
 								},
 								[
 									[
@@ -74,7 +79,7 @@ return (
 												"text",
 												{
 													"theme": "level3",
-													"style": "margin-right:10rem;"
+													"margin-right": "10rem"
 												},
 												"学习人数"
 											],
@@ -103,7 +108,7 @@ return (
 												"text",
 												{
 													"theme": "level3",
-													"style": "margin-right:10rem;"
+													"margin-right": "10rem"
 												},
 												"浏览量"
 											],
@@ -132,7 +137,7 @@ return (
 												"text",
 												{
 													"theme": "level3",
-													"style": "margin-right:10rem;"
+													"margin-right": "10rem"
 												},
 												"分享次数"
 											],
@@ -155,7 +160,7 @@ return (
 										"text",
 										{
 											"text": this.data.activity,
-											"style": "margin:20rem 0;"
+											"margin": "20rem 0"
 										}
 									]
 								]
@@ -167,7 +172,9 @@ return (
 						{
 							"host": "<* >@host",
 							"selected-index": "0",
-							"style": "height:60rem;line-height:60rem;text-align:center;"
+							"height": "60rem",
+							"line-height": "60rem",
+							"text-align": "center"
 						},
 						[
 							[

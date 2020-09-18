@@ -36,7 +36,8 @@ return (
 								{
 									"text": "model",
 									"theme": "font-important",
-									"style": "margin-left:.5em;font-weight:bold;"
+									"margin-left": ".5em",
+									"font-weight": "bold"
 								}
 							]
 						]
@@ -45,7 +46,7 @@ return (
 						"button",
 						{
 							"tag": "test.js",
-							"style": "margin-top:10rem;"
+							"margin-top": "10rem"
 						},
 						[
 							[
@@ -58,7 +59,8 @@ return (
 								{
 									"text": "test",
 									"theme": "font-important",
-									"style": "margin-left:.5em;font-weight:bold;"
+									"margin-left": ".5em",
+									"font-weight": "bold"
 								}
 							]
 						]

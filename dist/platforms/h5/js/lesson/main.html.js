@@ -25,7 +25,7 @@ return (
 				{
 					"key": "host",
 					"flex": "auto",
-					"style": "padding:0 20rem;"
+					"padding": "0 20rem"
 				}
 			]
 		]

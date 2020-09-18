@@ -5,7 +5,10 @@ return (
 	[
 		"box",
 		{
-			"style": "position:static;overflow:visible;z-index:5;height:80rem;"
+			"position": "static",
+			"overflow": "visible",
+			"z-index": "5",
+			"height": "80rem"
 		},
 		[
 			[
@@ -24,14 +27,23 @@ return (
 				{
 					"layout": "row",
 					"theme": "level1",
-					"style": "height:80rem;"
+					"height": "80rem"
 				},
 				[
 					[
 						"textbox",
 						{
 							"placeholder": "搜索老师、机构、课程",
-							"style": "position:absolute;width:710rem;height:60rem;line-height:60rem;top:50%;left:20rem;transform:translateY(-50%);border:.5px solid @border-level4;border-radius:60rem;padding:0 120rem 0 60rem;",
+							"position": "absolute",
+							"width": "710rem",
+							"height": "60rem",
+							"line-height": "60rem",
+							"top": "50%",
+							"left": "20rem",
+							"transform": "translateY(-50%)",
+							"border": ".5px solid @border-level4",
+							"border-radius": "60rem",
+							"padding": "0 120rem 0 60rem",
 							"bindings": {
 								"value": "text"
 							},
@@ -45,14 +57,22 @@ return (
 						"icon",
 						{
 							"icon": "common-search",
-							"style": "position:absolute;top:50%;left:28rem;transform:translateY(-50%);"
+							"position": "absolute",
+							"top": "50%",
+							"left": "28rem",
+							"transform": "translateY(-50%)"
 						}
 					],
 					[
 						"text",
 						{
 							"theme": "font-level2",
-							"style": "position:absolute;width:120rem;height:80rem;line-height:80rem;right:20rem;text-align:center;",
+							"position": "absolute",
+							"width": "120rem",
+							"height": "80rem",
+							"line-height": "80rem",
+							"right": "20rem",
+							"text-align": "center",
 							"bindings": {
 								"hidden": "hidden"
 							},
@@ -77,7 +97,9 @@ return (
 						"box",
 						{
 							"layout": "row",
-							"style": "height:80rem;line-height:80rem;padding:0 20rem;",
+							"height": "80rem",
+							"line-height": "80rem",
+							"padding": "0 20rem",
 							"events": {
 								"tap": this.handleSearch.bind(this)
 							}
@@ -107,7 +129,7 @@ return (
 								"text",
 								{
 									"theme": "font-level4",
-									"style": "margin-left:50rem;",
+									"margin-left": "50rem",
 									"events": {
 										"tap": this.handleCancel.bind(this)
 									}
@@ -129,7 +151,10 @@ return (
 								"box",
 								{
 									"layout": "row",
-									"style": "height:80rem;line-height:80rem;border-top:.5px solid @border-level4;padding:0 20rem;"
+									"height": "80rem",
+									"line-height": "80rem",
+									"border-top": ".5px solid @border-level4",
+									"padding": "0 20rem"
 								},
 								[
 									[

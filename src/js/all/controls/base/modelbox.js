@@ -51,10 +51,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
 
     // 子模型名称
-    this.$property('submodel', '', {
-
-        change: false
-    });
+    this.$property('submodel', '', false);
 
     
 

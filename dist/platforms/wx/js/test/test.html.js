@@ -42,7 +42,7 @@ return (
 						"button",
 						{
 							"content": "remove last",
-							"style": "margin-top:10rem;",
+							"margin-top": "10rem",
 							"events": {
 								"tap": this.handleRemove.bind(this)
 							}

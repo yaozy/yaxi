@@ -50,7 +50,7 @@ return (
 				"box",
 				{
 					"theme": "level1",
-					"style": "margin-top:10rem;"
+					"margin-top": "10rem"
 				},
 				[
 					[
@@ -63,28 +63,7 @@ return (
 				"box",
 				{
 					"theme": "level1",
-					"style": "margin-top:10rem;"
-				},
-				[
-					[
-						"box",
-						null
-					],
-					[
-						"box",
-						null
-					],
-					[
-						"box",
-						null
-					]
-				]
-			],
-			[
-				"box",
-				{
-					"theme": "level1",
-					"style": "margin-top:10rem;"
+					"margin-top": "10rem"
 				},
 				[
 					[
@@ -105,7 +84,28 @@ return (
 				"box",
 				{
 					"theme": "level1",
-					"style": "margin-top:10rem;"
+					"margin-top": "10rem"
+				},
+				[
+					[
+						"box",
+						null
+					],
+					[
+						"box",
+						null
+					],
+					[
+						"box",
+						null
+					]
+				]
+			],
+			[
+				"box",
+				{
+					"theme": "level1",
+					"margin-top": "10rem"
 				},
 				[
 					[
@@ -121,7 +121,7 @@ return (
 			[
 				"box",
 				{
-					"style": "margin-top:10rem;"
+					"margin-top": "10rem"
 				},
 				[
 					[

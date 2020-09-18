@@ -10,10 +10,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
     // 容器宿主
-    this.$property('host', '', {
-
-        change: false
-    });
+    this.$property('host', '', false);
 
 
 
@@ -124,7 +121,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.removeClass('yx-tab-page-active');
+                item.backstage = true;
             }
 
             if (item = event.lastItem)
@@ -165,10 +162,13 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         if (!page.__tab)
         {
             page.__tab = item.uuid;
-            page.addClass('yx-tab-page');
+
+            page.position = 'absolute';
+            page.left = page.top = '0';
+            page.width = page.height = '100%';
         }
 
-        page.addClass('yx-tab-page-active');
+        page.backstage = false;
     }
 
 

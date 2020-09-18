@@ -178,25 +178,6 @@
   font-size: 30rpx;
   overflow: hidden;
 }
-.yx-tab-top {
-  border-bottom: 0.5px solid #cccccc;
-}
-.yx-tab-bottom {
-  border-top: 0.5px solid #cccccc;
-}
-.yx-tab-page {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #ffffff;
-  visibility: hidden;
-}
-.yx-tab-page-active {
-  visibility: visible;
-}
 .yx-page {
   position: absolute;
   display: -webkit-flex;
@@ -314,11 +295,50 @@
   align-content: flex-end;
   align-items: flex-end;
 }
-.yx-flex-auto {
-  flex: auto;
+.yx-layout-line {
+  display: block;
+  white-space: nowrap;
+  overflow: auto;
 }
-.yx-flex-none {
-  flex: none;
+.yx-layout-line > .yx-control {
+  display: inline-block;
+}
+.yx-layout-line > .yx-layout-row,
+.yx-layout-line > .yx-layout-column,
+.yx-layout-line > .yx-layout-row-reverse,
+.yx-layout-line > .yx-layout-column-reverse {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+}
+.yx-layout-vline {
+  display: block;
+  overflow: auto;
+}
+.yx-layout-vline > .yx-control {
+  display: block;
+}
+.yx-layout-vline > .yx-layout-row,
+.yx-layout-vline > .yx-layout-column,
+.yx-layout-vline > .yx-layout-row-reverse,
+.yx-layout-vline > .yx-layout-column-reverse {
+  display: -webkit-flex;
+  display: flex;
+}
+.yx-layout-flow {
+  display: block;
+}
+.yx-layout-flow > .yx-control {
+  display: inline-block;
+}
+.yx-layout-flow > .yx-layout-row,
+.yx-layout-flow > .yx-layout-column,
+.yx-layout-flow > .yx-layout-row-reverse,
+.yx-layout-flow > .yx-layout-column-reverse {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+}
+.yx-backstage {
+  visibility: hidden;
 }
 .yx-hidden {
   display: none;

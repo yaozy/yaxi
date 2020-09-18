@@ -18,7 +18,8 @@ return (
 				"tab",
 				{
 					"host": "<* >@host",
-					"selected-index": "0"
+					"selected-index": "0",
+					"border-top": ".5px solid @border-level4"
 				},
 				[
 					[

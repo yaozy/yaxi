@@ -2,7 +2,7 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    var assign = Object.assign;
+    var own = Object.getOwnPropertyNames;
 
     var div = document.createElement('div');
 
@@ -64,7 +64,7 @@ yaxi.Control.mixin(function (mixin) {
 
     this.patch = function (view) {
 
-        var changes;
+        var values;
 
         this.__dirty = false;
 
@@ -74,23 +74,31 @@ yaxi.Control.mixin(function (mixin) {
             this.__render_class(view);
         }
 
-        if (changes = this.__changes)
+        if (values = this.__style)
+        {
+            style(view, values);
+            this.__style = null;
+        }
+
+        if (values = this.__changes)
         {
             var storage = this.$storage;
             var mixin = this.$mixin;
-            var fn;
+            var names = own(values);
+            var index = 0;
+            var name, fn;
 
-            this.__changes = null;
-
-            assign(storage, changes);
-
-            for (var name in changes)
+            while (name = names[index++])
             {
+                storage[name] = values[name];
+
                 if (fn = mixin[name])
                 {
-                    fn.call(this, view, changes[name]);
+                    fn.call(this, view, values[name]);
                 }
             }
+
+            this.__changes = null;
         }
     }
 
@@ -176,6 +184,19 @@ yaxi.Control.mixin(function (mixin) {
     }
 
 
+
+
+    function style(view, style) {
+
+        var names = own(style);
+        var index = 0;
+        var name;
+
+        while (name = names[index++])
+        {
+            view.style[name] = style[name];
+        }
+    }
 
 
     this.__render_class = function (view) {

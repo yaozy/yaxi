@@ -4,11 +4,33 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
     var create = Object.create;
 
+
+    // 此方法不会复制原型上的成员
     var assign = Object.assign;
 
-    var owner = Object.getOwnPropertyNames; 
+
+    var own = Object.getOwnPropertyNames; 
 
 
+
+
+    function renderStyle(style) {
+
+        var list = [];
+        var names = own(style);
+        var index = 0;
+        var name, value;
+
+        while (name = names[index++])
+        {
+            if (value = style[name])
+            {
+                list.push(name, ':', value.replace(/rem/g, 'rpx'), ';');
+            }
+        }
+
+        return list.join('');
+    }
 
 
     // 全局渲染
@@ -18,7 +40,8 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         var storage = this.$storage;
         var converts = this.$converts;
         var view = create(null);
-        var value, fn;
+        var index = 0;
+        var names, name, value, fn;
 
         this.__dirty = false;
 
@@ -31,18 +54,22 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, '');
         }
 
-        if (value = this.__changes)
+        if (value = this.__style)
         {
-            this.__changes = null;
-            assign(storage, value);
+            view.s = renderStyle(value);
+            this.__style = null;
         }
 
-        var names = owner(storage);
-
-        for (var i = 0, l = names.length; i < l; i++)
+        if (value = this.__changes)
         {
-            var name = names[i];
+            assign(storage, value);
+            this.__changes = null;
+        }
 
+        names = own(storage);
+
+        while (name = names[index++])
+        {
             // 配置了处理变更的属性才处理
             if ((value = converts[name]) && value.change)
             {
@@ -100,16 +127,21 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, prefix);
         }
 
-    
+        if (value = this.__style)
+        {
+            view.s = renderStyle(value);
+            this.__style = null;
+        }
+
         if (changes = this.__changes)
         {
             var storage = this.$storage;
-            var mixin = this.$mixin; 
-            var value, fn;
+            var mixin = this.$mixin;
+            var names = own(changes);
+            var index = 0;
+            var name, value, fn;
 
-            this.__changes = null;
-
-            for (var name in changes)
+            while (name = names[index++])
             {
                 value = storage[name] = changes[name];
 
@@ -124,6 +156,8 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             }
 
             mixin.onrender.call(this, view, prefix);
+            
+            this.__changes = null;
         }
     }
 
@@ -230,11 +264,11 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    mixin.style = function (view, prefix, value) {
+    // mixin.style = function (view, prefix, value) {
 
-        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
-    }
+    //     // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+    //     view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
+    // }
 
 
 

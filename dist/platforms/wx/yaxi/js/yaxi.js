@@ -853,7 +853,9 @@ yaxi.impl.property = function (target) {
 
         if (!options || typeof options !== 'object')
         {
-            options = {};
+            options = {
+                change: options !== false
+            };
         }
 
         this.$defaults[name] = defaultValue = defaultValue != null ? defaultValue : null;
@@ -861,7 +863,8 @@ yaxi.impl.property = function (target) {
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
-            converts[name] = null; // 指定了get的情况下不支持转换器, 直接设置属性值
+            // 指定了get的情况下不支持转换器, 直接设置属性值
+            converts[name] = null;
 
             options.set || (options.set = function () {
 
@@ -872,7 +875,7 @@ yaxi.impl.property = function (target) {
         else
         {
             options.change = options.change !== false;
-            options.convert || (options.convert = cache[options.type || typeof defaultValue])
+            options.convert || (options.convert = cache[options.type || typeof defaultValue]);
 
             options.get = this.__build_get(name, options);
             options.set || (options.set = this.__build_set(name, options));
@@ -881,13 +884,14 @@ yaxi.impl.property = function (target) {
             converts[name] = options.convert === false ? null : {
                 name: name,
                 change: options.change,
+                style: !!options.style,
                 fn: options.convert
             };
         }
 
         define(this, name, options);
 
-        if (alias = options.alias)
+        if ((alias = options.alias) && alias !== name)
         {
             converts[alias] = converts[name];
             define(this, alias, options);
@@ -3907,6 +3911,36 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+
+    // 构建触发变更通知的属性
+    function build_set_style(name, convert) {
+
+        var init = create;
+
+        return function (value) {
+
+            var storage, style;
+
+            value = value ? convert('' + value) : '';
+
+            if (style = this.__style)
+            {
+                if (value !== style[name])
+                {
+                    style[name] = value;
+                    this.__dirty || patch(this);
+                }
+            }
+            else if (value !== (storage = this.$storage)[name])
+            {
+                (this.__style = init(storage))[name] = value;
+                this.__dirty || patch(this);
+            }
+        }
+    }
+
+
+
     // 构建会造成class变更的属性
     function build_set_class(name, boolean, prefix) {
 
@@ -3960,13 +3994,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
+
     // 构建触发变更通知的属性
     function build_set_change(name, convert) {
 
+        var init = create;
+
         return function (value) {
 
-            var storage = this.$storage;
-            var changes;
+            var storage, changes;
 
             value = convert ? convert.call(this, value) : value;
 
@@ -3974,19 +4010,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 if (value !== changes[name])
                 {
-                    if (value !== storage[name])
-                    {
-                        changes[name] = value;
-                    }
-                    else
-                    {
-                        delete changes[name];
-                    }
+                    changes[name] = value;
+                    this.__dirty || patch(this);
                 }
             }
-            else if (value !== storage[name])
+            else if (value !== (storage = this.$storage)[name])
             {
-                (this.__changes = {})[name] = value;
+                (this.__changes = init(storage))[name] = value;
                 this.__dirty || patch(this);
             }
         }
@@ -3996,19 +4026,30 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 构建不触发变更通知的属性
     function build_set_unchange(name, convert) {
 
-        return function (value) {
+        return convert ? function (value) {
 
-            this.$storage[name] = convert ? convert.call(this, value) : value;
+            this.$storage[name] = convert.call(this, value);
+
+        } : function (value) {
+
+            this.$storage[name] = value;
         }
     }
 
     
     this.__build_get = function (name, options) {
 
+        if (options.style)
+        {
+            return function () {
+
+                return (this.__style || this.$storage)[name];
+            }
+        }
+        
         return options.change && !options.class ? function () {
 
-            var value = this.__changes;
-            return value && (value = value[name]) !== void 0 ? value : this.$storage[name];
+            return (this.__changes || this.$storage)[name];
 
         } : function () {
 
@@ -4020,6 +4061,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__build_set = function (name, options) {
 
         var value;
+
+        if (options.style)
+        {
+            return build_set_style(name, options.convert);
+        }
 
         // 造成class变更的属性
         if (value = options.class)
@@ -4036,7 +4082,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         return (options.change ? build_set_change : build_set_unchange)(name, options.convert);
     }
 
-    
+
 
 
     // 唯一Id
@@ -4066,116 +4112,116 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$class = 'yx-control';
 
 
-    // class
-    this.$property('class', '', {
+    // // class
+    // this.$property('class', '', {
 
-        change: false,
+    //     change: false,
 
-        alias: 'className',
+    //     alias: 'className',
 
-        get: function () {
+    //     get: function () {
 
-            return this.$storage.class;
-        },
+    //         return this.$storage.class;
+    //     },
 
-        set: function (value) {
+    //     set: function (value) {
 
-            var storage = this.$storage;
+    //         var storage = this.$storage;
 
-            value = '' + value;
+    //         value = '' + value;
 
-            if (storage.class !== value)
-            {
-                storage.class = value;
+    //         if (storage.class !== value)
+    //         {
+    //             storage.class = value;
 
-                this.__class_list = value ? value.split(/\s+/) : [];
-                this.__class_dirty = true;
-                this.__dirty || patch(this);
-            }
-        }
-    });
-
-
+    //             this.__class_list = value ? value.split(/\s+/) : [];
+    //             this.__class_dirty = true;
+    //             this.__dirty || patch(this);
+    //         }
+    //     }
+    // });
 
 
-    this.hasClass = function (name) {
 
-        if (name)
-        {
-            var keys = this.__class_list;
-            return keys ? keys.indexOf(name) >= 0 : false;
-        }
+
+    // this.hasClass = function (name) {
+
+    //     if (name)
+    //     {
+    //         var keys = this.__class_list;
+    //         return keys ? keys.indexOf(name) >= 0 : false;
+    //     }
         
-        return false;
-    }
+    //     return false;
+    // }
 
 
-    this.addClass = function (name) {
+    // this.addClass = function (name) {
 
-        var keys;
+    //     var keys;
 
-        if (name && name.search(/\s+/) < 0)
-        {
-            if (keys = this.__class_list)
-            {
-                if (keys.indexOf(name) < 0)
-                {
-                    keys.push(name);
-                }
-            }
-            else
-            {
-                this.__class_list = [name];
-            }
+    //     if (name && name.search(/\s+/) < 0)
+    //     {
+    //         if (keys = this.__class_list)
+    //         {
+    //             if (keys.indexOf(name) < 0)
+    //             {
+    //                 keys.push(name);
+    //             }
+    //         }
+    //         else
+    //         {
+    //             this.__class_list = [name];
+    //         }
 
-            this.__class_dirty = true;
-            this.__dirty || patch(this);
-        }
-        else
-        {
-            throw 'add class error: class name not allow null or empty!';
-        }
-    }
-
-
-    this.removeClass = function (name) {
-
-        if (name)
-        {
-            var keys = this.__class_list;
-            var index;
-
-            if (keys && (index = keys.indexOf(name)) >= 0)
-            {
-                keys.splice(index, 1);
-
-                this.__class_dirty = true;
-                this.__dirty || patch(this);
-            }
-        }
-    }
+    //         this.__class_dirty = true;
+    //         this.__dirty || patch(this);
+    //     }
+    //     else
+    //     {
+    //         throw 'add class error: class name not allow null or empty!';
+    //     }
+    // }
 
 
-    this.toggleClass = function (name) {
+    // this.removeClass = function (name) {
 
-        if (name)
-        {
-            var keys = this.__class_list;
-            var index;
+    //     if (name)
+    //     {
+    //         var keys = this.__class_list;
+    //         var index;
 
-            if (keys && (index = keys.indexOf(name)) >= 0)
-            {
-                keys.splice(index, 1);
-            }
-            else
-            {
-                this.addClass(name);
-            }
+    //         if (keys && (index = keys.indexOf(name)) >= 0)
+    //         {
+    //             keys.splice(index, 1);
 
-            this.__class_dirty = true;
-            this.__dirty || patch(this);
-        }
-    }
+    //             this.__class_dirty = true;
+    //             this.__dirty || patch(this);
+    //         }
+    //     }
+    // }
+
+
+    // this.toggleClass = function (name) {
+
+    //     if (name)
+    //     {
+    //         var keys = this.__class_list;
+    //         var index;
+
+    //         if (keys && (index = keys.indexOf(name)) >= 0)
+    //         {
+    //             keys.splice(index, 1);
+    //         }
+    //         else
+    //         {
+    //             this.addClass(name);
+    //         }
+
+    //         this.__class_dirty = true;
+    //         this.__dirty || patch(this);
+    //     }
+    // }
 
 
 
@@ -4203,84 +4249,471 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // 当父类使用flex布局时拉伸设置, 目前只支持auto和none
-    this.$property('flex', '', {
 
-        class: 'yx-flex-'
-    });
+    // 颜色转换函数, 把@color颜色变量转换成实际的颜色
+    var convertColor = function (translateFn, value) {
+
+        return value ? ('' + value).replace(this, translateFn) : '';
+
+    }.bind(/@([\w-]+)/g, function (_, key) {
+
+        return this[key];
+
+    }.bind(yaxi.color));
+    
+
+    function toString(value) {
+
+        return value ? '' + value : '';
+    }
+
+
+    var style = function (name, convert) {
+
+        this.$property(name, '', {
+
+            alias: name.replace(/-(\w)/g, function (_, x) {
+        
+                return x.toUpperCase();
+            }),
+
+            style: true,
+            convert: convert || toString
+        });
+
+    }.bind(this);
+
+
+
+    style('position');
+
+
+    style('overflow');
+
+
+    style('overflow-x');
+
+
+    style('overflow-y');
+
+
+    style('top');
+
+    style('right');
+
+    style('bottom');
+
+    style('left');
+
+
+    style('width');
+
+
+    style('height');
+
+
+    style('min-width');
+
+
+    style('max-width');
+
+
+    style('min-height');
+
+
+    style('max-height');
+
+
+    style('margin');
+
+    style('margin-top');
+
+    style('margin-right');
+
+    style('margin-bottom');
+
+    style('margin-left');
+
+
+    style('border', convertColor);
+
+    style('border-top', convertColor);
+
+    style('border-right', convertColor);
+
+    style('border-bottom', convertColor);
+
+    style('border-left', convertColor);
+
+
+    style('padding');
+
+    style('padding-top');
+
+    style('padding-right');
+
+    style('padding-bottom');
+
+    style('padding-left');
+
+
+
+    style('flex-direction');
+
+
+    style('flex-wrap');
+
+
+    style('flex-flow');
+
+
+    style('justify-content');
+
+
+    style('align-items');
+
+
+    style('align-content');
+
+
+
+    style('order');
+
+
+    style('flex-grow');
+
+
+    style('flex-shrink');
+
+
+    style('flex-basis');
+
+
+    style('flex');
+
+
+    style('align-self');
+
+    
+
+
+    //控件层叠顺序
+    style('z-index');
+
+
+    //控件内容横向对齐样式
+    //left      左边对齐
+    //center    横向居中对齐
+    //right     右边对齐
+    style('text-align');
+
+
+
+    style('outline', convertColor);
+
+    style('outline-color', convertColor);
+
+    style('outline-style');
+
+    style('outline-offset');
+
+    style('outline-width');
+
+
+
+    style('box-shadow', convertColor);
+
+
+
+    //控件上右下左边框宽度
+    style('border-width');
+
+    style('border-top-width');
+
+    style('border-right-width');
+
+    style('border-bottom-width');
+
+    style('border-left-width');
+
+
+    //控件上右下左边框样式
+    style('border-style');
+
+    style('border-top-style');
+
+    style('border-right-style');
+
+    style('border-bottom-style');
+
+    style('border-left-style');
+
+
+    //控件上右下左边框颜色
+    style('border-color', convertColor);
+
+    style('border-top-color', convertColor);
+
+    style('border-right-color', convertColor);
+
+    style('border-bottom-color', convertColor);
+
+    style('border-left-color', convertColor);
+
+
+    //控件上右下左边框圆角
+    style('border-radius');
+
+    style('border-top-left-radius');
+
+    style('border-top-right-radius');
+
+    style('border-bottom-left-radius');
+
+    style('border-bottom-right-radius');
+
+
+    //阅读方向
+    //ltr	    从左到右 
+    //rtl	    从右到左 
+    style('direction');
+
+    
+    //控件透明度
+    //number	0(完全透明)到1(完全不透明)之间数值
+    style('opacity');
+
+
+    // 控件背景
+    style('background', convertColor);
+
+
+    //控件背景颜色
+    //color_name	规定颜色值为颜色名称的背景颜色(比如 red)  transparent:透明 
+    //hex_number	规定颜色值为十六进制值的背景颜色(比如 #ff0000) 
+    //rgb_number	规定颜色值为 rgb 代码的背景颜色(比如 rgb(255,0,0)) 
+    style('background-color', convertColor);
+
+    //控件背景图片
+    //string        图像名(空字符串则表示无背景)
+    //url('URL')	指向图像的路径
+    style('background-image');
+
+    //控件背景重复方式
+    //repeat	背景图像将在垂直方向和水平方向重复 
+    //repeat-x	背景图像将在水平方向重复 
+    //repeat-y	背景图像将在垂直方向重复 
+    //no-repeat	背景图像将仅显示一次 
+    style('background-repeat');
+
+    //控件背景颜色对齐方式
+    //top left
+    //top center
+    //top right
+    //center left
+    //center center
+    //center right
+    //bottom left
+    //bottom center
+    //bottom right  如果您仅规定了一个关键词, 那么第二个值将是'center'     默认值：0% 0% 
+    //x% y%	        第一个值是水平位置, 第二个值是垂直位置     左上角是 0% 0% 右下角是 100% 100%     如果您仅规定了一个值, 另一个值将是 50% 
+    //xpos ypos	    第一个值是水平位置, 第二个值是垂直位置     左上角是 0 0 单位是像素 (0px 0px) 或任何其他的 CSS 单位     如果您仅规定了一个值, 另一个值将是50%     您可以混合使用 % 和 position 值 
+    style('background-position');
+
+
+    //控件颜色
+    //color_name	规定颜色值为颜色名称的颜色(比如 red) 
+    //hex_number	规定颜色值为十六进制值的颜色(比如 #ff0000) 
+    //rgb_number	规定颜色值为 rgb 代码的颜色(比如 rgb(255,0,0)) 
+    style('color', convertColor);
+
+
+    // 字体
+    style('font');
+
+
+    //控件字体样式
+    //normal	浏览器显示一个标准的字体样式 
+    //italic	浏览器会显示一个斜体的字体样式 
+    //oblique	浏览器会显示一个倾斜的字体样式 
+    style('font-style');
+
+    //控件字体变体
+    //normal	    浏览器会显示一个标准的字体 
+    //small-caps	浏览器会显示小型大写字母的字体 
+    style('font-variant');
+
+    //控件字体粗细
+    //normal	定义标准的字符 
+    //bold	    定义粗体字符 
+    //bolder	定义更粗的字符 
+    //lighter	定义更细的字符 
+    //100-900   定义由粗到细的字符 400 等同于 normal, 而 700 等同于 bold 
+    style('font-weight');
+
+    //控件字体大小
+    style('font-size');
+
+    //控件文字行高
+    style('line-height');
+
+    //控件字体族 family-name generic-family  用于某个元素的字体族名称或/及类族名称的一个优先表
+    style('font-family');
+
+
+    //
+    style('white-space');
+
+
+    //控件文字词间距(以空格为准)
+    style('word-spacing');
+
+    //控件文字字间距
+    style('letter-spacing');
+
+    //控件文字缩进
+    style('text-indent');
+
+    //控件文字装饰
+    //none	        默认 定义标准的文本 
+    //underline	    定义文本下的一条线 
+    //overline	    定义文本上的一条线 
+    //line-through	定义穿过文本下的一条线 
+    //blink	        定义闪烁的文本 
+    style('text-decoration');
+
+    //控件文字溢出处理方式
+    //clip	    修剪文本
+    //ellipsis	显示省略符号来代表被修剪的文本 	
+    //string	使用给定的字符串来代表被修剪的文本 
+    style('text-overflow');
+
+
+    style('text-shadow', convertColor);
+
+
+
+    //转换
+    style('transform');
+
+
+    style('transform-origin');
+
+
+    style('transform-style');
+
+
+    style('transform-box')
+
+
+
+    //过渡
+    style('transition');
+
+
+    style('transition-delay');
+
+
+    style('transition-duration');
+
+
+    style('transition-property');
+
+
+    style('transition-timing-function');
+
+
+
+    //动画
+    style('animation');
+
+
+    style('animation-delay');
+
+
+    style('animation-direction');
+
+
+    style('animation-duration');
+
+
+    style('animation-fill-mode');
+
+
+    style('animation-iteration-count');
+
+
+    style('animation-name');
+
+
+    style('animation-play-state');
+
+    
+    style('animation-timing-function');
     
 
 
 
-    var color = yaxi.color;
+    // // 样式
+    // this.$property('style', '', {
 
-    function translateColor(_, key) {
+    //     convert: function (value) {
 
-        return color[key];
-    }
+    //         if (value)
+    //         {
+    //             value = convertColor(('' + value).replace(/\s+:/g, ':'));
 
+    //             if (value[value.length - 1] !== ';')
+    //             {
+    //                 value += ';';
+    //             }
+    //         }
 
-
-    // 样式
-    this.$property('style', '', {
-
-        convert: function (value) {
-
-            if (value)
-            {
-                value = ('' + value).replace(/\s+:/g, ':').replace(/@([\w-]+)/g, translateColor);
-
-                if (value[value.length - 1] !== ';')
-                {
-                    value += ';';
-                }
-            }
-
-            return value || '';
-        }
-    });
+    //         return value || '';
+    //     }
+    // });
 
 
 
-    this.setStyle = function (name, value) {
+    // this.setStyle = function (name, value) {
 
-        var style, index;
+    //     var style, index;
 
-        if (name)
-        {
-            name += ':';
+    //     if (name)
+    //     {
+    //         name += ':';
 
-            if (style = this.style)
-            {
-                if ((index = style.indexOf(name)) >= 0)
-                {
-                    style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
-                }
+    //         if (style = this.style)
+    //         {
+    //             if ((index = style.indexOf(name)) >= 0)
+    //             {
+    //                 style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
+    //             }
  
-                if (value)
-                {
-                    style += name + value + ';';
-                }
+    //             if (value)
+    //             {
+    //                 style += name + value + ';';
+    //             }
 
-                this.style = style;
-            }
-            else if (value)
-            {
-                this.style = name + value + ';';
-            }
-        }
-    }
+    //             this.style = style;
+    //         }
+    //         else if (value)
+    //         {
+    //             this.style = name + value + ';';
+    //         }
+    //     }
+    // }
 
 
-    this.removeStyle = function (name) {
+    // this.removeStyle = function (name) {
 
-        var style, index;
+    //     var style, index;
 
-        if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
-        {
-            this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
-        }
-    }
+    //     if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
+    //     {
+    //         this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
+    //     }
+    // }
 
 
     
@@ -4297,6 +4730,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         type: 'boolean',
         class: 'yx-hidden'
     });
+
+
+    // 是否退居幕后
+    this.$property('backstage', false, {
+
+        type: 'boolean',
+        class: 'yx-backstage'
+    })
 
 
 
@@ -4412,17 +4853,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
 
     // 自定义key
-    this.$property('key', '', {
-        
-        change: false
-    });
+    this.$property('key', '', false);
     
 
     // 自定义tag
-    this.$property('tag', null, {
-        
-        change: false
-    });
+    this.$property('tag', null, false);
 
 
 
@@ -4467,7 +4902,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     */
     this.load = function (values, model) {
 
-        var attributes, converts, convert, changes, value, any;
+        var attributes, converts, convert, changes, style, value, any;
 
         if (attributes = values[1])
         {
@@ -4492,9 +4927,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                         value = any.call(this, value);
                     }
 
-                    if (convert.change) // 需要处理变化
+                    if (convert.style)
                     {
-                        (changes || (changes = this.__changes = {}))[name] = value;
+                        (style || (style = this.__style = create(this.$storage)))[name] = value;
+                    }
+                    else if (convert.change) // 需要处理变化
+                    {
+                        (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
                     }
                     else
                     {
@@ -5488,10 +5927,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
 
     // 子模型名称
-    this.$property('submodel', '', {
-
-        change: false
-    });
+    this.$property('submodel', '', false);
 
     
 
@@ -6114,10 +6550,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
     // 容器宿主
-    this.$property('host', '', {
-
-        change: false
-    });
+    this.$property('host', '', false);
 
 
 
@@ -6228,7 +6661,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.removeClass('yx-tab-page-active');
+                item.backstage = true;
             }
 
             if (item = event.lastItem)
@@ -6269,10 +6702,13 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         if (!page.__tab)
         {
             page.__tab = item.uuid;
-            page.addClass('yx-tab-page');
+
+            page.position = 'absolute';
+            page.left = page.top = '0';
+            page.width = page.height = '100%';
         }
 
-        page.addClass('yx-tab-page-active');
+        page.backstage = false;
     }
 
 
@@ -6489,17 +6925,11 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
 
 
     // 最小值
-    this.$property('min', -Infinity, {
-
-        change: false
-    });
+    this.$property('min', -Infinity, false);
 
 
     // 最大值
-    this.$property('max', Infinity, {
-
-        change: false
-    });
+    this.$property('max', Infinity, false);
 
 
     // 加减步进
@@ -6965,11 +7395,33 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
     var create = Object.create;
 
+
+    // 此方法不会复制原型上的成员
     var assign = Object.assign;
 
-    var owner = Object.getOwnPropertyNames; 
+
+    var own = Object.getOwnPropertyNames; 
 
 
+
+
+    function renderStyle(style) {
+
+        var list = [];
+        var names = own(style);
+        var index = 0;
+        var name, value;
+
+        while (name = names[index++])
+        {
+            if (value = style[name])
+            {
+                list.push(name, ':', value.replace(/rem/g, 'rpx'), ';');
+            }
+        }
+
+        return list.join('');
+    }
 
 
     // 全局渲染
@@ -6979,7 +7431,8 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         var storage = this.$storage;
         var converts = this.$converts;
         var view = create(null);
-        var value, fn;
+        var index = 0;
+        var names, name, value, fn;
 
         this.__dirty = false;
 
@@ -6992,18 +7445,22 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, '');
         }
 
-        if (value = this.__changes)
+        if (value = this.__style)
         {
-            this.__changes = null;
-            assign(storage, value);
+            view.s = renderStyle(value);
+            this.__style = null;
         }
 
-        var names = owner(storage);
-
-        for (var i = 0, l = names.length; i < l; i++)
+        if (value = this.__changes)
         {
-            var name = names[i];
+            assign(storage, value);
+            this.__changes = null;
+        }
 
+        names = own(storage);
+
+        while (name = names[index++])
+        {
             // 配置了处理变更的属性才处理
             if ((value = converts[name]) && value.change)
             {
@@ -7061,16 +7518,21 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, prefix);
         }
 
-    
+        if (value = this.__style)
+        {
+            view.s = renderStyle(value);
+            this.__style = null;
+        }
+
         if (changes = this.__changes)
         {
             var storage = this.$storage;
-            var mixin = this.$mixin; 
-            var value, fn;
+            var mixin = this.$mixin;
+            var names = own(changes);
+            var index = 0;
+            var name, value, fn;
 
-            this.__changes = null;
-
-            for (var name in changes)
+            while (name = names[index++])
             {
                 value = storage[name] = changes[name];
 
@@ -7085,6 +7547,8 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             }
 
             mixin.onrender.call(this, view, prefix);
+            
+            this.__changes = null;
         }
     }
 
@@ -7191,11 +7655,11 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    mixin.style = function (view, prefix, value) {
+    // mixin.style = function (view, prefix, value) {
 
-        // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-        view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
-    }
+    //     // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+    //     view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
+    // }
 
 
 

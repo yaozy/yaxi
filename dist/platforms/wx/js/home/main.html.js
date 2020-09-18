@@ -12,7 +12,7 @@ return (
 			[
 				"swiper",
 				{
-					"style": "flex-shrink:0;"
+					"flex-shrink": "0"
 				},
 				[
 					[
@@ -53,7 +53,7 @@ return (
 				{
 					"key": "host",
 					"flex": "auto",
-					"style": "min-height:200rem;"
+					"min-height": "200rem"
 				}
 			]
 		]

@@ -18,8 +18,11 @@ return (
 						[
 							"box",
 							{
+								"layout": "line",
 								"tag": item.id,
-								"style": "height:160rem;margin:20rem 0;overflow:hidden;",
+								"height": "160rem",
+								"margin": "20rem 0",
+								"overflow": "hidden",
 								"events": {
 									"tap": this.handleOpenDetail.bind(this)
 								}
@@ -29,19 +32,23 @@ return (
 									"image",
 									{
 										"src": item.image,
-										"style": "width:200rem;height:100%;"
+										"width": "200rem",
+										"height": "100%"
 									}
 								],
 								[
 									"box",
 									{
-										"style": "display:inline-block;width:500rem;height:100%;padding-left:20rem;"
+										"width": "500rem",
+										"height": "100%",
+										"padding-left": "20rem"
 									},
 									[
 										[
 											"box",
 											{
-												"style": "height:80rem;overflow:hidden;"
+												"height": "70rem",
+												"overflow": "hidden"
 											},
 											[
 												[
@@ -55,8 +62,12 @@ return (
 										[
 											"box",
 											{
+												"layout": "flow",
 												"theme": "level3",
-												"style": "height:40rem;line-height:40rem;font-size:24rem;overflow:hidden;"
+												"height": "50rem",
+												"line-height": "40rem",
+												"font-size": "24rem",
+												"overflow": "hidden"
 											},
 											(function (__for_list) {
 
@@ -73,7 +84,9 @@ return (
 																{
 																	"text": item,
 																	"theme": "bg-level2",
-																	"style": "display:inline-block;border-radius:20rem;padding:0 20rem;margin-right:10rem;"
+																	"border-radius": "20rem",
+																	"padding": "0 20rem",
+																	"margin-right": "10rem"
 																}
 															]
 														] || []);
@@ -87,7 +100,8 @@ return (
 											"box",
 											{
 												"theme": "important",
-												"style": "height:40rem;overflow:hidden;"
+												"height": "40rem",
+												"overflow": "hidden"
 											},
 											[
 												[

@@ -53,7 +53,9 @@ yaxi.impl.property = function (target) {
 
         if (!options || typeof options !== 'object')
         {
-            options = {};
+            options = {
+                change: options !== false
+            };
         }
 
         this.$defaults[name] = defaultValue = defaultValue != null ? defaultValue : null;
@@ -61,7 +63,8 @@ yaxi.impl.property = function (target) {
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
-            converts[name] = null; // 指定了get的情况下不支持转换器, 直接设置属性值
+            // 指定了get的情况下不支持转换器, 直接设置属性值
+            converts[name] = null;
 
             options.set || (options.set = function () {
 
@@ -72,7 +75,7 @@ yaxi.impl.property = function (target) {
         else
         {
             options.change = options.change !== false;
-            options.convert || (options.convert = cache[options.type || typeof defaultValue])
+            options.convert || (options.convert = cache[options.type || typeof defaultValue]);
 
             options.get = this.__build_get(name, options);
             options.set || (options.set = this.__build_set(name, options));
@@ -81,13 +84,14 @@ yaxi.impl.property = function (target) {
             converts[name] = options.convert === false ? null : {
                 name: name,
                 change: options.change,
+                style: !!options.style,
                 fn: options.convert
             };
         }
 
         define(this, name, options);
 
-        if (alias = options.alias)
+        if ((alias = options.alias) && alias !== name)
         {
             converts[alias] = converts[name];
             define(this, alias, options);

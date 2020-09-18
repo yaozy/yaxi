@@ -15,10 +15,7 @@ yaxi.Segment = yaxi.Control.extend(function (Class, base) {
 
 
     // 步进(为零时只能落在分段上)
-    this.$property('step', 0, {
-
-        change: false
-    });
+    this.$property('step', 0, false);
 
 
     // 分段数

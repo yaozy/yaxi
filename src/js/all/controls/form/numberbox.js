@@ -30,17 +30,11 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
 
 
     // 最小值
-    this.$property('min', -Infinity, {
-
-        change: false
-    });
+    this.$property('min', -Infinity, false);
 
 
     // 最大值
-    this.$property('max', Infinity, {
-
-        change: false
-    });
+    this.$property('max', Infinity, false);
 
 
     // 加减步进
