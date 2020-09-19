@@ -263,7 +263,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls = yaxi.$controls = create(null);
+    var controls = yaxi.$controls || (yaxi.$controls = create(null));
 
 
     // 控件唯一id
@@ -1287,7 +1287,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.destroy = function () {
 
-        var bindings, uuid, model, any;
+        var bindings, uuid;
 
         if (uuid = this.__uuid)
         {
@@ -1296,17 +1296,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if (bindings = this.__bindings)
         {
-            any = [];
-            this.__bindings = null;
-
-            for (var name in bindings)
+            for (var i = bindings.length; i--;)
             {
-                if ((model = bindings[name].model) && any.indexOf(model) < 0)
-                {
-                    model.$unbind(uuid);
-                    any.push(model);
-                }
+                bindings[i--].$unbind(bindings[i], uuid);
             }
+            
+            this.__bindings = null;
         }
 
         if (this.__event_keys)

@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -104,7 +104,7 @@ return (
 									"padding-left": "30rem",
 									"border-top": ".5px solid @border-level4",
 									"bindings": {
-										"key": "index"
+										"key": "$index"
 									}
 								},
 								[
@@ -115,7 +115,7 @@ return (
 											"top": "0",
 											"left": "0",
 											"bindings": {
-												"color": "item.theme"
+												"color": "$item.theme"
 											}
 										}
 									],
@@ -123,8 +123,8 @@ return (
 										"text",
 										{
 											"bindings": {
-												"theme": "item.theme",
-												"text": "item.text"
+												"theme": "$item.theme",
+												"text": "$item.text"
 											}
 										}
 									]
@@ -164,10 +164,10 @@ return (
 									"height": "80rem",
 									"padding-left": "20rem",
 									"bindings": {
-										"key": "index",
-										"icon": "item.icon",
-										"content": "item.text",
-										"theme": "item.theme"
+										"key": "$index",
+										"icon": "$item.icon",
+										"content": "$item.text",
+										"theme": "$item.theme"
 									}
 								}
 							]
@@ -192,9 +192,9 @@ return (
 									"line-height": "80rem",
 									"padding-left": "20rem",
 									"bindings": {
-										"key": "index",
-										"text": "item.text",
-										"theme": "item.theme"
+										"key": "$index",
+										"text": "$item.text",
+										"theme": "$item.theme"
 									}
 								}
 							]
@@ -218,9 +218,9 @@ return (
 									"line-height": "80rem",
 									"padding-left": "20rem",
 									"bindings": {
-										"key": "index",
-										"text": "item.text",
-										"theme": "item.theme"
+										"key": "$index",
+										"text": "$item.text",
+										"theme": "$item.theme"
 									}
 								}
 							]
@@ -265,7 +265,7 @@ return (
 												"text",
 												{
 													"bindings": {
-														"text": "item.text"
+														"text": "$item.text"
 													}
 												}
 											]
@@ -274,11 +274,11 @@ return (
 									[
 										"modelbox",
 										{
-											"submodel": "item.data",
+											"submodel": "$item.data",
 											"padding-left": "20rem",
 											"tag": "filter",
 											"bindings": {
-												"key": "index"
+												"key": "$index"
 											},
 											"events": {
 												"tap": this.handleChangeFilter.bind(this)
@@ -295,9 +295,9 @@ return (
 													"border-radius": "40rem",
 													"text-align": "center",
 													"bindings": {
-														"key": "index",
-														"text": "item.text",
-														"theme": "item.theme"
+														"key": "$index",
+														"text": "$item.text",
+														"theme": "$item.theme"
 													}
 												}
 											]

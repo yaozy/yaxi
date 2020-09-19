@@ -1,4 +1,4 @@
-(function () {
+(function (yaxi) {
 
 
 
@@ -93,18 +93,23 @@
     }
 
 
+    function empty(value) {
+
+        return value;
+    }
+
+
     function compile(text) {
 
         var items = text && parse(text);
-        return caches[text] = items && items[0] ? pipe.bind(items) : null;
+        return caches[text] = items && items[0] ? pipe.bind(items) : empty;
     }
 
 
     yaxi.pipe.compile = function (text) {
 
-        var fn = caches[text];
-        return fn !== void 0 ? fn : compile(text);
+        return caches[text] || compile(text);
     }
 
 
-})();
+})(yaxi);

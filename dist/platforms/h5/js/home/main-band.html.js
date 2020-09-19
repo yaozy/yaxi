@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -21,7 +21,7 @@ return (
 						"icon",
 						{
 							"theme": "level2",
-							"icon": this.icon,
+							"icon": data.icon,
 							"position": "absolute",
 							"font-size": "50rem"
 						}
@@ -30,7 +30,7 @@ return (
 						"text",
 						{
 							"theme": "level2",
-							"text": this.text,
+							"text": data.text,
 							"position": "absolute",
 							"left": "60rem"
 						}
@@ -69,9 +69,9 @@ return (
 
 				    var __for_data = [];
 
-				    for (var index = 0, __for_len = __for_list.length; index < __for_len; index++)
+				    for (var $index = 0, __for_len = __for_list.length; $index < __for_len; $index++)
 				    {
-				        var item = __for_list[index];
+				        var $item = __for_list[$index];
 
 				        __for_data.push.apply(__for_data,
 							[
@@ -79,7 +79,7 @@ return (
 									"box",
 									{
 										"layout": "line",
-										"tag": item.id,
+										"tag": $item.id,
 										"height": "160rem",
 										"margin": "20rem 0",
 										"overflow": "hidden",
@@ -91,7 +91,7 @@ return (
 										[
 											"image",
 											{
-												"src": item.image,
+												"src": $item.image,
 												"width": "200rem",
 												"height": "100%"
 											}
@@ -114,7 +114,7 @@ return (
 														[
 															"text",
 															{
-																"text": item.name
+																"text": $item.name
 															}
 														]
 													]
@@ -131,7 +131,7 @@ return (
 														[
 															"text",
 															{
-																"text": item.remark
+																"text": $item.remark
 															}
 														]
 													]
@@ -147,7 +147,7 @@ return (
 														[
 															"text",
 															{
-																"text": '￥' + item.price
+																"text": '￥' + $item.price
 															}
 														]
 													]
@@ -161,7 +161,7 @@ return (
 
 				    return __for_data;
 
-				}).call(this, this.data)
+				}).call(this, data.data)
 			]
 		]
 	]

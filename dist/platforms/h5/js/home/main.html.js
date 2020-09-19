@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -45,7 +45,7 @@ return (
 				"marquee",
 				{
 					"theme": "level1",
-					"text": this.marquee
+					"text": data.marquee
 				}
 			],
 			[

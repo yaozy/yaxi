@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -71,9 +71,7 @@ return (
 					[
 						"modelbox",
 						{
-							"flex": "auto",
-							"item": "item",
-							"index": "index"
+							"flex": "auto"
 						},
 						[
 							[
@@ -97,7 +95,7 @@ return (
 												"text",
 												{
 													"bindings": {
-														"text": "index"
+														"text": "$index"
 													}
 												}
 											]
@@ -118,7 +116,7 @@ return (
 												{
 													"width": "200rem",
 													"bindings": {
-														"text": "item.name"
+														"text": "$item.name"
 													}
 												}
 											],
@@ -126,7 +124,7 @@ return (
 												"text",
 												{
 													"bindings": {
-														"text": "item.value"
+														"text": "$item.value"
 													}
 												}
 											],
@@ -134,7 +132,7 @@ return (
 												"text",
 												{
 													"bindings": {
-														"text": "item.computed"
+														"text": "$item.computed"
 													}
 												}
 											]

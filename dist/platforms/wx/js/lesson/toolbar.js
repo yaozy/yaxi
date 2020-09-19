@@ -118,7 +118,10 @@ module.exports = yaxi.Box.extend(function (Class, base) {
         }
 
 
-    }))().$load({
+    }))();
+    
+    
+    model.$load({
 
         sort: {
             data: [
@@ -252,7 +255,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
         var sort = model.sort;
 
-        if (index && (item = sort.data[index - 1]))
+        if (index && (item = sort.data[index]))
         {
             sort.key = item.key;
             sort.text = item.text;
@@ -266,12 +269,12 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.handleCategoryLevel1 = function (event) {
 
-        var index;
+        var index = +event.target.key;
 
-        if (index = +event.target.key)
+        if (index >= 0)
         {
             var category = model.category;
-            var item = category.level1s[index - 1];
+            var item = category.level1s[index];
 
             category.level1 = item;
             category.level2 = category.level3 = all;
@@ -297,12 +300,12 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.handleCategoryLevel2 = function (event) {
 
-        var index;
+        var index = +event.target.key;
 
-        if (index = +event.target.key)
+        if (index >= 0)
         {
             var category = model.category;
-            var item = category.level2s[index - 1];
+            var item = category.level2s[index];
 
             category.level2 = item;
             category.level3 = all;
@@ -328,12 +331,12 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.handleCategoryLevel3 = function (event) {
 
-        var index;
+        var index = +event.target.key;
 
-        if (index = +event.target.key)
+        if (index >= 0)
         {
             var category = model.category;
-            var item = category.level3s[index - 1];
+            var item = category.level3s[index];
 
             model.type = '';
 
@@ -356,9 +359,9 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
         if (parent && parent.tag === 'filter')
         {
-            var group = model.filter.data[+parent.key - 1];
+            var group = model.filter.data[+parent.key];
             var checked = group.checked;
-            var item = group.data[+target.key - 1];
+            var item = group.data[+target.key];
             var id = item.id + ',';
 
             if (checked.indexOf(id) >= 0)

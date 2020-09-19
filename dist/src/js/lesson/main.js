@@ -10,8 +10,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     function render(data) {
 
-        this.data = data;
-        this.find('>>@host').load(lessonTemplate.call(this));
+        this.find('>>@host').load(lessonTemplate.call(this, data));
     }
 
 
@@ -29,7 +28,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
         if (control = event.target.findHasTag())
         {
-            require('../lesson/detail').open(control.tag);
+            require('../lesson/detail/main').open(control.tag);
         }
     }
 

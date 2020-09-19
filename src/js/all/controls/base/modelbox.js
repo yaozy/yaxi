@@ -1,5 +1,5 @@
 /*
- * ModelBox是一个通过模型(arrayModel)和模板(template)进行重复展现的容器控件
+ * ModelBox是一个通过数组模型和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
 */
 yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
@@ -97,14 +97,9 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         {
             model = model.$findSubmodel(name);
 
-            if (!model)
-            {
-                throw message + 'can not find submodel "' + name + '" of modelbox control!';
-            }
-
             if (model.__model_type !== 2)
             {
-                throw message + 'model "' + name + '" not a valid array model of modelbox control!';
+                throw message + 'modelbox submodel "' + name + '" not a valid array model!';
             }
         }
 
@@ -112,15 +107,14 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     }
 
 
-    this.reload = function (arrayModel) {
+    this.reload = function (array) {
 
-        if (!arrayModel || arrayModel.__model_type !== 2)
+        if (!array || array.__model_type !== 2)
         {
             throw  message + 'modelbox control must bind a array model!';
         }
 
         var template = this.template;
-        var any;
 
         if (!template)
         {
@@ -128,55 +122,55 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         }
 
         var children = this.__children;
+        var old;
 
         if (children.length > 0)
         {
             children.clear();
         }
 
-        if (any = this.__arrayModel)
+        if (old = this.__array_model)
         {
-            if (any !== arrayModel)
+            if (old !== array)
             {
-                unbind(this, any);
-                bind(this, arrayModel);
+                unbind(this, old);
+                bind(this, array);
             }
         }
         else
         {
-            bind(this, arrayModel);
+            bind(this, array);
         }
 
-        if (arrayModel.length > 0)
+        if (array.length > 0)
         {
-            any = createControls(this, arrayModel, template);
-            children.__insert(-1, any);
+            children.__insert(-1, createControls(this, array, template));
         }
     }
 
 
-    function bind(modelbox, arrayModel) {
+    function bind(modelbox, array) {
 
         var bindings;
 
-        if (bindings = arrayModel.__bindings)
+        if (bindings = array.__bindings)
         {
             bindings.push(modelbox.uuid);
         }
         else
         {
-            arrayModel.__bindings = [modelbox.uuid];
+            array.__bindings = [modelbox.uuid];
         }
 
-        modelbox.__arrayModel = arrayModel;
+        modelbox.__array_model = array;
     }
 
 
-    function unbind(modelbox, arrayModel) {
+    function unbind(modelbox, array) {
 
         var bindings;
 
-        if (bindings = arrayModel.__bindings)
+        if (bindings = array.__bindings)
         {
             var index = bindings.indexOf(modelbox.uuid);
 
@@ -186,13 +180,13 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             }
         }
 
-        modelbox.__arrayModel = null;
+        modelbox.__array_model = null;
     }
 
 
-    function createControls(parent, arrayModel, template) {
+    function createControls(parent, array, template) {
 
-        var length = arrayModel.length;
+        var length = array.length;
         var list, control, model;
 
         // [['xxx', ...]]形式为多子控件模板
@@ -205,7 +199,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
             for (var i = 0; i < length; i++)
             {
-                model = arrayModel[i];
+                model = array[i];
     
                 for (var j = 0; j < template_length; j++)
                 {
@@ -222,7 +216,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
             for (var i = 0; i < length; i++)
             {
-                model = arrayModel[i];
+                model = array[i];
 
                 control = parent.$createSubControl(template, model);
                 control.currentModel = model;
@@ -304,7 +298,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.__arrayModel)
+        if (any = this.__array_model)
         {
             unbind(this, any);
         }

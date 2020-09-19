@@ -26,8 +26,10 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.marquee = '滚动文字 滚动文字 滚动文字 滚动文字';
-        this.load(template.call(this));
+        this.load(template.call(this, {
+            
+            marquee: '滚动文字 滚动文字 滚动文字 滚动文字'
+        }));
 
         yaxi.http.get('home').json(render.bind(this));
     }

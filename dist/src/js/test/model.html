@@ -7,15 +7,15 @@
             <button flex="auto" content="Remove" e-tap="handleRemove" />
             <button flex="auto" content="Reorder" e-tap="handleReorder" />
         </box>
-        <modelbox flex="auto" item="item" index="index">
+        <modelbox flex="auto">
             <box height="120rem">
                 <box width="50rem" height="120rem" line-height="120rem" position="absolute" top="0" left="20rem">
-                    <text b-text="index" />
+                    <text b-text="$index" />
                 </box>
                 <box height="100rem" width="700rem" position="absolute" left="70rem" top="20rem">
-                    <text b-text="item.name" width="200rem" />
-                    <text b-text="item.value" />
-                    <text b-text="item.computed" />
+                    <text b-text="$item.name" width="200rem" />
+                    <text b-text="$item.value" />
+                    <text b-text="$item.computed" />
                 </box>
             </box>
         </modelbox>

@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -161,7 +161,7 @@ return (
 										"text",
 										{
 											"bindings": {
-												"text": "item.before"
+												"text": "$item.before"
 											}
 										}
 									],
@@ -170,7 +170,7 @@ return (
 										{
 											"theme": "font-primary",
 											"bindings": {
-												"text": "text"
+												"text": "$top.text"
 											}
 										}
 									],
@@ -178,7 +178,7 @@ return (
 										"text",
 										{
 											"bindings": {
-												"text": "item.after"
+												"text": "$item.after"
 											}
 										}
 									]

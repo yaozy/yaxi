@@ -5,7 +5,7 @@ const template = require('./search.html');
 module.exports = yaxi.Box.extend(function () {
 
 
-    var model = yaxi.store = new (yaxi.model({
+    var model = yaxi.store1 = new (yaxi.model({
 
         last: '',
         text: '',
@@ -28,8 +28,11 @@ module.exports = yaxi.Box.extend(function () {
 
     this.init = function (size) {
 
-        this.size = size || '100%';
-        this.load(template.call(this), model);
+        this.load(template.call(this, {
+
+            size: size || '100%'
+
+        }), model);
     }
 
 

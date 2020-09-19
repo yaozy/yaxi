@@ -1,4 +1,4 @@
-module.exports = function (scope) {
+module.exports = function (data) {
 
 
 return (
@@ -9,9 +9,9 @@ return (
 
 		    var __for_data = [];
 
-		    for (var index = 0, __for_len = __for_list.length; index < __for_len; index++)
+		    for (var $index = 0, __for_len = __for_list.length; $index < __for_len; $index++)
 		    {
-		        var item = __for_list[index];
+		        var $item = __for_list[$index];
 
 		        __for_data.push.apply(__for_data,
 					[
@@ -19,7 +19,7 @@ return (
 							"box",
 							{
 								"layout": "line",
-								"tag": item.id,
+								"tag": $item.id,
 								"height": "160rem",
 								"margin": "20rem 0",
 								"overflow": "hidden",
@@ -31,7 +31,7 @@ return (
 								[
 									"image",
 									{
-										"src": item.image,
+										"src": $item.image,
 										"width": "200rem",
 										"height": "100%"
 									}
@@ -54,7 +54,7 @@ return (
 												[
 													"text",
 													{
-														"text": item.name
+														"text": $item.name
 													}
 												]
 											]
@@ -73,16 +73,16 @@ return (
 
 											    var __for_data = [];
 
-											    for (var index = 0, __for_len = __for_list.length; index < __for_len; index++)
+											    for (var $index = 0, __for_len = __for_list.length; $index < __for_len; $index++)
 											    {
-											        var item = __for_list[index];
+											        var $remark = __for_list[$index];
 
 											        __for_data.push.apply(__for_data,
 														[
 															[
 																"text",
 																{
-																	"text": item,
+																	"text": $remark,
 																	"theme": "bg-level2",
 																	"border-radius": "20rem",
 																	"padding": "0 20rem",
@@ -94,7 +94,7 @@ return (
 
 											    return __for_data;
 
-											}).call(this, item.remark)
+											}).call(this, $item.remark)
 										],
 										[
 											"box",
@@ -107,7 +107,7 @@ return (
 												[
 													"text",
 													{
-														"text": item.price > 0 ? '￥' + item.price : '免费'
+														"text": $item.price > 0 ? '￥' + $item.price : '免费'
 													}
 												]
 											]
@@ -121,7 +121,7 @@ return (
 
 		    return __for_data;
 
-		}).call(this, this.data)
+		}).call(this, data)
 	]
 )
 

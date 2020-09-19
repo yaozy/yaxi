@@ -1,6 +1,6 @@
-const yaxi = require('../../yaxi/js/yaxi');
-const template = require('./detail.html');
-const ajaxTemplate = require('./detail-ajax.html')
+const yaxi = require('../../../yaxi/js/yaxi');
+const template = require('./main.html');
+const ajaxTemplate = require('./main-ajax.html')
 
 
 module.exports = yaxi.Page.extend(function (Class, base) {
@@ -9,8 +9,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     function render(data) {
 
-        this.data = data;
-        this.find('>Box').load(ajaxTemplate.call(this));
+        this.find('>Box').load(ajaxTemplate.call(this, data));
     }
 
     

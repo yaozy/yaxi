@@ -23,7 +23,7 @@
 
 
     // 定义数组模型
-    yaxi.arrayModel = function (properties, itemName, indexName) {
+    yaxi.arrayModel = function (properties) {
     
         var prototype = create(base);
 
@@ -32,7 +32,6 @@
         function ArrayModel(parent) {
 
             this.$parent = parent || null;
-            this.__item = [itemName || 'item', indexName || 'index'];
         }
 
         prototype.$Model = yaxi.model(properties);
@@ -98,9 +97,6 @@
         while (index < length)
         {
             model = new Model(parent);
-
-            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
-            model.__item = arrayModel.__item;
             model.$load(list[index++]);
 
             outputs.push(model);
@@ -126,7 +122,7 @@
             }
             else if (old !== index)
             {
-                model.__item_index = index;
+                model.$index = index;
             }
 
             index++;
@@ -172,7 +168,7 @@
             }
         }
 
-        item.$parent = item.__item = item.__bindings = null;
+        item.$parent = item.__bindings = null;
     }
 
 
@@ -183,10 +179,7 @@
         {
             var model = new this.$Model(this.$parent);
 
-            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
-            model.__item = this.__item;
             model.$load(value);
-
             this[index] = model;
 
             notify(this, '__on_set', index, model);

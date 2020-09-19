@@ -6010,7 +6010,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             children.clear();
         }
 
-        if (any = this.__arrayModel)
+        if (any = this.__array_model)
         {
             if (any !== arrayModel)
             {
@@ -6044,7 +6044,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             arrayModel.__bindings = [modelbox.uuid];
         }
 
-        modelbox.__arrayModel = arrayModel;
+        modelbox.__array_model = arrayModel;
     }
 
 
@@ -6062,7 +6062,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             }
         }
 
-        modelbox.__arrayModel = null;
+        modelbox.__array_model = null;
     }
 
 
@@ -6180,7 +6180,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.__arrayModel)
+        if (any = this.__array_model)
         {
             unbind(this, any);
         }

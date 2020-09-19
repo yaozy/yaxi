@@ -1,18 +1,18 @@
 <box>
-    <for list="data">
-        <box layout="line" d-tag="item.id" height="160rem" margin="20rem 0" overflow="hidden" e-tap="handleOpenDetail">
-            <image d-src="item.image" width="200rem" height="100%" />
+    <for list="$data">
+        <box layout="line" d-tag="$item.id" height="160rem" margin="20rem 0" overflow="hidden" e-tap="handleOpenDetail">
+            <image d-src="$item.image" width="200rem" height="100%" />
             <box width="500rem" height="100%" padding-left="20rem">
                 <box height="70rem" overflow="hidden">
-                    <text d-text="item.name" />
+                    <text d-text="$item.name" />
                 </box>
                 <box layout="flow" theme="level3" height="50rem" line-height="40rem" font-size="24rem" overflow="hidden">
-                    <for list="item.remark" item="item">
-                        <text d-text="item" theme="bg-level2" border-radius="20rem" padding="0 20rem" margin-right="10rem" />
+                    <for list="$item.remark" item="remark">
+                        <text d-text="$remark" theme="bg-level2" border-radius="20rem" padding="0 20rem" margin-right="10rem" />
                     </for>
                 </box>
                 <box theme="important" height="40rem" overflow="hidden">
-                    <text d-text="item.price > 0 ? '￥' + item.price : '免费'" />
+                    <text d-text="$item.price > 0 ? '￥' + $item.price : '免费'" />
                 </box>
             </box>
         </box>

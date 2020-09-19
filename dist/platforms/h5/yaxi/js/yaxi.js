@@ -1717,7 +1717,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-(function () {
+(function (yaxi) {
 
 
 
@@ -1812,21 +1812,26 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
+    function empty(value) {
+
+        return value;
+    }
+
+
     function compile(text) {
 
         var items = text && parse(text);
-        return caches[text] = items && items[0] ? pipe.bind(items) : null;
+        return caches[text] = items && items[0] ? pipe.bind(items) : empty;
     }
 
 
     yaxi.pipe.compile = function (text) {
 
-        var fn = caches[text];
-        return fn !== void 0 ? fn : compile(text);
+        return caches[text] || compile(text);
     }
 
 
-})();
+})(yaxi);
 
 
 
@@ -1840,6 +1845,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     var define = Object.defineProperty;
 
 
+    // 管理编译器
     var compile = yaxi.pipe.compile;
 
 
@@ -1847,8 +1853,8 @@ yaxi.http = Object.extend.call({}, function (Class) {
     var cache = create(null);
 
 
-    // 观察器对象集合
-    var controls;
+    // 控件对象集合
+    var controls = yaxi.$controls || (yaxi.$controls = create(null));
 
 
     // 绑定的目标
@@ -1865,128 +1871,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
     // 定义属性方法
     var property = yaxi.impl.property();
 
-
-    
-    this.__build_get = function (name) {
-
-        return function () {
-
-            var target, bindings, any;
-
-            if (target = bindingTarget)
-            {
-                if (bindings = this.__bindings)
-                {
-                    if (any = bindings[name])
-                    {
-                        any.push(target);
-                    }
-                    else
-                    {
-                        bindings[name] = [target];
-                    }
-                }
-                else
-                {
-                    (this.__bindings = {})[name] = [target];
-                }
-            }
-
-            return this.$storage[name];
-        }
-
-    }
-    
-    
-    this.__build_set = function (name, options) {
-
-        var watches = watchKeys;
-        var convert = options.convert;
-
-        return function (value) {
-
-            var any = this.$storage;
-
-            if (convert)
-            {
-                value = convert(value);
-            }
-
-            if (value === any[name] || watches[name] && this.$notify(name, value) === false)
-            {
-                return this;
-            }
-
-            any[name] = value;
-
-            if ((any = this.__bindings) && (any = any[name]))
-            {
-                syncBindings(any);
-            }
-        }
-    }
-
-
-
-    // 数组项索引属性
-    define(this, '__item_index', {
-
-        get: function () {
-
-            var bindings, any;
-
-            if (bindingTarget)
-            {
-                if (bindings = this.__bindings)
-                {
-                    if (any = bindings.__item_index)
-                    {
-                        any.push(bindingTarget);
-                    }
-                    else
-                    {
-                        bindings.__item_index = [bindingTarget];
-                    }
-                }
-                else
-                {
-                    (this.__bindings = {}).__item_index = [bindingTarget];
-                }
-            }
-
-            return this.__index + 1 || 0;
-        },
-
-        set: function (value) {
-
-            value |= 0;
-
-            if (this.__index === value)
-            {
-                return;
-            }
-
-            var bindings = this.__bindings;
-
-            this.__index = value;
-
-            if (bindings && (bindings = bindings.__item_index))
-            {
-                value += 1;
-                
-                for (var name in bindings)
-                {
-                    var binding = bindings[name];
-                    var control = (controls || (controls = yaxi.$controls))[binding.control];
-        
-                    if (control)
-                    {
-                        control[binding.property] = binding.pipe ? binding.pipe(value) : value;
-                    }
-                }
-            }
-        }
-    });
 
 
 
@@ -2015,6 +1899,181 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
+
+    
+    this.__build_get = function (name) {
+
+        return function () {
+
+            var control, target;
+
+            // 找到控件才收集依赖
+            if ((target = bindingTarget) && (control = controls[target.control]))
+            {
+                addDep(this, name, target, control);
+            }
+
+            return this.$storage[name];
+        }
+    }
+    
+    
+    this.__build_set = function (name, options) {
+
+        var watches = watchKeys;
+        var convert = options.convert;
+
+        return function (value) {
+
+            var storage = this.$storage;
+            var bindings;
+
+            if (convert)
+            {
+                value = convert(value);
+            }
+
+            if (value === storage[name] || watches[name] && this.$notify(name, value) === false)
+            {
+                return this;
+            }
+
+            storage[name] = value;
+
+            if ((bindings = this.__bindings) && (bindings = bindings[name]))
+            {
+                syncBindings(bindings);
+            }
+        }
+    }
+
+
+
+    this.__index = -1;
+
+
+    // 添加索引属性
+    define(this, '$index', {
+
+        get: function () {
+
+            var control, target;
+
+            // 找到控件才收集依赖
+            if ((target = bindingTarget) && (control = controls[target.control]))
+            {
+                addDep(this, '$index', target, control);
+            }
+
+            return this.__index;
+        },
+
+        set: function (value) {
+
+            var bindings;
+
+            if (this.__index !== (value |= 0))
+            {
+                this.__index = value;
+
+                if ((bindings = this.__bindings) && (bindings = bindings.$index))
+                {
+                    syncBindings(bindings);
+                }
+            }
+        }
+    });
+
+
+    // 顶层模型对象
+    define(this, '$top', {
+        
+        get: function () {
+
+            var target = this;
+            var parent;
+
+            while (parent = target.$parent)
+            {
+                target = parent;
+            }
+
+            return target;
+        }
+    });
+
+
+
+    // 添加依赖
+    function addDep(model, name, target, control) {
+
+        var bindings, control, any;
+
+        // 给模型添加绑定关系
+        if (bindings = model.__bindings)
+        {
+            if (any = bindings[name])
+            {
+                any.push(target);
+            }
+            else
+            {
+                bindings[name] = [target];
+            }
+        }
+        else
+        {
+            (model.__bindings = create(null))[name] = [target];
+        }
+
+        // 给控件记录依赖关系以便控件销毁时自动解除绑定
+        if (bindings = control.__bindings)
+        {
+            bindings.push(name, model);
+        }
+        else
+        {
+            control.__bindings = [name, model];
+        }
+    }
+
+
+    // 同步绑定
+    function syncBindings(bindings) {
+
+        var index = 0;
+        var binding, model, control, fn, value;
+
+        while (binding = bindings[index++])
+        {
+            if ((model = binding.model) && (control = controls[binding.control]))
+            {
+                if (fn = binding.fn)
+                {
+                    value = fn.call(model, compile);
+                }
+                else
+                {
+                    value = model[binding.field];
+
+                    if (fn = binding.pipe)
+                    {
+                        value = fn(value);
+                    }
+                }
+
+                control[binding.property] = value;
+            }
+            else
+            {
+                bindings.splice(--index, 1);
+            }
+        }
+    }
+
+
+
+
     function defineProperties(prototype, properties, subkeys) {
 
         var options, type;
@@ -2023,7 +2082,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         {
             if (name[0] === '$' || name[0] === '_' && name[1] === '_')
             {
-                throw 'define model error: field can not use "$" or "__" to start!';
+                throw 'define model error: model field can not use "$" or "__" to start!';
             }
 
             if (options = properties[name])
@@ -2167,65 +2226,55 @@ yaxi.http = Object.extend.call({}, function (Class) {
         };
     }
     
-
-
-    function syncBindings(bindings) {
-
-        var binding, model, value, any;
-
-        for (var name in bindings)
-        {
-            binding = bindings[name];
-
-            // 子模型可能使用计算字段绑定至父模型的属性, 所以此处必须使用binding.model获取当前绑定对应的模型
-            if (model = binding.model)
-            {
-                value = model[binding.field];
-
-                if (any = binding.pipe)
-                {
-                    value = any(value);
-                }
     
-                if (any = (controls || (controls = yaxi.$controls))[binding.control])
-                {
-                    any[binding.property] = value;
-                }
-            }
-        }
+
+    // 编译字段绑定
+    function compileFieldBinding(control, model, name, rule) {
+
+        // 绑定结构
+        var binding = bindingTarget = {
+            type: 0,                        // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定  3: 表达式绑定
+            model: null,                    // 绑定的模型
+            field: rule.last,               // 绑定模型字段
+            control: control.uuid,          // 控件id
+            property: name                  // 控件属性名
+        };
+
+        var model = findModel(model, rule, binding);
+        var value = model[binding.field];
+
+        binding.model = model;
+        control[name] = rule.pipe ? rule.pipe(value) : value;
     }
 
-    
 
-    // 编译绑定
-    function compileBinding(control, model, name, rule) {
-    
-        var binding, value;
+    // 编译模型推送绑定
+    function compilePushBinding(control, model, rule) {
 
-        if (rule !== 1)
-        {
-            binding = bindingTarget = createBinding(model, rule);
-            binding.control = control.uuid;
+        // 绑定结构
+        var binding = control.__binding_push = {
+            model: model,
+            field: rule.last
+        };
 
-            value = binding.model[binding.field];
-
-            if (rule.pipe)
-            {
-                value = rule.pipe(value);
-            }
-
-            control[binding.property = name] = value;
-
-            if (binding.model.__model_type === 1)
-            {
-                (control.__bindings || (control.__bindings = {}))[name] = binding;
-            }
-        }
-        else
-        {
-            throw 'bind error: binding expression "' + expression + '" is invalid!';
-        }
+        binding.model = findModel(model, rule, binding);
     }
+
+
+    // 编译函数绑定
+    function compileFunctionBinding(control, model, name, fn) {
+    
+        bindingTarget = {
+            type: 3,                    // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定  3: 表达式绑定
+            model: model,               // 绑定的模型
+            fn: fn,                     // 函数表达式
+            control: control.uuid,      // 控件id
+            property: name              // 控件属性名
+        };
+
+        control[name] = fn.call(model, compile);
+    }
+
 
 
     // 解析绑定表达式
@@ -2243,10 +2292,11 @@ yaxi.http = Object.extend.call({}, function (Class) {
             value = expression;
         }
 
-        if (any = value.match(/\w+/g))
+        if (any = value.match(/[\w$]+/g))
         {
             value = {
                 path: any,
+                last: any[any.length - 1],
                 pipe: pipe,
                 bind: value
             };
@@ -2256,111 +2306,107 @@ yaxi.http = Object.extend.call({}, function (Class) {
     }
 
 
-    // 创建绑定对象
-    function createBinding(model, rule) {
 
-        var path = rule.path;
-        var name = path[0];
-        var item;
-
-        // 绑定结构
-        var binding = {
-            type: 0,        // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定
-            model: null,    // 模型对象
-            field: name,    // 模型字段名
-            control: 0,     // 控件id
-            property: ''    // 控件属性名
-        };
-
-        while (model)
-        {
-            // 如果是数组模型子项时只能通过设定的项名或索引名绑定, 不支持直接绑定
-            if (item = model.__item)
-            {
-                // 数组模型子项
-                if (name === item[0])
-                {
-                    binding.type = 1;
-    
-                    if (path[1])
-                    {
-                        return findSubModel(model, rule, binding, 1);
-                    }
-
-                    binding.model = model;
-                    return binding;
-                }
-
-                // 数组模型子项索引
-                if (name === item[1])
-                {
-                    if (path[1])
-                    {
-                        throw 'bind error: "' + name + '" is model index, can not supports sub model!';
-                    }
-
-                    binding.type = 2;
-                    binding.model = model;
-                    binding.field = '__item_index';
-
-                    return binding;
-                }
-            }
-            else if (name in model)
-            {
-                if (path[1])
-                {
-                    return findSubModel(model, rule, binding);
-                }
- 
-                binding.model = model;
-                return binding;
-            }
-            
-            model = model.$parent;
-        }
-
-        throw 'bind error: model field "' + name + '" not exists!';
-    }
-
-
-    function findSubModel(model, rule, binding, index) {
+    function findModel(model, rule, binding) {
 
         var path = rule.path;
         var last = path.length - 1;
+        var name = path[0];
+        var index = 0;
 
-        index |= 0;
+        // 特殊绑定
+        switch (name)
+        {
+            // 当前模型项
+            case '$item':
+                index++;
+
+                if (binding)
+                {
+                    binding.type = 1;
+                }
+                break;
+
+            // 当前模型在array model中的索引
+            case '$index':
+                if (!binding || last > 0)
+                {
+                    throw 'bind error: $index is a model index field, not a model!';
+                }
+
+                if (binding)
+                {
+                    binding.type = 2;
+                    binding.field = '$index';
+                }
+
+                return model;
+
+            // 顶层模型
+            case '$top':
+                index++;
+                model = model.$top;
+                break;
+
+            // 上级模型
+            case '$parent':
+                do
+                {
+                    model = model.$parent;
+
+                    if (!model)
+                    {
+                        throw findModelThrow(rule, '"' + path.substring(0, index) + '" not exists!');
+                    }
+                }
+                while ((name = path[++index]) && name === '$parent');
+                break;
+        }
 
         while (index < last)
         {
-            if (model = model[path[index++]])
+            name = path[index];
+
+            if (model = model[name])
             {
                 if (model.__model_type === 1)
                 {
+                    index++;
                     continue;
                 }
 
-                throw 'bind error: "' + name + '" is not a sub model in "' + rule.bind + '"!';
+                findModelThrow(rule, '"' + name + '" not a submodel!');
             }
             else
             {
-                throw 'bind error: "' + rule.bind + '" is invalid, can not find submodel "' + path[index - 1] + '"!';
+                findModelThrow(rule, 'submodel "' + name + '" not exists!');
             }
         }
 
-        if (path[last] in model)
+        name = path[last];
+
+        if (name in model)
         {
             if (binding)
             {
-                binding.field = path[last];
-                binding.model = model;
-                return binding;
+                return model;
+            }
+            
+            if ((last = model[name]) && last.__model_type)
+            {
+                return last;
             }
 
-            return model[path[last]];
+            findModelThrow(rule, '"' + name + '" not a model object!');
         }
 
-        throw 'bind error: "' + rule.bind + '" is invalid, can not find model field "' + path[last] + '"!';
+        findModelThrow(rule, 'field "' + name + '" not exists!');
+    }
+
+
+    function findModelThrow(rule, text) {
+
+        throw 'bind error: "' + rule.bind + '" is invalid, ' + text;
     }
 
 
@@ -2369,15 +2415,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     this.$findSubmodel = function (expression) {
 
         var rule = cache[expression] || parseExpression(expression);
-        var item = this.__item;
-
-        // 数组子项模型
-        if (item && item[0] === rule.path[0])
-        {
-            return findSubModel(this, rule, null, 1);
-        }
-
-        return findSubModel(this, rule);
+        return findModel(this, rule);
     }
 
 
@@ -2393,61 +2431,61 @@ yaxi.http = Object.extend.call({}, function (Class) {
             {
                 if (expression = bindings[name])
                 {
-                    var rule = cache[expression] || parseExpression(expression);
-        
-                    if (name === 'model')
+                    // 字段绑定
+                    if (typeof expression !== 'function')
                     {
+                        var rule = cache[expression] || parseExpression(expression);
+        
                         if (rule !== 1)
                         {
-                            control.__binding_push = createBinding(model, rule);
+                            if (name === 'model')
+                            {
+                                compilePushBinding(control, this, name, rule);
+                            }
+                            else
+                            {
+                                compileFieldBinding(control, this, name, rule);
+                            }
+                        }
+                        else
+                        {
+                            throw 'bind error: binding expression "' + expression + '" is invalid!';
                         }
                     }
-                    else
+                    else // 表达式绑定
                     {
-                        compileBinding(control, this, name, rule);
+                        compileFunctionBinding(control, this, name, expression);
                     }
                 }
             }
         }
         finally
         {
+            // 终止收集依赖
             bindingTarget = null;
         }
-
-        return this;
     }
-
 
 
     // 解除绑定
-    this.$unbind = function (uuid) {
+    this.$unbind = function (name, uuid) {
 
         var bindings = this.__bindings;
-        var values;
 
-        if (bindings)
+        if (bindings && (bindings = bindings[name]))
         {
-            for (var name in bindings)
+            for (var i = bindings.length; i--;)
             {
-                if (values = bindings[name])
+                if (bindings[i].control === uuid)
                 {
-                    for (var i = values.length; i--;)
-                    {
-                        if (values[i].control === uuid)
-                        {
-                            values.splice(i, 1);
-                            break;
-                        }
-                    }
+                    bindings.splice(i, 1);
+                    break;
                 }
             }
         }
-
-        return this;
     }
 
 
-    
     
     // 观测属性变化
     this.$watch = function (name, listener) {
@@ -2478,8 +2516,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 (this.__watches || (this.__watches = {}))[name] = [listener];
             }
         }
-
-        return this;
     }
 
 
@@ -2532,8 +2568,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
             this.__watches = null;
         }
-
-        return this;
     }
 
 
@@ -2563,8 +2597,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
             target = target.$parent;
         }
-
-        return this;
     }
 
 
@@ -2603,8 +2635,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 }
             }
         }
-
-        return this;
     }
 
 
@@ -2632,8 +2662,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
                 }
             }
         }
-        
-        return this;
     }
 
 
@@ -2668,7 +2696,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
     // 定义数组模型
-    yaxi.arrayModel = function (properties, itemName, indexName) {
+    yaxi.arrayModel = function (properties) {
     
         var prototype = create(base);
 
@@ -2677,7 +2705,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
         function ArrayModel(parent) {
 
             this.$parent = parent || null;
-            this.__item = [itemName || 'item', indexName || 'index'];
         }
 
         prototype.$Model = yaxi.model(properties);
@@ -2743,9 +2770,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
         while (index < length)
         {
             model = new Model(parent);
-
-            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
-            model.__item = arrayModel.__item;
             model.$load(list[index++]);
 
             outputs.push(model);
@@ -2771,7 +2795,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
             else if (old !== index)
             {
-                model.__item_index = index;
+                model.$index = index;
             }
 
             index++;
@@ -2817,7 +2841,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
         }
 
-        item.$parent = item.__item = item.__bindings = null;
+        item.$parent = item.__bindings = null;
     }
 
 
@@ -2828,10 +2852,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         {
             var model = new this.$Model(this.$parent);
 
-            // 标记数组模型子项, 标记了此项只能通过item和index进行绑定, 不支持直接绑定属性
-            model.__item = this.__item;
             model.$load(value);
-
             this[index] = model;
 
             notify(this, '__on_set', index, model);
@@ -4090,7 +4111,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls = yaxi.$controls = create(null);
+    var controls = yaxi.$controls || (yaxi.$controls = create(null));
 
 
     // 控件唯一id
@@ -5114,7 +5135,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.destroy = function () {
 
-        var bindings, uuid, model, any;
+        var bindings, uuid;
 
         if (uuid = this.__uuid)
         {
@@ -5123,17 +5144,12 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if (bindings = this.__bindings)
         {
-            any = [];
-            this.__bindings = null;
-
-            for (var name in bindings)
+            for (var i = bindings.length; i--;)
             {
-                if ((model = bindings[name].model) && any.indexOf(model) < 0)
-                {
-                    model.$unbind(uuid);
-                    any.push(model);
-                }
+                bindings[i--].$unbind(bindings[i], uuid);
             }
+            
+            this.__bindings = null;
         }
 
         if (this.__event_keys)
@@ -5973,14 +5989,9 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         {
             model = model.$findSubmodel(name);
 
-            if (!model)
-            {
-                throw message + 'can not find submodel "' + name + '" of modelbox control!';
-            }
-
             if (model.__model_type !== 2)
             {
-                throw message + 'model "' + name + '" not a valid array model of modelbox control!';
+                throw message + 'modelbox submodel "' + name + '" not a valid array model!';
             }
         }
 
@@ -6010,7 +6021,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             children.clear();
         }
 
-        if (any = this.__arrayModel)
+        if (any = this.__array_model)
         {
             if (any !== arrayModel)
             {
@@ -6044,7 +6055,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             arrayModel.__bindings = [modelbox.uuid];
         }
 
-        modelbox.__arrayModel = arrayModel;
+        modelbox.__array_model = arrayModel;
     }
 
 
@@ -6062,7 +6073,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             }
         }
 
-        modelbox.__arrayModel = null;
+        modelbox.__array_model = null;
     }
 
 
@@ -6180,7 +6191,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.__arrayModel)
+        if (any = this.__array_model)
         {
             unbind(this, any);
         }
