@@ -197,7 +197,7 @@ Object.extend.call(Array, function (Class, base) {
 
     function raise(token, index, message) {
 
-        throw 'selector is invalid, ' + token + ' at ' + index + ', ' + message + '!';
+        throw new Error('selector is invalid, ' + token + ' at ' + index + ', ' + message + '!');
     }
 
 

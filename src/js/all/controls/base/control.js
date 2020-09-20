@@ -352,7 +352,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     //     }
     //     else
     //     {
-    //         throw 'add class error: class name not allow null or empty!';
+    //         throw new Error('add class error: class name not allow null or empty!');
     //     }
     // }
 
@@ -996,26 +996,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         // 处理选中状态
         if (selectedStatus)
         {
-            var converts = control.$converts;
-            var convert;
-            
             status = {};
 
             for (var name in selectedStatus)
             {
                 var value1 = control[name];
-                var value2 = selectedStatus[name];
 
-                if ((convert = converts[name]) && (convert = convert.fn))
-                {
-                    value2 = convert.call(control, value2);
-                }
-
-                if (value1 !== value2)
-                {
-                    status[name] = [value1, value2];
-                    control[name] = value2;
-                }
+                control[name] = selectedStatus[name];;
+                status[name] = [value1, control[name]];
             }
         }
 
@@ -1075,6 +1063,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     */
     this.load = function (values, model) {
 
+        this.__model = model || (model = this.findModel());
+        this.__load(values, model);
+
+        return this;
+    }
+
+
+    this.__load = function (values, model) {
+
         var attributes, converts, convert, changes, style, value, any;
 
         if (attributes = values[1])
@@ -1124,26 +1121,71 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         {
             any.call(this, values, model);
         }
-
-        return this;
     }
     
+
+    this.findModel = function () {
+
+        var target = this;
+        var model;
+
+        do
+        {
+            if (model = target.__model)
+            {
+                return model;
+            }
+        }
+        while (target = target.parent);
+    }
+
+
+    this.findSubmodel = function (submodel, model) {
+
+        if (model || (model = this.findModel()))
+        {
+            if (model = model.$findSubmodel(submodel))
+            {
+                if (model.__model_type === 2)
+                {
+                    return model;
+                }
+
+                throwBindError('submodel "' + submodel + '" not a array model!');
+            }
+        }
+        
+        throwBindError('can not find submodel "' + submodel + '"!');
+    }
+
+
+    function throwBindError(text) {
+
+        throw new Error('bind error: ' + text);
+    }
 
 
     // 设置绑定
     this.setBindings = function (model, bindings) {
 
-        if (model.__model_type === 1)
+        if (model || (model = this.findModel()))
         {
-            model.$bind(this, bindings);
-        }
-        else if (model.__model_type === 2)
-        {
-            throw 'bind error: require a model object, but input a array model!';
+            switch (model.__model_type)
+            {
+                case 1:
+                    model.$bind(this, bindings);
+                    break;
+
+                case 2:
+                    throwBindError('require a model object, but input a array model!');
+
+                default:
+                    throwBindError('not a model object');
+            }
         }
         else
         {
-            throw 'bind error: not a model object';
+            throwBindError('can not find a model object!');
         }
     }
 
@@ -1200,7 +1242,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             // 容器控件内部不允许绑定事件
             if (yaxi.__content_count > 0)
             {
-                throw 'register event error: no support event inside the content control!'
+                throw new Error('register event error: no support event inside the content control!');
             }
 
             for (var name in events)
@@ -1312,7 +1354,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__binding_push = this.currentModel = null;
+        this.parent = this.__model = 
+        this.__binding_push = this.__data_stack = null;
     }
 
 
@@ -1384,28 +1427,28 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if (!Class)
         {
-            throw message + 'type' + message2;
+            throw new Error(message + 'type' + message2);
         }
 
         if (!parent)
         {
-            throw message + 'parent' + message2;
+            throw new Error(message + 'parent' + message2);
         }
 
         if (check = Class.allowParent)
         {
             if (check !== true && !check(parent))
             {
-                throw message + Class.typeName + message1 + ' of ' + parent.typeName + '!';
+                throw new Error(message + Class.typeName + message1 + ' of ' + parent.typeName + '!');
             }
         }
         else if (check = Class.typeName)
         {
-            throw message + check + message1 + '!';
+            throw new Error(message + check + message1 + '!');
         }
         else
         {
-            throw message + JSON.stringify(Class).substring(0, 20) + '... not a valid type!';
+            throw new Error(message + JSON.stringify(Class).substring(0, 20) + '... not a valid type!');
         }
     }
 
@@ -1435,14 +1478,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
-                    throw 'create control error: "' + options[0] + '" doesn\'t register!';
+                    throw new Error('create control error: "' + options[0] + '" doesn\'t register!');
                 }
                 
                 check(Class, this);
 
                 control = new Class();
                 control.parent = this;
-                control.load(options, model);
+                control.__load(options, control.__model = model);
 
                 return control;
             }

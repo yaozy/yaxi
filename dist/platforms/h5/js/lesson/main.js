@@ -1,7 +1,5 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
-const lessonTemplate = require('./main-lesson-list.html');
-
 
 
 module.exports = yaxi.Box.extend(function (Class, base) {
@@ -10,13 +8,13 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     function render(data) {
 
-        this.find('>>@host').load(lessonTemplate.call(this, data));
+        this.find('>>@main-body').data = data;
     }
 
 
     this.init = function () {
 
-        this.load(template.call(this));
+        this.load(template(this));
         yaxi.http.get('lesson/list').json(render.bind(this));
     }
 

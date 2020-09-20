@@ -185,7 +185,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
                 while (fn = events[index++])
                 {
-                    if (fn.call(target, event) === false)
+                    if (fn.call(event.source = target, event) === false)
                     {
                         event.defaultPrevented = true;
                     }

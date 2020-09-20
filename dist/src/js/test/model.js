@@ -12,6 +12,12 @@ module.exports = yaxi.Page.extend(function (Class, base) {
         name: '',
         value: 0,
 
+        submodel: [
+            {
+                text: ''
+            }
+        ],
+
         computed: function () {
 
             return 'computed: ' + this.name + ' + ' + this.value;
@@ -24,7 +30,13 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     {
         arrayModel.push({
             name: 'name' + id++,
-            value: Math.random()
+            value: Math.random(),
+
+            submodel: [
+                { text: 'submodel text 1' },
+                { text: 'submodel text 2' },
+                { text: 'submodel text 3' },
+            ]
         })
     }
 
@@ -32,7 +44,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template.call(this), arrayModel);
+        this.load(template(this), arrayModel);
     }
 
 

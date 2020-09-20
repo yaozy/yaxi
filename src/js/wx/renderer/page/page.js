@@ -35,7 +35,7 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
             }
         }
 
-        throw 'can not find uuid ' + uuid + ' of page!';
+        throw new Error('can not find uuid ' + uuid + ' of page!');
     }
 
 

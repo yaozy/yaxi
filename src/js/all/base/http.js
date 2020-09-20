@@ -28,7 +28,8 @@ yaxi.http = Object.extend.call({}, function (Class) {
             }
             catch (e)
             {
-                stream.reject(e);
+                console.error(e);
+                stream.reject(url + '\n' + e);
             }
     
         }, 500);

@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (

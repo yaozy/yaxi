@@ -13,6 +13,10 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     this.$property('host', '', false);
 
 
+    // 页面充满模式
+    this.$property('full', true);
+
+
 
     // 获取或设置当前页索引
     this.$property('selectedIndex', -1, {
@@ -73,12 +77,12 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (!host)
             {
-                throw 'host of tab control not allow empty!'; 
+                throwError('host of tab control not allow empty!'); 
             }
 
             if (host[0] !== '<')
             {
-                throw 'host of tab control host must use "<" or "<<" to find up!';
+                throwError('host of tab control host must use "<" or "<<" to find up!');
             }
 
             if (host = this.find(host))
@@ -88,13 +92,19 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
                     return host;
                 }
 
-                throw 'host of must be a Box!';
+                throwError('tab control host of must be a Box!');
             }
 
-            throw 'tab control can not find host "' + this.host + '"!';
+            throwError('tab control can not find host "' + this.host + '"!');
         }
     });
 
+
+
+    function throwError(text) {
+
+        throw new Error(text);
+    }
 
 
     function initIndex(index) {
@@ -121,7 +131,14 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.backstage = true;
+                if (tab.full)
+                {
+                    item.backstage = true;
+                }
+                else
+                {
+                    item.hidden = true;
+                }
             }
 
             if (item = event.lastItem)
@@ -150,7 +167,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         {
             if (page = item.module)
             {
-                page = event.page = new page();
+                page = event.page = new page(item.data);
                 tab.selectedHost.children.push(page);
             }
             else
@@ -163,12 +180,22 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         {
             page.__tab = item.uuid;
 
-            page.position = 'absolute';
-            page.left = page.top = '0';
-            page.width = page.height = '100%';
+            if (tab.full)
+            {
+                page.position = 'absolute';
+                page.left = page.top = '0';
+                page.width = page.height = '100%';
+            }
         }
 
-        page.backstage = false;
+        if (tab.full)
+        {
+            page.backstage = false;
+        }
+        else
+        {
+            page.hidden = false;
+        }
     }
 
 

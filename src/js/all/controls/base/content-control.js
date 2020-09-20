@@ -72,7 +72,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
         if (typeof Class === 'string' && !(Class = classes[Class]))
         {
-            throw 'create control error: class "' + options[0] + '" doesn\'t register!';
+            throw new Error('create control error: class "' + options[0] + '" doesn\'t register!');
         }
 
         if (Class)
@@ -86,7 +86,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
         control = new Class();
         control.parent = parent;
-        control.load(options);
+        control.__load(options);
 
         return control;
     }

@@ -2,10 +2,6 @@ yaxi.ModelBox.mixin(function (mixin, base) {
 
 
 
-    yaxi.template(this, '<div class="$class"></div>');
-
-
-
     this.render = function () {
 
         var view = base.render.call(this);

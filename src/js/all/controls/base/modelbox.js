@@ -9,11 +9,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     var A = Array;
 
     
-    // 标记不能被继承
-    Class.sealed = true;
-
-
-    
     // 布局
     this.$property('layout', '', {
 
@@ -66,7 +61,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
     function no_children () {
 
-        throw 'ModelBox doesn\'t supports children, please use model and template!';
+        throw new Error('ModelBox doesn\'t supports children, please use model and template!');
     }
 
 
@@ -81,47 +76,42 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     var message = 'control load error: ';
 
 
-    this.load = function (values, model) {
+    this.__load = function (values, model) {
 
         var storage = this.$storage;
         var name;
 
         if (!model)
         {
-            throw message + 'modelbox control must bind a model!';
+            throw new Error(message + 'modelbox control must bind a model!');
         }
 
-        base.load.call(this, values, model);
+        base.__load.call(this, values, model);
         
         if (name = storage.submodel)
         {
-            model = model.$findSubmodel(name);
-
-            if (model.__model_type !== 2)
-            {
-                throw message + 'modelbox submodel "' + name + '" not a valid array model!';
-            }
+            model = this.findSubmodel(name, model);
         }
 
-        this.reload(model);
+        reload(this, model);
     }
 
 
-    this.reload = function (array) {
+    function reload(modelbox, array) {
 
         if (!array || array.__model_type !== 2)
         {
-            throw  message + 'modelbox control must bind a array model!';
+            throw new Error(message + 'modelbox control must bind a array model!');
         }
 
-        var template = this.template;
+        var template = modelbox.template;
 
         if (!template)
         {
-            throw message + 'modelbox control does not specify a template!';
+            throw new Error(message + 'modelbox control does not specify a template!');
         }
 
-        var children = this.__children;
+        var children = modelbox.__children;
         var old;
 
         if (children.length > 0)
@@ -129,22 +119,22 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             children.clear();
         }
 
-        if (old = this.__array_model)
+        if (old = modelbox.__array_model)
         {
             if (old !== array)
             {
-                unbind(this, old);
-                bind(this, array);
+                unbind(modelbox, old);
+                bind(modelbox, array);
             }
         }
         else
         {
-            bind(this, array);
+            bind(modelbox, array);
         }
 
         if (array.length > 0)
         {
-            children.__insert(-1, createControls(this, array, template));
+            children.__insert(-1, createControls(modelbox, array, template));
         }
     }
 
@@ -204,8 +194,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
                 for (var j = 0; j < template_length; j++)
                 {
                     control = parent.$createSubControl(template[j], model);
-                    control.currentModel = model;
-
                     list[index++] = control;
                 }
             }
@@ -219,8 +207,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
                 model = array[i];
 
                 control = parent.$createSubControl(template, model);
-                control.currentModel = model;
-
                 list[i] = control;
             }
         }
@@ -242,8 +228,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         if (template = this.template)
         {
             var control = this.$createSubControl(template, model);
-
-            control.currentModel = model;
             this.__children.set(index, control);
         }
     }
@@ -281,8 +265,8 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.currentModel.__index;
-        b = b.currentModel.__index;
+        a = a.__model.__index;
+        b = b.__model.__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }

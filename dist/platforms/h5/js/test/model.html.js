@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -32,7 +32,7 @@ return (
 									"flex": "auto",
 									"content": "Append",
 									"events": {
-										"tap": this.handleAppend.bind(this)
+										"tap": owner.handleAppend.bind(owner)
 									}
 								}
 							],
@@ -42,7 +42,7 @@ return (
 									"flex": "auto",
 									"content": "Replace",
 									"events": {
-										"tap": this.handleReplace.bind(this)
+										"tap": owner.handleReplace.bind(owner)
 									}
 								}
 							],
@@ -52,7 +52,7 @@ return (
 									"flex": "auto",
 									"content": "Remove",
 									"events": {
-										"tap": this.handleRemove.bind(this)
+										"tap": owner.handleRemove.bind(owner)
 									}
 								}
 							],
@@ -62,7 +62,7 @@ return (
 									"flex": "auto",
 									"content": "Reorder",
 									"events": {
-										"tap": this.handleReorder.bind(this)
+										"tap": owner.handleReorder.bind(owner)
 									}
 								}
 							]
@@ -71,13 +71,14 @@ return (
 					[
 						"modelbox",
 						{
-							"flex": "auto"
+							"flex": "auto",
+							"scope": ""
 						},
 						[
 							[
 								"box",
 								{
-									"height": "120rem"
+									"height": "200rem"
 								},
 								[
 									[
@@ -104,7 +105,7 @@ return (
 									[
 										"box",
 										{
-											"height": "100rem",
+											"height": "180rem",
 											"width": "700rem",
 											"position": "absolute",
 											"left": "70rem",
@@ -135,6 +136,25 @@ return (
 														"text": "$item.computed"
 													}
 												}
+											],
+											[
+												"modelbox",
+												{
+													"submodel": "$item.submodel",
+													"item": "$subitem",
+													"index": "$subindex",
+													"scope": "$item$index"
+												},
+												[
+													[
+														"text",
+														{
+															"bindings": {
+																"text":  function ($pipe) { return 'index:' + this.$parent.$index + '  subindex:' + this.$index + '  text:' + this.text }
+															}
+														}
+													]
+												]
 											]
 										]
 									]

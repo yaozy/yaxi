@@ -244,7 +244,7 @@
         {
             if (name[0] === '$' || name[0] === '_' && name[1] === '_')
             {
-                throw 'define model error: model field can not use "$" or "__" to start!';
+                throw new Error('define model error: model field can not use "$" or "__" to begin!');
             }
 
             if (options = properties[name])
@@ -299,17 +299,17 @@
 
         if (!properties || typeof properties !== 'object')
         {
-            throw message + 'the first item of sub array model must be a none empty object!'
+            throw new Error(message + 'the first item of sub array model must be a none empty object!');
         }
 
         if (itemName != null && typeof itemName !== 'string')
         {
-            throw message + 'the second item for sub array model must be a string or null!';
+            throw new Error(message + 'the second item for sub array model must be a string or null!');
         }
 
         if (itemIndex != null && typeof itemIndex !== 'string')
         {
-            throw message + 'the third item for sub array model must be a string or null!';
+            throw new Error(message + 'the third item for sub array model must be a string or null!');
         }
 
         return yaxi.arrayModel(properties, itemName, itemIndex);
@@ -493,7 +493,7 @@
             case '$index':
                 if (!binding || last > 0)
                 {
-                    throw 'bind error: $index is a model index field, not a model!';
+                    throw new Error('bind error: $index is a model index field, not a model!');
                 }
 
                 if (binding)
@@ -518,7 +518,7 @@
 
                     if (!model)
                     {
-                        throw findModelThrow(rule, '"' + path.substring(0, index) + '" not exists!');
+                        findModelThrow(rule, '"' + path.substring(0, index) + '" not exists!');
                     }
                 }
                 while ((name = path[++index]) && name === '$parent');
@@ -568,7 +568,7 @@
 
     function findModelThrow(rule, text) {
 
-        throw 'bind error: "' + rule.bind + '" is invalid, ' + text;
+        throw new Error('bind error: "' + rule.bind + '" is invalid, ' + text);
     }
 
 
@@ -611,7 +611,7 @@
                         }
                         else
                         {
-                            throw 'bind error: binding expression "' + expression + '" is invalid!';
+                            throw new Error('bind error: binding expression "' + expression + '" is invalid!');
                         }
                     }
                     else // 表达式绑定

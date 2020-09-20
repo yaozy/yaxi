@@ -1,6 +1,7 @@
-module.exports = 
-{
-	hot: {
+module.exports = [
+	
+	{
+		id: 'hot',
 		icon: 'home-hot',
 		text: '热门课程',
 		data: [
@@ -27,8 +28,8 @@ module.exports =
 			}
 		]
 	},
-	live: 
 	{
+		id: 'live',
 		icon: 'home-live',
 		text: '直播课程',
 		data: [
@@ -55,7 +56,8 @@ module.exports =
 			}
 		]
 	},
-	my: {
+	{
+		id: 'my',
 		icon: 'home-my',
 		text: '我的课程',
 		data: [
@@ -75,4 +77,4 @@ module.exports =
 			}
 		]
 	}
-}
+]

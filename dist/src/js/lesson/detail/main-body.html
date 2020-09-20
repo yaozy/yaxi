@@ -1,0 +1,70 @@
+<box layout="column" flex="auto" theme="bg-level2">
+    <box flex="auto">
+        <image d-src="image" width="100%" height="400rem" />
+        <box padding="0 20rem" theme="level1">
+            <box layout="row space-between" height="80rem" line-height="80rem">
+                <text d-text="name" font-size="36rem" />
+                <text d-text="'￥' + price" theme="primary" align-self="flex-end" />
+            </box>
+            <box layout="row space-between" theme="level1" height="80rem" font-size="28rem" border-bottom=".5px solid @border-level4">
+                <box layout="row middle">
+                    <icon icon="common-search" />
+                    <text theme="level3" margin-right="10rem">学习人数</text>
+                    <text theme="second" d-text="study" />
+                </box>
+                <box layout="row middle">
+                    <icon icon="common-search" />
+                    <text theme="level3" margin-right="10rem">浏览量</text>
+                    <text theme="second" d-text="browse" />
+                </box>
+                <box layout="row middle">
+                    <icon icon="common-search" />
+                    <text theme="level3" margin-right="10rem">分享次数</text>
+                    <text theme="second" d-text="share" />
+                </box>
+            </box>
+            <box>
+                <text d-text="activity" margin="20rem 0" />
+            </box>
+        </box>
+        <tab 
+            host="<* >@host" 
+            full="false"
+            selected-index="0" 
+            height="80rem" 
+            line-height="80rem" 
+            theme="level1"
+            margin-top="10rem"
+            border-bottom=".5px solid @border-level4"
+            text-align="center">
+            <text 
+                flex="auto" 
+                d-module="require('./info')" 
+                d-data="$data"
+                d-selected-status="selectedStatus">详情</text>
+            <text 
+                flex="auto" 
+                d-module="require('./section')" 
+                d-data="$data"
+                d-selected-status="selectedStatus">章节</text>
+            <text 
+                flex="auto" 
+                d-module="require('./test-paper')" 
+                d-data="$data"
+                d-selected-status="selectedStatus">试卷</text>
+            <text 
+                flex="auto" 
+                d-module="require('./comment')" 
+                d-data="$data"
+                d-selected-status="selectedStatus">评论</text>
+            <text 
+                flex="auto" 
+                d-module="require('./recommend')" 
+                d-data="$data"
+                d-selected-status="selectedStatus">推荐</text>
+        </tab>
+        <box key="host">
+        </box>
+    </box>
+    <button>报名学习</button>
+</box>

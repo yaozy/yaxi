@@ -228,7 +228,7 @@ yaxi.Control.extend(function (Class, base) {
 
         if (!data || !data.content)
         {
-            throw 'actionsheet must input a object and content not allow empty!'
+            throw new Error('actionsheet must input a object and content not allow empty!');
         }
 
         if (data.cancel === void 0)

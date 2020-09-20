@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -19,7 +19,7 @@ return (
 						"hidden": "hidden"
 					},
 					"events": {
-						"tap": this.handleClose.bind(this)
+						"tap": owner.handleClose.bind(owner)
 					}
 				}
 			],
@@ -33,7 +33,7 @@ return (
 					"text-align": "center",
 					"border-bottom": ".5px solid @border-level4",
 					"events": {
-						"tap": this.handleSwitch.bind(this)
+						"tap": owner.handleSwitch.bind(owner)
 					}
 				},
 				[
@@ -91,8 +91,9 @@ return (
 						"modelbox",
 						{
 							"submodel": "sort.data",
+							"scope": "",
 							"events": {
-								"tap": this.handleSort.bind(this)
+								"tap": owner.handleSort.bind(owner)
 							}
 						},
 						[
@@ -151,8 +152,9 @@ return (
 							"submodel": "category.level1s",
 							"theme": "bg-level3",
 							"width": "25%",
+							"scope": "",
 							"events": {
-								"tap": this.handleCategoryLevel1.bind(this)
+								"tap": owner.handleCategoryLevel1.bind(owner)
 							}
 						},
 						[
@@ -179,8 +181,9 @@ return (
 							"submodel": "category.level2s",
 							"theme": "bg-level2",
 							"width": "35%",
+							"scope": "",
 							"events": {
-								"tap": this.handleCategoryLevel2.bind(this)
+								"tap": owner.handleCategoryLevel2.bind(owner)
 							}
 						},
 						[
@@ -205,8 +208,9 @@ return (
 						{
 							"submodel": "category.level3s",
 							"width": "40%",
+							"scope": "",
 							"events": {
-								"tap": this.handleCategoryLevel3.bind(this)
+								"tap": owner.handleCategoryLevel3.bind(owner)
 							}
 						},
 						[
@@ -250,7 +254,8 @@ return (
 								"modelbox",
 								{
 									"submodel": "filter.data",
-									"border-top": ".5px solid @border-level4"
+									"border-top": ".5px solid @border-level4",
+									"scope": ""
 								},
 								[
 									[
@@ -277,11 +282,12 @@ return (
 											"submodel": "$item.data",
 											"padding-left": "20rem",
 											"tag": "filter",
+											"scope": "$item$index",
 											"bindings": {
 												"key": "$index"
 											},
 											"events": {
-												"tap": this.handleChangeFilter.bind(this)
+												"tap": owner.handleChangeFilter.bind(owner)
 											}
 										},
 										[
@@ -322,7 +328,7 @@ return (
 									"theme": "primary",
 									"padding": "0 30rem",
 									"events": {
-										"tap": this.handleClearFilter.bind(this)
+										"tap": owner.handleClearFilter.bind(owner)
 									}
 								},
 								"清空筛选"
@@ -336,7 +342,7 @@ return (
 									"top": "10rem",
 									"right": "30rem",
 									"events": {
-										"tap": this.handleFilter.bind(this)
+										"tap": owner.handleFilter.bind(owner)
 									}
 								},
 								"确定"

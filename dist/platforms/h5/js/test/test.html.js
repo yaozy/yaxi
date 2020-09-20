@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -34,7 +34,7 @@ return (
 						{
 							"content": "append",
 							"events": {
-								"tap": this.handleAppend.bind(this)
+								"tap": owner.handleAppend.bind(owner)
 							}
 						}
 					],
@@ -44,7 +44,7 @@ return (
 							"content": "remove last",
 							"margin-top": "10rem",
 							"events": {
-								"tap": this.handleRemove.bind(this)
+								"tap": owner.handleRemove.bind(owner)
 							}
 						}
 					]

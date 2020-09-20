@@ -1,11 +1,13 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
 	[
 		"box",
 		{
-			"layout": "column"
+			"layout": "column",
+			"flex": "auto",
+			"theme": "bg-level2"
 		},
 		[
 			[
@@ -25,13 +27,14 @@ return (
 					[
 						"box",
 						{
-							"padding": "0 20rem"
+							"padding": "0 20rem",
+							"theme": "level1"
 						},
 						[
 							[
 								"box",
 								{
-									"layout": "row",
+									"layout": "row space-between",
 									"height": "80rem",
 									"line-height": "80rem"
 								},
@@ -171,44 +174,63 @@ return (
 						"tab",
 						{
 							"host": "<* >@host",
+							"full": "false",
 							"selected-index": "0",
-							"height": "60rem",
-							"line-height": "60rem",
+							"height": "80rem",
+							"line-height": "80rem",
+							"theme": "level1",
+							"margin-top": "10rem",
+							"border-bottom": ".5px solid @border-level4",
 							"text-align": "center"
 						},
 						[
 							[
 								"text",
 								{
-									"flex": "auto"
+									"flex": "auto",
+									"module": require('./info'),
+									"data": data,
+									"selected-status": data.selectedStatus
 								},
 								"详情"
 							],
 							[
 								"text",
 								{
-									"flex": "auto"
+									"flex": "auto",
+									"module": require('./section'),
+									"data": data,
+									"selected-status": data.selectedStatus
 								},
 								"章节"
 							],
 							[
 								"text",
 								{
-									"flex": "auto"
+									"flex": "auto",
+									"module": require('./test-paper'),
+									"data": data,
+									"selected-status": data.selectedStatus
 								},
 								"试卷"
 							],
 							[
 								"text",
 								{
-									"flex": "auto"
+									"flex": "auto",
+									"module": require('./comment'),
+									"data": data,
+									"selected-status": data.selectedStatus
 								},
 								"评论"
 							],
 							[
 								"text",
 								{
-									"flex": "auto"
+									"flex": "auto",
+									"module": require('./recommend'),
+									"data": data,
+									"selected-status": data.selectedStatus
 								},
 								"推荐"
 							]

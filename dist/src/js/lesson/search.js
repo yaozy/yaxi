@@ -9,12 +9,6 @@ module.exports = yaxi.Box.extend(function () {
 
         last: '',
         text: '',
-        data: [
-            {
-                before: '',
-                after: ''
-            }
-        ],
 
         hidden: true,
 
@@ -26,9 +20,12 @@ module.exports = yaxi.Box.extend(function () {
     }))();
 
 
+    var data;
+
+
     this.init = function (size) {
 
-        this.load(template.call(this, {
+        this.load(template(this, {
 
             size: size || '100%'
 
@@ -41,13 +38,13 @@ module.exports = yaxi.Box.extend(function () {
 
 
 
-    function loadData(value, max) {
+    function loadData(search, value) {
 
-        var data = [];
+        var list = data = [];
 
-        for (var i = 1; i <= max; i++)
+        for (var i = 1, l = search.max || 8; i <= l; i++)
         {
-            data.push({
+            list.push({
                 before: '课程',
                 after: '章节' + i
             });
@@ -55,13 +52,14 @@ module.exports = yaxi.Box.extend(function () {
 
         model.hidden = !value;
         model.text = value;
-        model.data = data;
+
+        search.find('>>@search-body').data = list;
     }
 
 
     this.handleInput = function (event) {
 
-        loadData(event.value, this.max || 8);
+        loadData(this, event.value);
     }
 
 
@@ -81,7 +79,7 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleFocus = function () {
 
-        loadData(model.text, this.max || 8);
+        loadData(this, model.text);
     }
 
 
@@ -105,18 +103,11 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleSuggest = function (event) {
 
-        var target = event.target;
-        var submodel;
+        var item = +event.source.tag;
 
-        while (target)
+        if (item >= 0 && (item = data[item]))
         {
-            if (submodel = target.currentModel)
-            {
-                raiseEvent(this, submodel.before + model.text + submodel.after);
-                break;
-            }
-
-            target = target.parent;
+            raiseEvent(this, item.before + model.text + item.after);
         }
     }
 

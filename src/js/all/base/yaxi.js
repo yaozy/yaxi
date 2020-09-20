@@ -46,7 +46,7 @@ Object.extend = function (fn, Class) {
 
     if (base && this.sealed)
     {
-        throw this.typeName + ' is sealed, can not be extended!';
+        throw new Error(this.typeName + ' is sealed, can not be extended!');
     }
 
     if (Class)

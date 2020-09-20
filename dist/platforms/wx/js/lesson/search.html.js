@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -18,7 +18,7 @@ return (
 						"hidden": "hidden"
 					},
 					"events": {
-						"tap": this.handleClear.bind(this)
+						"tap": owner.handleClear.bind(owner)
 					}
 				}
 			],
@@ -48,8 +48,8 @@ return (
 								"value": "text"
 							},
 							"events": {
-								"input": this.handleInput.bind(this),
-								"focus": this.handleFocus.bind(this)
+								"input": owner.handleInput.bind(owner),
+								"focus": owner.handleFocus.bind(owner)
 							}
 						}
 					],
@@ -77,7 +77,7 @@ return (
 								"hidden": "hidden"
 							},
 							"events": {
-								"tap": this.handleClear.bind(this)
+								"tap": owner.handleClear.bind(owner)
 							}
 						},
 						"清除"
@@ -101,7 +101,7 @@ return (
 							"line-height": "80rem",
 							"padding": "0 20rem",
 							"events": {
-								"tap": this.handleSearch.bind(this)
+								"tap": owner.handleSearch.bind(owner)
 							}
 						},
 						[
@@ -131,7 +131,7 @@ return (
 									"theme": "font-level4",
 									"margin-left": "50rem",
 									"events": {
-										"tap": this.handleCancel.bind(this)
+										"tap": owner.handleCancel.bind(owner)
 									}
 								},
 								"取消搜索"
@@ -139,52 +139,63 @@ return (
 						]
 					],
 					[
-						"modelbox",
+						"databox",
 						{
-							"submodel": "data",
+							"key": "search-body",
+							"scope": "",
 							"events": {
-								"tap": this.handleSuggest.bind(this)
+								"tap": owner.handleSuggest.bind(owner)
 							}
 						},
-						[
-							[
-								"box",
-								{
-									"layout": "row",
-									"height": "80rem",
-									"line-height": "80rem",
-									"border-top": ".5px solid @border-level4",
-									"padding": "0 20rem"
-								},
-								[
+						function (controls, __loop_data, __loop_scope) {
+
+
+						    for (var $index = 0, __loop_len = __loop_data.length; $index < __loop_len; $index++)
+						    {
+						        var $item = __loop_data[$index];
+
+						        this.loadTemplate(controls, __loop_scope, $index, $item,
 									[
-										"text",
-										{
-											"bindings": {
-												"text": "$item.before"
-											}
-										}
-									],
-									[
-										"text",
-										{
-											"theme": "font-primary",
-											"bindings": {
-												"text": "$top.text"
-											}
-										}
-									],
-									[
-										"text",
-										{
-											"bindings": {
-												"text": "$item.after"
-											}
-										}
+										[
+											"box",
+											{
+												"tag": $index,
+												"layout": "row",
+												"height": "80rem",
+												"line-height": "80rem",
+												"border-top": ".5px solid @border-level4",
+												"padding": "0 20rem"
+											},
+											[
+												[
+													"text",
+													{
+														"text": $item.before
+													}
+												],
+												[
+													"text",
+													{
+														"theme": "font-primary",
+														"bindings": {
+															"text": "text"
+														}
+													}
+												],
+												[
+													"text",
+													{
+														"text": $item.after
+													}
+												]
+											]
+										]
 									]
-								]
-							]
-						]
+								);
+						    }
+
+						    // end function
+						}
 					]
 				]
 			]

@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -6,7 +6,7 @@ return (
 		"page",
 		{
 			"events": {
-				"tap": this.handleTap.bind(this)
+				"tap": owner.handleTap.bind(owner)
 			}
 		},
 		[

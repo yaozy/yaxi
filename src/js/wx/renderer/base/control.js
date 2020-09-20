@@ -4,19 +4,14 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
     var create = Object.create;
 
-
-    // 此方法不会复制原型上的成员
-    var assign = Object.assign;
-
-
     var own = Object.getOwnPropertyNames; 
 
 
 
 
-    function renderStyle(style) {
+    function renderStyle(control, style, outputs) {
 
-        var list = [];
+        var storage = control.$storage;
         var names = own(style);
         var index = 0;
         var name, value;
@@ -25,28 +20,94 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         {
             if (value = style[name])
             {
-                list.push(name, ':', value.replace(/rem/g, 'rpx'), ';');
+                // 把默认的rem改成rpx, 系统规定1rem = 1rpx
+                outputs.push(name, ':', value.replace(/rem/g, 'rpx'), ';');
             }
+
+            storage[name] = value;
         }
 
-        return list.join('');
+        return outputs;
     }
+
+
+    function renderStorage(control, view, style) {
+        
+        var mixin = control.$mixin;
+        var storage = control.$storage;
+        var converts = control.$converts;
+        var names = own(storage);
+        var index = 0;
+        var convert, name, fn;
+
+        while (name = names[index++])
+        {
+            if (convert = converts[name])
+            {
+                if (convert.style)
+                {
+                    style.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
+                }
+                else if (convert.change) // 配置了处理变更的属性才处理
+                {
+                    if (fn = mixin[name])
+                    {
+                        fn.call(control, view, '', storage[name]);
+                    }
+                    else if (fn !== false) // 自定义渲染为false不做任何处理
+                    {
+                        view[name] = storage[name];
+                    }
+                }
+            }
+        }
+    }
+
+
+    function renderChanges(control, changes, view, prefix) {
+
+        var mixin = control.$mixin;
+        var storage = control.$storage;
+        var names = own(changes);
+        var index = 0;
+        var name, value, fn;
+
+        while (name = names[index++])
+        {
+            value = storage[name] = changes[name];
+
+            if (fn = mixin[name])
+            {
+                fn.call(control, view, prefix, value);
+            }
+            else if (fn !== false) // 自定义渲染为false不做任何处理
+            {
+                view[prefix + name] = value;
+            }
+        }
+    }
+
 
 
     // 全局渲染
     this.render = function () {
 
-        var mixin = this.$mixin;
-        var storage = this.$storage;
-        var converts = this.$converts;
         var view = create(null);
-        var index = 0;
-        var names, name, value, fn;
+        var style = [];
+        var values;
 
         this.__dirty = false;
 
         view.t = this.typeName;
         view.u = this.uuid;
+
+        if (values = this.__style)
+        {
+            renderStyle(this, values, style);
+            this.__style = null;
+        }
+
+        renderStorage(this, view, style);
 
         if (this.__class_dirty)
         {
@@ -54,37 +115,18 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, '');
         }
 
-        if (value = this.__style)
+        if (values = this.__changes)
         {
-            view.s = renderStyle(value);
-            this.__style = null;
-        }
-
-        if (value = this.__changes)
-        {
-            assign(storage, value);
+            renderChanges(this, values, view, '');
+            
+            mixin.onchange.call(this, view, '');    
             this.__changes = null;
         }
 
-        names = own(storage);
-
-        while (name = names[index++])
+        if (style.length > 0)
         {
-            // 配置了处理变更的属性才处理
-            if ((value = converts[name]) && value.change)
-            {
-                if (fn = mixin[name])
-                {
-                    fn.call(this, view, '', storage[name]);
-                }
-                else if (fn !== false) // 自定义渲染为false不做任何处理
-                {
-                    view[name] = storage[name];
-                }
-            }
+            view.s = style.join('');
         }
-
-        mixin.onrender.call(this, view, '');
 
         return view;
     }
@@ -115,7 +157,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     // 增量渲染
     this.patch = function (view, prefix) {
 
-        var changes;
+        var values;
 
         this.__dirty = false;
 
@@ -127,36 +169,17 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             this.__render_class(view, prefix);
         }
 
-        if (value = this.__style)
+        if (values = this.__style)
         {
-            view.s = renderStyle(value);
+            view.s = renderStyle(this, values, []).join('');
             this.__style = null;
         }
 
-        if (changes = this.__changes)
+        if (values = this.__changes)
         {
-            var storage = this.$storage;
-            var mixin = this.$mixin;
-            var names = own(changes);
-            var index = 0;
-            var name, value, fn;
+            renderChanges(this, values, view, prefix);
 
-            while (name = names[index++])
-            {
-                value = storage[name] = changes[name];
-
-                if (fn = mixin[name])
-                {
-                    fn.call(this, view, prefix, value);
-                }
-                else if (fn !== false) // 自定义渲染为false不做任何处理
-                {
-                    view[prefix + name] = value;
-                }
-            }
-
-            mixin.onrender.call(this, view, prefix);
-            
+            mixin.onchange.call(this, view, prefix);
             this.__changes = null;
         }
     }
@@ -263,16 +286,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-
-    // mixin.style = function (view, prefix, value) {
-
-    //     // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-    //     view[prefix + 'style'] = value ? value.replace(/rem/g, 'rpx') : '';
-    // }
-
-
-
-    mixin.onrender = function (view, prefix) {
+    mixin.onchange = function (view, prefix) {
     }
 
     

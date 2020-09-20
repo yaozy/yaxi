@@ -1,4 +1,4 @@
-module.exports = function (data) {
+module.exports = function (owner, data) {
 
 
 return (
@@ -128,7 +128,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": this.openTest.bind(this)
+								"tap": owner.openTest.bind(owner)
 							}
 						},
 						"Open Test"

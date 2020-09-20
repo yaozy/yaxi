@@ -113,7 +113,7 @@
                 }
                 else
                 {
-                    throw this.statusText;
+                    throw new Error(url + '\n' + this.statusText);
                 }
                 
                 this.onreadystatechange = null;
@@ -154,6 +154,7 @@
                 if (typeof console !== 'undefined')
                 {
                     console.error(url);
+                    console.error(e);
                 }
 
                 throw e;
@@ -333,7 +334,7 @@ jiac.Thread = (function () {
                     }
                     else
                     {
-                        throw this.statusText;
+                        throw new Error(url + '\n' + this.statusText);
                     }
                     
                     this.onreadystatechange = null;
@@ -404,6 +405,7 @@ jiac.Thread = (function () {
                 {
                     if (typeof console !== 'undefined')
                     {
+                        console.error(e.message || e);
                         console.error(url);
                     }
     

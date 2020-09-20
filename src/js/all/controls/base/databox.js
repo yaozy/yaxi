@@ -1,17 +1,9 @@
 /*
  * DataBox是一个通过数据集合(data)和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
- * 对于只读渲染比ModelBox具有更好的性能
+ * 不支持对子项进行修改, 对于不需要修改子项的渲染比ModelBox具有更好的性能
 */
-yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
-
-
-
-    var A = Array;
-
-    
-    // 标记不能被继承
-    Class.sealed = true;
+yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
     
@@ -40,11 +32,15 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             }
             else
             {
-                throw 'the template of databox must be a required template or a function!';
+                throw new Error('the template of databox must be a required template or a function!');
             }
         }
     });
 
+
+
+    // 子模型名称
+    this.$property('submodel', '', false);
 
 
     // 数据集合
@@ -57,17 +53,35 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             return this.__data || null;
         },
 
-        set: function () {
+        set: function (value) {
 
-            if (value && value instanceof A && value.length > 0)
+            if (value && value.length > 0)
             {
-                loadData(this, this.__data = value);
+                this.__data = value;
+
+                if (this.__template)
+                {
+                    loadData(this, value);
+                }
             }
             else
             {
                 this.__data = null;
                 this.__children.clear();
             }
+        }
+    });
+
+    
+
+    this.$property('scope', '', {
+
+        change: false,
+
+        convert: function (value) {
+
+            value = '' + value;
+            this.__scope = value ? value.split(',') : null;
         }
     });
 
@@ -81,44 +95,110 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     });
 
 
-
     function no_children () {
 
-        throw 'DataBox doesn\'t supports children, please use data and template!';
+        throw new Error('DataBox doesn\'t supports children, please use data and template!');
     }
 
 
 
     this.__load_content = function (value) {
 
-        this.template = value;
+        var data;
+
+        if (this.template = value)
+        {
+            if (data = this.__data)
+            {
+                loadData(this, data);
+            }
+            else if ((data = this.submodel) && (data = this.findSubmodel(data)))
+            {
+                loadData(this, data);
+            }
+        }
     }
 
 
 
-    var message = 'control load error: ';
+    // 当前作用域
+    var scopeStack = null;
 
+
+
+    this.loadTemplate = function (controls, scope, item, index, template) {
+
+        var length = template.length;
+
+        if (length > 0)
+        {
+            try
+            {
+                scopeStack = scope = scope.concat(item, index);
+
+                for (var i = length; i--;)
+                {
+                    var item = template[i];
+                    var attributes = item[1];
+    
+                    if (attributes)
+                    {
+                        attributes.__data_stack = scope;
+                    }
+                    else
+                    {
+                        item[1] = { __data_stack: scope };
+                    }
+    
+                    controls.push(this.$createSubControl(item));
+                }
+            }
+            finally
+            {
+                scopeStack = scope;
+            }
+        }
+    }
 
 
     function loadData(databox, data) {
 
         var template = databox.__template;
-
+ 
         if (!template)
         {
-            throw message + 'databox control does not specify a template!';
+            throw new Error('control load error: databox control does not specify a template!');
         }
 
-        var children = this.__children;
+        var children = databox.__children;
+        var controls = [];
 
         if (children.length > 0)
         {
             children.clear();
         }
 
-        this.load(template.call(this, data));
+        template.call(databox, controls, data, scopeStack || initScopeStack(databox));
+        children.push.apply(children, controls);
     }
 
+
+    function initScopeStack(control) {
+
+        var stack;
+
+        while (control)
+        {
+            if (stack = control.__data_stack)
+            {
+                return scopeStack = stack;
+            }
+
+            control = control.parent;
+        }
+
+        return scopeStack = [];
+    }
 
 
     // 扩展查询实现
@@ -127,7 +207,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-}, function ModelBox() {
+}, function DataBox() {
 
     var init;
     
@@ -139,4 +219,4 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         init.apply(this, arguments);
     }
 
-}).register('ModelBox');
+}).register('DataBox');

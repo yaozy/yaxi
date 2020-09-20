@@ -66,7 +66,7 @@
                 }
                 else
                 {
-                    throw 'compile pipe error: not exist pipe function "' + list[0] + '"!';
+                    throw new Error('compile pipe error: not exist pipe function "' + list[0] + '"!');
                 }
             }
         }

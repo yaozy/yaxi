@@ -45,7 +45,7 @@ yaxi.impl.property = function (target) {
 
         if (/[^\w-]/.test(name))
         {
-            throw 'define property error: "' + name + '" not a valid property name!'; 
+            throw new Error('define property error: "' + name + '" not a valid property name!'); 
         }
 
         var converts = this.$converts;
@@ -69,7 +69,7 @@ yaxi.impl.property = function (target) {
             options.set || (options.set = function () {
 
                 var type = this.typeName;
-                throw 'property "' + name + '"' + (type ? ' of ' + type : '') + ' is readonly!';
+                throw new Error('property "' + name + '"' + (type ? ' of ' + type : '') + ' is readonly!');
             });
         }
         else

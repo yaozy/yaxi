@@ -39,7 +39,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             }
             else
             {
-                throw 'the length of collection is readonly!';
+                throw new Error('the length of collection is readonly!');
             }
         }
     });

@@ -76,7 +76,7 @@ yaxi.Control.mixin(function (mixin) {
 
         if (values = this.__style)
         {
-            style(view, values);
+            style(this.$storage, view, values);
             this.__style = null;
         }
 
@@ -186,15 +186,16 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    function style(view, style) {
+    function style(storage, view, values) {
 
-        var names = own(style);
+        var style = view.style;
+        var names = own(values);
         var index = 0;
         var name;
 
         while (name = names[index++])
         {
-            view.style[name] = style[name];
+            style[name] = storage[name] = values[name];
         }
     }
 
@@ -210,12 +211,6 @@ yaxi.Control.mixin(function (mixin) {
         view.className = this.$class + class1 + class2 + (this.__active ? ' active' : '');
     }
 
-
-
-    mixin.style = function (view, value) {
-
-        view.style.cssText = value;
-    }
 
 
     mixin.id = function (view, value) {
