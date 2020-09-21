@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\search.html")
 
 return (
 	[
@@ -15,10 +16,10 @@ return (
 				"masklayer",
 				{
 					"bindings": {
-						"hidden": "hidden"
+						"hidden":  function ($pipe) { return $model.hidden }
 					},
 					"events": {
-						"tap": owner.handleClear.bind(owner)
+						"tap": $owner.handleClear.bind($owner)
 					}
 				}
 			],
@@ -45,11 +46,11 @@ return (
 							"border-radius": "60rem",
 							"padding": "0 120rem 0 60rem",
 							"bindings": {
-								"value": "text"
+								"value":  function ($pipe) { return $model.text }
 							},
 							"events": {
-								"input": owner.handleInput.bind(owner),
-								"focus": owner.handleFocus.bind(owner)
+								"input": $owner.handleInput.bind($owner),
+								"focus": $owner.handleFocus.bind($owner)
 							}
 						}
 					],
@@ -74,10 +75,10 @@ return (
 							"right": "20rem",
 							"text-align": "center",
 							"bindings": {
-								"hidden": "hidden"
+								"hidden":  function ($pipe) { return $model.hidden }
 							},
 							"events": {
-								"tap": owner.handleClear.bind(owner)
+								"tap": $owner.handleClear.bind($owner)
 							}
 						},
 						"清除"
@@ -89,7 +90,7 @@ return (
 				{
 					"theme": "level1",
 					"bindings": {
-						"hidden": "hidden"
+						"hidden":  function ($pipe) { return $model.hidden }
 					}
 				},
 				[
@@ -101,7 +102,7 @@ return (
 							"line-height": "80rem",
 							"padding": "0 20rem",
 							"events": {
-								"tap": owner.handleSearch.bind(owner)
+								"tap": $owner.handleSearch.bind($owner)
 							}
 						},
 						[
@@ -121,7 +122,7 @@ return (
 								{
 									"theme": "font-primary",
 									"bindings": {
-										"text": "text"
+										"text":  function ($pipe) { return $model.text }
 									}
 								}
 							],
@@ -131,7 +132,7 @@ return (
 									"theme": "font-level4",
 									"margin-left": "50rem",
 									"events": {
-										"tap": owner.handleCancel.bind(owner)
+										"tap": $owner.handleCancel.bind($owner)
 									}
 								},
 								"取消搜索"
@@ -142,59 +143,55 @@ return (
 						"databox",
 						{
 							"key": "search-body",
-							"scope": "",
 							"events": {
-								"tap": owner.handleSuggest.bind(owner)
+								"tap": $owner.handleSuggest.bind($owner)
 							}
 						},
-						function (controls, __loop_data, __loop_scope) {
+						function (template, __data_list, __data_scope) {
 
+							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							{
+								var $item = __data_list[$index];
 
-						    for (var $index = 0, __loop_len = __loop_data.length; $index < __loop_len; $index++)
-						    {
-						        var $item = __loop_data[$index];
-
-						        this.loadTemplate(controls, __loop_scope, $index, $item,
+								template($index, $item,
 									[
+										"box",
+										{
+											"tag": $index,
+											"layout": "row",
+											"height": "80rem",
+											"line:height": "80rem",
+											"border-top": ".5px solid @border-level4",
+											"padding": "0 20rem"
+										},
 										[
-											"box",
-											{
-												"tag": $index,
-												"layout": "row",
-												"height": "80rem",
-												"line-height": "80rem",
-												"border-top": ".5px solid @border-level4",
-												"padding": "0 20rem"
-											},
 											[
-												[
-													"text",
-													{
-														"text": $item.before
+												"text",
+												{
+													"text": $item.before
+												}
+											],
+											[
+												"text",
+												{
+													"theme": "font-primary",
+													"bindings": {
+														"text":  function ($pipe) { return $model.text }
 													}
-												],
-												[
-													"text",
-													{
-														"theme": "font-primary",
-														"bindings": {
-															"text": "text"
-														}
-													}
-												],
-												[
-													"text",
-													{
-														"text": $item.after
-													}
-												]
+												}
+											],
+											[
+												"text",
+												{
+													"text": $item.after
+												}
 											]
 										]
 									]
 								);
-						    }
+							}
 
-						    // end function
+							// end function
 						}
 					]
 				]

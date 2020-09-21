@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\test\\model.html")
 
 return (
 	[
@@ -32,7 +33,7 @@ return (
 									"flex": "auto",
 									"content": "Append",
 									"events": {
-										"tap": owner.handleAppend.bind(owner)
+										"tap": $owner.handleAppend.bind($owner)
 									}
 								}
 							],
@@ -42,7 +43,7 @@ return (
 									"flex": "auto",
 									"content": "Replace",
 									"events": {
-										"tap": owner.handleReplace.bind(owner)
+										"tap": $owner.handleReplace.bind($owner)
 									}
 								}
 							],
@@ -52,7 +53,7 @@ return (
 									"flex": "auto",
 									"content": "Remove",
 									"events": {
-										"tap": owner.handleRemove.bind(owner)
+										"tap": $owner.handleRemove.bind($owner)
 									}
 								}
 							],
@@ -62,105 +63,129 @@ return (
 									"flex": "auto",
 									"content": "Reorder",
 									"events": {
-										"tap": owner.handleReorder.bind(owner)
+										"tap": $owner.handleReorder.bind($owner)
 									}
 								}
 							]
 						]
 					],
 					[
-						"modelbox",
+						"databox",
 						{
-							"flex": "auto",
-							"scope": ""
+							"type": "model",
+							"data": $model,
+							"flex": "auto"
 						},
-						[
-							[
-								"box",
-								{
-									"height": "200rem"
-								},
-								[
+						function (template, __data_list, __data_scope) {
+
+							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							{
+								var $item = __data_list[$index];
+
+								template($index, $item,
 									[
 										"box",
 										{
-											"width": "50rem",
-											"height": "120rem",
-											"line-height": "120rem",
-											"position": "absolute",
-											"top": "0",
-											"left": "20rem"
+											"height": "200rem"
 										},
 										[
 											[
-												"text",
+												"box",
 												{
-													"bindings": {
-														"text": "$index"
-													}
-												}
-											]
-										]
-									],
-									[
-										"box",
-										{
-											"height": "180rem",
-											"width": "700rem",
-											"position": "absolute",
-											"left": "70rem",
-											"top": "20rem"
-										},
-										[
-											[
-												"text",
-												{
-													"width": "200rem",
-													"bindings": {
-														"text": "$item.name"
-													}
-												}
-											],
-											[
-												"text",
-												{
-													"bindings": {
-														"text": "$item.value"
-													}
-												}
-											],
-											[
-												"text",
-												{
-													"bindings": {
-														"text": "$item.computed"
-													}
-												}
-											],
-											[
-												"modelbox",
-												{
-													"submodel": "$item.submodel",
-													"item": "$subitem",
-													"index": "$subindex",
-													"scope": "$item$index"
+													"width": "50rem",
+													"height": "120rem",
+													"line-height": "120rem",
+													"position": "absolute",
+													"top": "0",
+													"left": "20rem"
 												},
 												[
 													[
 														"text",
 														{
 															"bindings": {
-																"text":  function ($pipe) { return 'index:' + this.$parent.$index + '  subindex:' + this.$index + '  text:' + this.text }
+																"text":  function ($pipe) { return $item.$index }
 															}
+														}
+													]
+												]
+											],
+											[
+												"box",
+												{
+													"height": "180rem",
+													"width": "700rem",
+													"position": "absolute",
+													"left": "70rem",
+													"top": "20rem"
+												},
+												[
+													[
+														"text",
+														{
+															"width": "200rem",
+															"bindings": {
+																"text":  function ($pipe) { return $item.name }
+															}
+														}
+													],
+													[
+														"text",
+														{
+															"bindings": {
+																"text":  function ($pipe) { return $item.value }
+															}
+														}
+													],
+													[
+														"text",
+														{
+															"bindings": {
+																"text":  function ($pipe) { return $item.computed }
+															}
+														}
+													],
+													[
+														"databox",
+														{
+															"type": "model",
+															"data": $item.submodel,
+															"item": "$subitem",
+															"index": "$subindex"
+														},
+														function (template, __data_list, __data_scope) {
+
+															var $item = __data_scope[0];
+															var $index = __data_scope[1];
+
+															for (var $subindex = 0, __data_length = __data_list.length; $subindex < __data_length; $subindex++)
+															{
+																var $subitem = __data_list[$subindex];
+
+																template($subindex, $subitem,
+																	[
+																		"text",
+																		{
+																			"bindings": {
+																				"text":  function ($pipe) { return 'index:' + $item.$index + '  subindex:' + $subitem.$index + '  text:' + $subitem.text }
+																			}
+																		}
+																	]
+																);
+															}
+
+															// end function
 														}
 													]
 												]
 											]
 										]
 									]
-								]
-							]
-						]
+								);
+							}
+
+							// end function
+						}
 					]
 				]
 			]

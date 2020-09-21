@@ -4,15 +4,15 @@
         <textbox width="480rem" height="60rem" />
         <button content="评论" width="150rem" height="60rem" />
     </box>
-    <databox d-data="data.comments" theme="level1" padding="20rem 0">
-        <box layout="line" d-tag="$item.id" height="150rem" padding="20rem" overflow="hidden">
-            <image d-src="$item.image" width="100rem" height="100rem" border-radius="100rem" />
+    <databox d:data="$data.comments" theme="level1" padding="20rem 0">
+        <box layout="line" d:tag="$item.id" height="150rem" padding="20rem" overflow="hidden">
+            <image d:src="$item.image" width="100rem" height="100rem" border-radius="100rem" />
             <box width="600rem" margin-left="10rem">
                 <box layout="row space-between" height="50rem" overflow="hidden" theme="level2" font-size="28rem">
-                    <text d-text="$item.name" />
-                    <text d-text="$item.time" />
+                    <text d:text="$item.name" />
+                    <text d:text="$item.time" />
                 </box>
-                <text d-text="$item.text" theme="level3" />
+                <text d:text="$item.text" theme="level3" />
             </box>
         </box>
     </databox>

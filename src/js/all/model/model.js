@@ -11,10 +11,6 @@
     var compile = yaxi.pipe.compile;
 
 
-    // expression缓存
-    var cache = create(null);
-
-
     // 控件对象集合
     var controls = yaxi.$controls || (yaxi.$controls = create(null));
 
@@ -204,27 +200,16 @@
     function syncBindings(bindings) {
 
         var index = 0;
-        var binding, model, control, fn, value;
+        var binding, control, fn;
 
         while (binding = bindings[index++])
         {
-            if ((model = binding.model) && (control = controls[binding.control]))
+            if (control = controls[binding.control])
             {
                 if (fn = binding.fn)
                 {
-                    value = fn.call(model, compile);
+                    control[binding.property] = fn(compile);
                 }
-                else
-                {
-                    value = model[binding.field];
-
-                    if (fn = binding.pipe)
-                    {
-                        value = fn(value);
-                    }
-                }
-
-                control[binding.property] = value;
             }
             else
             {
@@ -390,233 +375,39 @@
     
     
 
-    // 编译字段绑定
-    function compileFieldBinding(control, model, name, rule) {
-
-        // 绑定结构
-        var binding = bindingTarget = {
-            type: 0,                        // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定  3: 表达式绑定
-            model: null,                    // 绑定的模型
-            field: rule.last,               // 绑定模型字段
-            control: control.uuid,          // 控件id
-            property: name                  // 控件属性名
-        };
-
-        var model = findModel(model, rule, binding);
-        var value = model[binding.field];
-
-        binding.model = model;
-        control[name] = rule.pipe ? rule.pipe(value) : value;
-    }
-
-
-    // 编译模型推送绑定
-    function compilePushBinding(control, model, rule) {
-
-        // 绑定结构
-        var binding = control.__binding_push = {
-            model: model,
-            field: rule.last
-        };
-
-        binding.model = findModel(model, rule, binding);
-    }
-
-
-    // 编译函数绑定
-    function compileFunctionBinding(control, model, name, fn) {
-    
-        bindingTarget = {
-            type: 3,                    // 绑定类型 0:模型绑定  1:数组模型子项绑定  2:数组模型子项索引绑定  3: 表达式绑定
-            model: model,               // 绑定的模型
-            fn: fn,                     // 函数表达式
-            control: control.uuid,      // 控件id
-            property: name              // 控件属性名
-        };
-
-        control[name] = fn.call(model, compile);
-    }
-
-
-
-    // 解析绑定表达式
-    function parseExpression(expression) {
-
-        var value, pipe, any;
-
-        if ((any = expression.indexOf('|')) > 0)
-        {
-            pipe = compile(expression.substring(any));
-            value = expression.substring(0, any);
-        }
-        else
-        {
-            value = expression;
-        }
-
-        if (any = value.match(/[\w$]+/g))
-        {
-            value = {
-                path: any,
-                last: any[any.length - 1],
-                pipe: pipe,
-                bind: value
-            };
-        }
-
-        return cache[expression] = value || 1;
-    }
-
-
-
-    function findModel(model, rule, binding) {
-
-        var path = rule.path;
-        var last = path.length - 1;
-        var name = path[0];
-        var index = 0;
-
-        // 特殊绑定
-        switch (name)
-        {
-            // 当前模型项
-            case '$item':
-                index++;
-
-                if (binding)
-                {
-                    binding.type = 1;
-                }
-                break;
-
-            // 当前模型在array model中的索引
-            case '$index':
-                if (!binding || last > 0)
-                {
-                    throw new Error('bind error: $index is a model index field, not a model!');
-                }
-
-                if (binding)
-                {
-                    binding.type = 2;
-                    binding.field = '$index';
-                }
-
-                return model;
-
-            // 顶层模型
-            case '$top':
-                index++;
-                model = model.$top;
-                break;
-
-            // 上级模型
-            case '$parent':
-                do
-                {
-                    model = model.$parent;
-
-                    if (!model)
-                    {
-                        findModelThrow(rule, '"' + path.substring(0, index) + '" not exists!');
-                    }
-                }
-                while ((name = path[++index]) && name === '$parent');
-                break;
-        }
-
-        while (index < last)
-        {
-            name = path[index];
-
-            if (model = model[name])
-            {
-                if (model.__model_type === 1)
-                {
-                    index++;
-                    continue;
-                }
-
-                findModelThrow(rule, '"' + name + '" not a submodel!');
-            }
-            else
-            {
-                findModelThrow(rule, 'submodel "' + name + '" not exists!');
-            }
-        }
-
-        name = path[last];
-
-        if (name in model)
-        {
-            if (binding)
-            {
-                return model;
-            }
-            
-            if ((last = model[name]) && last.__model_type)
-            {
-                return last;
-            }
-
-            findModelThrow(rule, '"' + name + '" not a model object!');
-        }
-
-        findModelThrow(rule, 'field "' + name + '" not exists!');
-    }
-
-
-    function findModelThrow(rule, text) {
-
-        throw new Error('bind error: "' + rule.bind + '" is invalid, ' + text);
-    }
-
-
-
-    // 查找子模型
-    this.$findSubmodel = function (expression) {
-
-        var rule = cache[expression] || parseExpression(expression);
-        return findModel(this, rule);
-    }
-
-
 
     // 绑定
-    this.$bind = function (control, bindings) {
+    yaxi.$bind = function (bindings) {
 
         try
         {
-            var expression;
+            var target, fn;
+
+            bindingTarget = target = {
+                control: this.uuid,
+                property: '',
+                fn: null
+            }
 
             for (var name in bindings)
             {
-                if (expression = bindings[name])
+                if (fn = bindings[name])
                 {
                     // 字段绑定
-                    if (typeof expression !== 'function')
+                    if (typeof fn !== 'function')
                     {
-                        var rule = cache[expression] || parseExpression(expression);
-        
-                        if (rule !== 1)
-                        {
-                            if (name === 'model')
-                            {
-                                compilePushBinding(control, this, name, rule);
-                            }
-                            else
-                            {
-                                compileFieldBinding(control, this, name, rule);
-                            }
-                        }
-                        else
-                        {
-                            throw new Error('bind error: binding expression "' + expression + '" is invalid!');
-                        }
+                        throw new Error('bind error: binding expression "' + fn + '" is not a function!');
+                    }
+                    else if (name === 'onchange')
+                    {
+                        this.__binding_change = fn;
                     }
                     else // 表达式绑定
                     {
-                        compileFunctionBinding(control, this, name, expression);
+                        target.property = name;
+                        target.fn = fn;
+
+                        this[name] = fn(compile);
                     }
                 }
             }

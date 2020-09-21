@@ -450,7 +450,17 @@ Object.extend.call(Array, function (Class, base) {
     
     this.filter = function (selector) {
     
-        if (selector = cache[selector] || parse(selector))
+        if (typeof selector === 'function')
+        {
+            for (var i = this.length; i--;)
+            {
+                if (!selector(this[i]))
+                {
+                    this.splice(i, 1);
+                }
+            }
+        }
+        else if (selector = cache[selector] || parse(selector))
         {
             for (var i = this.length; i--;)
             {

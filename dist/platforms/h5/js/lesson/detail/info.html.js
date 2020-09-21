@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\info.html")
 
 return (
 	[
@@ -33,49 +34,45 @@ return (
 					[
 						"databox",
 						{
-							"data": data.teachers,
+							"data": $data.teachers,
 							"layout": "line",
-							"padding": "10rem 20rem",
-							"scope": ""
+							"padding": "10rem 20rem"
 						},
-						function (controls, __loop_data, __loop_scope) {
+						function (template, __data_list, __data_scope) {
 
+							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							{
+								var $item = __data_list[$index];
 
-						    for (var $index = 0, __loop_len = __loop_data.length; $index < __loop_len; $index++)
-						    {
-						        var $item = __loop_data[$index];
-
-						        this.loadTemplate(controls, __loop_scope, $index, $item,
+								template($index, $item,
 									[
+										"box",
+										{
+											"layout": "column center",
+											"margin-left": "20rem"
+										},
 										[
-											"box",
-											{
-												"layout": "column center",
-												"margin-left": "20rem"
-											},
 											[
-												[
-													"image",
-													{
-														"src": $item.image,
-														"width": "100rem",
-														"height": "100rem",
-														"border-radius": "100rem"
-													}
-												],
-												[
-													"text",
-													{
-														"text": $item.name
-													}
-												]
+												"image",
+												{
+													"src": $item.image,
+													"width": "100rem",
+													"height": "100rem",
+													"border-radius": "100rem"
+												}
+											],
+											[
+												"text",
+												{
+													"text": $item.name
+												}
 											]
 										]
 									]
 								);
-						    }
+							}
 
-						    // end function
+							// end function
 						}
 					]
 				]
@@ -113,7 +110,7 @@ return (
 							[
 								"text",
 								{
-									"text": data.detail
+									"text": $data.detail
 								}
 							]
 						]

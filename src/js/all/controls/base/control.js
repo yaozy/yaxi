@@ -23,6 +23,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    
+
+    // 默认允许任意类型父控件
+    Class.allowParent = true;
+
+
+    classes[Class.typeName = this.typeName = 'Control'] = classes.control = Class;
+
+
+
+
     // 注册补丁
     var patch = yaxi.patch = function (control) {
 
@@ -55,6 +66,90 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         yaxi.__on_page_patch(patches);
         schedule = patches.length = 0;
+    }
+
+
+
+    function throwError(text) {
+
+        throw new Error('create control error: ' + text);
+    }
+
+
+
+    // 检查父控件
+    var check = yaxi.__check_parent = function (Class, parent) {
+
+        var check;
+
+        if (!Class)
+        {
+            throwError('type can not be null!');
+        }
+
+        if (!parent)
+        {
+            throwError('parent can not be null!');
+        }
+
+        if (check = Class.allowParent)
+        {
+            if (check !== true && !check(parent))
+            {
+                throwError(Class.typeName + ' can not be a sub type of ' + parent.typeName + '!');
+            }
+        }
+        else if (check = Class.typeName)
+        {
+            throwError(check + ' can not be a sub type!');
+        }
+        else
+        {
+            throwError(JSON.stringify(Class).substring(0, 20) + '... not a valid type!');
+        }
+    }
+
+    
+    
+    this.$createSubControl = function (options, scope) {
+
+        var Class, control;
+
+        if (options)
+        {
+            if (options.$storage && (Class = options.constructor))
+            {
+                check(Class, this);
+
+                control = options;
+
+                if (control.parent && control.parent !== this)
+                {
+                    control.remove();
+                }
+
+                control.parent = this;
+                return control;
+            }
+
+            if (Class = options[0])
+            {
+                if (typeof Class === 'string' && !(Class = classes[Class]))
+                {
+                    throwError('"' + options[0] + '" doesn\'t register!');
+                }
+                
+                check(Class, this);
+
+                control = new Class();
+                control.parent = this;
+                control.__load(options, scope);
+
+                return control;
+            }
+        }
+
+        throwError('no options, eg: ["box", { theme: "primary" }, [[...], ...]]');
     }
 
 
@@ -285,117 +380,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$class = 'yx-control';
 
 
-    // // class
-    // this.$property('class', '', {
-
-    //     change: false,
-
-    //     alias: 'className',
-
-    //     get: function () {
-
-    //         return this.$storage.class;
-    //     },
-
-    //     set: function (value) {
-
-    //         var storage = this.$storage;
-
-    //         value = '' + value;
-
-    //         if (storage.class !== value)
-    //         {
-    //             storage.class = value;
-
-    //             this.__class_list = value ? value.split(/\s+/) : [];
-    //             this.__class_dirty = true;
-    //             this.__dirty || patch(this);
-    //         }
-    //     }
-    // });
-
-
-
-
-    // this.hasClass = function (name) {
-
-    //     if (name)
-    //     {
-    //         var keys = this.__class_list;
-    //         return keys ? keys.indexOf(name) >= 0 : false;
-    //     }
-        
-    //     return false;
-    // }
-
-
-    // this.addClass = function (name) {
-
-    //     var keys;
-
-    //     if (name && name.search(/\s+/) < 0)
-    //     {
-    //         if (keys = this.__class_list)
-    //         {
-    //             if (keys.indexOf(name) < 0)
-    //             {
-    //                 keys.push(name);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             this.__class_list = [name];
-    //         }
-
-    //         this.__class_dirty = true;
-    //         this.__dirty || patch(this);
-    //     }
-    //     else
-    //     {
-    //         throw new Error('add class error: class name not allow null or empty!');
-    //     }
-    // }
-
-
-    // this.removeClass = function (name) {
-
-    //     if (name)
-    //     {
-    //         var keys = this.__class_list;
-    //         var index;
-
-    //         if (keys && (index = keys.indexOf(name)) >= 0)
-    //         {
-    //             keys.splice(index, 1);
-
-    //             this.__class_dirty = true;
-    //             this.__dirty || patch(this);
-    //         }
-    //     }
-    // }
-
-
-    // this.toggleClass = function (name) {
-
-    //     if (name)
-    //     {
-    //         var keys = this.__class_list;
-    //         var index;
-
-    //         if (keys && (index = keys.indexOf(name)) >= 0)
-    //         {
-    //             keys.splice(index, 1);
-    //         }
-    //         else
-    //         {
-    //             this.addClass(name);
-    //         }
-
-    //         this.__class_dirty = true;
-    //         this.__dirty || patch(this);
-    //     }
-    // }
-
 
 
     function change_active(active) {
@@ -420,6 +404,160 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
     }
 
+
+    
+    // 控件风格
+    this.$property('theme', '', {
+
+        class: 'yx-theme-'
+    });
+    
+
+    // 是否隐藏
+    this.$property('hidden', false, {
+
+        type: 'boolean',
+        class: 'yx-hidden'
+    });
+
+
+    // 是否退居幕后
+    this.$property('backstage', false, {
+
+        type: 'boolean',
+        class: 'yx-backstage'
+    })
+
+
+
+    // 是否禁用
+    this.$property('disabled', false);
+
+
+    // 是否选中
+    this.$property('selected', false, {
+
+        change: false,
+
+        get: function () {
+
+            return this.__selected || false;
+        },
+
+        set: function (value) {
+
+            if ((value = !!value) !== this.__selected)
+            {
+                // 从不选中状态切换到选中有选中状态值时则切换状态
+                if (value && (value = this.__selected_status))
+                {
+                    changeSelectedStatus(this, value);
+                }
+                else if (this.__save_status) // 有保存的状态时清空
+                {
+                    changeSelectedStatus(this);
+                }
+            }
+        }
+    });
+
+
+    // 选中时状态
+    this.$property('selectedStatus', null, {
+        
+        change: false,
+
+        alias: 'selected-status',
+
+        get: function () {
+
+            return this.__selected_status || null;
+        },
+
+        set: function (value) {
+
+            this.__selected_status = value;
+
+            if (this.__selected)
+            {
+                changeSelectedStatus(this, value);
+            }
+        }
+    });
+
+
+
+    // 变更选中状态
+    function changeSelectedStatus(control, selectedStatus) {
+
+        var status;
+
+        // 有缓存状态时需先恢复
+        if (status = control.__save_status)
+        {
+            for (var name in status)
+            {
+                var values = status[name];
+
+                // 等于选中值才恢复
+                if (control[name] === values[1])
+                {
+                    control[name] = values[0];
+                }
+            }
+
+            status = null;
+        }
+
+        // 处理选中状态
+        if (selectedStatus)
+        {
+            status = {};
+
+            for (var name in selectedStatus)
+            {
+                var value1 = control[name];
+
+                control[name] = selectedStatus[name];;
+                status[name] = [value1, control[name]];
+            }
+        }
+
+        // 记录保存状态
+        control.__save_status = status;
+    }
+
+    
+
+    // 自定义key
+    this.$property('key', '', false);
+    
+
+    // 自定义tag
+    this.$property('tag', null, false);
+
+
+
+    // 父控件
+    this.parent = null;
+
+
+    // 顶级控件
+    this.$property('root', null, {
+
+        get: function () {
+
+            var target = this,
+                parent;
+
+            while (parent = target.parent)
+            {
+                target = parent;
+            }
+
+            return target;
+        }
+    });
 
 
 
@@ -567,6 +705,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     style('align-self');
 
+
+    style('justify-self');
     
 
 
@@ -827,229 +967,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // // 样式
-    // this.$property('style', '', {
-
-    //     convert: function (value) {
-
-    //         if (value)
-    //         {
-    //             value = convertColor(('' + value).replace(/\s+:/g, ':'));
-
-    //             if (value[value.length - 1] !== ';')
-    //             {
-    //                 value += ';';
-    //             }
-    //         }
-
-    //         return value || '';
-    //     }
-    // });
-
-
-
-    // this.setStyle = function (name, value) {
-
-    //     var style, index;
-
-    //     if (name)
-    //     {
-    //         name += ':';
-
-    //         if (style = this.style)
-    //         {
-    //             if ((index = style.indexOf(name)) >= 0)
-    //             {
-    //                 style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
-    //             }
- 
-    //             if (value)
-    //             {
-    //                 style += name + value + ';';
-    //             }
-
-    //             this.style = style;
-    //         }
-    //         else if (value)
-    //         {
-    //             this.style = name + value + ';';
-    //         }
-    //     }
-    // }
-
-
-    // this.removeStyle = function (name) {
-
-    //     var style, index;
-
-    //     if (name && (style = this.style) && (index = style.indexOf(name += ':')) >= 0)
-    //     {
-    //         this.style = style.substring(0, index) + style.substring(style.indexOf(';', index) + 1);
-    //     }
-    // }
-
-
-    
-    // 控件风格
-    this.$property('theme', '', {
-
-        class: 'yx-theme-'
-    });
-    
-
-    // 是否隐藏
-    this.$property('hidden', false, {
-
-        type: 'boolean',
-        class: 'yx-hidden'
-    });
-
-
-    // 是否退居幕后
-    this.$property('backstage', false, {
-
-        type: 'boolean',
-        class: 'yx-backstage'
-    })
-
-
-
-    // 是否禁用
-    this.$property('disabled', false);
-
-
-    // 是否选中
-    this.$property('selected', false, {
-
-        change: false,
-
-        get: function () {
-
-            return this.__selected || false;
-        },
-
-        set: function (value) {
-
-            if ((value = !!value) !== this.__selected)
-            {
-                // 从不选中状态切换到选中有选中状态值时则切换状态
-                if (value && (value = this.__selected_status))
-                {
-                    changeSelectedStatus(this, value);
-                }
-                else if (this.__save_status) // 有保存的状态时清空
-                {
-                    changeSelectedStatus(this);
-                }
-            }
-        }
-    });
-
-
-    // 选中时状态
-    this.$property('selectedStatus', null, {
-        
-        change: false,
-
-        alias: 'selected-status',
-
-        get: function () {
-
-            return this.__selected_status || null;
-        },
-
-        set: function (value) {
-
-            this.__selected_status = value;
-
-            if (this.__selected)
-            {
-                changeSelectedStatus(this, value);
-            }
-        }
-    });
-
-
-
-    // 变更选中状态
-    function changeSelectedStatus(control, selectedStatus) {
-
-        var status;
-
-        // 有缓存状态时需先恢复
-        if (status = control.__save_status)
-        {
-            for (var name in status)
-            {
-                var values = status[name];
-
-                // 等于选中值才恢复
-                if (control[name] === values[1])
-                {
-                    control[name] = values[0];
-                }
-            }
-
-            status = null;
-        }
-
-        // 处理选中状态
-        if (selectedStatus)
-        {
-            status = {};
-
-            for (var name in selectedStatus)
-            {
-                var value1 = control[name];
-
-                control[name] = selectedStatus[name];;
-                status[name] = [value1, control[name]];
-            }
-        }
-
-        // 记录保存状态
-        control.__save_status = status;
-    }
-
-    
-
-    // 自定义key
-    this.$property('key', '', false);
-    
-
-    // 自定义tag
-    this.$property('tag', null, false);
-
-
-
-    // 父控件
-    this.parent = null;
-
-
-    // 检查父控件(默认允许任意容器控件)
-    this.checkParent = true;
-
-
-    // 顶级控件
-    this.$property('root', null, {
-
-        get: function () {
-
-            var target = this,
-                parent;
-
-            while (parent = target.parent)
-            {
-                target = parent;
-            }
-
-            return target;
-        }
-    });
-
-
-    
-
     // 从json结构加载组件
     /*
      * [
@@ -1061,16 +978,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
      *   ]
      * ]
     */
-    this.load = function (values, model) {
+    this.load = function (values, scope) {
 
-        this.__model = model || (model = this.findModel());
-        this.__load(values, model);
-
+        this.__load(values, scope);
         return this;
     }
 
 
-    this.__load = function (values, model) {
+    this.__load = function (values, scope) {
 
         var attributes, converts, convert, changes, style, value, any;
 
@@ -1082,12 +997,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 value = attributes[name];
 
-                // 模型特殊处理
-                if (name === 'bindings')
-                {
-                    this.setBindings(model, value);
-                }
-                else if (convert = converts[name])
+                if (convert = converts[name])
                 {
                     // 从转换器中获取存储名以解决别名存储的问题
                     name = convert.name;
@@ -1119,85 +1029,27 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         if ((values = values[2]) && (any = this.__load_content))
         {
-            any.call(this, values, model);
+            any.call(this, values, scope);
         }
     }
     
 
-    this.findModel = function () {
 
-        var target = this;
-        var model;
-
-        do
-        {
-            if (model = target.__model)
-            {
-                return model;
-            }
-        }
-        while (target = target.parent);
-    }
-
-
-    this.findSubmodel = function (submodel, model) {
-
-        if (model || (model = this.findModel()))
-        {
-            if (model = model.$findSubmodel(submodel))
-            {
-                if (model.__model_type === 2)
-                {
-                    return model;
-                }
-
-                throwBindError('submodel "' + submodel + '" not a array model!');
-            }
-        }
+    this.$converts.bindings = {
         
-        throwBindError('can not find submodel "' + submodel + '"!');
-    }
+        fn: yaxi.$bind
+    };
 
-
-    function throwBindError(text) {
-
-        throw new Error('bind error: ' + text);
-    }
-
-
-    // 设置绑定
-    this.setBindings = function (model, bindings) {
-
-        if (model || (model = this.findModel()))
-        {
-            switch (model.__model_type)
-            {
-                case 1:
-                    model.$bind(this, bindings);
-                    break;
-
-                case 2:
-                    throwBindError('require a model object, but input a array model!');
-
-                default:
-                    throwBindError('not a model object');
-            }
-        }
-        else
-        {
-            throwBindError('can not find a model object!');
-        }
-    }
 
 
     // 推送绑定
     this.$push = function (value) {
 
-        var binding;
+        var change;
 
-        if (binding = this.__binding_push)
+        if (change = this.__b_onchange)
         {
-            binding.model[binding.field] = value;
+            change(value);
         }
     }
 
@@ -1354,8 +1206,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__model = 
-        this.__binding_push = this.__data_stack = null;
+        this.parent = this.__model = this.__b_onchange = this.__d_scope = null;
     }
 
 
@@ -1387,10 +1238,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    classes[Class.typeName = this.typeName = 'Control'] = Class;
-
-
-
     function register(name) {
 
         if (name)
@@ -1405,95 +1252,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         return this;
     }
-
-
-    // 默认允许任意类型父控件
-    Class.allowParent = true;
-
-
-
-    
-    var message = 'create control error: ';
-
-    var message1 = ' can not be a sub type';
-
-    var message2 = ' can not be null!';
-    
-
-    // 检查父控件
-    var check = yaxi.__check_parent = function (Class, parent) {
-
-        var check;
-
-        if (!Class)
-        {
-            throw new Error(message + 'type' + message2);
-        }
-
-        if (!parent)
-        {
-            throw new Error(message + 'parent' + message2);
-        }
-
-        if (check = Class.allowParent)
-        {
-            if (check !== true && !check(parent))
-            {
-                throw new Error(message + Class.typeName + message1 + ' of ' + parent.typeName + '!');
-            }
-        }
-        else if (check = Class.typeName)
-        {
-            throw new Error(message + check + message1 + '!');
-        }
-        else
-        {
-            throw new Error(message + JSON.stringify(Class).substring(0, 20) + '... not a valid type!');
-        }
-    }
-
-    
-    this.$createSubControl = function (options, model) {
-
-        var Class, control;
-
-        if (options)
-        {
-            if (options.$storage && (Class = options.constructor))
-            {
-                check(Class, this);
-
-                control = options;
-
-                if (control.parent && control.parent !== this)
-                {
-                    control.remove();
-                }
-
-                control.parent = this;
-                return control;
-            }
-
-            if (Class = options[0])
-            {
-                if (typeof Class === 'string' && !(Class = classes[Class]))
-                {
-                    throw new Error('create control error: "' + options[0] + '" doesn\'t register!');
-                }
-                
-                check(Class, this);
-
-                control = new Class();
-                control.parent = this;
-                control.__load(options, control.__model = model);
-
-                return control;
-            }
-        }
-
-        return message + 'no options!';
-    }
-
 
 
 

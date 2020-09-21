@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\home\\main.html")
 
 return (
 	[
@@ -45,7 +46,7 @@ return (
 				"marquee",
 				{
 					"theme": "level1",
-					"text": data.marquee
+					"text": $data.marquee
 				}
 			],
 			[
@@ -54,192 +55,185 @@ return (
 					"key": "host",
 					"flex": "auto",
 					"min-height": "200rem",
-					"margin-top": "10rem",
-					"scope": ""
+					"margin-top": "10rem"
 				},
-				function (controls, __loop_data, __loop_scope) {
+				function (template, __data_list, __data_scope) {
 
+					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					{
+						var $item = __data_list[$index];
 
-				    for (var $index = 0, __loop_len = __loop_data.length; $index < __loop_len; $index++)
-				    {
-				        var $item = __loop_data[$index];
-
-				        this.loadTemplate(controls, __loop_scope, $index, $item,
+						template($index, $item,
 							[
+								"box",
+								{
+									"key": $item.id,
+									"theme": "level1",
+									"margin-bottom": "10rem",
+									"padding": "0 20rem"
+								},
 								[
-									"box",
-									{
-										"key": $item.id,
-										"theme": "level1",
-										"margin-bottom": "10rem",
-										"padding": "0 20rem"
-									},
 									[
+										"box",
+										{
+											"height": "60rem",
+											"line-height": "60rem"
+										},
 										[
-											"box",
-											{
-												"height": "60rem",
-												"line-height": "60rem"
-											},
 											[
+												"icon",
+												{
+													"theme": "level2",
+													"icon": $item.icon,
+													"position": "absolute",
+													"font-size": "50rem"
+												}
+											],
+											[
+												"text",
+												{
+													"theme": "level2",
+													"text": $item.text,
+													"position": "absolute",
+													"left": "60rem"
+												}
+											],
+											[
+												"box",
+												{
+													"layout": "row",
+													"theme": "level4",
+													"position": "absolute",
+													"top": "0",
+													"right": "0",
+													"bottom": "0",
+													"font-size": "28rem"
+												},
 												[
-													"icon",
-													{
-														"theme": "level2",
-														"icon": $item.icon,
-														"position": "absolute",
-														"font-size": "50rem"
-													}
-												],
-												[
-													"text",
-													{
-														"theme": "level2",
-														"text": $item.text,
-														"position": "absolute",
-														"left": "60rem"
-													}
-												],
-												[
-													"box",
-													{
-														"layout": "row",
-														"theme": "level4",
-														"position": "absolute",
-														"top": "0",
-														"right": "0",
-														"bottom": "0",
-														"font-size": "28rem"
-													},
 													[
-														[
-															"text",
-															null,
-															"查看更多"
-														],
-														[
-															"icon",
-															{
-																"icon": "common-more"
-															}
-														]
+														"text",
+														null,
+														"查看更多"
+													],
+													[
+														"icon",
+														{
+															"icon": "common-more"
+														}
 													]
 												]
 											]
-										],
-										[
-											"databox",
+										]
+									],
+									[
+										"databox",
+										{
+											"data": $item.data,
+											"item": "$lesson"
+										},
+										function (template, __data_list, __data_scope) {
+
+											var $item = __data_scope[0];
+											var $index = __data_scope[1];
+
+											for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 											{
-												"data": $item.data,
-												"item": "$lesson",
-												"scope": "$item,$index"
-											},
-											function (controls, __loop_data, __loop_scope) {
+												var $lesson = __data_list[$index];
 
-											    var $item = __loop_scope[0];
-											    var $index = __loop_scope[1];
-
-											    for (var $index = 0, __loop_len = __loop_data.length; $index < __loop_len; $index++)
-											    {
-											        var $lesson = __loop_data[$index];
-
-											        this.loadTemplate(controls, __loop_scope, $index, $lesson,
+												template($index, $lesson,
+													[
+														"box",
+														{
+															"layout": "line",
+															"tag": $lesson.id,
+															"height": "160rem",
+															"margin": "20rem 0",
+															"overflow": "hidden",
+															"events": {
+																"tap": $owner.handleOpenDetail.bind($owner)
+															}
+														},
 														[
+															[
+																"image",
+																{
+																	"src": $lesson.image,
+																	"width": "200rem",
+																	"height": "100%"
+																}
+															],
 															[
 																"box",
 																{
-																	"layout": "line",
-																	"tag": $lesson.id,
-																	"height": "160rem",
-																	"margin": "20rem 0",
-																	"overflow": "hidden",
-																	"events": {
-																		"tap": owner.handleOpenDetail.bind(owner)
-																	}
+																	"width": "500rem",
+																	"height": "100%",
+																	"padding-left": "20rem"
 																},
 																[
 																	[
-																		"image",
+																		"box",
 																		{
-																			"src": $lesson.image,
-																			"width": "200rem",
-																			"height": "100%"
-																		}
+																			"height": "50rem",
+																			"overflow": "hidden"
+																		},
+																		[
+																			[
+																				"text",
+																				{
+																					"text": $lesson.name
+																				}
+																			]
+																		]
 																	],
 																	[
 																		"box",
 																		{
-																			"width": "500rem",
-																			"height": "100%",
-																			"padding-left": "20rem"
+																			"theme": "level4",
+																			"height": "70rem",
+																			"font-size": "24rem",
+																			"overflow": "hidden"
 																		},
 																		[
 																			[
-																				"box",
+																				"text",
 																				{
-																					"height": "50rem",
-																					"overflow": "hidden"
-																				},
-																				[
-																					[
-																						"text",
-																						{
-																							"text": $lesson.name
-																						}
-																					]
-																				]
-																			],
+																					"text": $lesson.remark
+																				}
+																			]
+																		]
+																	],
+																	[
+																		"box",
+																		{
+																			"theme": "primary",
+																			"height": "40rem",
+																			"overflow": "hidden"
+																		},
+																		[
 																			[
-																				"box",
+																				"text",
 																				{
-																					"theme": "level4",
-																					"height": "70rem",
-																					"font-size": "24rem",
-																					"overflow": "hidden"
-																				},
-																				[
-																					[
-																						"text",
-																						{
-																							"text": $lesson.remark
-																						}
-																					]
-																				]
-																			],
-																			[
-																				"box",
-																				{
-																					"theme": "primary",
-																					"height": "40rem",
-																					"overflow": "hidden"
-																				},
-																				[
-																					[
-																						"text",
-																						{
-																							"text": '￥' + $lesson.price
-																						}
-																					]
-																				]
+																					"text": '￥' + $lesson.price
+																				}
 																			]
 																		]
 																	]
 																]
 															]
 														]
-													);
-											    }
-
-											    // end function
+													]
+												);
 											}
-										]
+
+											// end function
+										}
 									]
 								]
 							]
 						);
-				    }
+					}
 
-				    // end function
+					// end function
 				}
 			]
 		]

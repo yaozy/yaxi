@@ -137,13 +137,6 @@
   background-color: #000000;
   opacity: 0.3;
 }
-.yx-modelbox {
-  position: relative;
-  display: block;
-  overflow: auto;
-  width: auto;
-  height: auto;
-}
 .yx-swiper {
   height: 300rpx;
 }

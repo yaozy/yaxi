@@ -132,16 +132,16 @@
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var modelboxs = controls || (controls = yaxi.$controls);
-        var bindings, modelbox;
+        var databoxs = controls || (controls = yaxi.$controls);
+        var bindings, databox;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                if (modelbox = modelboxs[bindings[i]])
+                if (databox = databoxs[bindings[i]])
                 {
-                    modelbox[type](arg1, arg2);
+                    databox[type](arg1, arg2);
                 }
             }
         }

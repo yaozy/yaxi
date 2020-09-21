@@ -4,9 +4,9 @@
     z-index="1" 
     height="80rem" 
     border-bottom=".5px solid @border-level4">
-    <masklayer b-hidden="hidden" e-tap="handleClose" />
+    <masklayer b:hidden="$model.hidden" e:tap="handleClose" />
     <box 
-        e-tap="handleSwitch" 
+        e:tap="handleSwitch" 
         layout="row" 
         theme="level1" 
         height="80rem" 
@@ -14,107 +14,110 @@
         text-align="center" 
         border-bottom=".5px solid @border-level4">
         <iconbutton 
-            b-icon="sort.icon" 
-            b-content="sort.text" 
+            b:icon="$model.sort.icon" 
+            b:content="$model.sort.text" 
             layout="row-reverse" 
             tag="sort" 
             width="33%" 
             height="100%" />
         <iconbutton 
-            b-icon="category.icon" 
-            b-content="category.text"
+            b:icon="$model.category.icon" 
+            b:content="$model.category.text"
             layout="row-reverse" 
             tag="category" 
             width="34%" 
             height="100%" />
         <iconbutton 
-            b-icon="filter.icon" 
+            b:icon="$model.filter.icon" 
             layout="row-reverse" 
             content="筛选" 
             tag="filter" 
             width="33%" 
             height="100%" />
     </box>
-    <box b-hidden="sort.hidden" theme="level1">
-        <modelbox e-tap="handleSort" submodel="sort.data">
+    <box b:hidden="$model.sort.hidden" theme="level1">
+        <databox type="model" d:data="$model.sort.data" e:tap="handleSort">
             <box 
-                b-key="$index" 
+                b:key="$index" 
                 height="80rem" 
                 line-height="80rem" 
                 padding-left="30rem" 
                 border-top=".5px solid @border-level4" >
-                <vline b-color="$item.theme" position="absolute" top="0" left="0" />
-                <text b-theme="$item.theme" b-text="$item.text" />
+                <vline b:color="$item.theme" position="absolute" top="0" left="0" />
+                <text b:theme="$item.theme" b:text="$item.text" />
             </box>
-        </modelbox>
+        </databox>
     </box>
-    <box b-hidden="category.hidden" layout="row" theme="level1" max-height="640rem">
-        <modelbox submodel="category.level1s" theme="bg-level3" width="25%" e-tap="handleCategoryLevel1">
+    <box b:hidden="$model.category.hidden" layout="row" theme="level1" max-height="640rem">
+        <databox type="model" d:data="$model.category.level1s" theme="bg-level3" width="25%" e:tap="handleCategoryLevel1">
             <iconbutton 
-                b-key="$index" 
-                b-icon="$item.icon" 
-                b-content="$item.text" 
-                b-theme="$item.theme" 
+                b:key="$index" 
+                b:icon="$item.icon" 
+                b:content="$item.text" 
+                b:theme="$item.theme" 
                 layout="row before" 
                 width="100%" 
                 height="80rem" 
                 padding-left="20rem" />
-        </modelbox>
-        <modelbox submodel="category.level2s" theme="bg-level2" width="35%" e-tap="handleCategoryLevel2" >
+        </databox>
+        <databox type="model" d:data="$model.category.level2s" theme="bg-level2" width="35%" e:tap="handleCategoryLevel2" >
             <text 
-                b-key="$index" 
-                b-text="$item.text" 
-                b-theme="$item.theme" 
+                b:key="$index" 
+                b:text="$item.text" 
+                b:theme="$item.theme" 
                 width="100%" 
                 height="80rem" 
                 line-height="80rem" 
                 padding-left="20rem" />
-        </modelbox>
-        <modelbox submodel="category.level3s" width="40%" e-tap="handleCategoryLevel3">
+        </databox>
+        <databox type="model" d:data="$model.category.level3s" width="40%" e:tap="handleCategoryLevel3">
             <text 
-                b-key="$index" 
-                b-text="$item.text" 
-                b-theme="$item.theme" 
+                b:key="$index" 
+                b:text="$item.text" 
+                b:theme="$item.theme" 
                 width="100%" 
                 height="80rem" 
                 line-height="80rem" 
                 padding-left="20rem" />
-        </modelbox>
+        </databox>
     </box>
-    <box b-hidden="filter.hidden" layout="column" theme="level1" max-height="640rem">
+    <box b:hidden="$model.filter.hidden" layout="column" theme="level1" max-height="640rem">
         <box flex="auto" font-size="28rem">
-            <modelbox submodel="filter.data" border-top=".5px solid @border-level4">
-                <box height="80rem" line-height="80rem" padding-left="20rem">
-                    <text b-text="$item.text" />
+            <databox type="model" d:data="$model.filter.data" border-top=".5px solid @border-level4">
+                <box>
+                    <box height="80rem" line:height="80rem" padding-left="20rem">
+                        <text b:text="$item.text" />
+                    </box>
+                    <databox 
+                        type="model"
+                        b:key="$index" 
+                        d:data="$item.data" 
+                        padding-left="20rem" 
+                        tag="filter"
+                        e:tap="handleChangeFilter" >
+                        <text 
+                            b:key="$index" 
+                            b:text="$item.text" 
+                            b:theme="$item.theme" 
+                            width="220rem" 
+                            height="60rem" 
+                            line-height="60rem" 
+                            margin="0 20rem 20rem 0" 
+                            border-radius="40rem" 
+                            text-align="center" />
+                    </databox>
                 </box>
-                <modelbox 
-                    b-key="$index" 
-                    submodel="$item.data" 
-                    padding-left="20rem" 
-                    tag="filter"
-                    e-tap="handleChangeFilter" >
-                    <text 
-                        b-key="$index" 
-                        b-text="$item.text" 
-                        b-theme="$item.theme" 
-                        width="220rem" 
-                        height="60rem" 
-                        line-height="60rem" 
-                        margin="0 20rem 20rem 0" 
-                        border-radius="40rem" 
-                        text-align="center" />
-                </modelbox>
-            </modelbox>
+            </databox>
         </box>
         <box theme="level1" height="80rem" line-height="80rem" border-top=".5px solid @border-level4">
-            <text theme="primary" padding="0 30rem" e-tap="handleClearFilter">清空筛选</text>
+            <text theme="primary" padding="0 30rem" e:tap="handleClearFilter">清空筛选</text>
             <button 
                 width="200rem" 
                 height="60rem" 
                 position="absolute" 
                 top="10rem" 
                 right="30rem"
-                e-tap="handleFilter">确定</button>
+                e:tap="handleFilter">确定</button>
         </box>
     </box>
 </box>

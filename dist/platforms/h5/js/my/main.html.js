@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\main.html")
 
 return (
 	[
@@ -128,7 +129,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": owner.openTest.bind(owner)
+								"tap": $owner.openTest.bind($owner)
 							}
 						},
 						"Open Test"

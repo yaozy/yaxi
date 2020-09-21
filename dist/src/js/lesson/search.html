@@ -1,5 +1,5 @@
 <box position="static" overflow="visible" z-index="5" height="80rem">
-    <masklayer b-hidden="hidden" e-tap="handleClear" />
+    <masklayer b:hidden="$model.hidden" e:tap="handleClear" />
     <box layout="row" theme="level1" height="80rem">
         <textbox placeholder="搜索老师、机构、课程" 
             position="absolute" 
@@ -12,37 +12,37 @@
             border=".5px solid @border-level4" 
             border-radius="60rem" 
             padding="0 120rem 0 60rem" 
-            b-value="text" 
-            e-input="handleInput"
-            e-focus="handleFocus" />
+            b:value="$model.text" 
+            e:input="handleInput"
+            e:focus="handleFocus" />
         <icon icon="common-search" position="absolute" top="50%" left="28rem" transform="translateY(-50%)" />
-        <text theme="font-level2" b-hidden="hidden" 
+        <text theme="font-level2" b:hidden="$model.hidden" 
             position="absolute" 
             width="120rem" 
             height="80rem" 
             line-height="80rem" 
             right="20rem" 
             text-align="center"
-            e-tap="handleClear">清除</text>
+            e:tap="handleClear">清除</text>
     </box>
-    <box theme="level1" b-hidden="hidden">
-        <box layout="row" height="80rem" line-height="80rem" padding="0 20rem" e-tap="handleSearch">
+    <box theme="level1" b:hidden="$model.hidden">
+        <box layout="row" height="80rem" line-height="80rem" padding="0 20rem" e:tap="handleSearch">
             <icon icon="common-search" />
             <text>搜索</text>
-            <text theme="font-primary" b-text="text" />
-            <text theme="font-level4" e-tap="handleCancel" margin-left="50rem">取消搜索</text>
+            <text theme="font-primary" b:text="$model.text" />
+            <text theme="font-level4" e:tap="handleCancel" margin-left="50rem">取消搜索</text>
         </box>
-        <databox key="search-body" e-tap="handleSuggest">
+        <databox key="search-body" e:tap="handleSuggest">
             <box 
-                d-tag="$index" 
+                d:tag="$index" 
                 layout="row" 
                 height="80rem" 
-                line-height="80rem" 
+                line:height="80rem" 
                 border-top=".5px solid @border-level4" 
                 padding="0 20rem">
-                <text d-text="$item.before" />
-                <text theme="font-primary" b-text="text" />
-                <text d-text="$item.after" />
+                <text d:text="$item.before" />
+                <text theme="font-primary" b:text="$model.text" />
+                <text d:text="$item.after" />
             </box>
         </databox>
     </box>

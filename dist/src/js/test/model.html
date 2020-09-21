@@ -2,25 +2,25 @@
     <header content="yaxi model page" />
     <box layout="column" flex="auto">
         <box layout="row" background-color="@bg-level2-color">
-            <button flex="auto" content="Append" e-tap="handleAppend" />
-            <button flex="auto" content="Replace" e-tap="handleReplace" />
-            <button flex="auto" content="Remove" e-tap="handleRemove" />
-            <button flex="auto" content="Reorder" e-tap="handleReorder" />
+            <button flex="auto" content="Append" e:tap="handleAppend" />
+            <button flex="auto" content="Replace" e:tap="handleReplace" />
+            <button flex="auto" content="Remove" e:tap="handleRemove" />
+            <button flex="auto" content="Reorder" e:tap="handleReorder" />
         </box>
-        <modelbox flex="auto">
+        <databox type="model" d:data="$model" flex="auto">
             <box height="200rem">
                 <box width="50rem" height="120rem" line-height="120rem" position="absolute" top="0" left="20rem">
-                    <text b-text="$index" />
+                    <text b:text="$index" />
                 </box>
                 <box height="180rem" width="700rem" position="absolute" left="70rem" top="20rem">
-                    <text b-text="$item.name" width="200rem" />
-                    <text b-text="$item.value" />
-                    <text b-text="$item.computed" />
-                    <modelbox submodel="$item.submodel" item="$subitem" index="$subindex">
-                        <text b-text="'index:' + $index + '  subindex:' + $subindex + '  text:' + $subitem.text" />
-                    </modelbox>
+                    <text b:text="$item.name" width="200rem" />
+                    <text b:text="$item.value" />
+                    <text b:text="$item.computed" />
+                    <databox type="model" d:data="$item.submodel" item="$subitem" index="$subindex">
+                        <text b:text="'index:' + $index + '  subindex:' + $subindex + '  text:' + $subitem.text" />
+                    </databox>
                 </box>
             </box>
-        </modelbox>
+        </databox>
     </box>
 </page>

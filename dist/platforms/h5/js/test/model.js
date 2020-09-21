@@ -44,7 +44,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this), arrayModel);
+        this.load(template(this, {}, arrayModel));
     }
 
 
@@ -68,7 +68,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleRemove = function () {
 
-        arrayModel.pop();
+        arrayModel.shift();
     }
 
 

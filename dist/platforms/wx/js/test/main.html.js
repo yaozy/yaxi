@@ -1,12 +1,13 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\test\\main.html")
 
 return (
 	[
 		"page",
 		{
 			"events": {
-				"tap": owner.handleTap.bind(owner)
+				"tap": $owner.handleTap.bind($owner)
 			}
 		},
 		[

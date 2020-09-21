@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\test\\test.html")
 
 return (
 	[
@@ -34,7 +35,7 @@ return (
 						{
 							"content": "append",
 							"events": {
-								"tap": owner.handleAppend.bind(owner)
+								"tap": $owner.handleAppend.bind($owner)
 							}
 						}
 					],
@@ -44,7 +45,7 @@ return (
 							"content": "remove last",
 							"margin-top": "10rem",
 							"events": {
-								"tap": owner.handleRemove.bind(owner)
+								"tap": $owner.handleRemove.bind($owner)
 							}
 						}
 					]

@@ -280,7 +280,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    // 直接插入控件(给modelbox控件用)
+    // 直接插入控件(给databox控件用)
     this.__insert = function (index, controls) {
 
         this.__last || patch(this);

@@ -29,7 +29,7 @@ module.exports = yaxi.Box.extend(function () {
 
             size: size || '100%'
 
-        }), model);
+        }, model));
     }
 
 

@@ -151,18 +151,6 @@
 </template>
 
 
-<template name="ModelBox">
-
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-modelbox{{ active }}{{ class }}" 
-    style="{{ s || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}" />
-
-</template>
-
 
 <template name="ScrollBox">
 

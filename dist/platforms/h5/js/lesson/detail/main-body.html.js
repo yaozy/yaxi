@@ -1,5 +1,6 @@
-module.exports = function (owner, data) {
+module.exports = function ($owner, $data, $model) {
 
+if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\main-body.html")
 
 return (
 	[
@@ -19,7 +20,7 @@ return (
 					[
 						"image",
 						{
-							"src": data.image,
+							"src": $data.image,
 							"width": "100%",
 							"height": "400rem"
 						}
@@ -42,14 +43,14 @@ return (
 									[
 										"text",
 										{
-											"text": data.name,
+											"text": $data.name,
 											"font-size": "36rem"
 										}
 									],
 									[
 										"text",
 										{
-											"text": '￥' + data.price,
+											"text": '￥' + $data.price,
 											"theme": "primary",
 											"align-self": "flex-end"
 										}
@@ -90,7 +91,7 @@ return (
 												"text",
 												{
 													"theme": "second",
-													"text": data.study
+													"text": $data.study
 												}
 											]
 										]
@@ -119,7 +120,7 @@ return (
 												"text",
 												{
 													"theme": "second",
-													"text": data.browse
+													"text": $data.browse
 												}
 											]
 										]
@@ -148,7 +149,7 @@ return (
 												"text",
 												{
 													"theme": "second",
-													"text": data.share
+													"text": $data.share
 												}
 											]
 										]
@@ -162,7 +163,7 @@ return (
 									[
 										"text",
 										{
-											"text": data.activity,
+											"text": $data.activity,
 											"margin": "20rem 0"
 										}
 									]
@@ -189,8 +190,8 @@ return (
 								{
 									"flex": "auto",
 									"module": require('./info'),
-									"data": data,
-									"selected-status": data.selectedStatus
+									"data": $data,
+									"selected-status": $data.selectedStatus
 								},
 								"详情"
 							],
@@ -199,8 +200,8 @@ return (
 								{
 									"flex": "auto",
 									"module": require('./section'),
-									"data": data,
-									"selected-status": data.selectedStatus
+									"data": $data,
+									"selected-status": $data.selectedStatus
 								},
 								"章节"
 							],
@@ -209,8 +210,8 @@ return (
 								{
 									"flex": "auto",
 									"module": require('./test-paper'),
-									"data": data,
-									"selected-status": data.selectedStatus
+									"data": $data,
+									"selected-status": $data.selectedStatus
 								},
 								"试卷"
 							],
@@ -219,8 +220,8 @@ return (
 								{
 									"flex": "auto",
 									"module": require('./comment'),
-									"data": data,
-									"selected-status": data.selectedStatus
+									"data": $data,
+									"selected-status": $data.selectedStatus
 								},
 								"评论"
 							],
@@ -229,8 +230,8 @@ return (
 								{
 									"flex": "auto",
 									"module": require('./recommend'),
-									"data": data,
-									"selected-status": data.selectedStatus
+									"data": $data,
+									"selected-status": $data.selectedStatus
 								},
 								"推荐"
 							]
