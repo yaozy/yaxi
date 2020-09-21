@@ -4,7 +4,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-text{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         decode
         bindtouchstart="handleEvent">{{ text }}</text>
 
@@ -18,7 +18,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-textbox{{ active }}{{ class }}"
-        style="{{ s }}"
+        style="{{ s || '' }}"
         value="{{ value || '' }}"
         placeholder="{{ placeholder || '' }}"
         disabled="{{ disabled }}"
@@ -47,7 +47,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-button{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent"
         children="{{ c }}" />
 
@@ -60,7 +60,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-icon iconfont{{ active }}{{ class }}"
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent" />
 
 </template>
@@ -72,7 +72,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-image{{ active }}{{ class }}"
-        style="{{ s }}"
+        style="{{ s || '' }}"
         src="{{ src }}"
         mode="{{ mode }}"
         lazy-load="{{ lazy }}"
@@ -89,7 +89,7 @@
     <view data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-iconbutton{{ active }}{{ class }}" 
-        style="{{ s }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        style="{{ s || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
         <view class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" data-id="{{ u }}" />
         <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
@@ -103,7 +103,7 @@
     <view data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-imagebutton{{ active }}{{ class }}" 
-        style="{{ s }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        style="{{ s || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
         <image class="yx-imagebutton-image" data-id="{{ u }}" src="{{ src }}" />
         <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
@@ -118,7 +118,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-richtext{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         nodes="{{ data }}" 
         bindtouchstart="handleEvent" />
 
@@ -131,9 +131,22 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-box{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent"
         children="{{ c }}" />
+
+</template>
+
+
+<template name="DataBox">
+
+<box 
+    data-id="{{ u }}"
+    id="{{ id }}"
+    class="yx-control yx-box yx-databox{{ active }}{{ class }}" 
+    style="{{ s || '' }}"
+    bindtouchstart="handleEvent"
+    children="{{ c }}" />
 
 </template>
 
@@ -144,7 +157,7 @@
     data-id="{{ u }}"
     id="{{ id }}"
     class="yx-control yx-box yx-modelbox{{ active }}{{ class }}" 
-    style="{{ s }}"
+    style="{{ s || '' }}"
     bindtouchstart="handleEvent"
     children="{{ c }}" />
 
@@ -157,7 +170,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-box yx-scrollbox{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         scroll-x="{{ scrollX }}"
         scroll-y="{{ scrollY !== false }}"
         bindtouchstart="handleEvent">
@@ -173,7 +186,7 @@
     data-id="{{ u }}"
     id="{{ id }}"
     class="yx-control yx-line{{ active }}{{ class }}" 
-    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s }}"
+    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s || '' }}"
     bindtouchstart="handleEvent" />
 
 </template>
@@ -185,7 +198,7 @@
     data-id="{{ u }}"
     id="{{ id }}"
     class="yx-control yx-vline{{ active }}{{ class }}" 
-    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s }}"
+    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s || '' }}"
     bindtouchstart="handleEvent" />
 
 </template>
@@ -196,7 +209,7 @@
     <view data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-box yx-swiper{{ active }}{{ class }}" 
-        style="{{ s }}">
+        style="{{ s || '' }}">
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
@@ -241,7 +254,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-box yx-tab{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent"
         children="{{ c }}" />
 
@@ -254,7 +267,7 @@
         data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-box yx-page{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent"
         children="{{ c }}" />
 
@@ -265,7 +278,7 @@
     <view data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-header{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent">
         <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-flag="back" />
         <view class="{{ icon ? 'yx-header-icon ' + icon : 'yx-header-hide' }}" data-id="{{ u }}" />
@@ -280,7 +293,7 @@
     <view data-id="{{ u }}"
         id="{{ id }}"
         class="yx-control yx-masklayer{{ active }}{{ class }}" 
-        style="{{ s }}"
+        style="{{ s || '' }}"
         bindtouchstart="handleEvent" />
 
 </template>
@@ -293,7 +306,7 @@
     data-id="{{ u }}"
     id="{{ id }}"
     class="yx-control yx-marquee{{ active }}{{ class }}" 
-    style="{{ s }}"
+    style="{{ s || '' }}"
     bindtouchstart="handleEvent">
     <view class="yx-marquee-content" style="animation:{{ animation || '' }}">
         <text style="margin-right:100rpx;">{{ text || '' }}</text>

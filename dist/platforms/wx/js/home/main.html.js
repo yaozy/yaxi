@@ -54,6 +54,7 @@ return (
 					"key": "host",
 					"flex": "auto",
 					"min-height": "200rem",
+					"margin-top": "10rem",
 					"scope": ""
 				},
 				function (controls, __loop_data, __loop_scope) {
@@ -70,7 +71,7 @@ return (
 									{
 										"key": $item.id,
 										"theme": "level1",
-										"margin-top": "10rem",
+										"margin-bottom": "10rem",
 										"padding": "0 20rem"
 									},
 									[

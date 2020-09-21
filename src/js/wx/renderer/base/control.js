@@ -31,6 +31,35 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     }
 
 
+    function renderStylePatch(control, style) {
+        
+        var storage = control.$storage;
+        var converts = control.$converts;
+        var outputs = [];
+        var names = own(style);
+        var index = 0;
+        var convert, name;
+
+        while (name = names[index++])
+        {
+            storage[name] = style[name];
+        }
+
+        index = 0;
+        names = own(storage);
+
+        while (name = names[index++])
+        {
+            if ((convert = converts[name]) && convert.style)
+            {
+                outputs.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
+            }
+        }
+
+        return outputs.join('');
+    }
+
+
     function renderStorage(control, view, style) {
         
         var mixin = control.$mixin;
@@ -62,6 +91,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             }
         }
     }
+
 
 
     function renderChanges(control, changes, view, prefix) {
@@ -119,14 +149,12 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         {
             renderChanges(this, values, view, '');
             
-            mixin.onchange.call(this, view, '');    
+            this.$mixin.onchange.call(this, view, '');
             this.__changes = null;
         }
 
-        if (style.length > 0)
-        {
-            view.s = style.join('');
-        }
+        // 渲染样式并记录
+        this.__style_cache = style.length > 0 ? (view.s = style.join('')) : '';
 
         return view;
     }
@@ -171,15 +199,15 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
         if (values = this.__style)
         {
-            view.s = renderStyle(this, values, []).join('');
+            view[prefix + 's'] = renderStylePatch(this, values);
             this.__style = null;
         }
 
         if (values = this.__changes)
         {
             renderChanges(this, values, view, prefix);
-
-            mixin.onchange.call(this, view, prefix);
+            
+            this.$mixin.onchange.call(this, view, prefix);
             this.__changes = null;
         }
     }

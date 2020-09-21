@@ -5,7 +5,7 @@ const theme = require('./theme').theme
 new Compressor()
     .load('src/less', [
         'theme/' + theme + '/color.less',
-        'all/control/(control|text|button|iconbutton|box).less',
+        'all/control/(control|box).less',
         'all/control/*.less',
         'all/page/(page|header|host).less',
         'all/after/*.less'

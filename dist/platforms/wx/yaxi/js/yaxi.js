@@ -4845,26 +4845,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         // 处理选中状态
         if (selectedStatus)
         {
-            var converts = control.$converts;
-            var convert;
-            
             status = {};
 
             for (var name in selectedStatus)
             {
                 var value1 = control[name];
-                var value2 = selectedStatus[name];
 
-                if ((convert = converts[name]) && (convert = convert.fn))
-                {
-                    value2 = convert.call(control, value2);
-                }
-
-                if (value1 !== value2)
-                {
-                    status[name] = [value1, value2];
-                    control[name] = value2;
-                }
+                control[name] = selectedStatus[name];;
+                status[name] = [value1, control[name]];
             }
         }
 
@@ -4924,7 +4912,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     */
     this.load = function (values, model) {
 
-        this.__model = model;
+        this.__model = model || (model = this.findModel());
         this.__load(values, model);
 
         return this;
@@ -4946,7 +4934,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                 // 模型特殊处理
                 if (name === 'bindings')
                 {
-                    this.setBindings(model || (model = initModel(this)), value);
+                    this.setBindings(model, value);
                 }
                 else if (convert = converts[name])
                 {
@@ -4985,48 +4973,69 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
     
 
-    function initModel(control) {
+    this.findModel = function () {
 
+        var target = this;
         var model;
 
-        while (control)
+        do
         {
-            if (model = control.__model_item || control.__model)
+            if (model = target.__model)
             {
                 return model;
             }
-
-            control = control.parent;
         }
+        while (target = target.parent);
     }
 
 
+    this.findSubmodel = function (submodel, model) {
 
-    var bind_error = 'bind error: '
+        if (model || (model = this.findModel()))
+        {
+            if (model = model.$findSubmodel(submodel))
+            {
+                if (model.__model_type === 2)
+                {
+                    return model;
+                }
+
+                throwBindError('submodel "' + submodel + '" not a array model!');
+            }
+        }
+        
+        throwBindError('can not find submodel "' + submodel + '"!');
+    }
+
+
+    function throwBindError(text) {
+
+        throw new Error('bind error: ' + text);
+    }
 
 
     // 设置绑定
     this.setBindings = function (model, bindings) {
 
-        if (model)
+        if (model || (model = this.findModel()))
         {
-            if (model.__model_type === 1)
+            switch (model.__model_type)
             {
-                model.$bind(this, bindings);
-                return;
+                case 1:
+                    model.$bind(this, bindings);
+                    break;
+
+                case 2:
+                    throwBindError('require a model object, but input a array model!');
+
+                default:
+                    throwBindError('not a model object');
             }
         }
         else
         {
-            throw new Error(bind_error + 'can not find a model object!');
+            throwBindError('can not find a model object!');
         }
-        
-        if (model.__model_type === 2)
-        {
-            throw new Error(bind_error + 'require a model object, but input a array model!');
-        }
-
-        throw new Error(bind_error + 'not a model object');
     }
 
 
@@ -5194,7 +5203,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__model = this.__model_item = 
+        this.parent = this.__model = 
         this.__binding_push = this.__data_stack = null;
     }
 
@@ -5325,7 +5334,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
                 control = new Class();
                 control.parent = this;
-                control.__load(options, model);
+                control.__load(options, control.__model = model);
 
                 return control;
             }
@@ -5958,14 +5967,6 @@ yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
-
-    var A = Array;
-
-    
-    // 标记不能被继承
-    Class.sealed = true;
-
-
     
     // 布局
     this.$property('layout', '', {
@@ -5999,6 +6000,10 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
 
+    // 子模型名称
+    this.$property('submodel', '', false);
+
+
     // 数据集合
     this.$property('data', null, {
 
@@ -6011,7 +6016,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
         set: function (value) {
 
-            if (value && value instanceof A && value.length > 0)
+            if (value && value.length > 0)
             {
                 this.__data = value;
 
@@ -6060,13 +6065,18 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     this.__load_content = function (value) {
 
-        var data = this.__data;
+        var data;
 
-        this.template = value;
-
-        if (data && value)
+        if (this.template = value)
         {
-            loadData(this, data);
+            if (data = this.__data)
+            {
+                loadData(this, data);
+            }
+            else if ((data = this.submodel) && (data = this.findSubmodel(data)))
+            {
+                loadData(this, data);
+            }
         }
     }
 
@@ -6074,6 +6084,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     // 当前作用域
     var scopeStack = null;
+
 
 
     this.loadTemplate = function (controls, scope, item, index, template) {
@@ -6393,11 +6404,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     var A = Array;
 
     
-    // 标记不能被继承
-    Class.sealed = true;
-
-
-    
     // 布局
     this.$property('layout', '', {
 
@@ -6465,7 +6471,7 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
     var message = 'control load error: ';
 
 
-    this.load = function (values, model) {
+    this.__load = function (values, model) {
 
         var storage = this.$storage;
         var name;
@@ -6475,37 +6481,32 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             throw new Error(message + 'modelbox control must bind a model!');
         }
 
-        base.load.call(this, values, model);
+        base.__load.call(this, values, model);
         
         if (name = storage.submodel)
         {
-            model = model.$findSubmodel(name);
-
-            if (model.__model_type !== 2)
-            {
-                throw new Error(message + 'modelbox submodel "' + name + '" not a valid array model!');
-            }
+            model = this.findSubmodel(name, model);
         }
 
-        this.reload(model);
+        reload(this, model);
     }
 
 
-    this.reload = function (array) {
+    function reload(modelbox, array) {
 
         if (!array || array.__model_type !== 2)
         {
             throw new Error(message + 'modelbox control must bind a array model!');
         }
 
-        var template = this.template;
+        var template = modelbox.template;
 
         if (!template)
         {
             throw new Error(message + 'modelbox control does not specify a template!');
         }
 
-        var children = this.__children;
+        var children = modelbox.__children;
         var old;
 
         if (children.length > 0)
@@ -6513,22 +6514,22 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
             children.clear();
         }
 
-        if (old = this.__array_model)
+        if (old = modelbox.__array_model)
         {
             if (old !== array)
             {
-                unbind(this, old);
-                bind(this, array);
+                unbind(modelbox, old);
+                bind(modelbox, array);
             }
         }
         else
         {
-            bind(this, array);
+            bind(modelbox, array);
         }
 
         if (array.length > 0)
         {
-            children.__insert(-1, createControls(this, array, template));
+            children.__insert(-1, createControls(modelbox, array, template));
         }
     }
 
@@ -6588,8 +6589,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
                 for (var j = 0; j < template_length; j++)
                 {
                     control = parent.$createSubControl(template[j], model);
-                    control.__model_item = model;
-
                     list[index++] = control;
                 }
             }
@@ -6603,8 +6602,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
                 model = array[i];
 
                 control = parent.$createSubControl(template, model);
-                control.__model_item = model;
-
                 list[i] = control;
             }
         }
@@ -6626,8 +6623,6 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
         if (template = this.template)
         {
             var control = this.$createSubControl(template, model);
-
-            control.__model_item = model;
             this.__children.set(index, control);
         }
     }
@@ -6665,8 +6660,8 @@ yaxi.ModelBox = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.__model_item.__index;
-        b = b.__model_item.__index;
+        a = a.__model.__index;
+        b = b.__model.__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
@@ -6822,6 +6817,10 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     this.$property('host', '', false);
 
 
+    // 页面充满模式
+    this.$property('full', true);
+
+
 
     // 获取或设置当前页索引
     this.$property('selectedIndex', -1, {
@@ -6882,12 +6881,12 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (!host)
             {
-                throw new Error('host of tab control not allow empty!'); 
+                throwError('host of tab control not allow empty!'); 
             }
 
             if (host[0] !== '<')
             {
-                throw new Error('host of tab control host must use "<" or "<<" to find up!');
+                throwError('host of tab control host must use "<" or "<<" to find up!');
             }
 
             if (host = this.find(host))
@@ -6897,13 +6896,19 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
                     return host;
                 }
 
-                throw new Error('tab control host of must be a Box!');
+                throwError('tab control host of must be a Box!');
             }
 
-            throw new Error('tab control can not find host "' + this.host + '"!');
+            throwError('tab control can not find host "' + this.host + '"!');
         }
     });
 
+
+
+    function throwError(text) {
+
+        throw new Error(text);
+    }
 
 
     function initIndex(index) {
@@ -6930,7 +6935,14 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                item.backstage = true;
+                if (tab.full)
+                {
+                    item.backstage = true;
+                }
+                else
+                {
+                    item.hidden = true;
+                }
             }
 
             if (item = event.lastItem)
@@ -6959,7 +6971,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         {
             if (page = item.module)
             {
-                page = event.page = new page();
+                page = event.page = new page(item.data);
                 tab.selectedHost.children.push(page);
             }
             else
@@ -6972,12 +6984,22 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
         {
             page.__tab = item.uuid;
 
-            page.position = 'absolute';
-            page.left = page.top = '0';
-            page.width = page.height = '100%';
+            if (tab.full)
+            {
+                page.position = 'absolute';
+                page.left = page.top = '0';
+                page.width = page.height = '100%';
+            }
         }
 
-        page.backstage = false;
+        if (tab.full)
+        {
+            page.backstage = false;
+        }
+        else
+        {
+            page.hidden = false;
+        }
     }
 
 
@@ -7687,6 +7709,35 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     }
 
 
+    function renderStylePatch(control, style) {
+        
+        var storage = control.$storage;
+        var converts = control.$converts;
+        var outputs = [];
+        var names = own(style);
+        var index = 0;
+        var convert, name;
+
+        while (name = names[index++])
+        {
+            storage[name] = style[name];
+        }
+
+        index = 0;
+        names = own(storage);
+
+        while (name = names[index++])
+        {
+            if ((convert = converts[name]) && convert.style)
+            {
+                outputs.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
+            }
+        }
+
+        return outputs.join('');
+    }
+
+
     function renderStorage(control, view, style) {
         
         var mixin = control.$mixin;
@@ -7718,6 +7769,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             }
         }
     }
+
 
 
     function renderChanges(control, changes, view, prefix) {
@@ -7775,14 +7827,12 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         {
             renderChanges(this, values, view, '');
             
-            mixin.onchange.call(this, view, '');    
+            this.$mixin.onchange.call(this, view, '');
             this.__changes = null;
         }
 
-        if (style.length > 0)
-        {
-            view.s = style.join('');
-        }
+        // 渲染样式并记录
+        this.__style_cache = style.length > 0 ? (view.s = style.join('')) : '';
 
         return view;
     }
@@ -7827,15 +7877,15 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
         if (values = this.__style)
         {
-            view.s = renderStyle(this, values, []).join('');
+            view[prefix + 's'] = renderStylePatch(this, values);
             this.__style = null;
         }
 
         if (values = this.__changes)
         {
             renderChanges(this, values, view, prefix);
-
-            mixin.onchange.call(this, view, prefix);
+            
+            this.$mixin.onchange.call(this, view, prefix);
             this.__changes = null;
         }
     }
@@ -8025,7 +8075,7 @@ yaxi.Box.mixin(function (mixin, base) {
 
 
 
-yaxi.ModelBox.mixin(function (mixin, base) {
+yaxi.DataBox.mixin(function (mixin, base) {
 
 
 
