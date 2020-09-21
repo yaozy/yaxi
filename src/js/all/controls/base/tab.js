@@ -131,14 +131,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                if (tab.full)
-                {
-                    item.backstage = true;
-                }
-                else
-                {
-                    item.hidden = true;
-                }
+                item.hidden = true;
             }
 
             if (item = event.lastItem)
@@ -176,26 +169,8 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        if (!page.__tab)
-        {
-            page.__tab = item.uuid;
-
-            if (tab.full)
-            {
-                page.position = 'absolute';
-                page.left = page.top = '0';
-                page.width = page.height = '100%';
-            }
-        }
-
-        if (tab.full)
-        {
-            page.backstage = false;
-        }
-        else
-        {
-            page.hidden = false;
-        }
+        page.tab = item.uuid;
+        page.hidden = false;
     }
 
 
@@ -209,7 +184,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
             for (var i = children.length; i--;)
             {
-                if (children[i].__tab === uuid)
+                if (children[i].tab === uuid)
                 {
                     return children[i];
                 }

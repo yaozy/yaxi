@@ -3369,7 +3369,17 @@ Object.extend.call(Array, function (Class, base) {
     
     this.filter = function (selector) {
     
-        if (selector = cache[selector] || parse(selector))
+        if (typeof selector === 'function')
+        {
+            for (var i = this.length; i--;)
+            {
+                if (!selector(this[i]))
+                {
+                    this.splice(i, 1);
+                }
+            }
+        }
+        else if (selector = cache[selector] || parse(selector))
         {
             for (var i = this.length; i--;)
             {
@@ -4694,6 +4704,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
+    
+    // 开放管道函数给模板用
+    this.pipe = yaxi.pipe.compile;
+
+
 
 
     // 扩展查找实现
@@ -4846,7 +4861,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__model = this.__b_onchange = this.__data_stack = null;
+        this.parent = this.__model = this.__b_onchange = this.__d_scope = null;
     }
 
 
@@ -5648,14 +5663,15 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     
 
 
-    function loadTemplate(controls, scope, item, index, template) {
+    function loadTemplate(controls, scope, index, item, template) {
 
         var control;
 
-        scope = scope.concat(item, index);
+        scope = scope.concat(index, item);
 
         if (control = this.$createSubControl(template, scope))
         {
+            control.__d_scope = scope;
             controls.push(control);
         }
     }
@@ -5664,21 +5680,24 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     function createControls(databox, data, template, scope) {
 
         var controls = [];
-        
-        scope = scope || initScopeStack(databox);
-        template(loadTemplate.bind(databox, controls, scope), data, scope);
+        var fn;
+
+        scope || (scope = findScope(databox));
+        fn = loadTemplate.bind(databox, controls, scope);
+
+        template(fn, data, scope);
 
         return controls;
     }
 
 
-    function initScopeStack(control) {
+    function findScope(control) {
 
         var stack;
 
         while (control)
         {
-            if (stack = control.__data_stack)
+            if (stack = control.__d_scope)
             {
                 return stack;
             }
@@ -5819,8 +5838,15 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     function sort(a, b) {
 
-        a = a.__model.__index;
-        b = b.__model.__index;
+        var index;
+
+        a = a.__d_scope;
+        b = b.__d_scope;
+
+        index = a.length - 1;
+
+        a = a[index].__index;
+        b = b[index].__index;
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
@@ -6310,14 +6336,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                if (tab.full)
-                {
-                    item.backstage = true;
-                }
-                else
-                {
-                    item.hidden = true;
-                }
+                item.hidden = true;
             }
 
             if (item = event.lastItem)
@@ -6355,26 +6374,8 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        if (!page.__tab)
-        {
-            page.__tab = item.uuid;
-
-            if (tab.full)
-            {
-                page.position = 'absolute';
-                page.left = page.top = '0';
-                page.width = page.height = '100%';
-            }
-        }
-
-        if (tab.full)
-        {
-            page.backstage = false;
-        }
-        else
-        {
-            page.hidden = false;
-        }
+        page.tab = item.uuid;
+        page.hidden = false;
     }
 
 
@@ -6388,7 +6389,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
             for (var i = children.length; i--;)
             {
-                if (children[i].__tab === uuid)
+                if (children[i].tab === uuid)
                 {
                     return children[i];
                 }
@@ -6835,8 +6836,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 })(yaxi);
-
-
 
 
 
@@ -7484,29 +7483,29 @@ yaxi.Marquee.mixin(function (mixin, base) {
 
     mixin.text = function (view, prefix, value) {
 
-        var length = value.length;
+        // var length = value.length;
 
-        view[prefix + 'text'] = value;
+        // view[prefix + 'text'] = value;
 
-        if (length > 0)
-        {
-            var speed = length >> 5;
+        // if (length > 0)
+        // {
+        //     var speed = length >> 5;
 
-            if ((speed << 5) < length)
-            {
-                speed++;
-            }
+        //     if ((speed << 5) < length)
+        //     {
+        //         speed++;
+        //     }
         
-            if (speed < 1)
-            {
-                speed = 1;
-            }
+        //     if (speed < 1)
+        //     {
+        //         speed = 1;
+        //     }
 
-            speed = speed * this.speed | 0;
-            value = 'marquee ' + speed + 's linear infinite';
-        }
+        //     speed = speed * this.speed | 0;
+        //     value = 'marquee ' + speed + 's linear infinite';
+        // }
 
-        view[prefix + 'animation'] = value;
+        // view[prefix + 'animation'] = value;
     }
 
 

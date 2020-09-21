@@ -4704,6 +4704,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
+    
+    // 开放管道函数给模板用
+    this.pipe = yaxi.pipe.compile;
+
+
 
 
     // 扩展查找实现
@@ -5658,11 +5663,11 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     
 
 
-    function loadTemplate(controls, scope, item, index, template) {
+    function loadTemplate(controls, scope, index, item, template) {
 
         var control;
 
-        scope = scope.concat(item, index);
+        scope = scope.concat(index, item);
 
         if (control = this.$createSubControl(template, scope))
         {
@@ -6331,14 +6336,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
             if (item = event.lastPage)
             {
-                if (tab.full)
-                {
-                    item.backstage = true;
-                }
-                else
-                {
-                    item.hidden = true;
-                }
+                item.hidden = true;
             }
 
             if (item = event.lastItem)
@@ -6376,26 +6374,8 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        if (!page.__tab)
-        {
-            page.__tab = item.uuid;
-
-            if (tab.full)
-            {
-                page.position = 'absolute';
-                page.left = page.top = '0';
-                page.width = page.height = '100%';
-            }
-        }
-
-        if (tab.full)
-        {
-            page.backstage = false;
-        }
-        else
-        {
-            page.hidden = false;
-        }
+        page.tab = item.uuid;
+        page.hidden = false;
     }
 
 
@@ -6409,7 +6389,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
             for (var i = children.length; i--;)
             {
-                if (children[i].__tab === uuid)
+                if (children[i].tab === uuid)
                 {
                     return children[i];
                 }
@@ -7874,33 +7854,33 @@ yaxi.Marquee.mixin(function (mixin, base) {
     
     mixin.text = function (view, value) {
 
-        var length = value.length;
+        // var length = value.length;
 
-        view = view.firstChild;
+        // view = view.firstChild;
 
-        if (length > 0)
-        {
-            var speed = length >> 5;
+        // if (length > 0)
+        // {
+        //     var speed = length >> 5;
 
-            if ((speed << 5) < length)
-            {
-                speed++;
-            }
+        //     if ((speed << 5) < length)
+        //     {
+        //         speed++;
+        //     }
         
-            if (speed < 1)
-            {
-                speed = 1;
-            }
+        //     if (speed < 1)
+        //     {
+        //         speed = 1;
+        //     }
 
-            speed = speed * this.speed | 0;
+        //     speed = speed * this.speed | 0;
     
-            value = '<span "margin-right:100rem;">' + value + '</span>';
+        //     value = '<span "margin-right:100rem;">' + value + '</span>';
     
-            view.innerHTML = value + value;
-            value = 'marquee ' + speed + 's linear infinite';
-        }
+        //     view.innerHTML = value + value;
+        //     value = 'marquee ' + speed + 's linear infinite';
+        // }
 
-        view.style.animation = value;
+        // view.style.animation = value;
     }
 
 

@@ -38,7 +38,7 @@ Component({
 
         // 冒泡事件处理方法
         handleEvent: function (event) {
-            
+
             var dataset = event.target.dataset;
             var id, t;
 

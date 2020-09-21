@@ -201,7 +201,7 @@
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
-            autoplay="{{ autoplay !== false }}"
+            autoplay="{{ autoplay === false }}"
             current="{{ current || 0 }}"
             interval="{{ interval || 5000 }}"
             duration="{{ duration || 500 }}"

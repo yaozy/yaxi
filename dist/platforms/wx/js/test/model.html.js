@@ -80,6 +80,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -104,7 +107,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function ($pipe) { return $item.$index }
+																"text":  function () { return $item.$index }
 															}
 														}
 													]
@@ -125,7 +128,7 @@ return (
 														{
 															"width": "200rem",
 															"bindings": {
-																"text":  function ($pipe) { return $item.name }
+																"text":  function () { return $item.name }
 															}
 														}
 													],
@@ -133,7 +136,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function ($pipe) { return $item.value }
+																"text":  function () { return $item.value }
 															}
 														}
 													],
@@ -141,7 +144,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function ($pipe) { return $item.computed }
+																"text":  function () { return $item.computed }
 															}
 														}
 													],
@@ -155,11 +158,14 @@ return (
 														},
 														function (template, __data_list, __data_scope) {
 
-															var $item = __data_scope[0];
-															var $index = __data_scope[1];
+															var $index = __data_scope[0];
+															var $item = __data_scope[1];
 
 															for (var $subindex = 0, __data_length = __data_list.length; $subindex < __data_length; $subindex++)
 															{
+																// 添加作用域解决循环变量绑定变化的问题
+																(function () {
+
 																var $subitem = __data_list[$subindex];
 
 																template($subindex, $subitem,
@@ -167,11 +173,13 @@ return (
 																		"text",
 																		{
 																			"bindings": {
-																				"text":  function ($pipe) { return 'index:' + $item.$index + '  subindex:' + $subitem.$index + '  text:' + $subitem.text }
+																				"text":  function () { return 'index:' + $item.$index + '  subindex:' + $subitem.$index + '  text:' + $subitem.text }
 																			}
 																		}
 																	]
 																);
+
+																})();
 															}
 
 															// end function
@@ -182,6 +190,8 @@ return (
 										]
 									]
 								);
+
+								})();
 							}
 
 							// end function

@@ -1054,6 +1054,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
+    
+    // 开放管道函数给模板用
+    this.pipe = yaxi.pipe.compile;
+
+
 
 
     // 扩展查找实现

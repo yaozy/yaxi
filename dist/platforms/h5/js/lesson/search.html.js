@@ -16,7 +16,7 @@ return (
 				"masklayer",
 				{
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.hidden }
+						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
 						"tap": $owner.handleClear.bind($owner)
@@ -46,7 +46,7 @@ return (
 							"border-radius": "60rem",
 							"padding": "0 120rem 0 60rem",
 							"bindings": {
-								"value":  function ($pipe) { return $model.text }
+								"value":  function () { return $model.text }
 							},
 							"events": {
 								"input": $owner.handleInput.bind($owner),
@@ -75,7 +75,7 @@ return (
 							"right": "20rem",
 							"text-align": "center",
 							"bindings": {
-								"hidden":  function ($pipe) { return $model.hidden }
+								"hidden":  function () { return $model.hidden }
 							},
 							"events": {
 								"tap": $owner.handleClear.bind($owner)
@@ -90,7 +90,7 @@ return (
 				{
 					"theme": "level1",
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.hidden }
+						"hidden":  function () { return $model.hidden }
 					}
 				},
 				[
@@ -122,7 +122,7 @@ return (
 								{
 									"theme": "font-primary",
 									"bindings": {
-										"text":  function ($pipe) { return $model.text }
+										"text":  function () { return $model.text }
 									}
 								}
 							],
@@ -151,6 +151,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -176,7 +179,7 @@ return (
 												{
 													"theme": "font-primary",
 													"bindings": {
-														"text":  function ($pipe) { return $model.text }
+														"text":  function () { return $model.text }
 													}
 												}
 											],
@@ -189,6 +192,8 @@ return (
 										]
 									]
 								);
+
+								})();
 							}
 
 							// end function

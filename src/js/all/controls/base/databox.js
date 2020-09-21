@@ -138,11 +138,11 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     
 
 
-    function loadTemplate(controls, scope, item, index, template) {
+    function loadTemplate(controls, scope, index, item, template) {
 
         var control;
 
-        scope = scope.concat(item, index);
+        scope = scope.concat(index, item);
 
         if (control = this.$createSubControl(template, scope))
         {

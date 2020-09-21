@@ -61,6 +61,9 @@ return (
 
 					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 					{
+						// 添加作用域解决循环变量绑定变化的问题
+						(function () {
+
 						var $item = __data_list[$index];
 
 						template($index, $item,
@@ -133,11 +136,14 @@ return (
 										},
 										function (template, __data_list, __data_scope) {
 
-											var $item = __data_scope[0];
-											var $index = __data_scope[1];
+											var $index = __data_scope[0];
+											var $item = __data_scope[1];
 
 											for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 											{
+												// 添加作用域解决循环变量绑定变化的问题
+												(function () {
+
 												var $lesson = __data_list[$index];
 
 												template($index, $lesson,
@@ -223,6 +229,8 @@ return (
 														]
 													]
 												);
+
+												})();
 											}
 
 											// end function
@@ -231,6 +239,8 @@ return (
 								]
 							]
 						);
+
+						})();
 					}
 
 					// end function

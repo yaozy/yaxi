@@ -12,6 +12,7 @@ return (
 				"box",
 				{
 					"key": "host",
+					"layout": "page",
 					"flex": "auto"
 				}
 			],

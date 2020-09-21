@@ -6,33 +6,33 @@ yaxi.Marquee.mixin(function (mixin, base) {
     
     mixin.text = function (view, value) {
 
-        var length = value.length;
+        // var length = value.length;
 
-        view = view.firstChild;
+        // view = view.firstChild;
 
-        if (length > 0)
-        {
-            var speed = length >> 5;
+        // if (length > 0)
+        // {
+        //     var speed = length >> 5;
 
-            if ((speed << 5) < length)
-            {
-                speed++;
-            }
+        //     if ((speed << 5) < length)
+        //     {
+        //         speed++;
+        //     }
         
-            if (speed < 1)
-            {
-                speed = 1;
-            }
+        //     if (speed < 1)
+        //     {
+        //         speed = 1;
+        //     }
 
-            speed = speed * this.speed | 0;
+        //     speed = speed * this.speed | 0;
     
-            value = '<span "margin-right:100rem;">' + value + '</span>';
+        //     value = '<span "margin-right:100rem;">' + value + '</span>';
     
-            view.innerHTML = value + value;
-            value = 'marquee ' + speed + 's linear infinite';
-        }
+        //     view.innerHTML = value + value;
+        //     value = 'marquee ' + speed + 's linear infinite';
+        // }
 
-        view.style.animation = value;
+        // view.style.animation = value;
     }
 
 

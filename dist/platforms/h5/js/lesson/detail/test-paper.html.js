@@ -13,6 +13,9 @@ return (
 
 			for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 			{
+				// 添加作用域解决循环变量绑定变化的问题
+				(function () {
+
 				var $item = __data_list[$index];
 
 				template($index, $item,
@@ -76,6 +79,8 @@ return (
 						]
 					]
 				);
+
+				})();
 			}
 
 			// end function
