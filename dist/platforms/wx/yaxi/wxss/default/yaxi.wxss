@@ -175,9 +175,6 @@
   font-size: 30rpx;
   overflow: hidden;
 }
-.yx-tabhost > .yx-control {
-  display: block;
-}
 .yx-text {
   display: inline-block;
 }

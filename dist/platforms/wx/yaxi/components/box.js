@@ -1,9 +1,7 @@
-const event = require('./event');
-
+const translateEvent = require('../js/yaxi').wx.translateEvent;
 
 
 // 本程序最低要支持的版本: 2.2.3
-
 
 
 Component({
@@ -31,12 +29,9 @@ Component({
    * 组件的方法列表
    */
   methods: {
-
-      // 冒泡事件处理方法
-      handleEvent: event.handleEvent,
-
-      // 不冒泡事件直接转换
-      translateEvent: event.translateEvent
+    
+    translateEvent: translateEvent
   }
+
 
 })

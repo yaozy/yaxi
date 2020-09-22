@@ -46,7 +46,7 @@
             this.$storage = extend(defaults);
         }
         
-        prototype.$converts = extend(null);
+        prototype.$properties = extend(null);
         
         Model.model = prototype.__model_type = 1;
         Model.prototype = prototype;
@@ -381,13 +381,8 @@
 
         try
         {
-            var target, fn;
-
-            bindingTarget = target = {
-                control: this.uuid,
-                property: '',
-                fn: null
-            }
+            var uuid = this.uuid;
+            var fn;
 
             for (var name in bindings)
             {
@@ -404,8 +399,11 @@
                     }
                     else // 表达式绑定
                     {
-                        target.property = name;
-                        target.fn = fn;
+                        bindingTarget = {
+                            control: uuid,
+                            property: name,
+                            fn: fn
+                        }
 
                         this[name] = fn(compile);
                     }
@@ -573,14 +571,14 @@
         if (values)
         {
             var storage = this.$storage || (this.$storage = {}),
-                converts = this.$converts,
+                properties = this.$properties,
                 convert;
 
             for (var name in values)
             {
-                if (convert = converts[name])
+                if ((convert = properties[name]) && (convert = convert.convert))
                 {
-                    storage[name] = convert.fn.call(this, values[name]);
+                    storage[name] = convert.call(this, values[name]);
                 }
                 else
                 {

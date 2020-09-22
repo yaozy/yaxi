@@ -39,9 +39,9 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.$converts.children = {
+    this.$properties.children = {
         
-        fn: function (values) {
+        convert: function (values) {
       
             if (values && values.length > 0)
             {

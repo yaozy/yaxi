@@ -21,7 +21,7 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
     // 是否自动切换
-    this.$property('autoplay', false);
+    this.$property('autoplay', true);
 
 
     // 当前所在滑块的 index

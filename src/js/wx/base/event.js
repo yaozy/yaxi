@@ -24,48 +24,26 @@
     var tapTime = new Date();
 
     // 开始触摸时的控件及时间
-    var touchControl, touchTime;
+    var touchControl, touchTime, touchFlag, touches;
 
-
-
-    var cache_uuid, cache_flag;
     
 
 
-    wx.translateEvent = function (event, uuid, flag) {
+    wx.translateEvent = function (event) {
 
-        var any;
-console.log(uuid, flag)
-        if (uuid)
-        {
-            cache_uuid = uuid;
-            cache_flag = flag = flag || '';
-        }
-        else
-        {
-            any = event.target.dataset;
-
-            if (uuid = any.id)
-            {
-                flag = any.flag;
-            }
-            else
-            {
-                uuid = cache_uuid;
-                flag = cache_flag;
-            }
-        }
+        var control, any;
 
         if (any = translates[event.type])
         {
-            any(event, uuid, flag);
+            any(event);
         }
-        else if (any !== false && (any = controls[uuid]))
+        else if (any !== false && (any = event.target.dataset) &&
+            (control = any.id) && (control = findControl(control)))
         {
             event = new Event(event.type, event.detail);
-            event.flag = flag;
+            event.flag = any.flag;
 
-            return any.trigger(event);
+            control.trigger(event);
         }
 
     }.bind(wx);
@@ -79,12 +57,12 @@ console.log(uuid, flag)
     }
     
     
-    function touchEvent(event, control, flag) {
+    function touchEvent(event) {
     
         var e = new Event(event.type);
     
-        e.target = control;
-        e.flag = flag;
+        e.target = touchControl;
+        e.flag = touchFlag;
         e.changedTouches = event.changedTouches;
         e.touches = event.touches;
     
@@ -92,6 +70,25 @@ console.log(uuid, flag)
     }
     
     
+    function touchendEvent(event) {
+
+        var touch1 = event.changedTouches;
+        var touch2 = touches;
+        var e = touchEvent(event);
+
+        if (touch1 && (touch1 = touch1[0]) && touch2 && (touch2 = touch2[0]))
+        {
+            var x = touch2.clientX - touch1.clientX;
+            var y = touch2.clientY - touch1.clientY;
+
+            e.distanceX = x;
+            e.distanceY = y;
+            e.move = x < -10 || x > 10 || y < -10 || y > 10;
+        }
+
+        return e;
+    }
+
     
     function call(control, name, event) {
     
@@ -110,18 +107,27 @@ console.log(uuid, flag)
     
     
     
-    translates.touchstart = function (event, uuid, flag) {
+    translates.touchstart = function (event) {
             
-        var control;
+        var control, dataset;
 
-        if (control = findControl(uuid))
+        // 阻止冒泡事件(触摸没有弹起时不处理)
+        if (touchControl)
         {
-            event = touchEvent(event, touchControl = control, flag);
+            return;
+        }
 
+        dataset = event.target.dataset;
+
+        if (control = findControl(dataset.id))
+        {
             touchControl = control;
+            touchFlag = dataset.flag;
             touchTime = new Date();
-            
             tap = true;
+
+            event = touchEvent(event);
+            touches = event.changedTouches;
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
@@ -138,7 +144,7 @@ console.log(uuid, flag)
     
         if (control = touchControl)
         {
-            event = touchEvent(event, control, cache_flag);
+            event = touchEvent(event);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -155,11 +161,12 @@ console.log(uuid, flag)
     
         if (control = touchControl)
         {
-            event = touchEvent(event, control, cache_flag);
+            event = touchendEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchend', event) === false || 
-                control.trigger(event) === false)
+                control.trigger(event) === false ||
+                event.move)  // 检测滑动距离
             {
                 return false;
             }
@@ -204,7 +211,7 @@ console.log(uuid, flag)
     
         if (control = touchControl)
         {
-            event = touchEvent(event, control, cache_flag);
+            event = touchEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchcancel', event) === false || 
@@ -216,20 +223,29 @@ console.log(uuid, flag)
     }
 
 
+
     // 不支持以下原生事件, 用touch模拟
     translates.tap = translates.longpress = false;
 
 
 
-    translates.input = translates.change = function (event, uuid, flag) {
+    translates.input = translates.change = function (event) {
 
-        var control;
+        var dataset = event.target.dataset;
+        var control, detail;
 
-        if (control = findControl(uuid))
+        if (control = findControl(dataset.id))
         {
-            event = new Event(event.type, event.detail);
+            detail = event.detail;
+
+            event = new Event(event.type);
             event.target = control;
-            event.flag = flag;
+            event.flag = dataset.flag;
+
+            if (detail)
+            {
+                event.value = detail.value || detail.current;
+            }
 
             return control.trigger(event);
         }

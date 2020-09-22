@@ -48,24 +48,32 @@ yaxi.impl.property = function (target) {
             throw new Error('define property error: "' + name + '" not a valid property name!'); 
         }
 
-        var converts = this.$converts;
+        var properties = this.$properties;
         var alias;
+
+        this.$defaults[name] = defaultValue = defaultValue != null ? defaultValue : null;
 
         if (!options || typeof options !== 'object')
         {
             options = {
+                name: name,
+                type: typeof defaultValue,
                 change: options !== false
             };
         }
+        else
+        {
+            options.name = name;
+            options.type || (options.type = typeof defaultValue);
+            options.change = options.change !== false;
+        }
 
-        this.$defaults[name] = defaultValue = defaultValue != null ? defaultValue : null;
+        options.defaultValue = defaultValue;
 
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
-            // 指定了get的情况下不支持转换器, 直接设置属性值
-            converts[name] = null;
-
+            options.convert || (options.convert = null);
             options.set || (options.set = function () {
 
                 var type = this.typeName;
@@ -74,27 +82,16 @@ yaxi.impl.property = function (target) {
         }
         else
         {
-            options.change = options.change !== false;
-            options.convert || (options.convert = cache[options.type || typeof defaultValue]);
-
+            options.convert || (options.convert = cache[options.type]);
             options.get = this.__build_get(name, options);
             options.set || (options.set = this.__build_set(name, options));
-
-            // convert等于false则不创建转换器
-            converts[name] = options.convert === false ? null : {
-                name: name,
-                change: options.change,
-                style: !!options.style,
-                fn: options.convert
-            };
         }
 
-        define(this, name, options);
+        define(this, name, properties[name] = options);
 
         if ((alias = options.alias) && alias !== name)
         {
-            converts[alias] = converts[name];
-            define(this, alias, options);
+            define(this, alias, properties[alias] = options);
         }
     }
 

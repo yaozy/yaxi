@@ -86,7 +86,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
         control = new Class();
         control.parent = parent;
-        control.__load(options);
+        control.load(options);
 
         return control;
     }

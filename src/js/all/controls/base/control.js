@@ -143,7 +143,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
                 control = new Class();
                 control.parent = this;
-                control.__load(options, scope);
+                control.load(options, scope);
 
                 return control;
             }
@@ -160,7 +160,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 转换器集合
-    this.$converts = create(null);
+    this.$properties = create(null);
 
 
     // 混入存储器(h5用来放置自定义渲染逻辑)
@@ -342,7 +342,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             options.change = false;
 
             // 不支持转换器
-            options.convert = false;
+            options.convert = null;
 
             return build_set_class(name, options.type === 'boolean', value);
         }
@@ -372,8 +372,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // id
-    this.$property('id', '');
+    // id 控件id仅做为内部属性用, 不会同步到dom节点上
+    this.$property('id', '', false);
 
 
     // 默认class
@@ -525,25 +525,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // 颜色转换函数, 把@color颜色变量转换成实际的颜色
-    var convertColor = function (translateFn, value) {
-
-        return value ? ('' + value).replace(this, translateFn) : '';
-
-    }.bind(/@([\w-]+)/g, function (_, key) {
-
-        return this[key];
-
-    }.bind(yaxi.color));
-    
-
-    function toString(value) {
-
-        return value ? '' + value : '';
-    }
-
-
-    var style = function (name, convert) {
+    var style = function (name, data) {
 
         this.$property(name, '', {
 
@@ -552,8 +534,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                 return x.toUpperCase();
             }),
 
-            style: true,
-            convert: convert || toString
+            kind: 'style',
+            data: data || '',
+            style: true
         });
 
     }.bind(this);
@@ -572,64 +555,64 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('overflow-y');
 
 
-    style('top');
+    style('top', 1);
 
-    style('right');
+    style('right', 1);
 
-    style('bottom');
+    style('bottom', 1);
 
-    style('left');
-
-
-    style('width');
+    style('left', 1);
 
 
-    style('height');
+    style('width', 1);
 
 
-    style('min-width');
+    style('height', 1);
 
 
-    style('max-width');
+    style('min-width', 1);
 
 
-    style('min-height');
+    style('max-width', 1);
 
 
-    style('max-height');
+    style('min-height', 1);
 
 
-    style('margin');
-
-    style('margin-top');
-
-    style('margin-right');
-
-    style('margin-bottom');
-
-    style('margin-left');
+    style('max-height', 1);
 
 
-    style('border', convertColor);
+    style('margin', 1);
 
-    style('border-top', convertColor);
+    style('margin-top', 1);
 
-    style('border-right', convertColor);
+    style('margin-right', 1);
 
-    style('border-bottom', convertColor);
+    style('margin-bottom', 1);
 
-    style('border-left', convertColor);
+    style('margin-left', 1);
 
 
-    style('padding');
+    style('border', 3);
 
-    style('padding-top');
+    style('border-top', 2);
 
-    style('padding-right');
+    style('border-right', 2);
 
-    style('padding-bottom');
+    style('border-bottom', 2);
 
-    style('padding-left');
+    style('border-left', 2);
+
+
+    style('padding', 1);
+
+    style('padding-top', 1);
+
+    style('padding-right', 1);
+
+    style('padding-bottom', 1);
+
+    style('padding-left', 1);
 
 
 
@@ -686,32 +669,32 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    style('outline', convertColor);
+    style('outline', 3);
 
-    style('outline-color', convertColor);
+    style('outline-color', 2);
 
     style('outline-style');
 
-    style('outline-offset');
+    style('outline-offset', 1);
 
-    style('outline-width');
+    style('outline-width', 1);
 
 
 
-    style('box-shadow', convertColor);
+    style('box-shadow', 3);
 
 
 
     //控件上右下左边框宽度
-    style('border-width');
+    style('border-width', 1);
 
-    style('border-top-width');
+    style('border-top-width', 1);
 
-    style('border-right-width');
+    style('border-right-width', 1);
 
-    style('border-bottom-width');
+    style('border-bottom-width', 1);
 
-    style('border-left-width');
+    style('border-left-width', 1);
 
 
     //控件上右下左边框样式
@@ -727,27 +710,27 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     //控件上右下左边框颜色
-    style('border-color', convertColor);
+    style('border-color', 2);
 
-    style('border-top-color', convertColor);
+    style('border-top-color', 2);
 
-    style('border-right-color', convertColor);
+    style('border-right-color', 2);
 
-    style('border-bottom-color', convertColor);
+    style('border-bottom-color', 2);
 
-    style('border-left-color', convertColor);
+    style('border-left-color', 2);
 
 
     //控件上右下左边框圆角
-    style('border-radius');
+    style('border-radius', 1);
 
-    style('border-top-left-radius');
+    style('border-top-left-radius', 1);
 
-    style('border-top-right-radius');
+    style('border-top-right-radius', 1);
 
-    style('border-bottom-left-radius');
+    style('border-bottom-left-radius', 1);
 
-    style('border-bottom-right-radius');
+    style('border-bottom-right-radius', 1);
 
 
     //阅读方向
@@ -762,14 +745,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 控件背景
-    style('background', convertColor);
+    style('background', 2);
 
 
     //控件背景颜色
     //color_name	规定颜色值为颜色名称的背景颜色(比如 red)  transparent:透明 
     //hex_number	规定颜色值为十六进制值的背景颜色(比如 #ff0000) 
     //rgb_number	规定颜色值为 rgb 代码的背景颜色(比如 rgb(255,0,0)) 
-    style('background-color', convertColor);
+    style('background-color', 2);
 
     //控件背景图片
     //string        图像名(空字符串则表示无背景)
@@ -795,18 +778,18 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     //bottom right  如果您仅规定了一个关键词, 那么第二个值将是'center'     默认值：0% 0% 
     //x% y%	        第一个值是水平位置, 第二个值是垂直位置     左上角是 0% 0% 右下角是 100% 100%     如果您仅规定了一个值, 另一个值将是 50% 
     //xpos ypos	    第一个值是水平位置, 第二个值是垂直位置     左上角是 0 0 单位是像素 (0px 0px) 或任何其他的 CSS 单位     如果您仅规定了一个值, 另一个值将是50%     您可以混合使用 % 和 position 值 
-    style('background-position');
+    style('background-position', 1);
 
 
     //控件颜色
     //color_name	规定颜色值为颜色名称的颜色(比如 red) 
     //hex_number	规定颜色值为十六进制值的颜色(比如 #ff0000) 
     //rgb_number	规定颜色值为 rgb 代码的颜色(比如 rgb(255,0,0)) 
-    style('color', convertColor);
+    style('color', 2);
 
 
     // 字体
-    style('font');
+    style('font', 3);
 
 
     //控件字体样式
@@ -829,7 +812,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('font-weight');
 
     //控件字体大小
-    style('font-size');
+    style('font-size', 1);
 
     //控件文字行高
     style('line-height');
@@ -839,14 +822,14 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     //
-    style('white-space');
+    style('white-space', 1);
 
 
     //控件文字词间距(以空格为准)
-    style('word-spacing');
+    style('word-spacing', 1);
 
     //控件文字字间距
-    style('letter-spacing');
+    style('letter-spacing', 1);
 
     //控件文字缩进
     style('text-indent');
@@ -866,15 +849,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('text-overflow');
 
 
-    style('text-shadow', convertColor);
+    style('text-shadow', 3);
 
 
 
     //转换
-    style('transform');
+    style('transform', 1);
 
 
-    style('transform-origin');
+    style('transform-origin', 1);
 
 
     style('transform-style');
@@ -944,64 +927,63 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     */
     this.load = function (values, scope) {
 
-        this.__load(values, scope);
-        return this;
-    }
-
-
-    this.__load = function (values, scope) {
-
-        var attributes, converts, convert, changes, style, value, any;
+        var attributes, properties, property, changes, style, fn, value;
 
         if (attributes = values[1])
         {
-            converts = this.$converts;
+            properties = this.$properties;
 
             for (var name in attributes)
             {
                 value = attributes[name];
 
-                if (convert = converts[name])
+                if (property = properties[name])
                 {
                     // 从转换器中获取存储名以解决别名存储的问题
-                    name = convert.name;
+                    name = property.name;
 
-                    if (any = convert.fn)
+                    if (fn = property.convert)
                     {
-                        value = any.call(this, value);
-                    }
+                        value = fn.call(this, value);
 
-                    if (convert.style)
-                    {
-                        (style || (style = this.__style = create(this.$storage)))[name] = value;
+                        if (property.style)
+                        {
+                            (style || (style = this.__style = create(this.$storage)))[name] = value;
+                        }
+                        else if (property.change) // 需要处理变化
+                        {
+                            (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
+                        }
+                        else
+                        {
+                            this.$storage[name] = value;
+                        }
                     }
-                    else if (convert.change) // 需要处理变化
+                    else if (fn !== false)
                     {
-                        (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
-                    }
-                    else
-                    {
-                        this.$storage[name] = value;
+                        this[name] = value;
                     }
                 }
-                else if (convert !== false)
+                else
                 {
                     this[name] = value;
                 }
             }
         }
 
-        if ((values = values[2]) && (any = this.__load_content))
+        if ((value = values[2]) && (fn = this.__load_content))
         {
-            any.call(this, values, scope);
+            fn.call(this, value, scope);
         }
+
+        return this;
     }
     
 
 
-    this.$converts.bindings = {
+    this.$properties.bindings = {
         
-        fn: yaxi.$bind
+        convert: yaxi.$bind
     };
 
 
@@ -1056,9 +1038,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     yaxi.__content_count = 0;
 
 
-    this.$converts.events = {
+    this.$properties.events = {
         
-        fn: function (events) {
+        convert: function (events) {
 
             // 容器控件内部不允许绑定事件
             if (yaxi.__content_count > 0)
@@ -1201,7 +1183,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         Class.allowParent = true;
 
         this.$defaults = create(this.$defaults);
-        this.$converts = create(this.$converts);
+        this.$properties = create(this.$properties);
         this.$mixin = create(this.$mixin);
     }
 

@@ -5,7 +5,7 @@
     data-id="{{ d.u }}"
     class="yx-host yx-page{{ d.class }}" 
     style="{{ d.s }}top:{{ top }}px;"
-    bindtouchstart="handleEvent"
+    bindtouchstart="translateEvent"
     bindtouchmove="translateEvent"
     bindtouchcancel="translateEvent"
     bindtouchend="translateEvent"

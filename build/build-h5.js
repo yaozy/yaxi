@@ -15,7 +15,7 @@ new Compressor()
         'js/h5/renderer/base/(control|content-control|box).js',
         'js/h5/renderer/base/*.js',
         'js/h5/renderer/form/(textbox|checkbox|numberbox|passwordbox|memo|radiobutton|switchbutton).js',
-        'js/h5/renderer/page/(page|header|title).js',
+        'js/h5/renderer/page/(page|header).js',
     ])
     .combine('\r\n\r\n\r\n\r\n')
     .output('dist/platforms/h5/yaxi/js/yaxi.js')

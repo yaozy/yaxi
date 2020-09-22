@@ -7,6 +7,17 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     var own = Object.getOwnPropertyNames; 
 
 
+    // 颜色转换函数, 把@color颜色变量转换成实际的颜色
+    var convertColor = function (translateFn, value) {
+
+        return value ? ('' + value).replace(this, translateFn) : '';
+
+    }.bind(/@([\w-]+)/g, function (_, key) {
+
+        return this[key];
+
+    }.bind(yaxi.color));
+    
 
 
     function renderStyle(control, style, outputs) {
@@ -34,7 +45,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     function renderStylePatch(control, style) {
         
         var storage = control.$storage;
-        var converts = control.$converts;
+        var properties = control.$properties;
         var outputs = [];
         var names = own(style);
         var index = 0;
@@ -50,7 +61,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
         while (name = names[index++])
         {
-            if ((convert = converts[name]) && convert.style)
+            if ((convert = properties[name]) && convert.style)
             {
                 outputs.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
             }
@@ -64,14 +75,14 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         
         var mixin = control.$mixin;
         var storage = control.$storage;
-        var converts = control.$converts;
+        var properties = control.$properties;
         var names = own(storage);
         var index = 0;
         var convert, name, fn;
 
         while (name = names[index++])
         {
-            if (convert = converts[name])
+            if (convert = properties[name])
             {
                 if (convert.style)
                 {

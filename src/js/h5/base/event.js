@@ -46,7 +46,7 @@
     var tapTime = new Date();
 
     // 开始触摸时的控件及时间
-    var touchControl, touchTime;
+    var touchControl, touchTime, touches;
     
     // dom标记
     var flag;
@@ -62,7 +62,7 @@
         {
             f || (f = view.getAttribute('flag'));
 
-            if ((uuid = view.$uuid) && (control = controls[uuid]))
+            if ((uuid = view.id) && (control = controls[uuid]))
             {
                 flag = f || '';
                 return control.findEventTarget();
@@ -74,11 +74,11 @@
 
     
 
-    function touchEvent(event, control) {
+    function touchEvent(event) {
 
         var e = new Event(event.type);
 
-        e.target = control;
+        e.target = touchControl;
         e.flag = flag;
         e.changedTouches = parseTouches(event.changedTouches);
         e.touches = parseTouches(event.touches);
@@ -87,14 +87,37 @@
     }
 
 
+    function touchendEvent(event) {
+
+        var touch1 = touches;
+        var touch2 = event.changedTouches;
+        var e = touchEvent(event);
+
+        if (touch1 && (touch1 = touch1[0]) && touch2 && (touch2 = touch2[0]))
+        {
+            var x = touch2.clientX - touch1.clientX;
+            var y = touch2.clientY - touch1.clientY;
+
+            e.distanceX = x;
+            e.distanceY = y;
+            e.move = x < -10 || x > 10 || y < -10 || y > 10;
+        }
+
+        return e;
+    }
+
+
     function parseTouches(touches) {
 
-        for (var i = touches.length; i--;)
+        var index = touches.length;
+        var list = new Array(index);
+
+        while (index--)
         {
-            var touch = touches[i];
+            var touch = touches[index];
 
             // 微信小程序只支持以下touch属性
-            touches[i] = {
+            list[index] = {
                 identifier: touch.identifier,
                 pageX: touch.pageX,
                 pageY: touch.pageY,
@@ -102,6 +125,8 @@
                 clientY: touch.clientY 
             }
         }
+
+        return list;
     }
 
 
@@ -143,12 +168,12 @@
 
         if (control = findControl(event.target))
         {
-            event = touchEvent(event, control);
-
             touchControl = control;
             touchTime = new Date();
-            
             tap = true;
+
+            event = touchEvent(event);
+            touches = event.changedTouches;
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
@@ -166,7 +191,7 @@
 
         if (control = touchControl)
         {
-            event = touchEvent(event, control);
+            event = touchEvent(event);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -189,11 +214,12 @@
 
         if (control = touchControl)
         {
-            event = touchEvent(event, control);
+            event = touchendEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchend', event) === false || 
-                control.trigger(event) === false)
+                control.trigger(event) === false ||
+                event.move)  // 检测滑动距离
             {
                 return false;
             }
@@ -239,7 +265,7 @@
 
         if (control = touchControl)
         {
-            event = touchEvent(event, control);
+            event = touchEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchcancel', event) === false || 

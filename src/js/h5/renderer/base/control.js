@@ -7,6 +7,17 @@ yaxi.Control.mixin(function (mixin) {
     var div = document.createElement('div');
 
 
+        // 颜色转换函数, 把@color颜色变量转换成实际的颜色
+        var convertColor = function (translateFn, value) {
+
+            return value ? ('' + value).replace(this, translateFn) : '';
+    
+        }.bind(/@([\w-]+)/g, function (_, key) {
+    
+            return this[key];
+    
+        }.bind(yaxi.color));
+        
     
 
     yaxi.template = function (target, html) {
@@ -40,8 +51,7 @@ yaxi.Control.mixin(function (mixin) {
 
         var view = this.$view || (this.$view = (this.constructor.__dom_template || init_template(this)).cloneNode(true));
 
-        view.$uuid = this.uuid;
-
+        view.id = this.uuid;
         this.patch(view);
 
         return view;
@@ -211,12 +221,6 @@ yaxi.Control.mixin(function (mixin) {
         view.className = this.$class + class1 + class2;
     }
 
-
-
-    mixin.id = function (view, value) {
-
-        view.id = value;
-    }
 
 
     mixin.hidden = function (view, value) {
