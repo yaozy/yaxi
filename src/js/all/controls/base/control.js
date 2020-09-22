@@ -381,30 +381,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
-    function change_active(active) {
-
-        this.__active = active;
-
-        this.__class_dirty = true;
-        this.__dirty || patch(this);
-    }
-
-
-    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
-    this.__change_active = function (active) {
-
-        if (active)
-        {
-            change_active.call(this, active);
-        }
-        else
-        {
-            setTimeout(change_active.bind(this, active), 50);
-        }
-    }
-
-
     
     // 控件风格
     this.$property('theme', '', {
@@ -413,21 +389,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
     
 
+
     // 是否隐藏
-    this.$property('hidden', false, {
-
-        type: 'boolean',
-        class: 'yx-hidden'
-    });
-
-
-    // 是否退居幕后
-    this.$property('backstage', false, {
-
-        type: 'boolean',
-        class: 'yx-backstage'
-    })
-
+    this.$property('hidden', false);
 
 
     // 是否禁用

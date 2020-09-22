@@ -26,7 +26,7 @@
   background-color: #1c86ee;
   color: #f7f7f7;
 }
-.yx-button.active {
+.yx-button:active {
   background-color: #5eaadd;
 }
 .yx-databox {
@@ -167,13 +167,16 @@
   background-color: #1c86ee;
   opacity: 0.8;
 }
-.yx-tab {
+.yx-tabbar {
   display: -webkit-flex;
   display: flex;
   justify-items: stretch;
   height: 100rpx;
   font-size: 30rpx;
   overflow: hidden;
+}
+.yx-tabhost > .yx-control {
+  display: block;
 }
 .yx-text {
   display: inline-block;
@@ -343,12 +346,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-}
-.yx-layout-page > .yx-hidden {
-  visibility: hidden;
-}
-.yx-hidden {
-  display: none;
 }
 .yx-theme-level1 {
   background-color: #ffffff;

@@ -136,15 +136,6 @@
     }
 
 
-    function stop(event) {
-      
-        event.stopPropagation();
-        event.preventDefault();
-
-        return false;
-    }
-
-
     
 	bind('touchstart', function (event) {
 		
@@ -152,17 +143,17 @@
 
         if (control = findControl(event.target))
         {
-            var e = touchEvent(event, control);
+            event = touchEvent(event, control);
 
-            control.__change_active(true);
             touchControl = control;
             touchTime = new Date();
             
             tap = true;
 
-            if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchstart', event) === false || 
+                control.trigger(event) === false)
             {
-                return tap = stop(event);
+                return tap = false;
             }
         }
 
@@ -175,22 +166,18 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
+            event = touchEvent(event, control);
 
-            if (call(control, '__on_touchmove', e) === false)
+            if (call(control, '__on_touchmove', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
-            }
-
-            if (control.trigger(e) === false)
-            {
-                return tap = stop(event);
+                return tap = false;
             }
         }
 
         if (yaxi.h5.weixin)
         {
-            return stop(event);
+            return false;
         }
 
 	}, true);
@@ -202,24 +189,23 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
-
+            event = touchEvent(event, control);
             touchControl = null;
-            control.__change_active(false);
 
-            if (call(control, '__on_touchend', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchend', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
+                return false;
             }
 
             // 按下大于350毫秒则触发longpress事件
             if ((time = new Date()) - touchTime > 350)
             {
-                e.type = 'longpress';
+                event.type = 'longpress';
 
-                if (control.trigger(e) === false)
+                if (control.trigger(event) === false)
                 {
-                    return stop(event);
+                    return false;
                 }
             }
 
@@ -232,11 +218,12 @@
                     tapControl = control;
                     tapTime = time;
     
-                    e.type = 'tap';
+                    event.type = 'tap';
      
-                    if (call(control, '__on_tap', e) !== false)
+                    if (call(control, '__on_tap', event) === false || 
+                        control.trigger(event) === false)
                     {
-                        control.trigger(e) === false
+                        return false;
                     }
 
                 }, 0);
@@ -252,14 +239,13 @@
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
-
+            event = touchEvent(event, control);
             touchControl = null;
-            control.__change_active(false);
 
-            if (call(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchcancel', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
+                return false;
             }
         }
 

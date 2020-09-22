@@ -1,4 +1,5 @@
 const yaxi = require('../js/yaxi');
+const event = require('../components/event');
 
 
 Page({
@@ -61,6 +62,10 @@ Page({
     },
 
 
-    handleEvent: yaxi.wx.translateEvent
+    // 冒泡事件处理方法
+    handleEvent: event.handleEvent,
+
+    // 不冒泡事件直接转换
+    translateEvent: event.translateEvent
 
 })

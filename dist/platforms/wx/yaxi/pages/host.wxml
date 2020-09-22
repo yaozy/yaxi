@@ -1,17 +1,14 @@
 <import src="../components/template.wxml" />
 
 <view class="yx-statusbar" style="height:{{ top }}px;" />
-<view class="yx-host" style="top:{{ top }}px;" 
+<box 
+    data-id="{{ d.u }}"
+    class="yx-host yx-page{{ d.class }}" 
+    style="{{ d.s }}top:{{ top }}px;"
     bindtouchstart="handleEvent"
-    bindtouchmove="handleEvent"
-    bindtouchcancel="handleEvent"
-    bindtouchend="handleEvent"
-    bindtouchforcechange="handleEvent"
-    bindtap="handleEvent"
-    bindlongpress="handleEvent"
-    bindtransitionend="handleEvent"
-    bindanimationstart="handleEvent"
-    bindanimationiteration="handleEvent"
-    bindanimationend="handleEvent">
-    <template wx:if="{{ d }}" is="{{ d.t }}" data="{{ ...d }}" />
-</view>
+    bindtouchmove="translateEvent"
+    bindtouchcancel="translateEvent"
+    bindtouchend="translateEvent"
+    bindtouchforcechange="translateEvent"
+    children="{{ d.c }}">
+</box>

@@ -3,8 +3,8 @@
     <text
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-text{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
+        class="yx-control yx-text{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         decode
         bindtouchstart="handleEvent">{{ text }}</text>
 
@@ -14,11 +14,11 @@
 <template name="TextBox">
 
     <input
-        type="{{ type || 'text' }}"
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-textbox{{ active }}{{ class }}"
-        style="{{ s || '' }}"
+        class="yx-control yx-textbox{{ class }}"
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        type="{{ type || 'text' }}"
         value="{{ value || '' }}"
         placeholder="{{ placeholder || '' }}"
         disabled="{{ disabled }}"
@@ -43,13 +43,13 @@
 
 <template name="Button">
 
-    <box
+    <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-button{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
+        class="yx-control yx-button{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
@@ -59,8 +59,8 @@
     <view
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-icon iconfont{{ active }}{{ class }}"
-        style="{{ s || '' }}"
+        class="yx-control yx-icon iconfont{{ class }}"
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="handleEvent" />
 
 </template>
@@ -71,28 +71,34 @@
     <image
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-image{{ active }}{{ class }}"
-        style="{{ s || '' }}"
+        class="yx-control yx-image{{ class }}"
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         src="{{ src }}"
         mode="{{ mode }}"
         lazy-load="{{ lazy }}"
         show-menu-by-longpress
         bindtouchstart="handleEvent"
-        bindload="handleEvent"
-        binderror="handleEvent" />
+        bindload="translateEvent"
+        binderror="translateEvent" />
 
 </template>
 
 
 <template name="IconButton">
 
-    <view data-id="{{ u }}"
+    <view 
+        data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-iconbutton{{ active }}{{ class }}" 
-        style="{{ s || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        class="yx-control yx-iconbutton{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
-        <view class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" data-id="{{ u }}" />
-        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
+        <view 
+            data-id="{{ u }}"
+            class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" />
+        <box 
+            data-id="{{ u }}"
+            class="yx-iconbutton-content"
+            children="{{ c }}" />
     </view>
 
 </template>
@@ -100,13 +106,20 @@
 
 <template name="ImageButton">
 
-    <view data-id="{{ u }}"
+    <view 
+        data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-imagebutton{{ active }}{{ class }}" 
-        style="{{ s || '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        class="yx-control yx-imagebutton{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
         bindtouchstart="handleEvent">
-        <image class="yx-imagebutton-image" data-id="{{ u }}" src="{{ src }}" />
-        <box class="yx-iconbutton-content" data-id="{{ u }}" children="{{ c }}" />
+        <image 
+            data-id="{{ u }}" 
+            class="yx-imagebutton-image" 
+            src="{{ src }}" />
+        <box 
+            data-id="{{ u }}" 
+            class="yx-iconbutton-content"
+            children="{{ c }}" />
     </view>
 
 </template>
@@ -117,9 +130,9 @@
     <rich-text
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-richtext{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        nodes="{{ data }}" 
+        class="yx-control yx-richtext{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        nodes="{{ data }}"
         bindtouchstart="handleEvent" />
 
 </template>
@@ -130,23 +143,23 @@
     <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
+        class="yx-control yx-box{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
 
 <template name="DataBox">
 
-<box 
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-box yx-databox{{ active }}{{ class }}" 
-    style="{{ s || '' }}"
-    bindtouchstart="handleEvent"
-    children="{{ c }}" />
+    <box 
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-databox{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
@@ -154,15 +167,13 @@
 
 <template name="ScrollBox">
 
-    <scroll-view 
+    <scroll-view
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-scrollbox{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        scroll-x="{{ scrollX }}"
-        scroll-y="{{ scrollY !== false }}"
+        class="yx-control yx-box yx-scrollbox{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="handleEvent">
-        <box wx:if="{{ c }}" children="{{ c }}" />
+        <box data-id="{{ u }}" children="{{ c }}" bindtouchstart="handleEvent" />
     </scroll-view>
 
 </template>
@@ -170,24 +181,24 @@
 
 <template name="Line">
 
-<view
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-line{{ active }}{{ class }}" 
-    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s || '' }}"
-    bindtouchstart="handleEvent" />
+    <view
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-line{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
 
 <template name="Vline">
 
-<view
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-vline{{ active }}{{ class }}" 
-    style="{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}{{ s || '' }}"
-    bindtouchstart="handleEvent" />
+    <view
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-vline{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
@@ -196,8 +207,9 @@
 
     <view data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-swiper{{ active }}{{ class }}" 
-        style="{{ s || '' }}">
+        class="yx-control yx-box yx-swiper{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        bindtouchstart="handleEvent">
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
@@ -209,8 +221,7 @@
             vertical="{{ vertical }}"
             previous-margin="{{ before }}"
             next-margin="{{ after }}"
-            bindchange="translateEvent"
-            bindtouchstart="handleEvent">
+            bindchange="translateEvent">
             <swiper-item 
                 wx:for="{{ c }}"
                 wx:key="u"
@@ -236,52 +247,70 @@
 </template>
 
 
-<template name="Tab">
+<template name="TabBar">
 
     <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-tab{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
+        class="yx-control yx-tabbar{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="handleEvent" />
 
 </template>
 
 
-<template name="Page">
+<template name="TabHost">
 
     <box 
         data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-box yx-page{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
-        bindtouchstart="handleEvent"
-        children="{{ c }}" />
+        class="yx-control yx-box yx-tabhost{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="handleEvent" />
 
 </template>
+
 
 
 <template name="Header">
-    <view data-id="{{ u }}"
+
+    <view 
+        data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-header{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
+        class="yx-control yx-header{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="handleEvent">
-        <view class="yx-header-back iconfont icon-common-back" style="display: {{ back ? '' : 'none' }};" data-id="{{ u }}" data-flag="back" />
-        <view class="{{ icon ? 'yx-header-icon ' + icon : 'yx-header-hide' }}" data-id="{{ u }}" />
-        <box class="yx-header-host" data-id="{{ u }}" children="{{ c }}" />
+        <view 
+            data-id="{{ u }}" 
+            data-flag="back"
+            class="yx-header-back iconfont icon-common-back" 
+            style="{{ back ? '' : 'display:none;' }}" />
+        <view 
+            data-id="{{ u }}"
+            data-flag="icon"
+            class="{{ icon ? 'yx-header-icon ' + icon : '' }}"
+            style="{{ icon ? '' : 'display:none;' }}" />
+        <box 
+            data-id="{{ u }}" 
+            data-flag="content"
+            class="yx-header-host"
+            children="{{ c }}"
+            bind:touchstart="handleEvent" />
     </view>
+
 </template>
 
 
 
 <template name="MaskLayer">
 
-    <view data-id="{{ u }}"
+    <view 
+        data-id="{{ u }}"
         id="{{ id }}"
-        class="yx-control yx-masklayer{{ active }}{{ class }}" 
-        style="{{ s || '' }}"
+        class="yx-control yx-masklayer{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="handleEvent" />
 
 </template>
@@ -290,16 +319,16 @@
 
 <template name="Marquee">
 
-<view
-    data-id="{{ u }}"
-    id="{{ id }}"
-    class="yx-control yx-marquee{{ active }}{{ class }}" 
-    style="{{ s || '' }}"
-    bindtouchstart="handleEvent">
-    <view class="yx-marquee-content" style="animation:{{ animation || '' }}">
-        <text style="margin-right:100rpx;">{{ text || '' }}</text>
-        <text style="margin-right:100rpx;">{{ text || '' }}</text>
+    <view
+        data-id="{{ u }}"
+        id="{{ id }}"
+        class="yx-control yx-marquee{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        bindtouchstart="handleEvent">
+        <view data-id="{{ u }}" class="yx-marquee-content" style="animation:{{ animation || '' }}">
+            <text data-id="{{ u }}" style="margin-right:100rpx;">{{ text || '' }}</text>
+            <text data-id="{{ u }}" style="margin-right:100rpx;">{{ text || '' }}</text>
+        </view>
     </view>
-</view>
 
 </template>

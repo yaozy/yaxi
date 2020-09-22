@@ -4031,30 +4031,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
-    function change_active(active) {
-
-        this.__active = active;
-
-        this.__class_dirty = true;
-        this.__dirty || patch(this);
-    }
-
-
-    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
-    this.__change_active = function (active) {
-
-        if (active)
-        {
-            change_active.call(this, active);
-        }
-        else
-        {
-            setTimeout(change_active.bind(this, active), 50);
-        }
-    }
-
-
     
     // 控件风格
     this.$property('theme', '', {
@@ -4063,21 +4039,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
     
 
+
     // 是否隐藏
-    this.$property('hidden', false, {
-
-        type: 'boolean',
-        class: 'yx-hidden'
-    });
-
-
-    // 是否退居幕后
-    this.$property('backstage', false, {
-
-        type: 'boolean',
-        class: 'yx-backstage'
-    })
-
+    this.$property('hidden', false);
 
 
     // 是否禁用
@@ -6203,7 +6167,7 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
 
-yaxi.Tab = yaxi.Box.extend(function (Class, base) {
+yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
@@ -6215,7 +6179,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
     // 容器宿主
-    this.$property('host', '', false);
+    this.$property('tabhost', '', false);
 
 
     // 页面充满模式
@@ -6278,38 +6242,37 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
         get: function () {
 
-            var host = this.host;
+            var host = this.tabhost;
 
             if (!host)
             {
-                throwError('host of tab control not allow empty!'); 
+                host = '<* >TabHost';
             }
-
-            if (host[0] !== '<')
+            else if (host[0] !== '<')
             {
-                throwError('host of tab control host must use "<" or "<<" to find up!');
+                throwError('use "<" or "<<" to begin!');
             }
 
             if (host = this.find(host))
             {
-                if (host.children)
+                if (host instanceof yaxi.TabHost)
                 {
                     return host;
                 }
 
-                throwError('tab control host of must be a Box!');
+                throwError('be a TabHost!');
             }
 
-            throwError('tab control can not find host "' + this.host + '"!');
+            return null;
         }
     });
 
 
-
     function throwError(text) {
 
-        throw new Error(text);
+        throw new Error('the tabhost property of TabBar control must ' + text);
     }
+
 
 
     function initIndex(index) {
@@ -6318,21 +6281,21 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     }
 
 
-    function changeIndex(tab, index, lastIndex) {
+    function changeIndex(tabbar, index, lastIndex) {
 
-        var children = tab.children;
+        var children = tabbar.children;
         var event = new yaxi.Event('changing');
         var item;
 
         event.lastIndex = lastIndex;
-        event.lastPage = tab.findPage(event.lastItem = children[lastIndex] || null);
+        event.lastPage = tabbar.findPage(event.lastItem = children[lastIndex] || null);
 
         event.index = index;
-        event.page = tab.findPage(event.item = children[index] || null);
+        event.page = tabbar.findPage(event.item = children[index] || null);
 
-        if (tab.trigger(event) !== false)
+        if (tabbar.trigger(event) !== false)
         {
-            tab.$storage.selectedIndex = index;
+            tabbar.$storage.selectedIndex = index;
 
             if (item = event.lastPage)
             {
@@ -6347,26 +6310,27 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             if (item = event.item)
             {
                 item.selected = true;
-                checkPage(tab, event);
+                checkPage(tabbar, event);
             }
 
             event.type = 'changed';
-            tab.trigger(event);
+            tabbar.trigger(event);
         }
     }
 
 
-    function checkPage(tab, event) {
+    function checkPage(tabbar, event) {
 
         var page = event.page;
         var item = event.item;
+        var host;
 
         if (!page)
         {
-            if (page = item.module)
+            if ((page = item.module) && (host = tabbar.selectedHost))
             {
                 page = event.page = new page(item.data);
-                tab.selectedHost.children.push(page);
+                host.children.push(page);
             }
             else
             {
@@ -6374,7 +6338,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        page.tab = item.uuid;
+        page.tabbar = item.uuid;
         page.hidden = false;
     }
 
@@ -6382,14 +6346,16 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
     this.findPage = function (item) {
 
-        if (item)
+        var host;
+
+        if (item && (host = this.selectedHost))
         {
-            var children = this.selectedHost.children;
+            var children = host.children;
             var uuid = item.uuid;
     
             for (var i = children.length; i--;)
             {
-                if (children[i].tab === uuid)
+                if (children[i].tabbar === uuid)
                 {
                     return children[i];
                 }
@@ -6413,13 +6379,24 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
 
-}, function Tab() {
+}, function TabBar() {
 
 
     yaxi.Box.apply(this, arguments);
 
 
-}).register('Tab');
+}).register('TabBar');
+
+
+
+
+yaxi.TabHost = yaxi.Box.extend(function (Class, base) {
+
+}, function () {
+
+    yaxi.Box.apply(this, arguments);
+
+}).register('TabHost');
 
 
 
@@ -6994,15 +6971,6 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     }
 
 
-    function stop(event) {
-      
-        event.stopPropagation();
-        event.preventDefault();
-
-        return false;
-    }
-
-
     
 	bind('touchstart', function (event) {
 		
@@ -7010,17 +6978,17 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = findControl(event.target))
         {
-            var e = touchEvent(event, control);
+            event = touchEvent(event, control);
 
-            control.__change_active(true);
             touchControl = control;
             touchTime = new Date();
             
             tap = true;
 
-            if (call(control, '__on_touchstart', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchstart', event) === false || 
+                control.trigger(event) === false)
             {
-                return tap = stop(event);
+                return tap = false;
             }
         }
 
@@ -7033,22 +7001,18 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
+            event = touchEvent(event, control);
 
-            if (call(control, '__on_touchmove', e) === false)
+            if (call(control, '__on_touchmove', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
-            }
-
-            if (control.trigger(e) === false)
-            {
-                return tap = stop(event);
+                return tap = false;
             }
         }
 
         if (yaxi.h5.weixin)
         {
-            return stop(event);
+            return false;
         }
 
 	}, true);
@@ -7060,24 +7024,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
-
+            event = touchEvent(event, control);
             touchControl = null;
-            control.__change_active(false);
 
-            if (call(control, '__on_touchend', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchend', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
+                return false;
             }
 
             // 按下大于350毫秒则触发longpress事件
             if ((time = new Date()) - touchTime > 350)
             {
-                e.type = 'longpress';
+                event.type = 'longpress';
 
-                if (control.trigger(e) === false)
+                if (control.trigger(event) === false)
                 {
-                    return stop(event);
+                    return false;
                 }
             }
 
@@ -7090,11 +7053,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
                     tapControl = control;
                     tapTime = time;
     
-                    e.type = 'tap';
+                    event.type = 'tap';
      
-                    if (call(control, '__on_tap', e) !== false)
+                    if (call(control, '__on_tap', event) === false || 
+                        control.trigger(event) === false)
                     {
-                        control.trigger(e) === false
+                        return false;
                     }
 
                 }, 0);
@@ -7110,14 +7074,13 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
         if (control = touchControl)
         {
-            var e = touchEvent(event, control);
-
+            event = touchEvent(event, control);
             touchControl = null;
-            control.__change_active(false);
 
-            if (call(control, '__on_touchcancel', e) === false || control.trigger(e) === false)
+            if (call(control, '__on_touchcancel', event) === false || 
+                control.trigger(event) === false)
             {
-                return stop(event);
+                return false;
             }
         }
 
@@ -7533,7 +7496,7 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view.className = this.$class + class1 + class2 + (this.__active ? ' active' : '');
+        view.className = this.$class + class1 + class2;
     }
 
 
@@ -7541,6 +7504,12 @@ yaxi.Control.mixin(function (mixin) {
     mixin.id = function (view, value) {
 
         view.id = value;
+    }
+
+
+    mixin.hidden = function (view, value) {
+
+        view.style.display = value ? 'none' : '';
     }
 
 

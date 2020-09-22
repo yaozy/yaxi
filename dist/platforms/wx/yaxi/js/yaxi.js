@@ -4031,30 +4031,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
-    function change_active(active) {
-
-        this.__active = active;
-
-        this.__class_dirty = true;
-        this.__dirty || patch(this);
-    }
-
-
-    // 处理微信自定义组件不支持active的问题, 全部统一使用.active
-    this.__change_active = function (active) {
-
-        if (active)
-        {
-            change_active.call(this, active);
-        }
-        else
-        {
-            setTimeout(change_active.bind(this, active), 50);
-        }
-    }
-
-
     
     // 控件风格
     this.$property('theme', '', {
@@ -4063,21 +4039,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     });
     
 
+
     // 是否隐藏
-    this.$property('hidden', false, {
-
-        type: 'boolean',
-        class: 'yx-hidden'
-    });
-
-
-    // 是否退居幕后
-    this.$property('backstage', false, {
-
-        type: 'boolean',
-        class: 'yx-backstage'
-    })
-
+    this.$property('hidden', false);
 
 
     // 是否禁用
@@ -6203,7 +6167,7 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
 
-yaxi.Tab = yaxi.Box.extend(function (Class, base) {
+yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
@@ -6215,7 +6179,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
     // 容器宿主
-    this.$property('host', '', false);
+    this.$property('tabhost', '', false);
 
 
     // 页面充满模式
@@ -6278,38 +6242,37 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
         get: function () {
 
-            var host = this.host;
+            var host = this.tabhost;
 
             if (!host)
             {
-                throwError('host of tab control not allow empty!'); 
+                host = '<* >TabHost';
             }
-
-            if (host[0] !== '<')
+            else if (host[0] !== '<')
             {
-                throwError('host of tab control host must use "<" or "<<" to find up!');
+                throwError('use "<" or "<<" to begin!');
             }
 
             if (host = this.find(host))
             {
-                if (host.children)
+                if (host instanceof yaxi.TabHost)
                 {
                     return host;
                 }
 
-                throwError('tab control host of must be a Box!');
+                throwError('be a TabHost!');
             }
 
-            throwError('tab control can not find host "' + this.host + '"!');
+            return null;
         }
     });
 
 
-
     function throwError(text) {
 
-        throw new Error(text);
+        throw new Error('the tabhost property of TabBar control must ' + text);
     }
+
 
 
     function initIndex(index) {
@@ -6318,21 +6281,21 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     }
 
 
-    function changeIndex(tab, index, lastIndex) {
+    function changeIndex(tabbar, index, lastIndex) {
 
-        var children = tab.children;
+        var children = tabbar.children;
         var event = new yaxi.Event('changing');
         var item;
 
         event.lastIndex = lastIndex;
-        event.lastPage = tab.findPage(event.lastItem = children[lastIndex] || null);
+        event.lastPage = tabbar.findPage(event.lastItem = children[lastIndex] || null);
 
         event.index = index;
-        event.page = tab.findPage(event.item = children[index] || null);
+        event.page = tabbar.findPage(event.item = children[index] || null);
 
-        if (tab.trigger(event) !== false)
+        if (tabbar.trigger(event) !== false)
         {
-            tab.$storage.selectedIndex = index;
+            tabbar.$storage.selectedIndex = index;
 
             if (item = event.lastPage)
             {
@@ -6347,26 +6310,27 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             if (item = event.item)
             {
                 item.selected = true;
-                checkPage(tab, event);
+                checkPage(tabbar, event);
             }
 
             event.type = 'changed';
-            tab.trigger(event);
+            tabbar.trigger(event);
         }
     }
 
 
-    function checkPage(tab, event) {
+    function checkPage(tabbar, event) {
 
         var page = event.page;
         var item = event.item;
+        var host;
 
         if (!page)
         {
-            if (page = item.module)
+            if ((page = item.module) && (host = tabbar.selectedHost))
             {
                 page = event.page = new page(item.data);
-                tab.selectedHost.children.push(page);
+                host.children.push(page);
             }
             else
             {
@@ -6374,7 +6338,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        page.tab = item.uuid;
+        page.tabbar = item.uuid;
         page.hidden = false;
     }
 
@@ -6382,14 +6346,16 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
     this.findPage = function (item) {
 
-        if (item)
+        var host;
+
+        if (item && (host = this.selectedHost))
         {
-            var children = this.selectedHost.children;
+            var children = host.children;
             var uuid = item.uuid;
     
             for (var i = children.length; i--;)
             {
-                if (children[i].tab === uuid)
+                if (children[i].tabbar === uuid)
                 {
                     return children[i];
                 }
@@ -6413,13 +6379,24 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
 
-}, function Tab() {
+}, function TabBar() {
 
 
     yaxi.Box.apply(this, arguments);
 
 
-}).register('Tab');
+}).register('TabBar');
+
+
+
+
+yaxi.TabHost = yaxi.Box.extend(function (Class, base) {
+
+}, function () {
+
+    yaxi.Box.apply(this, arguments);
+
+}).register('TabHost');
 
 
 
@@ -6839,6 +6816,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
+
+
 ;(function (wx) {
 
 
@@ -6854,44 +6833,73 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     var translates = create(null);
 
 
-    // 开始触摸时的控件
-    var touchControl;
+
+    // 是否检查点击
+    var tap = false;
+
+    // 上次tap事件触发时的控件
+    var tapControl = null;
+
+    // 上次tap事件触发时的时间
+    var tapTime = new Date();
+
+    // 开始触摸时的控件及时间
+    var touchControl, touchTime;
+
+
+
+    var cache_uuid, cache_flag;
     
-    var uuid, flag;
 
 
+    wx.translateEvent = function (event, uuid, flag) {
 
-    wx.translateEvent = function (event) {
-
-        var fn;
-
-        uuid = this.__event_id;
-        flag = this.__event_flag || '';
-
-        if (fn = translates[event.type])
+        var any;
+console.log(uuid, flag)
+        if (uuid)
         {
-            fn(event);
+            cache_uuid = uuid;
+            cache_flag = flag = flag || '';
         }
-        else if (fn !== false)
+        else
+        {
+            any = event.target.dataset;
+
+            if (uuid = any.id)
+            {
+                flag = any.flag;
+            }
+            else
+            {
+                uuid = cache_uuid;
+                flag = cache_flag;
+            }
+        }
+
+        if (any = translates[event.type])
+        {
+            any(event, uuid, flag);
+        }
+        else if (any !== false && (any = controls[uuid]))
         {
             event = new Event(event.type, event.detail);
             event.flag = flag;
 
-            return controls[uuid].trigger(event);
+            return any.trigger(event);
         }
 
     }.bind(wx);
     
 
 
-    function findControl() {
+    function findControl(uuid) {
 
         var control = controls[uuid];
         return control ? control.findEventTarget() : null;
     }
     
     
-    function touchEvent(event, control) {
+    function touchEvent(event, control, flag) {
     
         var e = new Event(event.type);
     
@@ -6922,24 +6930,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
     
     
-    translates.touchstart = function (event) {
+    translates.touchstart = function (event, uuid, flag) {
             
-        var control = findControl();
-        var touch = event.changedTouches[0];
+        var control;
 
-        if (control && touch)
+        if (control = findControl(uuid))
         {
-            // 修复自定义组件不支持active的问题
-            control.__change_active(true);
+            event = touchEvent(event, touchControl = control, flag);
 
             touchControl = control;
-
-            event = touchEvent(event, control);
+            touchTime = new Date();
+            
+            tap = true;
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
             {
-                return false;
+                return tap = false;
             }
         }
     }
@@ -6951,12 +6958,12 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
         if (control = touchControl)
         {
-            event = touchEvent(event, control);
+            event = touchEvent(event, control, cache_flag);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
-                return false;
+                return tap = false;
             }
         }
     }
@@ -6964,19 +6971,48 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
     translates.touchend = function (event) {
         
-        var control;
+        var control, time;
     
         if (control = touchControl)
         {
+            event = touchEvent(event, control, cache_flag);
             touchControl = null;
-    
-            event = touchEvent(event, control);
-            control.__change_active(false);
 
             if (call(control, '__on_touchend', event) === false || 
                 control.trigger(event) === false)
             {
                 return false;
+            }
+
+            // 按下大于350毫秒则触发longpress事件
+            if ((time = new Date()) - touchTime > 350)
+            {
+                event.type = 'longpress';
+
+                if (control.trigger(event) === false)
+                {
+                    return false;
+                }
+            }
+
+            // 200ms内不重复触发tap事件
+            if (tap && (time - tapTime > 200 || tapControl !== control))
+            {
+                // 延时触发tap事件解决input先触发change事件的问题
+                setTimeout(function () {
+
+                    tapControl = control;
+                    tapTime = time;
+    
+                    event.type = 'tap';
+    
+                    if (call(control, '__on_tap', event) === false ||
+                        control.trigger(event) === false)
+                    {
+                        return false;
+                    }
+
+                }, 0);
             }
         }
     }
@@ -6988,10 +7024,8 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     
         if (control = touchControl)
         {
+            event = touchEvent(event, control, cache_flag);
             touchControl = null;
-
-            event = touchEvent(event, control);
-            control.__change_active(false);
 
             if (call(control, '__on_touchcancel', event) === false || 
                 control.trigger(event) === false)
@@ -7002,44 +7036,23 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
     }
 
 
-    translates.tap = function (event) {
+    // 不支持以下原生事件, 用touch模拟
+    translates.tap = translates.longpress = false;
 
-        var control = findControl();
 
-        event = touchEvent(event, control);
 
-        if (call(control, '__on_tap', event) === false || 
-            control.trigger(event) === false)
+    translates.input = translates.change = function (event, uuid, flag) {
+
+        var control;
+
+        if (control = findControl(uuid))
         {
-            return false;
+            event = new Event(event.type, event.detail);
+            event.target = control;
+            event.flag = flag;
+
+            return control.trigger(event);
         }
-    }
-
-
-    translates.longpress = function (event) {
-
-        var control = findControl();
-
-        event = touchEvent(event, control);
-
-        if (call(control, '__on_longpress', event) === false || 
-            control.trigger(event) === false)
-        {
-            return false;
-        }
-    }
-
-
-
-    translates.input = translates.change = function (event) {
-
-        var control = findControl();
-
-        event = new Event(event.type, event.detail);
-        event.target = control;
-        event.flag = flag;
-
-        return control.trigger(event);
     }
 
     
@@ -7183,13 +7196,13 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         view.t = this.typeName;
         view.u = this.uuid;
 
+        renderStorage(this, view, style);
+
         if (values = this.__style)
         {
             renderStyle(this, values, style);
             this.__style = null;
         }
-
-        renderStorage(this, view, style);
 
         if (this.__class_dirty)
         {
@@ -7361,9 +7374,15 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
+        view[prefix + 'class'] = class1 + class2;
     }
 
+
+    
+    mixin.hidden = function (view, prefix, value) {
+
+        view[prefix + 'hidden'] = value;
+    }
 
 
     mixin.onchange = function (view, prefix) {
@@ -7513,15 +7532,6 @@ yaxi.Marquee.mixin(function (mixin, base) {
 
         mixin.text.call(this, view, this.text);
     }
-
-
-
-});
-
-
-
-
-yaxi.Tab.mixin(function (mixin, base) {
 
 
 

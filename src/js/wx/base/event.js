@@ -13,44 +13,73 @@
     var translates = create(null);
 
 
-    // 开始触摸时的控件
-    var touchControl;
+
+    // 是否检查点击
+    var tap = false;
+
+    // 上次tap事件触发时的控件
+    var tapControl = null;
+
+    // 上次tap事件触发时的时间
+    var tapTime = new Date();
+
+    // 开始触摸时的控件及时间
+    var touchControl, touchTime;
+
+
+
+    var cache_uuid, cache_flag;
     
-    var uuid, flag;
 
 
+    wx.translateEvent = function (event, uuid, flag) {
 
-    wx.translateEvent = function (event) {
-
-        var fn;
-
-        uuid = this.__event_id;
-        flag = this.__event_flag || '';
-
-        if (fn = translates[event.type])
+        var any;
+console.log(uuid, flag)
+        if (uuid)
         {
-            fn(event);
+            cache_uuid = uuid;
+            cache_flag = flag = flag || '';
         }
-        else if (fn !== false)
+        else
+        {
+            any = event.target.dataset;
+
+            if (uuid = any.id)
+            {
+                flag = any.flag;
+            }
+            else
+            {
+                uuid = cache_uuid;
+                flag = cache_flag;
+            }
+        }
+
+        if (any = translates[event.type])
+        {
+            any(event, uuid, flag);
+        }
+        else if (any !== false && (any = controls[uuid]))
         {
             event = new Event(event.type, event.detail);
             event.flag = flag;
 
-            return controls[uuid].trigger(event);
+            return any.trigger(event);
         }
 
     }.bind(wx);
     
 
 
-    function findControl() {
+    function findControl(uuid) {
 
         var control = controls[uuid];
         return control ? control.findEventTarget() : null;
     }
     
     
-    function touchEvent(event, control) {
+    function touchEvent(event, control, flag) {
     
         var e = new Event(event.type);
     
@@ -81,24 +110,23 @@
     
     
     
-    translates.touchstart = function (event) {
+    translates.touchstart = function (event, uuid, flag) {
             
-        var control = findControl();
-        var touch = event.changedTouches[0];
+        var control;
 
-        if (control && touch)
+        if (control = findControl(uuid))
         {
-            // 修复自定义组件不支持active的问题
-            control.__change_active(true);
+            event = touchEvent(event, touchControl = control, flag);
 
             touchControl = control;
-
-            event = touchEvent(event, control);
+            touchTime = new Date();
+            
+            tap = true;
 
             if (call(control, '__on_touchstart', event) === false || 
                 control.trigger(event) === false)
             {
-                return false;
+                return tap = false;
             }
         }
     }
@@ -110,12 +138,12 @@
     
         if (control = touchControl)
         {
-            event = touchEvent(event, control);
+            event = touchEvent(event, control, cache_flag);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
             {
-                return false;
+                return tap = false;
             }
         }
     }
@@ -123,19 +151,48 @@
     
     translates.touchend = function (event) {
         
-        var control;
+        var control, time;
     
         if (control = touchControl)
         {
+            event = touchEvent(event, control, cache_flag);
             touchControl = null;
-    
-            event = touchEvent(event, control);
-            control.__change_active(false);
 
             if (call(control, '__on_touchend', event) === false || 
                 control.trigger(event) === false)
             {
                 return false;
+            }
+
+            // 按下大于350毫秒则触发longpress事件
+            if ((time = new Date()) - touchTime > 350)
+            {
+                event.type = 'longpress';
+
+                if (control.trigger(event) === false)
+                {
+                    return false;
+                }
+            }
+
+            // 200ms内不重复触发tap事件
+            if (tap && (time - tapTime > 200 || tapControl !== control))
+            {
+                // 延时触发tap事件解决input先触发change事件的问题
+                setTimeout(function () {
+
+                    tapControl = control;
+                    tapTime = time;
+    
+                    event.type = 'tap';
+    
+                    if (call(control, '__on_tap', event) === false ||
+                        control.trigger(event) === false)
+                    {
+                        return false;
+                    }
+
+                }, 0);
             }
         }
     }
@@ -147,10 +204,8 @@
     
         if (control = touchControl)
         {
+            event = touchEvent(event, control, cache_flag);
             touchControl = null;
-
-            event = touchEvent(event, control);
-            control.__change_active(false);
 
             if (call(control, '__on_touchcancel', event) === false || 
                 control.trigger(event) === false)
@@ -161,44 +216,23 @@
     }
 
 
-    translates.tap = function (event) {
+    // 不支持以下原生事件, 用touch模拟
+    translates.tap = translates.longpress = false;
 
-        var control = findControl();
 
-        event = touchEvent(event, control);
 
-        if (call(control, '__on_tap', event) === false || 
-            control.trigger(event) === false)
+    translates.input = translates.change = function (event, uuid, flag) {
+
+        var control;
+
+        if (control = findControl(uuid))
         {
-            return false;
+            event = new Event(event.type, event.detail);
+            event.target = control;
+            event.flag = flag;
+
+            return control.trigger(event);
         }
-    }
-
-
-    translates.longpress = function (event) {
-
-        var control = findControl();
-
-        event = touchEvent(event, control);
-
-        if (call(control, '__on_longpress', event) === false || 
-            control.trigger(event) === false)
-        {
-            return false;
-        }
-    }
-
-
-
-    translates.input = translates.change = function (event) {
-
-        var control = findControl();
-
-        event = new Event(event.type, event.detail);
-        event.target = control;
-        event.flag = flag;
-
-        return control.trigger(event);
     }
 
     

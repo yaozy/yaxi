@@ -131,13 +131,13 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         view.t = this.typeName;
         view.u = this.uuid;
 
+        renderStorage(this, view, style);
+
         if (values = this.__style)
         {
             renderStyle(this, values, style);
             this.__style = null;
         }
-
-        renderStorage(this, view, style);
 
         if (this.__class_dirty)
         {
@@ -309,9 +309,15 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view[prefix + 'class'] = class1 + class2 + (this.__active ? ' active' : '');
+        view[prefix + 'class'] = class1 + class2;
     }
 
+
+    
+    mixin.hidden = function (view, prefix, value) {
+
+        view[prefix + 'hidden'] = value;
+    }
 
 
     mixin.onchange = function (view, prefix) {

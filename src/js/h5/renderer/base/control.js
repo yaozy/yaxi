@@ -208,7 +208,7 @@ yaxi.Control.mixin(function (mixin) {
         class1 = class1 ? ' ' + class1.join(' ') : '';
         class2 = class2 ? ' ' + class2.join(' ') : '';
 
-        view.className = this.$class + class1 + class2 + (this.__active ? ' active' : '');
+        view.className = this.$class + class1 + class2;
     }
 
 
@@ -216,6 +216,12 @@ yaxi.Control.mixin(function (mixin) {
     mixin.id = function (view, value) {
 
         view.id = value;
+    }
+
+
+    mixin.hidden = function (view, value) {
+
+        view.style.display = value ? 'none' : '';
     }
 
 

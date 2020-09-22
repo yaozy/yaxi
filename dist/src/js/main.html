@@ -1,12 +1,12 @@
 <page>
     <template src="./components/header.html" />
-    <box key="host" layout="page" flex="auto">
-    </box>
-    <tab host="<* >@host" selected-index="0" border-top=".5px solid @border-level4">
+    <tabhost layout="page" flex="auto">
+    </tabhost>
+    <tabbar selected-index="0" border-top=".5px solid @border-level4">
         <iconbutton icon="tabbar-home" content="首页" d:module="require('home/main.js')" d:selected-status="{ theme: 'primary' }" />
         <iconbutton icon="tabbar-lesson" content="课程" d:module="require('lesson/main.js')" d:selected-status="{ theme: 'primary' }" />
         <iconbutton icon="tabbar-spread" content="推广" d:module="require('spread/main.js')" d:selected-status="{ theme: 'primary' }" />
         <iconbutton icon="tabbar-message" content="消息" d:module="require('message/main.js')" d:selected-status="{ theme: 'primary' }" />
         <iconbutton icon="tabbar-my" content="我的" d:module="require('my/main.js')" d:selected-status="{ theme: 'primary' }" />
-    </tab>
+    </tabbar>
 </page>

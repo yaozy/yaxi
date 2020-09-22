@@ -27,8 +27,7 @@
                 <text d:text="$data.activity" margin="20rem 0" />
             </box>
         </box>
-        <tab 
-            host="<* >@host" 
+        <tabbar 
             full="false"
             selected-index="0" 
             height="80rem" 
@@ -62,9 +61,9 @@
                 d:module="require('./recommend')" 
                 d:data="$data"
                 d:selected-status="$data.selectedStatus">推荐</text>
-        </tab>
-        <box key="host">
-        </box>
+        </tabbar>
+        <tabhost>
+        </tabhost>
     </box>
     <button>报名学习</button>
 </box>

@@ -172,9 +172,8 @@ return (
 						]
 					],
 					[
-						"tab",
+						"tabbar",
 						{
-							"host": "<* >@host",
 							"full": "false",
 							"selected-index": "0",
 							"height": "80rem",
@@ -238,10 +237,8 @@ return (
 						]
 					],
 					[
-						"box",
-						{
-							"key": "host"
-						}
+						"tabhost",
+						null
 					]
 				]
 			],

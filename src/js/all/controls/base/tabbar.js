@@ -1,4 +1,4 @@
-yaxi.Tab = yaxi.Box.extend(function (Class, base) {
+yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
@@ -10,7 +10,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
     // 容器宿主
-    this.$property('host', '', false);
+    this.$property('tabhost', '', false);
 
 
     // 页面充满模式
@@ -73,38 +73,37 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
         get: function () {
 
-            var host = this.host;
+            var host = this.tabhost;
 
             if (!host)
             {
-                throwError('host of tab control not allow empty!'); 
+                host = '<* >TabHost';
             }
-
-            if (host[0] !== '<')
+            else if (host[0] !== '<')
             {
-                throwError('host of tab control host must use "<" or "<<" to find up!');
+                throwError('use "<" or "<<" to begin!');
             }
 
             if (host = this.find(host))
             {
-                if (host.children)
+                if (host instanceof yaxi.TabHost)
                 {
                     return host;
                 }
 
-                throwError('tab control host of must be a Box!');
+                throwError('be a TabHost!');
             }
 
-            throwError('tab control can not find host "' + this.host + '"!');
+            return null;
         }
     });
 
 
-
     function throwError(text) {
 
-        throw new Error(text);
+        throw new Error('the tabhost property of TabBar control must ' + text);
     }
+
 
 
     function initIndex(index) {
@@ -113,21 +112,21 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     }
 
 
-    function changeIndex(tab, index, lastIndex) {
+    function changeIndex(tabbar, index, lastIndex) {
 
-        var children = tab.children;
+        var children = tabbar.children;
         var event = new yaxi.Event('changing');
         var item;
 
         event.lastIndex = lastIndex;
-        event.lastPage = tab.findPage(event.lastItem = children[lastIndex] || null);
+        event.lastPage = tabbar.findPage(event.lastItem = children[lastIndex] || null);
 
         event.index = index;
-        event.page = tab.findPage(event.item = children[index] || null);
+        event.page = tabbar.findPage(event.item = children[index] || null);
 
-        if (tab.trigger(event) !== false)
+        if (tabbar.trigger(event) !== false)
         {
-            tab.$storage.selectedIndex = index;
+            tabbar.$storage.selectedIndex = index;
 
             if (item = event.lastPage)
             {
@@ -142,26 +141,27 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             if (item = event.item)
             {
                 item.selected = true;
-                checkPage(tab, event);
+                checkPage(tabbar, event);
             }
 
             event.type = 'changed';
-            tab.trigger(event);
+            tabbar.trigger(event);
         }
     }
 
 
-    function checkPage(tab, event) {
+    function checkPage(tabbar, event) {
 
         var page = event.page;
         var item = event.item;
+        var host;
 
         if (!page)
         {
-            if (page = item.module)
+            if ((page = item.module) && (host = tabbar.selectedHost))
             {
                 page = event.page = new page(item.data);
-                tab.selectedHost.children.push(page);
+                host.children.push(page);
             }
             else
             {
@@ -169,7 +169,7 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
             }
         }
 
-        page.tab = item.uuid;
+        page.tabbar = item.uuid;
         page.hidden = false;
     }
 
@@ -177,14 +177,16 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
 
     this.findPage = function (item) {
 
-        if (item)
+        var host;
+
+        if (item && (host = this.selectedHost))
         {
-            var children = this.selectedHost.children;
+            var children = host.children;
             var uuid = item.uuid;
     
             for (var i = children.length; i--;)
             {
-                if (children[i].tab === uuid)
+                if (children[i].tabbar === uuid)
                 {
                     return children[i];
                 }
@@ -208,10 +210,10 @@ yaxi.Tab = yaxi.Box.extend(function (Class, base) {
     
 
 
-}, function Tab() {
+}, function TabBar() {
 
 
     yaxi.Box.apply(this, arguments);
 
 
-}).register('Tab');
+}).register('TabBar');

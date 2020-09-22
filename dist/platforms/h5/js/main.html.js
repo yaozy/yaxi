@@ -9,17 +9,15 @@ return (
 		[
 			require("./components/header.html")($owner, $data, $model),
 			[
-				"box",
+				"tabhost",
 				{
-					"key": "host",
 					"layout": "page",
 					"flex": "auto"
 				}
 			],
 			[
-				"tab",
+				"tabbar",
 				{
-					"host": "<* >@host",
 					"selected-index": "0",
 					"border-top": ".5px solid @border-level4"
 				},
