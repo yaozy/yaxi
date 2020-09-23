@@ -16,6 +16,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     var controls = yaxi.$controls;
 
+    var build = yaxi.Control.build;
+
+
     var released = false;
 
 
@@ -71,7 +74,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         while (index < length)
         {
-            if (control = parent.$createSubControl(list[index++]))
+            if (control = build(parent, list[index++]))
             {
                 outputs.push(control);
             }
@@ -97,7 +100,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    this.load = function (values, model) {
+    this.load = function (values, scope) {
 
         var parent = controls[this.$uuid];
         var length = values.length;
@@ -109,7 +112,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         for (var i = 0; i < length; i++)
         {
-            this[i] = parent.$createSubControl(values[i], model);
+            this[i] = build(parent, values[i], scope);
         }
         
         this.__last || patch(this);
@@ -122,7 +125,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if ((index |= 0) >= 0 && this.__length > index)
         {
-            value = controls[this.$uuid].$createSubControl(value);
+            value = build(controls[this.$uuid], value);
 
             this.__last || patch();
             this[index] = value;

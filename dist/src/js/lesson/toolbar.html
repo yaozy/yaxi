@@ -3,16 +3,15 @@
     overflow="visible" 
     z-index="1" 
     height="80rem" 
-    border-bottom=".5px solid @border-level4">
+    theme="border-level4 border-bottom">
     <masklayer b:hidden="$model.hidden" e:tap="handleClose" />
     <box 
         e:tap="handleSwitch" 
         layout="row" 
-        theme="level1" 
+        theme="level1 border-level4 border-bottom" 
         height="80rem" 
         line-height="80rem" 
-        text-align="center" 
-        border-bottom=".5px solid @border-level4">
+        text-align="center">
         <iconbutton 
             b:icon="$model.sort.icon" 
             b:content="$model.sort.text" 
@@ -42,7 +41,7 @@
                 height="80rem" 
                 line-height="80rem" 
                 padding-left="30rem" 
-                border-top=".5px solid @border-level4" >
+                theme="border-level4 border-top" >
                 <vline b:color="$item.theme" position="absolute" top="0" left="0" />
                 <text b:theme="$item.theme" b:text="$item.text" />
             </box>
@@ -83,9 +82,9 @@
     </box>
     <box b:hidden="$model.filter.hidden" layout="column" theme="level1" max-height="640rem">
         <box flex="auto" font-size="28rem">
-            <databox type="model" d:data="$model.filter.data" border-top=".5px solid @border-level4">
+            <databox type="model" d:data="$model.filter.data" theme="border-level4 border-top">
                 <box>
-                    <box height="80rem" line:height="80rem" padding-left="20rem">
+                    <box height="80rem" line-height="80rem" padding-left="20rem">
                         <text b:text="$item.text" />
                     </box>
                     <databox 
@@ -109,7 +108,7 @@
                 </box>
             </databox>
         </box>
-        <box theme="level1" height="80rem" line-height="80rem" border-top=".5px solid @border-level4">
+        <box theme="level1 border-level4 border-top" height="80rem" line-height="80rem">
             <text theme="primary" padding="0 30rem" e:tap="handleClearFilter">清空筛选</text>
             <button 
                 width="200rem" 

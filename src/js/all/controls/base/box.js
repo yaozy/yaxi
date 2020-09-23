@@ -52,9 +52,9 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     };
 
 
-    this.__load_subdata = function (values, model) {
+    this.__load_subdata = function (values, scope) {
 
-        this.__children.load(values, model);
+        this.__children.load(values, scope);
     }
 
 

@@ -10,14 +10,14 @@ return (
 			"overflow": "visible",
 			"z-index": "1",
 			"height": "80rem",
-			"border-bottom": ".5px solid @border-level4"
+			"theme": "border-level4 border-bottom"
 		},
 		[
 			[
 				"masklayer",
 				{
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.hidden }
+						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
 						"tap": $owner.handleClose.bind($owner)
@@ -28,11 +28,10 @@ return (
 				"box",
 				{
 					"layout": "row",
-					"theme": "level1",
+					"theme": "level1 border-level4 border-bottom",
 					"height": "80rem",
 					"line-height": "80rem",
 					"text-align": "center",
-					"border-bottom": ".5px solid @border-level4",
 					"events": {
 						"tap": $owner.handleSwitch.bind($owner)
 					}
@@ -46,8 +45,8 @@ return (
 							"width": "33%",
 							"height": "100%",
 							"bindings": {
-								"icon":  function ($pipe) { return $model.sort.icon },
-								"content":  function ($pipe) { return $model.sort.text }
+								"icon":  function () { return $model.sort.icon },
+								"content":  function () { return $model.sort.text }
 							}
 						}
 					],
@@ -59,8 +58,8 @@ return (
 							"width": "34%",
 							"height": "100%",
 							"bindings": {
-								"icon":  function ($pipe) { return $model.category.icon },
-								"content":  function ($pipe) { return $model.category.text }
+								"icon":  function () { return $model.category.icon },
+								"content":  function () { return $model.category.text }
 							}
 						}
 					],
@@ -73,7 +72,7 @@ return (
 							"width": "33%",
 							"height": "100%",
 							"bindings": {
-								"icon":  function ($pipe) { return $model.filter.icon }
+								"icon":  function () { return $model.filter.icon }
 							}
 						}
 					]
@@ -84,7 +83,7 @@ return (
 				{
 					"theme": "level1",
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.sort.hidden }
+						"hidden":  function () { return $model.sort.hidden }
 					}
 				},
 				[
@@ -101,6 +100,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -110,9 +112,9 @@ return (
 											"height": "80rem",
 											"line-height": "80rem",
 											"padding-left": "30rem",
-											"border-top": ".5px solid @border-level4",
+											"theme": "border-level4 border-top",
 											"bindings": {
-												"key":  function ($pipe) { return $item.$index }
+												"key":  function () { return $item.$index }
 											}
 										},
 										[
@@ -123,7 +125,7 @@ return (
 													"top": "0",
 													"left": "0",
 													"bindings": {
-														"color":  function ($pipe) { return $item.theme }
+														"color":  function () { return $item.theme }
 													}
 												}
 											],
@@ -131,14 +133,16 @@ return (
 												"text",
 												{
 													"bindings": {
-														"theme":  function ($pipe) { return $item.theme },
-														"text":  function ($pipe) { return $item.text }
+														"theme":  function () { return $item.theme },
+														"text":  function () { return $item.text }
 													}
 												}
 											]
 										]
 									]
 								);
+
+								})();
 							}
 
 							// end function
@@ -153,7 +157,7 @@ return (
 					"theme": "level1",
 					"max-height": "640rem",
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.category.hidden }
+						"hidden":  function () { return $model.category.hidden }
 					}
 				},
 				[
@@ -172,6 +176,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -183,14 +190,16 @@ return (
 											"height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function ($pipe) { return $item.$index },
-												"icon":  function ($pipe) { return $item.icon },
-												"content":  function ($pipe) { return $item.text },
-												"theme":  function ($pipe) { return $item.theme }
+												"key":  function () { return $item.$index },
+												"icon":  function () { return $item.icon },
+												"content":  function () { return $item.text },
+												"theme":  function () { return $item.theme }
 											}
 										}
 									]
 								);
+
+								})();
 							}
 
 							// end function
@@ -211,6 +220,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -222,13 +234,15 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function ($pipe) { return $item.$index },
-												"text":  function ($pipe) { return $item.text },
-												"theme":  function ($pipe) { return $item.theme }
+												"key":  function () { return $item.$index },
+												"text":  function () { return $item.text },
+												"theme":  function () { return $item.theme }
 											}
 										}
 									]
 								);
+
+								})();
 							}
 
 							// end function
@@ -248,6 +262,9 @@ return (
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
+
 								var $item = __data_list[$index];
 
 								template($index, $item,
@@ -259,13 +276,15 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function ($pipe) { return $item.$index },
-												"text":  function ($pipe) { return $item.text },
-												"theme":  function ($pipe) { return $item.theme }
+												"key":  function () { return $item.$index },
+												"text":  function () { return $item.text },
+												"theme":  function () { return $item.theme }
 											}
 										}
 									]
 								);
+
+								})();
 							}
 
 							// end function
@@ -280,7 +299,7 @@ return (
 					"theme": "level1",
 					"max-height": "640rem",
 					"bindings": {
-						"hidden":  function ($pipe) { return $model.filter.hidden }
+						"hidden":  function () { return $model.filter.hidden }
 					}
 				},
 				[
@@ -296,12 +315,15 @@ return (
 								{
 									"type": "model",
 									"data": $model.filter.data,
-									"border-top": ".5px solid @border-level4"
+									"theme": "border-level4 border-top"
 								},
 								function (template, __data_list, __data_scope) {
 
 									for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 									{
+										// 添加作用域解决循环变量绑定变化的问题
+										(function () {
+
 										var $item = __data_list[$index];
 
 										template($index, $item,
@@ -313,7 +335,7 @@ return (
 														"box",
 														{
 															"height": "80rem",
-															"line:height": "80rem",
+															"line-height": "80rem",
 															"padding-left": "20rem"
 														},
 														[
@@ -321,7 +343,7 @@ return (
 																"text",
 																{
 																	"bindings": {
-																		"text":  function ($pipe) { return $item.text }
+																		"text":  function () { return $item.text }
 																	}
 																}
 															]
@@ -335,7 +357,7 @@ return (
 															"padding-left": "20rem",
 															"tag": "filter",
 															"bindings": {
-																"key":  function ($pipe) { return $item.$index }
+																"key":  function () { return $item.$index }
 															},
 															"events": {
 																"tap": $owner.handleChangeFilter.bind($owner)
@@ -343,11 +365,14 @@ return (
 														},
 														function (template, __data_list, __data_scope) {
 
-															var $item = __data_scope[0];
-															var $index = __data_scope[1];
+															var $index = __data_scope[0];
+															var $item = __data_scope[1];
 
 															for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
 															{
+																// 添加作用域解决循环变量绑定变化的问题
+																(function () {
+
 																var $item = __data_list[$index];
 
 																template($index, $item,
@@ -361,13 +386,15 @@ return (
 																			"border-radius": "40rem",
 																			"text-align": "center",
 																			"bindings": {
-																				"key":  function ($pipe) { return $item.$index },
-																				"text":  function ($pipe) { return $item.text },
-																				"theme":  function ($pipe) { return $item.theme }
+																				"key":  function () { return $item.$index },
+																				"text":  function () { return $item.text },
+																				"theme":  function () { return $item.theme }
 																			}
 																		}
 																	]
 																);
+
+																})();
 															}
 
 															// end function
@@ -376,6 +403,8 @@ return (
 												]
 											]
 										);
+
+										})();
 									}
 
 									// end function
@@ -386,10 +415,9 @@ return (
 					[
 						"box",
 						{
-							"theme": "level1",
+							"theme": "level1 border-level4 border-top",
 							"height": "80rem",
-							"line-height": "80rem",
-							"border-top": ".5px solid @border-level4"
+							"line-height": "80rem"
 						},
 						[
 							[

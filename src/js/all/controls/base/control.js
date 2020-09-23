@@ -80,9 +80,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-
     // 检查父控件
-    var check = yaxi.__check_parent = function (Class, parent) {
+    function checkParent(Class, parent) {
 
         var check;
 
@@ -115,7 +114,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     
     
-    this.$createSubControl = function (options, scope) {
+    Class.build = function (parent, options, scope) {
 
         var Class, control;
 
@@ -123,16 +122,16 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         {
             if (options.$storage && (Class = options.constructor))
             {
-                check(Class, this);
+                checkParent(Class, parent);
 
                 control = options;
 
-                if (control.parent && control.parent !== this)
+                if (control.parent && control.parent !== parent)
                 {
                     control.remove();
                 }
 
-                control.parent = this;
+                control.parent = parent;
                 return control;
             }
 
@@ -143,10 +142,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     throwError('"' + options[0] + '" doesn\'t register!');
                 }
                 
-                check(Class, this);
+                checkParent(Class, parent);
 
                 control = new Class();
-                control.parent = this;
+                control.parent = parent;
                 control.load(options, scope);
 
                 return control;

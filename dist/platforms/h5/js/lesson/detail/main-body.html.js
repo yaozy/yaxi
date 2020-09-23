@@ -61,10 +61,9 @@ return (
 								"box",
 								{
 									"layout": "row space-between",
-									"theme": "level1",
+									"theme": "level1 border-level4 border-bottom",
 									"height": "80rem",
-									"font-size": "28rem",
-									"border-bottom": ".5px solid @border-level4"
+									"font-size": "28rem"
 								},
 								[
 									[
@@ -178,9 +177,8 @@ return (
 							"selected-index": "0",
 							"height": "80rem",
 							"line-height": "80rem",
-							"theme": "level1",
+							"theme": "level1 border-level4 border-bottom",
 							"margin-top": "10rem",
-							"border-bottom": ".5px solid @border-level4",
 							"text-align": "center"
 						},
 						[

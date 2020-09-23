@@ -92,12 +92,22 @@
             Model = arrayModel.$Model,
             parent = arrayModel.$parent,
             length = list.length,
-            model;
+            model,
+            data;
 
         while (index < length)
         {
-            model = new Model(parent);
-            model.$load(list[index++]);
+            data = list[index++];
+
+            if (data instanceof Model)
+            {
+                data.$parent = parent;
+            }
+            else
+            {
+                model = new Model(parent);
+                model.$load(data);    
+            }
 
             outputs.push(model);
         }
@@ -173,17 +183,69 @@
 
 
 
-    this.set = function (index, value) {
+    // 创建一个临时的模型
+    this.create = function (data) {
+
+        var model = new this.$Model();
+
+        if (data)
+        {
+            model.$load(data);
+        }
+
+        return model;
+    }
+
+
+    // 复制一个临时的模型
+    this.copy = function (index) {
+
+        var model = new this.$Model();
+        var data;
+
+        if (data = this[index])
+        {
+            model.$load(data.$storage);
+        }
+
+        return model;
+    }
+
+
+
+    this.set = function (index, data) {
+
+        var Model = this.$Model;
+        var model;
 
         if ((index |= 0) >= 0 && this[index])
         {
-            var model = new this.$Model(this.$parent);
+            if (data instanceof Model)
+            {
+                model = data;
+                model.$parent = this.$parent;
+            }
+            else
+            {
+                model = new Model(this.$parent);
+                data && model.$load(data);
+            }
 
-            model.$load(value);
             this[index] = model;
-
             notify(this, '__on_set', index, model);
         }
+    }
+
+
+
+    this.load = function (values) {
+
+        if (this.__length > 0)
+        {
+            this.clear();
+        }
+
+        this.push.apply(this, values);
     }
 
 

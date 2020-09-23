@@ -2634,6 +2634,19 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
+
+    this.load = function (values) {
+
+        if (this.__length > 0)
+        {
+            this.clear();
+        }
+
+        this.push.apply(this, values);
+    }
+
+
+
     this.push = function () {
 
         var length = arguments.length;
@@ -3563,9 +3576,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-
     // 检查父控件
-    var check = yaxi.__check_parent = function (Class, parent) {
+    function checkParent(Class, parent) {
 
         var check;
 
@@ -3598,7 +3610,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     
     
-    this.$createSubControl = function (options, scope) {
+    Class.build = function (parent, options, scope) {
 
         var Class, control;
 
@@ -3606,16 +3618,16 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         {
             if (options.$storage && (Class = options.constructor))
             {
-                check(Class, this);
+                checkParent(Class, parent);
 
                 control = options;
 
-                if (control.parent && control.parent !== this)
+                if (control.parent && control.parent !== parent)
                 {
                     control.remove();
                 }
 
-                control.parent = this;
+                control.parent = parent;
                 return control;
             }
 
@@ -3626,10 +3638,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     throwError('"' + options[0] + '" doesn\'t register!');
                 }
                 
-                check(Class, this);
+                checkParent(Class, parent);
 
                 control = new Class();
-                control.parent = this;
+                control.parent = parent;
                 control.load(options, scope);
 
                 return control;
@@ -4629,6 +4641,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     var controls = yaxi.$controls;
 
+    var build = yaxi.Control.build;
+
+
     var released = false;
 
 
@@ -4684,7 +4699,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         while (index < length)
         {
-            if (control = parent.$createSubControl(list[index++]))
+            if (control = build(parent, list[index++]))
             {
                 outputs.push(control);
             }
@@ -4710,7 +4725,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
 
-    this.load = function (values, model) {
+    this.load = function (values, scope) {
 
         var parent = controls[this.$uuid];
         var length = values.length;
@@ -4722,7 +4737,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         for (var i = 0; i < length; i++)
         {
-            this[i] = parent.$createSubControl(values[i], model);
+            this[i] = build(parent, values[i], scope);
         }
         
         this.__last || patch(this);
@@ -4735,7 +4750,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if ((index |= 0) >= 0 && this.__length > index)
         {
-            value = controls[this.$uuid].$createSubControl(value);
+            value = build(controls[this.$uuid], value);
 
             this.__last || patch();
             this[index] = value;
@@ -4932,13 +4947,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
     var A = Array;
     
-
-    var classes = yaxi.classes;
-
-    var patch = yaxi.patch;
-
-
-    var check = yaxi.__check_parent;
+    var build = yaxi.Control.build;
     
 
 
@@ -4978,42 +4987,16 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     function createControls(parent, values) {
 
         var length = values.length;
-        var list = new Array(length);
+        var list = new A(length);
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = createControl(parent, values[i]);
+            list[i] = build(parent, values[i]);
         }
 
         return list;
     }
 
-
-    function createControl(parent, options) {
-
-        var Class = options[0];
-        var control;
-
-        if (typeof Class === 'string' && !(Class = classes[Class]))
-        {
-            throw new Error('create control error: class "' + options[0] + '" doesn\'t register!');
-        }
-
-        if (Class)
-        {
-            check(Class, parent);
-        }
-        else
-        {
-            Class = yaxi.Text;
-        }
-
-        control = new Class();
-        control.parent = parent;
-        control.load(options);
-
-        return control;
-    }
 
 
     this.__load_subdata = function (values) {
@@ -5047,7 +5030,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
                 }
                 else
                 {
-                    content = [createControl(this, content)];
+                    content = [build(this, content)];
                 }
             }
             finally
@@ -5140,9 +5123,9 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     };
 
 
-    this.__load_subdata = function (values, model) {
+    this.__load_subdata = function (values, scope) {
 
-        this.__children.load(values, model);
+        this.__children.load(values, scope);
     }
 
 
@@ -5217,6 +5200,12 @@ yaxi.Button = yaxi.ContentControl.extend(function (Class, base) {
 yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
+
+
+    var build = yaxi.Control.build;
+
+
+
     
     // 布局
     this.$property('layout', '', {
@@ -5272,20 +5261,28 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
             var template;
 
-            if (value && value.length > 0)
+            if (value)
             {
-                this.__data = value;
-
-                if (template = this.__template)
+                if (value.__model_type === 2)
                 {
-                    load(this, value, template);
+                    bind(this, value);
+                }
+
+                if (value.length > 0)
+                {
+                    this.__data = value;
+
+                    if (template = this.__template)
+                    {
+                        loadData(this, value, template);
+                    }
+
+                    return;
                 }
             }
-            else
-            {
-                this.__data = null;
-                this.__children.clear();
-            }
+
+            this.__data = null;
+            this.__children.clear();
         }
     });
 
@@ -5312,43 +5309,10 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
         if ((this.template = value) && (data = this.__data))
         {
-            load(this, data, value, scope);
+            loadData(this, data, value, scope);
         }
     }
 
-
-
-
-    function throwError(text) {
-
-        throw new Error('databox load fault: ' + text);
-    }
- 
-
-
-    function load(databox, data, template, scope) {
-
-        switch (databox.type)
-        {
-            case 'data':
-                loadData(databox, data, template, scope);
-                break;
-
-            case 'model':
-                if (data.__model_type !== 2)
-                {
-                    throwError('data must be a array model when model type!');    
-                }
-
-                loadModel(databox, data, template, scope);
-                break;
-
-            default:
-                throwError('only support data or model type!');
-        }
-    }
-
-    
 
 
     function loadTemplate(controls, scope, index, item, template) {
@@ -5357,7 +5321,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
         scope = scope.concat(index, item);
 
-        if (control = this.$createSubControl(template, scope))
+        if (control = build(this, template, scope))
         {
             control.__d_scope = scope;
             controls.push(control);
@@ -5399,47 +5363,30 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     function loadData(databox, data, template, scope) {
 
-        var children = databox.__children;
-   
-        if (children.length > 0)
-        {
-            children.clear();
-        }
-
         var controls = createControls(databox, data, template, scope);
 
         if (controls.length > 0)
         {
-            children.push.apply(children, controls);
+            databox.__children.load(controls);
         }
     }
 
 
+    function bind(databox, arrayModel) {
 
-    function loadModel(databox, arrayModel, template, scope) {
-
-        var old;
+        var bindings, old;
 
         if (old = databox.__array_model)
         {
             if (old !== arrayModel)
             {
                 unbind(databox, old);
-                bind(databox, arrayModel);
+            }
+            else
+            {
+                return;
             }
         }
-        else
-        {
-            bind(databox, arrayModel);
-        }
-
-        loadData(databox, arrayModel, template, scope);
-    }
-
-
-    function bind(databox, arrayModel) {
-
-        var bindings;
 
         if (bindings = arrayModel.__bindings)
         {

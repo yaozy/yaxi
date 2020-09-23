@@ -8,13 +8,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
     var A = Array;
     
-
-    var classes = yaxi.classes;
-
-    var patch = yaxi.patch;
-
-
-    var check = yaxi.__check_parent;
+    var build = yaxi.Control.build;
     
 
 
@@ -54,42 +48,16 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     function createControls(parent, values) {
 
         var length = values.length;
-        var list = new Array(length);
+        var list = new A(length);
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = createControl(parent, values[i]);
+            list[i] = build(parent, values[i]);
         }
 
         return list;
     }
 
-
-    function createControl(parent, options) {
-
-        var Class = options[0];
-        var control;
-
-        if (typeof Class === 'string' && !(Class = classes[Class]))
-        {
-            throw new Error('create control error: class "' + options[0] + '" doesn\'t register!');
-        }
-
-        if (Class)
-        {
-            check(Class, parent);
-        }
-        else
-        {
-            Class = yaxi.Text;
-        }
-
-        control = new Class();
-        control.parent = parent;
-        control.load(options);
-
-        return control;
-    }
 
 
     this.__load_subdata = function (values) {
@@ -123,7 +91,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
                 }
                 else
                 {
-                    content = [createControl(this, content)];
+                    content = [build(this, content)];
                 }
             }
             finally

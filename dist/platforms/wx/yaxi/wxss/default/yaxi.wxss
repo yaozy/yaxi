@@ -789,56 +789,58 @@
   color: #999999;
 }
 .yx-theme-border-level1 {
-  border: 0.5px solid #31313d;
+  border-color: #31313d;
 }
 .yx-theme-border-level2 {
-  border: 0.5px solid #6c768b;
+  border-color: #6c768b;
 }
 .yx-theme-border-level3 {
-  border: 0.5px solid #b8c0de;
+  border-color: #b8c0de;
 }
 .yx-theme-border-level4 {
-  border: 0.5px solid #cccccc;
+  border-color: #cccccc;
 }
 .yx-theme-border-level5 {
-  border: 0.5px solid #ffffff;
+  border-color: #ffffff;
 }
 .yx-theme-border-important {
-  border: 0.5px solid #c40606;
+  border-color: #c40606;
 }
 .yx-theme-border-primary {
-  border: 0.5px solid #1c86ee;
+  border-color: #1c86ee;
 }
 .yx-theme-border-second {
-  border: 0.5px solid #5eaadd;
+  border-color: #5eaadd;
 }
 .yx-theme-border-success {
-  border: 0.5px solid #71c04a;
+  border-color: #71c04a;
 }
 .yx-theme-border-warning {
-  border: 0.5px solid #e89518;
+  border-color: #e89518;
 }
 .yx-theme-border-danger {
-  border: 0.5px solid #ff6c6c;
+  border-color: #ff6c6c;
 }
 .yx-theme-border-disabled {
-  border: 0.5px solid #999999;
+  border-color: #999999;
 }
 .yx-theme-border-top {
-  border-width: 0.5px 0 0 0;
+  border-top-style: solid;
+  border-top-width: 0.5px;
 }
 .yx-theme-border-left {
-  border-width: 0 0 0 0.5px;
+  border-left-style: solid;
+  border-left-width: 0.5px;
 }
 .yx-theme-border-right {
-  border-width: 0 0.5px 0 0;
+  border-right-style: solid;
+  border-right-width: 0.5px;
 }
 .yx-theme-border-bottom {
-  border-width: 0 0 0.5px 0;
+  border-bottom-style: solid;
+  border-bottom-width: 0.5px;
 }
-.yx-theme-border-double {
-  border-width: 0 0.5px;
-}
-.yx-theme-border-double-vertical {
-  border-width: 0 0.5px;
+.yx-theme-border-all {
+  border-style: solid;
+  border-width: 0.5px;
 }

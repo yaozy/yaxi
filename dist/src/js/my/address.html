@@ -1,0 +1,25 @@
+<page>
+    <template src="../components/header.html" />
+    <box text-align="center" line-height="100rem" e:tap="handleAdd">
+        <iconbutton width="auto" icon="common-search" content="添加地址" layout="row middle" theme="font-primary" />
+    </box>
+    <databox type="model" d:data="$model" theme="bg-level2" flex="auto">
+        <box margin-top="20rem" theme="level1">
+            <box layout="row middle" height="150rem">
+                <icon icon="tabbar-my" width="100rem" />
+                <box width="600rem">
+                    <box layout="row space-between">
+                        <text b:text="$item.name" />
+                        <text b:text="$item.tel" />
+                    </box>
+                    <text b:text="$item.address" theme="font-level3" font-size="28rem" />
+                </box>
+            </box>
+            <box d:tag="$item.id" layout="row middle" padding="0 20rem" theme="border-level4 border-top">
+                <iconbutton icon="common-search" content="默认地址" layout="row before" flex="auto" theme="warning" />
+                <text padding="0 30rem" theme="level3" e:tap="handleEdit">编辑</text>
+                <text padding="0 30rem" theme="level3" e:tap="handleDelete">删除</text>
+            </box>
+        </box>
+    </databox>
+</page>

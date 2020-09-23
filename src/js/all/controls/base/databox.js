@@ -5,6 +5,12 @@
 yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
+
+
+    var build = yaxi.Control.build;
+
+
+
     
     // 布局
     this.$property('layout', '', {
@@ -60,20 +66,28 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
             var template;
 
-            if (value && value.length > 0)
+            if (value)
             {
-                this.__data = value;
-
-                if (template = this.__template)
+                if (value.__model_type === 2)
                 {
-                    load(this, value, template);
+                    bind(this, value);
+                }
+
+                if (value.length > 0)
+                {
+                    this.__data = value;
+
+                    if (template = this.__template)
+                    {
+                        loadData(this, value, template);
+                    }
+
+                    return;
                 }
             }
-            else
-            {
-                this.__data = null;
-                this.__children.clear();
-            }
+
+            this.__data = null;
+            this.__children.clear();
         }
     });
 
@@ -100,43 +114,10 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
         if ((this.template = value) && (data = this.__data))
         {
-            load(this, data, value, scope);
+            loadData(this, data, value, scope);
         }
     }
 
-
-
-
-    function throwError(text) {
-
-        throw new Error('databox load fault: ' + text);
-    }
- 
-
-
-    function load(databox, data, template, scope) {
-
-        switch (databox.type)
-        {
-            case 'data':
-                loadData(databox, data, template, scope);
-                break;
-
-            case 'model':
-                if (data.__model_type !== 2)
-                {
-                    throwError('data must be a array model when model type!');    
-                }
-
-                loadModel(databox, data, template, scope);
-                break;
-
-            default:
-                throwError('only support data or model type!');
-        }
-    }
-
-    
 
 
     function loadTemplate(controls, scope, index, item, template) {
@@ -145,7 +126,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
         scope = scope.concat(index, item);
 
-        if (control = this.$createSubControl(template, scope))
+        if (control = build(this, template, scope))
         {
             control.__d_scope = scope;
             controls.push(control);
@@ -187,47 +168,30 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     function loadData(databox, data, template, scope) {
 
-        var children = databox.__children;
-   
-        if (children.length > 0)
-        {
-            children.clear();
-        }
-
         var controls = createControls(databox, data, template, scope);
 
         if (controls.length > 0)
         {
-            children.push.apply(children, controls);
+            databox.__children.load(controls);
         }
     }
 
 
+    function bind(databox, arrayModel) {
 
-    function loadModel(databox, arrayModel, template, scope) {
-
-        var old;
+        var bindings, old;
 
         if (old = databox.__array_model)
         {
             if (old !== arrayModel)
             {
                 unbind(databox, old);
-                bind(databox, arrayModel);
+            }
+            else
+            {
+                return;
             }
         }
-        else
-        {
-            bind(databox, arrayModel);
-        }
-
-        loadData(databox, arrayModel, template, scope);
-    }
-
-
-    function bind(databox, arrayModel) {
-
-        var bindings;
 
         if (bindings = arrayModel.__bindings)
         {

@@ -9,7 +9,7 @@
             top="50%" 
             left="20rem" 
             transform="translateY(-50%)" 
-            border=".5px solid @border-level4" 
+            theme="border-level4 border-all" 
             border-radius="60rem" 
             padding="0 120rem 0 60rem" 
             b:value="$model.text" 
@@ -35,10 +35,10 @@
         <databox key="search-body" e:tap="handleSuggest">
             <box 
                 d:tag="$index" 
-                layout="row" 
+                layout="row middle" 
                 height="80rem" 
-                line:height="80rem" 
-                border-top=".5px solid @border-level4" 
+                line-height="80rem" 
+                theme="border-level4 border-top" 
                 padding="0 20rem">
                 <text d:text="$item.before" />
                 <text theme="font-primary" b:text="$model.text" />

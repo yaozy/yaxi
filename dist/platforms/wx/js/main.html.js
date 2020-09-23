@@ -19,7 +19,7 @@ return (
 				"tabbar",
 				{
 					"selected-index": "0",
-					"border-top": ".5px solid @border-level4"
+					"theme": "border-level4 border-top"
 				},
 				[
 					[

@@ -11,8 +11,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     function render(data) {
 
         data.selectedStatus = {
-            theme: 'primary', 
-            'border-bottom': '.5px solid @border-primary' 
+            theme: 'primary border-primary border-bottom'
         };
 
         this.find('>box').load(bodyTemplate(this, data));
