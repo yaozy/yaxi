@@ -7065,6 +7065,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     var own = Object.getOwnPropertyNames; 
 
 
+
     // 颜色转换函数, 把@color颜色变量转换成实际的颜色
     var convertColor = function (translateFn, value) {
 
@@ -7076,6 +7077,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
     }.bind(yaxi.color));
     
+
 
 
     function renderStyle(control, style, outputs) {
@@ -7090,7 +7092,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             if (value = style[name])
             {
                 // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-                outputs.push(name, ':', value.replace(/rem/g, 'rpx'), ';');
+                outputs.push(name, ':', convertColor(value.replace(/rem/g, 'rpx')), ';');
             }
 
             storage[name] = value;
