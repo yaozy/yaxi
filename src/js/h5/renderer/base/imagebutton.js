@@ -1,4 +1,4 @@
-yaxi.ImageButton.renderer(function (renderer, base) {
+yaxi.ImageButton.renderer(function (base) {
 
 
 
@@ -9,22 +9,22 @@ yaxi.ImageButton.renderer(function (renderer, base) {
 
 
 
-    renderer.src = function (view, value) {
+    this.src = function (control, view, value) {
 
         view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 
-    renderer.size = function (view, value) {
+    this.size = function (control, view, value) {
 
         var style = view.firstChild.style;
         style.width = style.height = value;
     }
 
 
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
-        base.__render_content.call(this, view.lastChild, content);
+        base.renderContent.call(this, view.lastChild, content);
     }
 
 

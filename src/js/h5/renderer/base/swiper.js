@@ -1,4 +1,4 @@
-yaxi.Swiper.renderer(function (renderer, base) {
+yaxi.Swiper.renderer(function (base) {
 
 
 

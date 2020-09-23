@@ -16,7 +16,7 @@
             e:input="handleInput"
             e:focus="handleFocus" />
         <icon icon="common-search" position="absolute" top="50%" left="28rem" transform="translateY(-50%)" />
-        <text theme="font-level2" b:hidden="$model.hidden" 
+        <text theme="text-level2" b:hidden="$model.hidden" 
             position="absolute" 
             width="120rem" 
             height="80rem" 
@@ -29,8 +29,8 @@
         <box layout="row" height="80rem" line-height="80rem" padding="0 20rem" e:tap="handleSearch">
             <icon icon="common-search" />
             <text>搜索</text>
-            <text theme="font-primary" b:text="$model.text" />
-            <text theme="font-level4" e:tap="handleCancel" margin-left="50rem">取消搜索</text>
+            <text theme="text-primary" b:text="$model.text" />
+            <text theme="text-level4" e:tap="handleCancel" margin-left="50rem">取消搜索</text>
         </box>
         <databox key="search-body" e:tap="handleSuggest">
             <box 
@@ -41,7 +41,7 @@
                 theme="border-level4 border-top" 
                 padding="0 20rem">
                 <text d:text="$item.before" />
-                <text theme="font-primary" b:text="$model.text" />
+                <text theme="text-primary" b:text="$model.text" />
                 <text d:text="$item.after" />
             </box>
         </databox>

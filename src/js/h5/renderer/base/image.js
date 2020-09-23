@@ -1,4 +1,4 @@
-yaxi.Image.renderer(function (renderer, base) {
+yaxi.Image.renderer(function (base) {
 
 
 
@@ -6,7 +6,7 @@ yaxi.Image.renderer(function (renderer, base) {
 
 
 
-    renderer.src = function (view, value) {
+    this.src = function (control, view, value) {
 
         view.src = value;
     }

@@ -1089,8 +1089,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         var prototype = this.prototype;
         var base = this.superclass;
+
+        if (base && (base = base.prototype))
+        {
+            base = base.$renderer;
+        }
         
-        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+        fn.call(prototype.$renderer, base || null, yaxi);
     }
 
 

@@ -1,3 +1,6 @@
+const yaxi = require('../../yaxi/js/yaxi');
+
+
 module.exports = new (yaxi.model({
 
     name: '姚正洋',

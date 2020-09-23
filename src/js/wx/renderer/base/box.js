@@ -1,23 +1,23 @@
-yaxi.Box.renderer(function (renderer, base) {
+yaxi.Box.renderer(function (base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
-        view.c = this.renderChildren(children);
+        this.renderChildren(view, '', children);
 
         return view;
     }
 
 
-    this.patch = function (view, prefix) {
+    this.patch = function (control, view, prefix) {
 
-        this.patchChildren(view, prefix, this.__children);
-        base.patch.call(this, view, prefix);
+        this.patchChildren(control, view, prefix, control.__children);
+        base.patch.call(this, control, view, prefix);
     }
 
 

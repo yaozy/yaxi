@@ -36,9 +36,9 @@ return (
 								"text",
 								{
 									"text": "model",
-									"theme": "font-important",
+									"theme": "text-important",
 									"margin-left": ".5em",
-									"font-weight": "bold"
+									"text-weight": "bold"
 								}
 							]
 						]
@@ -59,9 +59,9 @@ return (
 								"text",
 								{
 									"text": "test",
-									"theme": "font-important",
+									"theme": "text-important",
 									"margin-left": ".5em",
-									"font-weight": "bold"
+									"text-weight": "bold"
 								}
 							]
 						]

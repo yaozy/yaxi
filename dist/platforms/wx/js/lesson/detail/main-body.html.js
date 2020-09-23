@@ -89,7 +89,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "second",
+													"theme": "secondary",
 													"text": $data.study
 												}
 											]
@@ -118,7 +118,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "second",
+													"theme": "secondary",
 													"text": $data.browse
 												}
 											]
@@ -147,7 +147,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "second",
+													"theme": "secondary",
 													"text": $data.share
 												}
 											]

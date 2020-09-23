@@ -1,4 +1,4 @@
-yaxi.Button.renderer(function (renderer, base) {
+yaxi.Button.renderer(function (base) {
 
 
 

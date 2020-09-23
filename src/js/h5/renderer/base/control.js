@@ -1,4 +1,4 @@
-yaxi.Control.renderer(function (renderer) {
+yaxi.Control.renderer(function () {
 
 
 
@@ -29,6 +29,7 @@ yaxi.Control.renderer(function (renderer) {
         if (target && html)
         {
             target.__html_template = html;
+            target.__dom_template = null;
         }
     }
 
@@ -38,26 +39,26 @@ yaxi.Control.renderer(function (renderer) {
     
 
 
-    function init_template(target) {
+    function init_template(target, control) {
 
-        div.innerHTML = target.__html_template.replace('$class', target.$class);
+        div.innerHTML = target.__html_template.replace('$class', control.$class);
 
         view = div.firstChild;
         div.removeChild(view);
 
-        return target.constructor.__dom_template = view;
+        return target.__dom_template = view;
     }
 
 
 
 
     // 渲染控件
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = this.$view || (this.$view = (this.constructor.__dom_template || init_template(this)).cloneNode(true));
+        var view = control.$view || (control.$view = (this.__dom_template || init_template(this, control)).cloneNode(true));
 
-        view.id = this.uuid;
-        this.patch(view);
+        view.id = control.uuid;
+        this.patch(control, view);
 
         return view;
     }
@@ -71,23 +72,22 @@ yaxi.Control.renderer(function (renderer) {
 
         while (control = children[index++])
         {
-            view.appendChild(control.$view || control.render());
+            view.appendChild(control.$view || control.$renderer.render(control));
         }
     }
 
 
 
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
         var values;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        if (values = this.__changes)
+        if (values = control.__changes)
         {
-            var properties = this.$properties;
-            var storage = this.$storage;
-            var renderer = this.$renderer;
+            var properties = control.$properties;
+            var storage = control.$storage;
             var names = own(values);
             var index = 0;
             var classes, property, name, value, any;
@@ -101,9 +101,9 @@ yaxi.Control.renderer(function (renderer) {
                 {
                     case 'style': // 样式属性
                         // 处理颜色值
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            value = any.call(this, view, value);
+                            value = any.call(this, control, view, value);
 
                             if (value == null)
                             {
@@ -119,9 +119,9 @@ yaxi.Control.renderer(function (renderer) {
                         break;
 
                     case 'class': // class属性
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            value = any.call(this, view, value);
+                            value = any.call(this, control, view, value);
 
                             if (value == null)
                             {
@@ -132,7 +132,7 @@ yaxi.Control.renderer(function (renderer) {
                         {
                             if (property.type !== 'boolean')
                             {
-                                value = any + value.replace(/\s+/g, ' ' + any);
+                                value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
                             }
                         }
                         else
@@ -140,13 +140,13 @@ yaxi.Control.renderer(function (renderer) {
                             value = '';
                         }
 
-                        (classes || (classes = this.__classes = create(null)))[name] = value;
+                        (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
                         break;
 
                     default:
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            any.call(this, view, values[name]);
+                            any.call(this, control, view, values[name]);
                         }
                         break;
                 }
@@ -165,17 +165,17 @@ yaxi.Control.renderer(function (renderer) {
                     }
                 }
 
-                view.className = this.$class + ' ' + values.join(' ');
+                view.className = control.$class + ' ' + values.join(' ');
             }
 
-            this.__changes = null;
+            control.__changes = null;
         }
     }
 
 
 
     // 子控件变化补丁(给子类用)
-    this.patchChildren = function (view, children) {
+    this.patchChildren = function (control, view, children) {
 
         var control, last, any;
 
@@ -185,7 +185,7 @@ yaxi.Control.renderer(function (renderer) {
 
             if (any = last.length > 0)
             {
-                this.destroyChildren(last);
+                control.destroyChildren(last);
             }
 
             // 曾经清除过
@@ -207,7 +207,7 @@ yaxi.Control.renderer(function (renderer) {
             {
                 if ((control = children[i]) && control.__dirty && (view = control.$view))
                 {
-                    control.patch(view);
+                    control.$renderer.patch(control, view);
                 }
             }
         }
@@ -227,7 +227,7 @@ yaxi.Control.renderer(function (renderer) {
             {
                 if (control.__dirty)
                 {
-                    control.patch(newChild);
+                    control.$renderer.patch(control, newChild);
                 }
 
                 if (newChild !== refChild)
@@ -241,7 +241,7 @@ yaxi.Control.renderer(function (renderer) {
             }
             else
             {
-                view.insertBefore(control.render(), refChild);
+                view.insertBefore(control.$renderer.render(control), refChild);
             }
         }
 
@@ -257,13 +257,13 @@ yaxi.Control.renderer(function (renderer) {
 
 
 
-    renderer.hidden = function (view, value) {
+    this.hidden = function (control, view, value) {
 
         view.style.display = value ? 'none' : '';
     }
 
 
-    renderer.disabled = function (view, value) {
+    this.disabled = function (control, view, value) {
 
         if (value)
         {

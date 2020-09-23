@@ -1,23 +1,23 @@
-yaxi.Memo.renderer(function (renderer, base) {
+yaxi.Memo.renderer(function (base) {
 
 
 
-    this.focus = function () {
+    this.focus = function (control) {
 
         var view;
 
-        if (view = this.$view)
+        if (view = control.$view)
         {
             view.focus();
         }
     }
 
     
-    this.blur = function () {
+    this.blur = function (control) {
 
         var view;
 
-        if (view = this.$view)
+        if (view = control.$view)
         {
             view.blur();
         }
@@ -29,13 +29,13 @@ yaxi.Memo.renderer(function (renderer, base) {
 
 
 
-    renderer.value = function (view, value) {
+    this.value = function (control, view, value) {
 
         view.firstChild.value = value;
     }
 
 
-    renderer.placeholder = function (view, value) {
+    this.placeholder = function (control, view, value) {
 
         view.firstChild.placeholder = value;
     }
@@ -44,17 +44,17 @@ yaxi.Memo.renderer(function (renderer, base) {
 
     this.__on_change = function (event) {
 
-        var value = this.value;
+        var value = control.value;
 
-        this.value = event.target.value;
+        control.value = event.target.value;
 
-        if (this.value !== value)
+        if (control.value !== value)
         {
-            this.$push(this.value);
+            control.$push(control.value);
         }
         else
         {
-            renderer.value(this.$view, value);
+            this.value(control.$view, value);
         }
     }
 

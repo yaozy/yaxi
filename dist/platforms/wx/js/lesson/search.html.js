@@ -67,7 +67,7 @@ return (
 					[
 						"text",
 						{
-							"theme": "font-level2",
+							"theme": "text-level2",
 							"position": "absolute",
 							"width": "120rem",
 							"height": "80rem",
@@ -120,7 +120,7 @@ return (
 							[
 								"text",
 								{
-									"theme": "font-primary",
+									"theme": "text-primary",
 									"bindings": {
 										"text":  function () { return $model.text }
 									}
@@ -129,7 +129,7 @@ return (
 							[
 								"text",
 								{
-									"theme": "font-level4",
+									"theme": "text-level4",
 									"margin-left": "50rem",
 									"events": {
 										"tap": $owner.handleCancel.bind($owner)
@@ -177,7 +177,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "font-primary",
+													"theme": "text-primary",
 													"bindings": {
 														"text":  function () { return $model.text }
 													}

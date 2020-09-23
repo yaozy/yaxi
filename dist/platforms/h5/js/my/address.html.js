@@ -25,7 +25,7 @@ return (
 							"icon": "common-search",
 							"content": "添加地址",
 							"layout": "row middle",
-							"theme": "font-primary"
+							"theme": "text-primary"
 						}
 					]
 				]
@@ -102,7 +102,7 @@ return (
 													[
 														"text",
 														{
-															"theme": "font-level3",
+															"theme": "text-level3",
 															"font-size": "28rem",
 															"bindings": {
 																"text":  function () { return $item.address }

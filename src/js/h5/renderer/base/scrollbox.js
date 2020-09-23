@@ -1,4 +1,4 @@
-yaxi.ScrollBox.renderer(function (renderer, base) {
+yaxi.ScrollBox.renderer(function (base) {
 
 
 

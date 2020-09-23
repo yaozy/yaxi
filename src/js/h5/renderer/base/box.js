@@ -1,4 +1,4 @@
-yaxi.Box.renderer(function (renderer, base) {
+yaxi.Box.renderer(function (base) {
 
 
     
@@ -7,23 +7,23 @@ yaxi.Box.renderer(function (renderer, base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
-        this.renderChildren(view, this.children);
+        this.renderChildren(view, children);
 
         return view;
     }
 
 
     
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
-        this.patchChildren(this.getChildrenView(view), this.__children);
-        base.patch.call(this, view);
+        this.patchChildren(control, this.getChildrenView(view), control.__children);
+        base.patch.call(this, control, view);
     }
 
 

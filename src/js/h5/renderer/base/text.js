@@ -1,4 +1,4 @@
-yaxi.Text.renderer(function (renderer, base) {
+yaxi.Text.renderer(function (base) {
 
 
 
@@ -6,28 +6,28 @@ yaxi.Text.renderer(function (renderer, base) {
 
     
 
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         var format;
 
-        if (!this.__security)
+        if (!control.__security)
         {
-            view.textContent = (format = this.__format) ? format(value) : value;
+            view.textContent = (format = control.__format) ? format(value) : value;
         }
     }
 
 
-    renderer.security = function (view, value) {
+    this.security = function (control, view, value) {
 
         var format;
 
-        if (this.__security = value)
+        if (control.__security = value)
         {
             view.textContent = value;
         }
         else
         {
-            view.textContent = (format = this.__format) ? format(this.text) : this.text;
+            view.textContent = (format = control.__format) ? format(control.text) : control.text;
         }
     }
 

@@ -24,7 +24,7 @@ return (
 							[
 								"text",
 								{
-									"border-left": "5rem solid @border-second",
+									"border-left": "5rem solid @border-secondary",
 									"padding": "0 20rem"
 								},
 								"任课教师"
@@ -99,7 +99,7 @@ return (
 							[
 								"text",
 								{
-									"border-left": "5rem solid @border-second",
+									"border-left": "5rem solid @border-secondary",
 									"padding": "0 20rem"
 								},
 								"课程内容"

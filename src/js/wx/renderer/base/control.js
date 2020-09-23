@@ -1,4 +1,4 @@
-yaxi.Control.renderer(function (renderer, base, yaxi) {
+yaxi.Control.renderer(function (base, yaxi) {
 
 
 
@@ -32,10 +32,9 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
     
 
 
-    function render(control, view, prefix, values) {
+    function render(renderer, control, view, prefix, values) {
         
         var properties = control.$properties;
-        var renderer = control.$renderer;
         var names = own(values);
         var index = 0;
         var classes, styles, property, name, value, any;
@@ -50,7 +49,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                 case 'style': // 样式属性
                     if (any = renderer[name])
                     {
-                        value = any.call(this, view, prefix, value);
+                        value = any.call(renderer, control, view, prefix, value);
 
                         if (value == null)
                         {
@@ -81,7 +80,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                 case 'class': // class属性
                     if (any = renderer[name])
                     {
-                        value = any.call(this, view, prefix, value);
+                        value = any.call(renderer, control, view, prefix, value);
 
                         if (value == null)
                         {
@@ -92,7 +91,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                     {
                         if (property.type !== 'boolean')
                         {
-                            value = any + value.replace(/\s+/g, ' ' + any);
+                            value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
                         }
                     }
                     else
@@ -108,7 +107,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                     {
                         if (any = renderer[name])
                         {
-                            any.call(control, view, prefix, value);
+                            any.call(renderer, control, view, prefix, value);
                         }
                         else if (any !== false) // 自定义渲染为false不做任何处理
                         {
@@ -153,32 +152,32 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
 
     // 全局渲染
-    this.render = function () {
+    this.render = function (control) {
 
-        var storage = this.$storage;
+        var storage = control.$storage;
         var view = create(null);
         var changes;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        view.t = this.typeName;
-        view.u = this.uuid;
+        view.t = control.typeName;
+        view.u = control.uuid;
 
-        if (changes = this.__changes)
+        if (changes = control.__changes)
         {
             assign(storage, changes);
-            this.__changes = null;
+            control.__changes = null;
         }
 
-        render(this, view, '', storage);
+        render(this, control, view, '', storage);
 
-        this.$renderer.onchange.call(this, view, '');
+        this.onchange.call(this, control, view, '');
         return view;
     }
 
 
     // 全新渲染子控件(给子类用)
-    this.renderChildren = function (children) {
+    this.renderChildren = function (view, prefix, children) {
 
         var length = children.length;
         
@@ -188,37 +187,35 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
             for (var i = 0; i < length; i++)
             {
-                list[i] = children[i].render();
+                list[i] = children[i].$renderer.render(children[i]);
             }
             
-            return list;
+            view[prefix + 'c'] = list;
         }
-
-        return [];
     }
 
 
 
     // 增量渲染
-    this.patch = function (view, prefix) {
+    this.patch = function (control, view, prefix) {
 
         var changes;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        if (changes = this.__changes)
+        if (changes = control.__changes)
         {
-            assign(this.$storage, changes);
-            render(this, view, prefix += '.', changes);
+            assign(control.$storage, changes);
+            render(this, control, view, prefix += '.', changes);
             
-            this.$renderer.onchange.call(this, view, prefix);
-            this.__changes = null;
+            this.onchange.call(this, control, view, prefix);
+            control.__changes = null;
         }
     }
 
 
     // 子控件变化补丁(给子类用)
-    this.patchChildren = function (view, prefix, children) {
+    this.patchChildren = function (control, view, prefix, children) {
 
         var last, any;
 
@@ -228,13 +225,13 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
             if (any = last.length > 0)
             {
-                this.destroyChildren(last);
+                control.destroyChildren(last);
             }
 
             // 曾经清除过
             if (!any || last.clear)
             {
-                view[prefix + 'c'] = this.renderChildren(children);
+                this.renderChildren(view, prefix, children);
             }
             else if (children.length < last.length)
             {
@@ -262,7 +259,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
         {
             if ((item = children[i]) && item.__dirty)
             {
-                item.patch(view, prefix + i + ']');
+                item.$renderer.patch(item, view, prefix + i + ']');
             }
         }
     }
@@ -275,7 +272,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = children[i].render();
+            list[i] = children[i].$renderer.render(children[i]);
         }
 
         view[prefix + '.c'] = view.children = list;
@@ -293,18 +290,18 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
         {
             if ((item = children[i]) !== last[i])
             {
-                view[prefix + i + ']'] = item.render();
+                view[prefix + i + ']'] = item.$renderer.render(item);
             }
             else if (item.__dirty)
             {
-                item.patch(view, prefix + i + ']');
+                item.$renderer.patch(item, view, prefix + i + ']');
             }
         }
     }
 
 
 
-    renderer.onchange = function (view, prefix) {
+    this.onchange = function (control, view, prefix) {
     }
 
     

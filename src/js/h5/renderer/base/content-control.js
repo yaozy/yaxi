@@ -1,27 +1,24 @@
-yaxi.ContentControl.renderer(function (renderer, base) {
+yaxi.ContentControl.renderer(function (base) {
 
 
 
-    this.__no_content = '';
 
+    this.render = function (control) {
 
+        var view = base.render.call(this, control);
+        var content = control.__init_content() || control.__no_content || '';
 
-    this.render = function () {
-
-        var view = base.render.call(this);
-        var content = this.__init_content() || this.__no_content;
-
-        this.__render_content(view, content);
+        this.renderContent(view, content);
 
         return view;
     }
 
     
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
         if (typeof content === 'string')
         {
-            this.__render_text(view, content);
+            this.renderText(view, content);
         }
         else
         {
@@ -31,15 +28,15 @@ yaxi.ContentControl.renderer(function (renderer, base) {
     }
 
 
-    this.__render_text = function (view, text) {
+    this.renderText = function (view, text) {
 
         view.textContent = text;
     }
 
 
-    renderer.content = function (view) {
+    this.content = function (control, view) {
 
-        this.__render_content(view, this.__init_content());
+        this.renderContent(view, control.__init_content());
     }
 
 

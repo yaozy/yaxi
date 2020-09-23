@@ -1,4 +1,4 @@
-yaxi.Header.renderer(function (renderer, base) {
+yaxi.Header.renderer(function (base) {
 
 
 
@@ -10,15 +10,15 @@ yaxi.Header.renderer(function (renderer, base) {
 
 
 
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
-        base.__render_content.call(this, view.lastChild, content);
+        base.renderContent.call(this, view.lastChild, content);
         view.firstChild.style.display = yaxi.currentPages.length > 1 ? '' : 'none';
     }
 
 
 
-    renderer.icon = function (view, value) {
+    this.icon = function (control, view, value) {
 
         view = view.firstChild.nextSibling;
         view.className = value ? 'yx-header-icon iconfont ' + value : 'yx-header-hidden';

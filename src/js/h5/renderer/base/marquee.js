@@ -1,10 +1,10 @@
-yaxi.Marquee.renderer(function (renderer, base) {
+yaxi.Marquee.renderer(function (base) {
 
 
     yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
     
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         // var length = value.length;
 
@@ -36,9 +36,9 @@ yaxi.Marquee.renderer(function (renderer, base) {
     }
 
 
-    renderer.speed = function (view) {
+    this.speed = function (control, view) {
 
-        renderer.text.call(this, view, this.text);
+        this.text.call(this, control, view, control.text);
     }
 
 

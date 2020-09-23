@@ -2538,12 +2538,22 @@ yaxi.http = Object.extend.call({}, function (Class) {
             Model = arrayModel.$Model,
             parent = arrayModel.$parent,
             length = list.length,
-            model;
+            model,
+            data;
 
         while (index < length)
         {
-            model = new Model(parent);
-            model.$load(list[index++]);
+            data = list[index++];
+
+            if (data instanceof Model)
+            {
+                data.$parent = parent;
+            }
+            else
+            {
+                model = new Model(parent);
+                model.$load(data);    
+            }
 
             outputs.push(model);
         }
@@ -2619,19 +2629,58 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-    this.set = function (index, value) {
+    // 创建一个临时的模型
+    this.create = function (data) {
+
+        var model = new this.$Model();
+
+        if (data)
+        {
+            model.$load(data);
+        }
+
+        return model;
+    }
+
+
+    // 复制一个临时的模型
+    this.copy = function (index) {
+
+        var model = new this.$Model();
+        var data;
+
+        if (data = this[index])
+        {
+            model.$load(data.$storage);
+        }
+
+        return model;
+    }
+
+
+
+    this.set = function (index, data) {
+
+        var Model = this.$Model;
+        var model;
 
         if ((index |= 0) >= 0 && this[index])
         {
-            var model = new this.$Model(this.$parent);
+            if (data instanceof Model)
+            {
+                model = data;
+                model.$parent = this.$parent;
+            }
+            else
+            {
+                model = new Model(this.$parent);
+                data && model.$load(data);
+            }
 
-            model.$load(value);
             this[index] = model;
-
             notify(this, '__on_set', index, model);
         }
     }
-
 
 
 
@@ -2836,7 +2885,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     bg.important = '#c40606';
     bg.primary = '#1c86ee';
-    bg.second = '#5eaadd';
+    bg.secondary = '#5eaadd';
     bg.success = '#71c04a';
     bg.warning = '#e89518';
     bg.danger = '#ff6c6c';
@@ -2851,7 +2900,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     font.important = '#c40606';
     font.primary = '#1c86ee';
-    font.second = '#5eaadd';
+    font.secondary = '#5eaadd';
     font.success = '#71c04a';
     font.warning = '#e89518';
     font.danger = '#ff6c6c';
@@ -2866,7 +2915,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     border.important = '#c40606';
     border.primary = '#1c86ee';
-    border.second = '#5eaadd';
+    border.secondary = '#5eaadd';
     border.success = '#71c04a';
     border.warning = '#e89518';
     border.danger = '#ff6c6c';
@@ -2885,8 +2934,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         {
             if (prefix)
             {
-                color[prefix] = value;
-                color[prefix + '-color'] = value;    
+                color[prefix] = value; 
             }
         }
         else
@@ -4585,8 +4633,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         var prototype = this.prototype;
         var base = this.superclass;
+
+        if (base && (base = base.prototype))
+        {
+            base = base.$renderer;
+        }
         
-        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+        fn.call(prototype.$renderer, base || null, yaxi);
     }
 
 
@@ -5671,7 +5724,7 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'font-level1-color');
+    this.$property('color', 'text-level1');
 
 
 
@@ -5691,7 +5744,7 @@ yaxi.Vline = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'font-level1-color');
+    this.$property('color', 'text-level1');
 
 
 
@@ -6764,7 +6817,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
-yaxi.Control.renderer(function (renderer, base, yaxi) {
+yaxi.Control.renderer(function (base, yaxi) {
 
 
 
@@ -6798,10 +6851,9 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
     
 
 
-    function render(control, view, prefix, values) {
+    function render(renderer, control, view, prefix, values) {
         
         var properties = control.$properties;
-        var renderer = control.$renderer;
         var names = own(values);
         var index = 0;
         var classes, styles, property, name, value, any;
@@ -6816,7 +6868,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                 case 'style': // 样式属性
                     if (any = renderer[name])
                     {
-                        value = any.call(this, view, prefix, value);
+                        value = any.call(renderer, control, view, prefix, value);
 
                         if (value == null)
                         {
@@ -6847,7 +6899,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                 case 'class': // class属性
                     if (any = renderer[name])
                     {
-                        value = any.call(this, view, prefix, value);
+                        value = any.call(renderer, control, view, prefix, value);
 
                         if (value == null)
                         {
@@ -6858,7 +6910,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                     {
                         if (property.type !== 'boolean')
                         {
-                            value = any + value.replace(/\s+/g, ' ' + any);
+                            value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
                         }
                     }
                     else
@@ -6874,7 +6926,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
                     {
                         if (any = renderer[name])
                         {
-                            any.call(control, view, prefix, value);
+                            any.call(renderer, control, view, prefix, value);
                         }
                         else if (any !== false) // 自定义渲染为false不做任何处理
                         {
@@ -6919,32 +6971,32 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
 
     // 全局渲染
-    this.render = function () {
+    this.render = function (control) {
 
-        var storage = this.$storage;
+        var storage = control.$storage;
         var view = create(null);
         var changes;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        view.t = this.typeName;
-        view.u = this.uuid;
+        view.t = control.typeName;
+        view.u = control.uuid;
 
-        if (changes = this.__changes)
+        if (changes = control.__changes)
         {
             assign(storage, changes);
-            this.__changes = null;
+            control.__changes = null;
         }
 
-        render(this, view, '', storage);
+        render(this, control, view, '', storage);
 
-        this.$renderer.onchange.call(this, view, '');
+        this.onchange.call(this, control, view, '');
         return view;
     }
 
 
     // 全新渲染子控件(给子类用)
-    this.renderChildren = function (children) {
+    this.renderChildren = function (view, prefix, children) {
 
         var length = children.length;
         
@@ -6954,37 +7006,35 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
             for (var i = 0; i < length; i++)
             {
-                list[i] = children[i].render();
+                list[i] = children[i].$renderer.render(children[i]);
             }
             
-            return list;
+            view[prefix + 'c'] = list;
         }
-
-        return [];
     }
 
 
 
     // 增量渲染
-    this.patch = function (view, prefix) {
+    this.patch = function (control, view, prefix) {
 
         var changes;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        if (changes = this.__changes)
+        if (changes = control.__changes)
         {
-            assign(this.$storage, changes);
-            render(this, view, prefix += '.', changes);
+            assign(control.$storage, changes);
+            render(this, control, view, prefix += '.', changes);
             
-            this.$renderer.onchange.call(this, view, prefix);
-            this.__changes = null;
+            this.onchange.call(this, control, view, prefix);
+            control.__changes = null;
         }
     }
 
 
     // 子控件变化补丁(给子类用)
-    this.patchChildren = function (view, prefix, children) {
+    this.patchChildren = function (control, view, prefix, children) {
 
         var last, any;
 
@@ -6994,13 +7044,13 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
             if (any = last.length > 0)
             {
-                this.destroyChildren(last);
+                control.destroyChildren(last);
             }
 
             // 曾经清除过
             if (!any || last.clear)
             {
-                view[prefix + 'c'] = this.renderChildren(children);
+                this.renderChildren(view, prefix, children);
             }
             else if (children.length < last.length)
             {
@@ -7028,7 +7078,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
         {
             if ((item = children[i]) && item.__dirty)
             {
-                item.patch(view, prefix + i + ']');
+                item.$renderer.patch(item, view, prefix + i + ']');
             }
         }
     }
@@ -7041,7 +7091,7 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = children[i].render();
+            list[i] = children[i].$renderer.render(children[i]);
         }
 
         view[prefix + '.c'] = view.children = list;
@@ -7059,18 +7109,18 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
         {
             if ((item = children[i]) !== last[i])
             {
-                view[prefix + i + ']'] = item.render();
+                view[prefix + i + ']'] = item.$renderer.render(item);
             }
             else if (item.__dirty)
             {
-                item.patch(view, prefix + i + ']');
+                item.$renderer.patch(item, view, prefix + i + ']');
             }
         }
     }
 
 
 
-    renderer.onchange = function (view, prefix) {
+    this.onchange = function (control, view, prefix) {
     }
 
     
@@ -7080,41 +7130,43 @@ yaxi.Control.renderer(function (renderer, base, yaxi) {
 
 
 
-yaxi.ContentControl.renderer(function (renderer, base) {
+yaxi.ContentControl.renderer(function (base) {
 
     
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var content = this.__init_content() || this.__no_content;
+        var view = base.render.call(this, control);
+        var content = control.__init_content() || control.__no_content || '';
 
-        view.c = this.__render_content(content);
+        this.renderContent(view, '', content);
 
         return view;
     }
     
     
 
-    this.__render_content = function (content) {
+    this.renderContent = function (view, prefix, content) {
 
         if (typeof content === 'string')
         {
-            return [{
+            view[prefix + 'c'] = [{
                 t: 'Text',
                 u: this.uuid,
                 text: content
             }];
         }
-
-        return this.renderChildren(content);
+        else
+        {
+            this.renderChildren(view, prefix, content);
+        }
     }
 
 
     
-    renderer.content = function (view, prefix, value) {
+    this.content = function (control, view, prefix, value) {
 
-        view[prefix + 'c'] = this.__render_content(this.__init_content() || '');
+        this.renderContent(view, prefix, control.__init_content() || '');
     }
 
 
@@ -7124,26 +7176,26 @@ yaxi.ContentControl.renderer(function (renderer, base) {
 
 
 
-yaxi.Box.renderer(function (renderer, base) {
+yaxi.Box.renderer(function (base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
-        view.c = this.renderChildren(children);
+        this.renderChildren(view, '', children);
 
         return view;
     }
 
 
-    this.patch = function (view, prefix) {
+    this.patch = function (control, view, prefix) {
 
-        this.patchChildren(view, prefix, this.__children);
-        base.patch.call(this, view, prefix);
+        this.patchChildren(control, view, prefix, control.__children);
+        base.patch.call(this, control, view, prefix);
     }
 
 
@@ -7153,26 +7205,26 @@ yaxi.Box.renderer(function (renderer, base) {
 
 
 
-yaxi.DataBox.renderer(function (renderer, base) {
+yaxi.DataBox.renderer(function (base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
-        view.c = this.renderChildren(children);
+        this.renderChildren(view, '', children);
 
         return view;
     }
 
 
-    this.patch = function (view, prefix) {
+    this.patch = function (control, view, prefix) {
 
-        this.patchChildren(view, prefix, this.__children);
-        base.patch.call(this, view, prefix);
+        this.patchChildren(control, view, prefix, control.__children);
+        base.patch.call(this, control, view, prefix);
     }
 
 
@@ -7181,11 +7233,11 @@ yaxi.DataBox.renderer(function (renderer, base) {
 
 
 
-yaxi.Marquee.renderer(function (renderer, base) {
+yaxi.Marquee.renderer(function (base) {
 
 
 
-    renderer.text = function (view, prefix, value) {
+    this.text = function (control, view, prefix, value) {
 
         // var length = value.length;
 
@@ -7205,7 +7257,7 @@ yaxi.Marquee.renderer(function (renderer, base) {
         //         speed = 1;
         //     }
 
-        //     speed = speed * this.speed | 0;
+        //     speed = speed * control.speed | 0;
         //     value = 'marquee ' + speed + 's linear infinite';
         // }
 
@@ -7213,9 +7265,9 @@ yaxi.Marquee.renderer(function (renderer, base) {
     }
 
 
-    renderer.speed = function (view) {
+    this.speed = function (control, view) {
 
-        renderer.text.call(this, view, this.text);
+        this.text.call(this, control, view, control.text);
     }
 
 
@@ -7225,7 +7277,7 @@ yaxi.Marquee.renderer(function (renderer, base) {
 
 
 
-yaxi.Page.renderer(function (renderer, base, yaxi) {
+yaxi.Page.renderer(function (base, yaxi) {
 
 
 
@@ -7382,7 +7434,7 @@ yaxi.Page.renderer(function (renderer, base, yaxi) {
             notifyRender(renderings);
 
             data = {};
-            data[wxName || (wxName = 'data')] = page.render();
+            data[wxName || (wxName = 'data')] = page.$renderer.render(page);
 
             console.log(data);
 
@@ -7417,7 +7469,7 @@ yaxi.Page.renderer(function (renderer, base, yaxi) {
             {
                 times++;
 
-                control.patch(data = create(null), control.__wx_name);
+                control.$renderer.patch(control, data = create(null), control.__wx_name);
                 console.log(data);
 
                 page.setData(data, function () {
@@ -7452,11 +7504,11 @@ yaxi.Page.renderer(function (renderer, base, yaxi) {
 
 
 
-yaxi.Header.renderer(function (renderer, base) {
+yaxi.Header.renderer(function (base) {
 
 
 
-    renderer.onchange = function (view, prefix) {
+    this.onchange = function (control, view, prefix) {
 
         view[prefix + 'back'] = yaxi.currentPages.length > 1;
     }

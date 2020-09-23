@@ -1,8 +1,8 @@
-yaxi.Marquee.renderer(function (renderer, base) {
+yaxi.Marquee.renderer(function (base) {
 
 
 
-    renderer.text = function (view, prefix, value) {
+    this.text = function (control, view, prefix, value) {
 
         // var length = value.length;
 
@@ -22,7 +22,7 @@ yaxi.Marquee.renderer(function (renderer, base) {
         //         speed = 1;
         //     }
 
-        //     speed = speed * this.speed | 0;
+        //     speed = speed * control.speed | 0;
         //     value = 'marquee ' + speed + 's linear infinite';
         // }
 
@@ -30,9 +30,9 @@ yaxi.Marquee.renderer(function (renderer, base) {
     }
 
 
-    renderer.speed = function (view) {
+    this.speed = function (control, view) {
 
-        renderer.text.call(this, view, this.text);
+        this.text.call(this, control, view, control.text);
     }
 
 

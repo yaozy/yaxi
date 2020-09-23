@@ -1,11 +1,11 @@
-yaxi.DataBox.renderer(function (renderer, base) {
+yaxi.DataBox.renderer(function (base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
         this.renderChildren(view, children);
@@ -15,10 +15,10 @@ yaxi.DataBox.renderer(function (renderer, base) {
 
 
     
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
-        this.patchChildren(view, this.__children);
-        base.patch.call(this, view);
+        this.patchChildren(control, view, control.__children);
+        base.patch.call(this, control, view);
     }
 
     

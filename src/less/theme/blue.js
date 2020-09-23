@@ -73,7 +73,7 @@
         {
             if (prefix)
             {
-                color[prefix] = value; 
+                color[prefix] = value;
             }
         }
         else

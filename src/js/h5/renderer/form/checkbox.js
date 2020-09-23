@@ -1,4 +1,4 @@
-yaxi.CheckBox.renderer(function (renderer, base) {
+yaxi.CheckBox.renderer(function (base) {
 
 
 
@@ -6,19 +6,19 @@ yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         view.lastChild.textContent = value;
     }
 
 
-    renderer.checked = function (view, value) {
+    this.checked = function (control, view, value) {
 
         view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    renderer.checkedIcon = function (view, value) {
+    this.checkedIcon = function (control, view, value) {
 
         if (value && this.checked)
         {
@@ -27,20 +27,12 @@ yaxi.CheckBox.renderer(function (renderer, base) {
     }
 
 
-    renderer.uncheckedIcon = function (view, value) {
+    this.uncheckedIcon = function (control, view, value) {
 
         if (value && !this.checked)
         {
             view.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
         }
-    }
-
-
-
-    this.__on_tap = function () {
-
-        this.$push(this.checked = !this.checked);
-        this.trigger('change');
     }
 
 

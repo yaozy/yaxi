@@ -1,38 +1,40 @@
-yaxi.ContentControl.renderer(function (renderer, base) {
+yaxi.ContentControl.renderer(function (base) {
 
     
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var content = this.__init_content() || this.__no_content;
+        var view = base.render.call(this, control);
+        var content = control.__init_content() || control.__no_content || '';
 
-        view.c = this.__render_content(content);
+        this.renderContent(view, '', content);
 
         return view;
     }
     
     
 
-    this.__render_content = function (content) {
+    this.renderContent = function (view, prefix, content) {
 
         if (typeof content === 'string')
         {
-            return [{
+            view[prefix + 'c'] = [{
                 t: 'Text',
                 u: this.uuid,
                 text: content
             }];
         }
-
-        return this.renderChildren(content);
+        else
+        {
+            this.renderChildren(view, prefix, content);
+        }
     }
 
 
     
-    renderer.content = function (view, prefix, value) {
+    this.content = function (control, view, prefix, value) {
 
-        view[prefix + 'c'] = this.__render_content(this.__init_content() || '');
+        this.renderContent(view, prefix, control.__init_content() || '');
     }
 
 

@@ -1,4 +1,4 @@
-yaxi.StackBox.renderer(function (renderer, base) {
+yaxi.StackBox.renderer(function (base) {
 
 
 
@@ -14,7 +14,7 @@ yaxi.StackBox.renderer(function (renderer, base) {
 
 
 
-    renderer.full = function (view, value) {
+    this.full = function (control, view, value) {
 
         view.firstChild.className = 'yx-stackbox-body' + (value ? ' yx-stackbox-full' : '');
     }

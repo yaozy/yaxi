@@ -1,4 +1,4 @@
-yaxi.Page.renderer(function (renderer, base, yaxi) {
+yaxi.Page.renderer(function (base, yaxi) {
 
 
 
@@ -155,7 +155,7 @@ yaxi.Page.renderer(function (renderer, base, yaxi) {
             notifyRender(renderings);
 
             data = {};
-            data[wxName || (wxName = 'data')] = page.render();
+            data[wxName || (wxName = 'data')] = page.$renderer.render(page);
 
             console.log(data);
 
@@ -190,7 +190,7 @@ yaxi.Page.renderer(function (renderer, base, yaxi) {
             {
                 times++;
 
-                control.patch(data = create(null), control.__wx_name);
+                control.$renderer.patch(control, data = create(null), control.__wx_name);
                 console.log(data);
 
                 page.setData(data, function () {

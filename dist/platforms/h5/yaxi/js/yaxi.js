@@ -2885,7 +2885,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     bg.important = '#c40606';
     bg.primary = '#1c86ee';
-    bg.second = '#5eaadd';
+    bg.secondary = '#5eaadd';
     bg.success = '#71c04a';
     bg.warning = '#e89518';
     bg.danger = '#ff6c6c';
@@ -2900,7 +2900,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     font.important = '#c40606';
     font.primary = '#1c86ee';
-    font.second = '#5eaadd';
+    font.secondary = '#5eaadd';
     font.success = '#71c04a';
     font.warning = '#e89518';
     font.danger = '#ff6c6c';
@@ -2915,7 +2915,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
     border.important = '#c40606';
     border.primary = '#1c86ee';
-    border.second = '#5eaadd';
+    border.secondary = '#5eaadd';
     border.success = '#71c04a';
     border.warning = '#e89518';
     border.danger = '#ff6c6c';
@@ -2934,8 +2934,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
         {
             if (prefix)
             {
-                color[prefix] = value;
-                color[prefix + '-color'] = value;    
+                color[prefix] = value; 
             }
         }
         else
@@ -4634,8 +4633,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         var prototype = this.prototype;
         var base = this.superclass;
+
+        if (base && (base = base.prototype))
+        {
+            base = base.$renderer;
+        }
         
-        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+        fn.call(prototype.$renderer, base || null, yaxi);
     }
 
 
@@ -5720,7 +5724,7 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'font-level1-color');
+    this.$property('color', 'text-level1');
 
 
 
@@ -5740,7 +5744,7 @@ yaxi.Vline = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'font-level1-color');
+    this.$property('color', 'text-level1');
 
 
 
@@ -7046,7 +7050,7 @@ yaxi.__ajax_send = function (options) {
 
 
 
-yaxi.Control.renderer(function (renderer) {
+yaxi.Control.renderer(function () {
 
 
 
@@ -7077,6 +7081,7 @@ yaxi.Control.renderer(function (renderer) {
         if (target && html)
         {
             target.__html_template = html;
+            target.__dom_template = null;
         }
     }
 
@@ -7086,26 +7091,26 @@ yaxi.Control.renderer(function (renderer) {
     
 
 
-    function init_template(target) {
+    function init_template(target, control) {
 
-        div.innerHTML = target.__html_template.replace('$class', target.$class);
+        div.innerHTML = target.__html_template.replace('$class', control.$class);
 
         view = div.firstChild;
         div.removeChild(view);
 
-        return target.constructor.__dom_template = view;
+        return target.__dom_template = view;
     }
 
 
 
 
     // 渲染控件
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = this.$view || (this.$view = (this.constructor.__dom_template || init_template(this)).cloneNode(true));
+        var view = control.$view || (control.$view = (this.__dom_template || init_template(this, control)).cloneNode(true));
 
-        view.id = this.uuid;
-        this.patch(view);
+        view.id = control.uuid;
+        this.patch(control, view);
 
         return view;
     }
@@ -7119,23 +7124,22 @@ yaxi.Control.renderer(function (renderer) {
 
         while (control = children[index++])
         {
-            view.appendChild(control.$view || control.render());
+            view.appendChild(control.$view || control.$renderer.render(control));
         }
     }
 
 
 
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
         var values;
 
-        this.__dirty = false;
+        control.__dirty = false;
 
-        if (values = this.__changes)
+        if (values = control.__changes)
         {
-            var properties = this.$properties;
-            var storage = this.$storage;
-            var renderer = this.$renderer;
+            var properties = control.$properties;
+            var storage = control.$storage;
             var names = own(values);
             var index = 0;
             var classes, property, name, value, any;
@@ -7149,9 +7153,9 @@ yaxi.Control.renderer(function (renderer) {
                 {
                     case 'style': // 样式属性
                         // 处理颜色值
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            value = any.call(this, view, value);
+                            value = any.call(this, control, view, value);
 
                             if (value == null)
                             {
@@ -7167,9 +7171,9 @@ yaxi.Control.renderer(function (renderer) {
                         break;
 
                     case 'class': // class属性
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            value = any.call(this, view, value);
+                            value = any.call(this, control, view, value);
 
                             if (value == null)
                             {
@@ -7180,7 +7184,7 @@ yaxi.Control.renderer(function (renderer) {
                         {
                             if (property.type !== 'boolean')
                             {
-                                value = any + value.replace(/\s+/g, ' ' + any);
+                                value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
                             }
                         }
                         else
@@ -7188,13 +7192,13 @@ yaxi.Control.renderer(function (renderer) {
                             value = '';
                         }
 
-                        (classes || (classes = this.__classes = create(null)))[name] = value;
+                        (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
                         break;
 
                     default:
-                        if (any = renderer[name])
+                        if (any = this[name])
                         {
-                            any.call(this, view, values[name]);
+                            any.call(this, control, view, values[name]);
                         }
                         break;
                 }
@@ -7213,17 +7217,17 @@ yaxi.Control.renderer(function (renderer) {
                     }
                 }
 
-                view.className = this.$class + ' ' + values.join(' ');
+                view.className = control.$class + ' ' + values.join(' ');
             }
 
-            this.__changes = null;
+            control.__changes = null;
         }
     }
 
 
 
     // 子控件变化补丁(给子类用)
-    this.patchChildren = function (view, children) {
+    this.patchChildren = function (control, view, children) {
 
         var control, last, any;
 
@@ -7233,7 +7237,7 @@ yaxi.Control.renderer(function (renderer) {
 
             if (any = last.length > 0)
             {
-                this.destroyChildren(last);
+                control.destroyChildren(last);
             }
 
             // 曾经清除过
@@ -7255,7 +7259,7 @@ yaxi.Control.renderer(function (renderer) {
             {
                 if ((control = children[i]) && control.__dirty && (view = control.$view))
                 {
-                    control.patch(view);
+                    control.$renderer.patch(control, view);
                 }
             }
         }
@@ -7275,7 +7279,7 @@ yaxi.Control.renderer(function (renderer) {
             {
                 if (control.__dirty)
                 {
-                    control.patch(newChild);
+                    control.$renderer.patch(control, newChild);
                 }
 
                 if (newChild !== refChild)
@@ -7289,7 +7293,7 @@ yaxi.Control.renderer(function (renderer) {
             }
             else
             {
-                view.insertBefore(control.render(), refChild);
+                view.insertBefore(control.$renderer.render(control), refChild);
             }
         }
 
@@ -7305,13 +7309,13 @@ yaxi.Control.renderer(function (renderer) {
 
 
 
-    renderer.hidden = function (view, value) {
+    this.hidden = function (control, view, value) {
 
         view.style.display = value ? 'none' : '';
     }
 
 
-    renderer.disabled = function (view, value) {
+    this.disabled = function (control, view, value) {
 
         if (value)
         {
@@ -7331,30 +7335,27 @@ yaxi.Control.renderer(function (renderer) {
 
 
 
-yaxi.ContentControl.renderer(function (renderer, base) {
+yaxi.ContentControl.renderer(function (base) {
 
 
 
-    this.__no_content = '';
 
+    this.render = function (control) {
 
+        var view = base.render.call(this, control);
+        var content = control.__init_content() || control.__no_content || '';
 
-    this.render = function () {
-
-        var view = base.render.call(this);
-        var content = this.__init_content() || this.__no_content;
-
-        this.__render_content(view, content);
+        this.renderContent(view, content);
 
         return view;
     }
 
     
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
         if (typeof content === 'string')
         {
-            this.__render_text(view, content);
+            this.renderText(view, content);
         }
         else
         {
@@ -7364,15 +7365,15 @@ yaxi.ContentControl.renderer(function (renderer, base) {
     }
 
 
-    this.__render_text = function (view, text) {
+    this.renderText = function (view, text) {
 
         view.textContent = text;
     }
 
 
-    renderer.content = function (view) {
+    this.content = function (control, view) {
 
-        this.__render_content(view, this.__init_content());
+        this.renderContent(view, control.__init_content());
     }
 
 
@@ -7382,7 +7383,7 @@ yaxi.ContentControl.renderer(function (renderer, base) {
 
 
 
-yaxi.Box.renderer(function (renderer, base) {
+yaxi.Box.renderer(function (base) {
 
 
     
@@ -7391,23 +7392,23 @@ yaxi.Box.renderer(function (renderer, base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
-        this.renderChildren(view, this.children);
+        this.renderChildren(view, children);
 
         return view;
     }
 
 
     
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
-        this.patchChildren(this.getChildrenView(view), this.__children);
-        base.patch.call(this, view);
+        this.patchChildren(control, this.getChildrenView(view), control.__children);
+        base.patch.call(this, control, view);
     }
 
 
@@ -7423,7 +7424,7 @@ yaxi.Box.renderer(function (renderer, base) {
 
 
 
-yaxi.Button.renderer(function (renderer, base) {
+yaxi.Button.renderer(function (base) {
 
 
 
@@ -7434,14 +7435,14 @@ yaxi.Button.renderer(function (renderer, base) {
 
 
 
-yaxi.DataBox.renderer(function (renderer, base) {
+yaxi.DataBox.renderer(function (base) {
 
 
 
-    this.render = function () {
+    this.render = function (control) {
 
-        var view = base.render.call(this);
-        var children = this.__children;
+        var view = base.render.call(this, control);
+        var children = control.__children;
 
         children.__last = null;
         this.renderChildren(view, children);
@@ -7451,10 +7452,10 @@ yaxi.DataBox.renderer(function (renderer, base) {
 
 
     
-    this.patch = function (view) {
+    this.patch = function (control, view) {
 
-        this.patchChildren(view, this.__children);
-        base.patch.call(this, view);
+        this.patchChildren(control, view, control.__children);
+        base.patch.call(this, control, view);
     }
 
     
@@ -7464,7 +7465,7 @@ yaxi.DataBox.renderer(function (renderer, base) {
 
 
 
-yaxi.Icon.renderer(function (renderer, base) {
+yaxi.Icon.renderer(function (base) {
 
 
 
@@ -7480,7 +7481,7 @@ yaxi.Icon.renderer(function (renderer, base) {
 
 
 
-yaxi.IconButton.renderer(function (renderer, base) {
+yaxi.IconButton.renderer(function (base) {
 
 
 
@@ -7491,21 +7492,21 @@ yaxi.IconButton.renderer(function (renderer, base) {
 
 
     
-    renderer.icon = function (view, value) {
+    this.icon = function (control, view, value) {
 
         view.firstChild.className = 'yx-iconbutton-icon iconfont' + (value ? ' icon-' + value : '');
     }
 
 
-    renderer.size = function (view, value) {
+    this.size = function (control, view, value) {
 
         view.firstChild.style.fontSize = value > 0 ? value + 'rem' : value;
     }
 
 
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
-        base.__render_content.call(this, view.lastChild, content);
+        base.renderContent.call(this, view.lastChild, content);
     }
 
 
@@ -7514,7 +7515,7 @@ yaxi.IconButton.renderer(function (renderer, base) {
 
 
 
-yaxi.Image.renderer(function (renderer, base) {
+yaxi.Image.renderer(function (base) {
 
 
 
@@ -7522,7 +7523,7 @@ yaxi.Image.renderer(function (renderer, base) {
 
 
 
-    renderer.src = function (view, value) {
+    this.src = function (control, view, value) {
 
         view.src = value;
     }
@@ -7534,7 +7535,7 @@ yaxi.Image.renderer(function (renderer, base) {
 
 
 
-yaxi.ImageButton.renderer(function (renderer, base) {
+yaxi.ImageButton.renderer(function (base) {
 
 
 
@@ -7545,22 +7546,22 @@ yaxi.ImageButton.renderer(function (renderer, base) {
 
 
 
-    renderer.src = function (view, value) {
+    this.src = function (control, view, value) {
 
         view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 
-    renderer.size = function (view, value) {
+    this.size = function (control, view, value) {
 
         var style = view.firstChild.style;
         style.width = style.height = value;
     }
 
 
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
-        base.__render_content.call(this, view.lastChild, content);
+        base.renderContent.call(this, view.lastChild, content);
     }
 
 
@@ -7569,19 +7570,19 @@ yaxi.ImageButton.renderer(function (renderer, base) {
 
 
 
-yaxi.Line.renderer(function (renderer, base) {
+yaxi.Line.renderer(function (base) {
 
 
     var color = yaxi.color;
 
 
-    renderer.size = function (view, value) {
+    this.size = function (control, view, value) {
 
         view.style.width = value;
     }
 
 
-    renderer.color = function (view, value) {
+    this.color = function (control, view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }
@@ -7591,19 +7592,19 @@ yaxi.Line.renderer(function (renderer, base) {
 
 
 
-yaxi.Vline.renderer(function (renderer, base) {
+yaxi.Vline.renderer(function (base) {
 
 
     var color = yaxi.color;
 
 
-    renderer.size = function (view, value) {
+    this.size = function (control, view, value) {
 
         view.style.height = value;
     }
 
 
-    renderer.color = function (view, value) {
+    this.color = function (control, view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }
@@ -7616,13 +7617,13 @@ yaxi.Vline.renderer(function (renderer, base) {
 
 
 
-yaxi.Marquee.renderer(function (renderer, base) {
+yaxi.Marquee.renderer(function (base) {
 
 
     yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
     
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         // var length = value.length;
 
@@ -7654,9 +7655,9 @@ yaxi.Marquee.renderer(function (renderer, base) {
     }
 
 
-    renderer.speed = function (view) {
+    this.speed = function (control, view) {
 
-        renderer.text.call(this, view, this.text);
+        this.text.call(this, control, view, control.text);
     }
 
 
@@ -7665,7 +7666,7 @@ yaxi.Marquee.renderer(function (renderer, base) {
 
 
 
-yaxi.ScrollBox.renderer(function (renderer, base) {
+yaxi.ScrollBox.renderer(function (base) {
 
 
 
@@ -7676,7 +7677,7 @@ yaxi.ScrollBox.renderer(function (renderer, base) {
 
 
 
-yaxi.StackBox.renderer(function (renderer, base) {
+yaxi.StackBox.renderer(function (base) {
 
 
 
@@ -7692,7 +7693,7 @@ yaxi.StackBox.renderer(function (renderer, base) {
 
 
 
-    renderer.full = function (view, value) {
+    this.full = function (control, view, value) {
 
         view.firstChild.className = 'yx-stackbox-body' + (value ? ' yx-stackbox-full' : '');
     }
@@ -7703,7 +7704,7 @@ yaxi.StackBox.renderer(function (renderer, base) {
 
 
 
-yaxi.Swiper.renderer(function (renderer, base) {
+yaxi.Swiper.renderer(function (base) {
 
 
 
@@ -7715,7 +7716,7 @@ yaxi.Swiper.renderer(function (renderer, base) {
 
 
 
-yaxi.Text.renderer(function (renderer, base) {
+yaxi.Text.renderer(function (base) {
 
 
 
@@ -7723,28 +7724,28 @@ yaxi.Text.renderer(function (renderer, base) {
 
     
 
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         var format;
 
-        if (!this.__security)
+        if (!control.__security)
         {
-            view.textContent = (format = this.__format) ? format(value) : value;
+            view.textContent = (format = control.__format) ? format(value) : value;
         }
     }
 
 
-    renderer.security = function (view, value) {
+    this.security = function (control, view, value) {
 
         var format;
 
-        if (this.__security = value)
+        if (control.__security = value)
         {
             view.textContent = value;
         }
         else
         {
-            view.textContent = (format = this.__format) ? format(this.text) : this.text;
+            view.textContent = (format = control.__format) ? format(control.text) : control.text;
         }
     }
 
@@ -7755,7 +7756,7 @@ yaxi.Text.renderer(function (renderer, base) {
 
 
 
-yaxi.TextBox.renderer(function (renderer, base) {
+yaxi.TextBox.renderer(function (base) {
 
 
 
@@ -7764,7 +7765,7 @@ yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
-    renderer.focus = function (view, value) {
+    this.focus = function (control, view, value) {
 
         if (value)
         {
@@ -7777,11 +7778,11 @@ yaxi.TextBox.renderer(function (renderer, base) {
     }
 
 
-    renderer.value = function (view, value) {
+    this.value = function (control, view, value) {
 
         var format;
 
-        if (format = this.__format)
+        if (format = control.__format)
         {
             value = format(value);
         }
@@ -7791,19 +7792,19 @@ yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
-    renderer.placeholder = function (view, value) {
+    this.placeholder = function (control, view, value) {
 
         view.setAttribute('placeholder', value);
     }
 
 
-    renderer.maxlength = function (view, value) {
+    this.maxlength = function (control, view, value) {
 
         view.setAttribute('maxlength', value);
     }
 
 
-    renderer.pattern = function (view, value) {
+    this.pattern = function (control, view, value) {
 
         view.setAttribute('pattern', value);
     }
@@ -7812,18 +7813,7 @@ yaxi.TextBox.renderer(function (renderer, base) {
     
     this.__on_change = function (event) {
 
-        var value = this.value;
-
-        this.value = event.target.value;;
-
-        if (this.value !== value)
-        {
-            this.$push(this.value);
-        }
-        else
-        {
-            this.$renderer.value(this.$view, value);
-        }
+        
     }
 
 
@@ -7833,7 +7823,7 @@ yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
-yaxi.CheckBox.renderer(function (renderer, base) {
+yaxi.CheckBox.renderer(function (base) {
 
 
 
@@ -7841,19 +7831,19 @@ yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
-    renderer.text = function (view, value) {
+    this.text = function (control, view, value) {
 
         view.lastChild.textContent = value;
     }
 
 
-    renderer.checked = function (view, value) {
+    this.checked = function (control, view, value) {
 
         view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    renderer.checkedIcon = function (view, value) {
+    this.checkedIcon = function (control, view, value) {
 
         if (value && this.checked)
         {
@@ -7862,7 +7852,7 @@ yaxi.CheckBox.renderer(function (renderer, base) {
     }
 
 
-    renderer.uncheckedIcon = function (view, value) {
+    this.uncheckedIcon = function (control, view, value) {
 
         if (value && !this.checked)
         {
@@ -7872,11 +7862,14 @@ yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
-    this.__on_tap = function () {
+});
 
-        this.$push(this.checked = !this.checked);
-        this.trigger('change');
-    }
+
+
+
+yaxi.NumberBox.renderer(function (base) {
+
+
 
 
 
@@ -7885,250 +7878,37 @@ yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
-yaxi.NumberBox.renderer(function (renderer, base) {
+yaxi.PasswordBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<span class="$class">'
-            + '<input type="number" />'
-            + '<span class="yx-number-minus">-</span>'
-            + '<span class="yx-number-plus">＋</span>'
-        + '</span>');
+
+
+});
 
 
 
-    this.clear = function () {
+
+yaxi.Memo.renderer(function (base) {
+
+
+
+    this.focus = function (control) {
 
         var view;
 
-        if (view = this.$view)
-        {
-            view.firstChild.value = '';
-        }
-
-        this.$storage.value = 0;
-    }
-
-
-
-    renderer.button = function (view, value) {
-
-        if (value)
-        {
-            view.setAttribute('button', true);
-        }
-        else
-        {
-            view.removeAttribute('button');
-        }
-    }
-
-
-
-    renderer.value = function (view, value) {
-
-        var format = this.__format;
-
-        if (format)
-        {
-            value = format(value);
-        }
-
-        view = view.firstChild;
-        view.value = value ? value : (view.value ? 0 : '');
-
-        view = view.nextSibling;
-
-        if (value === this.min)
-        {
-            view.setAttribute('disabled', true);
-        }
-        else
-        {
-            view.removeAttribute('disabled');
-        }
-
-        view = view.nextSibling;
-
-        if (value === this.max)
-        {
-            view.setAttribute('disabled', true);
-        }
-        else
-        {
-            view.removeAttribute('disabled');
-        }
-    }
-
-
-    this.__on_tap = function (event) {
-
-        var view = this.$view,
-            target = event.view,
-            keys;
-
-        while (target && target !== view)
-        {
-            if (keys = target.classList)
-            {
-                if (keys.contains('yx-number-minus'))
-                {
-                    change(this, (+view.firstChild.value || 0) - this.step);
-
-                    event.stop();
-                    return false;
-                }
-                
-                if (keys.contains('yx-number-plus'))
-                {
-                    change(this, (+view.firstChild.value || 0) + this.step);
-
-                    event.stop();
-                    return false;
-                }
-            }
-
-            target = target.parentNode;
-        }
-    }
-
-
-
-    function change(control, value) {
-
-        var any;
-
-        any = control.value;
-        control.value = value;
-
-        if ((value = control.value) !== any)
-        {
-            control.$push(value);
-
-            any = new yaxi.Event('change');
-            any.view = control.$view.firstChild;
-            any.value = value;
-
-            return control.trigger(any);
-        }
-        else
-        {
-            control.$renderer.value(control.$view, value);
-        }
-    }
-
-
-
-    this.__on_input = function (event) {
-
-        var maxlength = this.maxlength;
-
-        // 增加input type="number"不支持maxlength的问题
-        if (maxlength > 0 && event.target.value.length >= maxlength)
-        {
-            return false;
-        }
-    }
-
-
-    this.__on_change = function (event) {
-
-        var value = this.value;
-
-        this.value = +event.target.value || 0;
-
-        if (this.value !== value)
-        {
-            this.$push(this.value);
-        }
-        else
-        {
-            this.$renderer.value(this.$view, value);
-        }
-    }
-
-
-
-
-});
-
-
-
-
-yaxi.PasswordBox.renderer(function (renderer, base) {
-
-
-
-    yaxi.template(this, '<span class="$class"><input type="password" /><span><svg aria-hidden="true"><use xlink:href="#icon-yaxi-eye-close"></use></svg></span></span>');
-
-
-
-
-    renderer.type = function (view, value) {
-
-        view.lastChild.className = value ? 'yx-password-' + value : '';
-    }
-
-
-    this.__on_tap = function (event) {
-
-        var view = this.$view,
-            target = event.view,
-            icon;
-
-        while (target && target !== view)
-        {
-            if (target.tagName === 'SPAN')
-            {
-                view = view.firstChild;
-                
-                if (view.type === 'text')
-                {
-                    view.type = 'password';
-                    icon = 'yaxi-eye-close';
-                }
-                else
-                {
-                    view.type = 'text';
-                    icon = 'yaxi-eye-open';
-                }
-
-                target.firstChild.firstChild.setAttribute('xlink:href', '#icon-' + icon);
-                return;
-            }
-
-            target = target.parentNode;
-        }
-    }
-
-
-
-
-});
-
-
-
-
-yaxi.Memo.renderer(function (renderer, base) {
-
-
-
-    this.focus = function () {
-
-        var view;
-
-        if (view = this.$view)
+        if (view = control.$view)
         {
             view.focus();
         }
     }
 
     
-    this.blur = function () {
+    this.blur = function (control) {
 
         var view;
 
-        if (view = this.$view)
+        if (view = control.$view)
         {
             view.blur();
         }
@@ -8140,13 +7920,13 @@ yaxi.Memo.renderer(function (renderer, base) {
 
 
 
-    renderer.value = function (view, value) {
+    this.value = function (control, view, value) {
 
         view.firstChild.value = value;
     }
 
 
-    renderer.placeholder = function (view, value) {
+    this.placeholder = function (control, view, value) {
 
         view.firstChild.placeholder = value;
     }
@@ -8155,17 +7935,17 @@ yaxi.Memo.renderer(function (renderer, base) {
 
     this.__on_change = function (event) {
 
-        var value = this.value;
+        var value = control.value;
 
-        this.value = event.target.value;
+        control.value = event.target.value;
 
-        if (this.value !== value)
+        if (control.value !== value)
         {
-            this.$push(this.value);
+            control.$push(control.value);
         }
         else
         {
-            renderer.value(this.$view, value);
+            this.value(control.$view, value);
         }
     }
 
@@ -8176,86 +7956,8 @@ yaxi.Memo.renderer(function (renderer, base) {
 
 
 
-yaxi.RadioButton.renderer(function (renderer, base) {
+yaxi.RadioButton.renderer(function (base) {
 
-
-
-    yaxi.template(this, '<span class="$class"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-radio-unchecked"></use></svg><span></span></span>');
-
-    
-
-
-    renderer.text = function (view, value) {
-
-        view.lastChild.textContent = value;
-    }
-
-
-    renderer.checked = function (view, value) {
-
-        view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
-    }
-
-
-    renderer.checkedIcon = function (view, value) {
-
-        if (value && this.checked)
-        {
-            view.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
-        }
-    }
-
-
-    renderer.uncheckedIcon = function (view, value) {
-
-        if (value && !this.checked)
-        {
-            view.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
-        }
-    }
-
-    
-
-    this.__on_tap = function () {
-
-        if (!this.checked)
-        {
-            this.$push(this.checked = true);
-            this.trigger('change');
-
-            // 同一容器内的组件互斥
-            this.mutex(this.host)
-        }
-    }
-
-
-
-    this.mutex = function (host) {
-
-        var parent = this.parent;
-
-        host |= 0;
-
-        while (--host)
-        {
-            parent = parent.parent;
-        }
-
-        if (parent)
-        {
-            var list = parent.query('>>RadioButton');
-
-            for (var i = list.length; i--;)
-            {
-                var item = list[i];
-    
-                if (item instanceof Class && item !== this && item.checked)
-                {
-                    item.checked = false;
-                }
-            }
-        }
-    }
 
 
 
@@ -8264,35 +7966,9 @@ yaxi.RadioButton.renderer(function (renderer, base) {
 
 
 
-yaxi.SwitchButton.renderer(function (renderer, base) {
+yaxi.SwitchButton.renderer(function (base) {
 
 
-
-    yaxi.template(this, '<span class="$class"><span class="yx-switchbutton-bar"></span><span class="yx-switchbutton-button"></span></span>');
-
-
-
-    renderer.checked = function (view, value) {
-
-        var classList = view.classList;
-
-        if (value)
-        {
-            classList.add('yx-switchbutton-checked');
-        }
-        else
-        {
-            classList.remove('yx-switchbutton-checked');
-        }
-    }
-
-
-
-    this.__on_tap = function () {
-
-        this.$push(this.checked = !this.checked);
-        this.trigger('change');
-    }
 
 
 
@@ -8301,7 +7977,7 @@ yaxi.SwitchButton.renderer(function (renderer, base) {
 
 
 
-yaxi.Page.renderer(function (renderer, base) {
+yaxi.Page.renderer(function (base) {
 
 
 
@@ -8391,7 +8067,7 @@ yaxi.Page.renderer(function (renderer, base) {
             all.push(page);
 			page.options = options;
 			
-			host.appendChild(page.render());
+			host.appendChild(page.$renderer.render(page));
 
 			notifyRender(renderings);
 			page.onload(page.options);
@@ -8441,7 +8117,7 @@ yaxi.Page.renderer(function (renderer, base) {
         {
             if (view = control.$view)
             {
-                control.patch(view);
+                control.$renderer.patch(control, view);
             }
         }
 
@@ -8455,7 +8131,7 @@ yaxi.Page.renderer(function (renderer, base) {
 
 
 
-yaxi.Header.renderer(function (renderer, base) {
+yaxi.Header.renderer(function (base) {
 
 
 
@@ -8467,15 +8143,15 @@ yaxi.Header.renderer(function (renderer, base) {
 
 
 
-    this.__render_content = function (view, content) {
+    this.renderContent = function (view, content) {
 
-        base.__render_content.call(this, view.lastChild, content);
+        base.renderContent.call(this, view.lastChild, content);
         view.firstChild.style.display = yaxi.currentPages.length > 1 ? '' : 'none';
     }
 
 
 
-    renderer.icon = function (view, value) {
+    this.icon = function (control, view, value) {
 
         view = view.firstChild.nextSibling;
         view.className = value ? 'yx-header-icon iconfont ' + value : 'yx-header-hidden';

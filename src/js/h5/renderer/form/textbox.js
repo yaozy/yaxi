@@ -1,4 +1,4 @@
-yaxi.TextBox.renderer(function (renderer, base) {
+yaxi.TextBox.renderer(function (base) {
 
 
 
@@ -7,7 +7,7 @@ yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
-    renderer.focus = function (view, value) {
+    this.focus = function (control, view, value) {
 
         if (value)
         {
@@ -20,11 +20,11 @@ yaxi.TextBox.renderer(function (renderer, base) {
     }
 
 
-    renderer.value = function (view, value) {
+    this.value = function (control, view, value) {
 
         var format;
 
-        if (format = this.__format)
+        if (format = control.__format)
         {
             value = format(value);
         }
@@ -34,19 +34,19 @@ yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
-    renderer.placeholder = function (view, value) {
+    this.placeholder = function (control, view, value) {
 
         view.setAttribute('placeholder', value);
     }
 
 
-    renderer.maxlength = function (view, value) {
+    this.maxlength = function (control, view, value) {
 
         view.setAttribute('maxlength', value);
     }
 
 
-    renderer.pattern = function (view, value) {
+    this.pattern = function (control, view, value) {
 
         view.setAttribute('pattern', value);
     }
@@ -55,18 +55,7 @@ yaxi.TextBox.renderer(function (renderer, base) {
     
     this.__on_change = function (event) {
 
-        var value = this.value;
-
-        this.value = event.target.value;;
-
-        if (this.value !== value)
-        {
-            this.$push(this.value);
-        }
-        else
-        {
-            this.$renderer.value(this.$view, value);
-        }
+        
     }
 
 

@@ -1,8 +1,8 @@
-yaxi.Header.renderer(function (renderer, base) {
+yaxi.Header.renderer(function (base) {
 
 
 
-    renderer.onchange = function (view, prefix) {
+    this.onchange = function (control, view, prefix) {
 
         view[prefix + 'back'] = yaxi.currentPages.length > 1;
     }

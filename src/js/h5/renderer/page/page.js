@@ -1,4 +1,4 @@
-yaxi.Page.renderer(function (renderer, base) {
+yaxi.Page.renderer(function (base) {
 
 
 
@@ -88,7 +88,7 @@ yaxi.Page.renderer(function (renderer, base) {
             all.push(page);
 			page.options = options;
 			
-			host.appendChild(page.render());
+			host.appendChild(page.$renderer.render(page));
 
 			notifyRender(renderings);
 			page.onload(page.options);
@@ -138,7 +138,7 @@ yaxi.Page.renderer(function (renderer, base) {
         {
             if (view = control.$view)
             {
-                control.patch(view);
+                control.$renderer.patch(control, view);
             }
         }
 

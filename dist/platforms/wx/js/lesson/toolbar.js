@@ -32,7 +32,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.key === this.key ? 'font-primary' : '';
+                        return this.$parent.key === this.key ? 'text-primary' : '';
                     }
                 }
             ]
@@ -57,7 +57,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.level1.id === this.id ? 'bg-level2 font-primary' : '';
+                        return this.$parent.level1.id === this.id ? 'bg-level2 text-primary' : '';
                     }
                 }
             ],
@@ -69,7 +69,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.level2.id === this.id ? 'bg-level1 font-primary' : '';
+                        return this.$parent.level2.id === this.id ? 'bg-level1 text-primary' : '';
                     }
                 }
             ],
@@ -81,7 +81,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.level3.id === this.id ? 'font-primary' : '';
+                        return this.$parent.level3.id === this.id ? 'text-primary' : '';
                     }
                 }
             ]
@@ -109,7 +109,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                             theme: function () {
 
-                                return this.checked ? 'bg-level2 border-primary font-primary' :  'bg-level3';
+                                return this.checked ? 'bg-level2 border-primary text-primary' :  'bg-level3';
                             }
                         }
                     ]

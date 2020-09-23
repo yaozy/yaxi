@@ -1,7 +1,7 @@
 <page>
     <template src="../components/header.html" />
     <box text-align="center" line-height="100rem" e:tap="handleAdd">
-        <iconbutton width="auto" icon="common-search" content="添加地址" layout="row middle" theme="font-primary" />
+        <iconbutton width="auto" icon="common-search" content="添加地址" layout="row middle" theme="text-primary" />
     </box>
     <databox type="model" d:data="$model" theme="bg-level2" flex="auto">
         <box margin-top="20rem" theme="level1">
@@ -12,7 +12,7 @@
                         <text b:text="$item.name" />
                         <text b:text="$item.tel" />
                     </box>
-                    <text b:text="$item.address" theme="font-level3" font-size="28rem" />
+                    <text b:text="$item.address" theme="text-level3" font-size="28rem" />
                 </box>
             </box>
             <box d:tag="$item.id" layout="row middle" padding="0 20rem" theme="border-level4 border-top">
