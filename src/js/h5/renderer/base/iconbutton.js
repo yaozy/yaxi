@@ -1,4 +1,4 @@
-yaxi.IconButton.mixin(function (mixin, base) {
+yaxi.IconButton.renderer(function (renderer, base) {
 
 
 
@@ -9,13 +9,13 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
 
     
-    mixin.icon = function (view, value) {
+    renderer.icon = function (view, value) {
 
         view.firstChild.className = 'yx-iconbutton-icon iconfont' + (value ? ' icon-' + value : '');
     }
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.firstChild.style.fontSize = value > 0 ? value + 'rem' : value;
     }

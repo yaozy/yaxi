@@ -504,146 +504,15 @@ Object.extend.call(Array, function (Class, base) {
     this.call = function (name, args) {
 
         var index = 0,
-            item;
+            item,
+            fn;
 
         while (item = this[index++])
         {
-            var fn = item[name];
-
-            if (fn)
+            if (fn = item[name])
             {
-                if (args)
-                {
-                    fn.call(item);
-                }
-                else
-                {
-                    fn.apply(item, args);
-                }
+                fn.apply(item, args);
             }
-        }
-
-        return this;
-    }
-
-
-
-    this.hasClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.hasClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-
-    this.addClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.addClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.removeClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.removeClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.toggleClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.toggleClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.style = function (value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.style = value;
-        }
-
-        return this;
-    }
-
-
-    this.setStyle = function (name, value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.setStyle(name, value);
-        }
-
-        return this;
-    }
-
-
-    this.removeStyle = function (name) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.removeStyle(name);
         }
 
         return this;
@@ -705,19 +574,6 @@ Object.extend.call(Array, function (Class, base) {
         return this;
     }
 
-
-    this.remove = function () {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.remove();
-        }
-
-        return this;
-    }
 
 
 });

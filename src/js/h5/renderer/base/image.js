@@ -1,4 +1,4 @@
-yaxi.Image.mixin(function (mixin, base) {
+yaxi.Image.renderer(function (renderer, base) {
 
 
 
@@ -6,7 +6,7 @@ yaxi.Image.mixin(function (mixin, base) {
 
 
 
-    mixin.src = function (view, value) {
+    renderer.src = function (view, value) {
 
         view.src = value;
     }

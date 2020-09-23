@@ -1,16 +1,16 @@
-yaxi.Line.mixin(function (mixin, base) {
+yaxi.Line.renderer(function (renderer, base) {
 
 
     var color = yaxi.color;
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.style.width = value;
     }
 
 
-    mixin.color = function (view, value) {
+    renderer.color = function (view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }
@@ -20,19 +20,19 @@ yaxi.Line.mixin(function (mixin, base) {
 
 
 
-yaxi.Vline.mixin(function (mixin, base) {
+yaxi.Vline.renderer(function (renderer, base) {
 
 
     var color = yaxi.color;
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.style.height = value;
     }
 
 
-    mixin.color = function (view, value) {
+    renderer.color = function (view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }

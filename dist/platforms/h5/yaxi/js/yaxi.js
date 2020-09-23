@@ -21,21 +21,6 @@ yaxi.impl = Object.create(null);
 
 
 
-// 混入
-yaxi.impl.mixin = function (fn) {
-
-    if (fn)
-    {
-        var prototype = this.prototype;
-        var base = this.superclass;
-        
-        fn.call(prototype, prototype.$mixin, base && base.prototype || null, yaxi);
-    }
-
-    return this;
-}
-
-
 
 // 对象继承实现
 Object.extend = function (fn, Class) {
@@ -68,7 +53,6 @@ Object.extend = function (fn, Class) {
 	
     Class.superclass = base ? this : null;
     Class.extend = this.extend || Object.extend;
-    Class.mixin = this.mixin || yaxi.impl.mixin;
     Class.prototype = prototype;
 
     prototype.constructor = Class;
@@ -3420,146 +3404,15 @@ Object.extend.call(Array, function (Class, base) {
     this.call = function (name, args) {
 
         var index = 0,
-            item;
+            item,
+            fn;
 
         while (item = this[index++])
         {
-            var fn = item[name];
-
-            if (fn)
+            if (fn = item[name])
             {
-                if (args)
-                {
-                    fn.call(item);
-                }
-                else
-                {
-                    fn.apply(item, args);
-                }
+                fn.apply(item, args);
             }
-        }
-
-        return this;
-    }
-
-
-
-    this.hasClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.hasClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-
-    this.addClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.addClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.removeClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.removeClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.toggleClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.toggleClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.style = function (value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.style = value;
-        }
-
-        return this;
-    }
-
-
-    this.setStyle = function (name, value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.setStyle(name, value);
-        }
-
-        return this;
-    }
-
-
-    this.removeStyle = function (name) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.removeStyle(name);
         }
 
         return this;
@@ -3622,19 +3475,6 @@ Object.extend.call(Array, function (Class, base) {
     }
 
 
-    this.remove = function () {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.remove();
-        }
-
-        return this;
-    }
-
 
 });
 
@@ -3670,6 +3510,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     // 默认允许任意类型父控件
     Class.allowParent = true;
+
+    // 渲染器扩展
+    Class.renderer = renderer;
+
 
 
     classes[Class.typeName = this.typeName = 'Control'] = classes.control = Class;
@@ -3806,8 +3650,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$properties = create(null);
 
 
-    // 混入存储器(h5用来放置自定义渲染逻辑)
-    this.$mixin = create(null);
+    // 渲染器
+    this.$renderer = create(null);
 
 
 
@@ -3947,7 +3791,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             if ((value = !!value) !== this.__selected)
             {
                 // 从不选中状态切换到选中有选中状态值时则切换状态
-                if (value && (value = this.__selected_status))
+                if ((this.__selected = value) && (value = this.__selected_status))
                 {
                     changeSelectedStatus(this, value);
                 }
@@ -4349,7 +4193,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('font-size', 1);
 
     //控件文字行高
-    style('line-height');
+    style('line-height', 1);
 
     //控件字体族 family-name generic-family  用于某个元素的字体族名称或/及类族名称的一个优先表
     style('font-family');
@@ -4713,14 +4557,25 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.__class_init = function (Class) {
 
-        Class.register = register;
         Class.allowParent = true;
+        
+        Class.register = register;
+        Class.renderer = renderer;
 
         this.$defaults = create(this.$defaults);
         this.$properties = create(this.$properties);
-        this.$mixin = create(this.$mixin);
+        this.$renderer = create(this.$renderer);
     }
 
+
+
+    function renderer(fn) {
+
+        var prototype = this.prototype;
+        var base = this.superclass;
+        
+        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+    }
 
 
     function register(name) {
@@ -5439,14 +5294,14 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     // 子控件集合
     this.$property('children', null, {
 
-        get: no_children,
-        set: no_children
+        get: nochildren,
+        set: nochildren
     });
 
 
-    function no_children () {
+    function nochildren () {
 
-        throw new Error('databox doesn\'t supports children, please use data and template!');
+        throw new Error('BataBox control doesn\'t supports children, please use data and template!');
     }
 
 
@@ -5970,6 +5825,28 @@ yaxi.ScrollBox = yaxi.Box.extend(function () {
 
 yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
+
+
+    this.$property('layout', {
+
+        get: nolayout,
+        set: nolayout
+    });
+
+
+    function nolayout() {
+
+        throw new Error('StackBox control doesn\'t supports layout! can only use full!');
+    }
+
+
+
+    // 子项是否充满容器
+    this.$property('full', false);
+
+
+
+
 }, function StackBox() {
 
     yaxi.Box.apply(this, arguments);
@@ -6054,20 +5931,8 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
-    // 线条(目前只支持top及bottom)
-    this.$property('line', 'bottom', {
-
-        kind: 'class',
-        data: 'yx-tab-'
-    });
-    
-
     // 页面容器
     this.$property('host', '', false);
-
-
-    // 页面充满模式
-    this.$property('full', true);
 
 
 
@@ -6139,12 +6004,12 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
             if (host = this.find(host))
             {
-                if (host instanceof yaxi.Box)
+                if (host instanceof yaxi.StackBox)
                 {
                     return host;
                 }
 
-                throwError('be a Box!');
+                throwError('be a StackBox!');
             }
 
             return null;
@@ -6154,7 +6019,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
     function throwError(text) {
 
-        throw new Error('the host property of TabBar must ' + text);
+        throw new Error('the host of TabBar must ' + text);
     }
 
 
@@ -7185,7 +7050,7 @@ yaxi.__ajax_send = function (options) {
 
 
 
-yaxi.Control.mixin(function (mixin) {
+yaxi.Control.renderer(function (renderer) {
 
 
 
@@ -7237,24 +7102,6 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    function combineClass(classes) {
-
-        var list = [];
-
-        for (var name in classes)
-        {
-            var value = classes[name];
-
-            if (value)
-            {
-                list.push(value);
-            }
-        }
-
-        return list.join(' ');
-    }
-
-
 
     // 渲染控件
     this.render = function () {
@@ -7284,33 +7131,56 @@ yaxi.Control.mixin(function (mixin) {
 
     this.patch = function (view) {
 
-        var changes;
+        var values;
 
         this.__dirty = false;
 
-        if (changes = this.__changes)
+        if (values = this.__changes)
         {
             var properties = this.$properties;
             var storage = this.$storage;
-            var mixin = this.$mixin;
-            var names = own(changes);
+            var renderer = this.$renderer;
+            var names = own(values);
             var index = 0;
             var classes, property, name, value, any;
 
             while (name = names[index++])
             {
                 property = properties[name];
-                value = storage[name] = changes[name];
+                value = storage[name] = values[name];
 
                 switch (property && property.kind)
                 {
                     case 'style': // 样式属性
                         // 处理颜色值
-                        view.style[name] = ((property.data) & 2 === 2) ? convertColor(value) : value;
+                        if (any = renderer[name])
+                        {
+                            value = any.call(this, view, value);
+
+                            if (value == null)
+                            {
+                                break;
+                            }
+                        }
+                        else if ((property.data) & 2 === 2)
+                        {
+                            value = convertColor(value);
+                        }
+
+                        view.style[name] = value;
                         break;
 
                     case 'class': // class属性
-                        if (any = property.data)
+                        if (any = renderer[name])
+                        {
+                            value = any.call(this, view, value);
+
+                            if (value == null)
+                            {
+                                break;
+                            }
+                        }
+                        else if (any = property.data)
                         {
                             if (property.type !== 'boolean')
                             {
@@ -7326,9 +7196,9 @@ yaxi.Control.mixin(function (mixin) {
                         break;
 
                     default:
-                        if (any = mixin[name])
+                        if (any = renderer[name])
                         {
-                            any.call(this, view, changes[name]);
+                            any.call(this, view, values[name]);
                         }
                         break;
                 }
@@ -7337,12 +7207,23 @@ yaxi.Control.mixin(function (mixin) {
             // 有变化的class则合并处理
             if (classes)
             {
-                view.className = this.$class + ' ' + combineClass(classes);
+                values = [];
+
+                for (name in classes)
+                {
+                    if (value = classes[name])
+                    {
+                        values.push(value);
+                    }
+                }
+
+                view.className = this.$class + ' ' + values.join(' ');
             }
 
             this.__changes = null;
         }
     }
+
 
 
     // 子控件变化补丁(给子类用)
@@ -7428,13 +7309,13 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    mixin.hidden = function (view, value) {
+    renderer.hidden = function (view, value) {
 
         view.style.display = value ? 'none' : '';
     }
 
 
-    mixin.disabled = function (view, value) {
+    renderer.disabled = function (view, value) {
 
         if (value)
         {
@@ -7454,7 +7335,7 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-yaxi.ContentControl.mixin(function (mixin, base) {
+yaxi.ContentControl.renderer(function (renderer, base) {
 
 
 
@@ -7493,7 +7374,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
     }
 
 
-    mixin.content = function (view) {
+    renderer.content = function (view) {
 
         this.__render_content(view, this.__init_content());
     }
@@ -7505,7 +7386,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
 
 
-yaxi.Box.mixin(function (mixin, base) {
+yaxi.Box.renderer(function (renderer, base) {
 
 
     
@@ -7529,8 +7410,14 @@ yaxi.Box.mixin(function (mixin, base) {
     
     this.patch = function (view) {
 
-        this.patchChildren(view, this.__children);
+        this.patchChildren(this.getChildrenView(view), this.__children);
         base.patch.call(this, view);
+    }
+
+
+    this.getChildrenView = function (view) {
+
+        return view;
     }
 
 
@@ -7540,11 +7427,8 @@ yaxi.Box.mixin(function (mixin, base) {
 
 
 
-yaxi.Button.mixin(function (mixin, base) {
+yaxi.Button.renderer(function (renderer, base) {
 
-
-
-    yaxi.template(this, '<div class="$class"></div>');
 
 
 
@@ -7554,7 +7438,7 @@ yaxi.Button.mixin(function (mixin, base) {
 
 
 
-yaxi.DataBox.mixin(function (mixin, base) {
+yaxi.DataBox.renderer(function (renderer, base) {
 
 
 
@@ -7584,7 +7468,7 @@ yaxi.DataBox.mixin(function (mixin, base) {
 
 
 
-yaxi.Icon.mixin(function (mixin, base) {
+yaxi.Icon.renderer(function (renderer, base) {
 
 
 
@@ -7600,7 +7484,7 @@ yaxi.Icon.mixin(function (mixin, base) {
 
 
 
-yaxi.IconButton.mixin(function (mixin, base) {
+yaxi.IconButton.renderer(function (renderer, base) {
 
 
 
@@ -7611,13 +7495,13 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
 
     
-    mixin.icon = function (view, value) {
+    renderer.icon = function (view, value) {
 
         view.firstChild.className = 'yx-iconbutton-icon iconfont' + (value ? ' icon-' + value : '');
     }
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.firstChild.style.fontSize = value > 0 ? value + 'rem' : value;
     }
@@ -7634,7 +7518,7 @@ yaxi.IconButton.mixin(function (mixin, base) {
 
 
 
-yaxi.Image.mixin(function (mixin, base) {
+yaxi.Image.renderer(function (renderer, base) {
 
 
 
@@ -7642,7 +7526,7 @@ yaxi.Image.mixin(function (mixin, base) {
 
 
 
-    mixin.src = function (view, value) {
+    renderer.src = function (view, value) {
 
         view.src = value;
     }
@@ -7654,7 +7538,7 @@ yaxi.Image.mixin(function (mixin, base) {
 
 
 
-yaxi.ImageButton.mixin(function (mixin, base) {
+yaxi.ImageButton.renderer(function (renderer, base) {
 
 
 
@@ -7665,13 +7549,13 @@ yaxi.ImageButton.mixin(function (mixin, base) {
 
 
 
-    mixin.src = function (view, value) {
+    renderer.src = function (view, value) {
 
         view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         var style = view.firstChild.style;
         style.width = style.height = value;
@@ -7689,19 +7573,19 @@ yaxi.ImageButton.mixin(function (mixin, base) {
 
 
 
-yaxi.Line.mixin(function (mixin, base) {
+yaxi.Line.renderer(function (renderer, base) {
 
 
     var color = yaxi.color;
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.style.width = value;
     }
 
 
-    mixin.color = function (view, value) {
+    renderer.color = function (view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }
@@ -7711,19 +7595,19 @@ yaxi.Line.mixin(function (mixin, base) {
 
 
 
-yaxi.Vline.mixin(function (mixin, base) {
+yaxi.Vline.renderer(function (renderer, base) {
 
 
     var color = yaxi.color;
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         view.style.height = value;
     }
 
 
-    mixin.color = function (view, value) {
+    renderer.color = function (view, value) {
 
         view.style.backgroundColor = color[value] || value;
     }
@@ -7736,13 +7620,13 @@ yaxi.Vline.mixin(function (mixin, base) {
 
 
 
-yaxi.Marquee.mixin(function (mixin, base) {
+yaxi.Marquee.renderer(function (renderer, base) {
 
 
     yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
     
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         // var length = value.length;
 
@@ -7774,9 +7658,9 @@ yaxi.Marquee.mixin(function (mixin, base) {
     }
 
 
-    mixin.speed = function (view) {
+    renderer.speed = function (view) {
 
-        mixin.text.call(this, view, this.text);
+        renderer.text.call(this, view, this.text);
     }
 
 
@@ -7785,7 +7669,7 @@ yaxi.Marquee.mixin(function (mixin, base) {
 
 
 
-yaxi.ScrollBox.mixin(function (mixin, base) {
+yaxi.ScrollBox.renderer(function (renderer, base) {
 
 
 
@@ -7796,7 +7680,34 @@ yaxi.ScrollBox.mixin(function (mixin, base) {
 
 
 
-yaxi.Swiper.mixin(function (mixin, base) {
+yaxi.StackBox.renderer(function (renderer, base) {
+
+
+
+    
+    yaxi.template(this, '<div class="$class"><div class="yx-stackbox-body"></div></div>');
+
+
+
+    this.getChildrenView = function (view) {
+
+        return view.firstChild;
+    }
+
+
+
+    renderer.full = function (view, value) {
+
+        view.firstChild.className = 'yx-stackbox-body' + (value ? ' yx-stackbox-full' : '');
+    }
+
+
+});
+
+
+
+
+yaxi.Swiper.renderer(function (renderer, base) {
 
 
 
@@ -7808,7 +7719,7 @@ yaxi.Swiper.mixin(function (mixin, base) {
 
 
 
-yaxi.Text.mixin(function (mixin, base) {
+yaxi.Text.renderer(function (renderer, base) {
 
 
 
@@ -7816,7 +7727,7 @@ yaxi.Text.mixin(function (mixin, base) {
 
     
 
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         var format;
 
@@ -7827,7 +7738,7 @@ yaxi.Text.mixin(function (mixin, base) {
     }
 
 
-    mixin.security = function (view, value) {
+    renderer.security = function (view, value) {
 
         var format;
 
@@ -7848,7 +7759,7 @@ yaxi.Text.mixin(function (mixin, base) {
 
 
 
-yaxi.TextBox.mixin(function (mixin, base) {
+yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
@@ -7857,7 +7768,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    mixin.focus = function (view, value) {
+    renderer.focus = function (view, value) {
 
         if (value)
         {
@@ -7870,7 +7781,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
     }
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         var format;
 
@@ -7884,19 +7795,19 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    mixin.placeholder = function (view, value) {
+    renderer.placeholder = function (view, value) {
 
         view.setAttribute('placeholder', value);
     }
 
 
-    mixin.maxlength = function (view, value) {
+    renderer.maxlength = function (view, value) {
 
         view.setAttribute('maxlength', value);
     }
 
 
-    mixin.pattern = function (view, value) {
+    renderer.pattern = function (view, value) {
 
         view.setAttribute('pattern', value);
     }
@@ -7915,7 +7826,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
         }
         else
         {
-            this.$mixin.value(this.$view, value);
+            this.$renderer.value(this.$view, value);
         }
     }
 
@@ -7926,7 +7837,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-yaxi.CheckBox.mixin(function (mixin, base) {
+yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
@@ -7934,19 +7845,19 @@ yaxi.CheckBox.mixin(function (mixin, base) {
 
 
 
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         view.lastChild.textContent = value;
     }
 
 
-    mixin.checked = function (view, value) {
+    renderer.checked = function (view, value) {
 
         view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    mixin.checkedIcon = function (view, value) {
+    renderer.checkedIcon = function (view, value) {
 
         if (value && this.checked)
         {
@@ -7955,7 +7866,7 @@ yaxi.CheckBox.mixin(function (mixin, base) {
     }
 
 
-    mixin.uncheckedIcon = function (view, value) {
+    renderer.uncheckedIcon = function (view, value) {
 
         if (value && !this.checked)
         {
@@ -7978,7 +7889,7 @@ yaxi.CheckBox.mixin(function (mixin, base) {
 
 
 
-yaxi.NumberBox.mixin(function (mixin, base) {
+yaxi.NumberBox.renderer(function (renderer, base) {
 
 
 
@@ -8004,7 +7915,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
 
 
 
-    mixin.button = function (view, value) {
+    renderer.button = function (view, value) {
 
         if (value)
         {
@@ -8018,7 +7929,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
 
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         var format = this.__format;
 
@@ -8106,7 +8017,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
         }
         else
         {
-            control.$mixin.value(control.$view, value);
+            control.$renderer.value(control.$view, value);
         }
     }
 
@@ -8136,7 +8047,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
         }
         else
         {
-            this.$mixin.value(this.$view, value);
+            this.$renderer.value(this.$view, value);
         }
     }
 
@@ -8148,7 +8059,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
 
 
 
-yaxi.PasswordBox.mixin(function (mixin, base) {
+yaxi.PasswordBox.renderer(function (renderer, base) {
 
 
 
@@ -8157,7 +8068,7 @@ yaxi.PasswordBox.mixin(function (mixin, base) {
 
 
 
-    mixin.type = function (view, value) {
+    renderer.type = function (view, value) {
 
         view.lastChild.className = value ? 'yx-password-' + value : '';
     }
@@ -8202,7 +8113,7 @@ yaxi.PasswordBox.mixin(function (mixin, base) {
 
 
 
-yaxi.Memo.mixin(function (mixin, base) {
+yaxi.Memo.renderer(function (renderer, base) {
 
 
 
@@ -8233,13 +8144,13 @@ yaxi.Memo.mixin(function (mixin, base) {
 
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         view.firstChild.value = value;
     }
 
 
-    mixin.placeholder = function (view, value) {
+    renderer.placeholder = function (view, value) {
 
         view.firstChild.placeholder = value;
     }
@@ -8258,7 +8169,7 @@ yaxi.Memo.mixin(function (mixin, base) {
         }
         else
         {
-            mixin.value(this.$view, value);
+            renderer.value(this.$view, value);
         }
     }
 
@@ -8269,7 +8180,7 @@ yaxi.Memo.mixin(function (mixin, base) {
 
 
 
-yaxi.RadioButton.mixin(function (mixin, base) {
+yaxi.RadioButton.renderer(function (renderer, base) {
 
 
 
@@ -8278,19 +8189,19 @@ yaxi.RadioButton.mixin(function (mixin, base) {
     
 
 
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         view.lastChild.textContent = value;
     }
 
 
-    mixin.checked = function (view, value) {
+    renderer.checked = function (view, value) {
 
         view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    mixin.checkedIcon = function (view, value) {
+    renderer.checkedIcon = function (view, value) {
 
         if (value && this.checked)
         {
@@ -8299,7 +8210,7 @@ yaxi.RadioButton.mixin(function (mixin, base) {
     }
 
 
-    mixin.uncheckedIcon = function (view, value) {
+    renderer.uncheckedIcon = function (view, value) {
 
         if (value && !this.checked)
         {
@@ -8357,7 +8268,7 @@ yaxi.RadioButton.mixin(function (mixin, base) {
 
 
 
-yaxi.SwitchButton.mixin(function (mixin, base) {
+yaxi.SwitchButton.renderer(function (renderer, base) {
 
 
 
@@ -8365,7 +8276,7 @@ yaxi.SwitchButton.mixin(function (mixin, base) {
 
 
 
-    mixin.checked = function (view, value) {
+    renderer.checked = function (view, value) {
 
         var classList = view.classList;
 
@@ -8394,7 +8305,7 @@ yaxi.SwitchButton.mixin(function (mixin, base) {
 
 
 
-yaxi.Page.mixin(function (mixin, base) {
+yaxi.Page.renderer(function (renderer, base) {
 
 
 
@@ -8548,7 +8459,7 @@ yaxi.Page.mixin(function (mixin, base) {
 
 
 
-yaxi.Header.mixin(function (mixin, base) {
+yaxi.Header.renderer(function (renderer, base) {
 
 
 
@@ -8568,7 +8479,7 @@ yaxi.Header.mixin(function (mixin, base) {
 
 
 
-    mixin.icon = function (view, value) {
+    renderer.icon = function (view, value) {
 
         view = view.firstChild.nextSibling;
         view.className = value ? 'yx-header-icon iconfont ' + value : 'yx-header-hidden';

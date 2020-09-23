@@ -1,10 +1,10 @@
-yaxi.Marquee.mixin(function (mixin, base) {
+yaxi.Marquee.renderer(function (renderer, base) {
 
 
     yaxi.template(this, '<div class="$class"><div class="yx-marquee-content"></div></div>')
 
     
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         // var length = value.length;
 
@@ -36,9 +36,9 @@ yaxi.Marquee.mixin(function (mixin, base) {
     }
 
 
-    mixin.speed = function (view) {
+    renderer.speed = function (view) {
 
-        mixin.text.call(this, view, this.text);
+        renderer.text.call(this, view, this.text);
     }
 
 

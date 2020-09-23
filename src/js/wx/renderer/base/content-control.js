@@ -1,4 +1,4 @@
-yaxi.ContentControl.mixin(function (mixin, base) {
+yaxi.ContentControl.renderer(function (renderer, base) {
 
     
 
@@ -30,7 +30,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
 
     
-    mixin.content = function (view, prefix, value) {
+    renderer.content = function (view, prefix, value) {
 
         view[prefix + 'c'] = this.__render_content(this.__init_content() || '');
     }

@@ -1,4 +1,4 @@
-yaxi.NumberBox.mixin(function (mixin, base) {
+yaxi.NumberBox.renderer(function (renderer, base) {
 
 
 
@@ -24,7 +24,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
 
 
 
-    mixin.button = function (view, value) {
+    renderer.button = function (view, value) {
 
         if (value)
         {
@@ -38,7 +38,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
 
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         var format = this.__format;
 
@@ -126,7 +126,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
         }
         else
         {
-            control.$mixin.value(control.$view, value);
+            control.$renderer.value(control.$view, value);
         }
     }
 
@@ -156,7 +156,7 @@ yaxi.NumberBox.mixin(function (mixin, base) {
         }
         else
         {
-            this.$mixin.value(this.$view, value);
+            this.$renderer.value(this.$view, value);
         }
     }
 

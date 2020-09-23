@@ -21,21 +21,6 @@ yaxi.impl = Object.create(null);
 
 
 
-// 混入
-yaxi.impl.mixin = function (fn) {
-
-    if (fn)
-    {
-        var prototype = this.prototype;
-        var base = this.superclass;
-        
-        fn.call(prototype, prototype.$mixin, base && base.prototype || null, yaxi);
-    }
-
-    return this;
-}
-
-
 
 // 对象继承实现
 Object.extend = function (fn, Class) {
@@ -68,7 +53,6 @@ Object.extend = function (fn, Class) {
 	
     Class.superclass = base ? this : null;
     Class.extend = this.extend || Object.extend;
-    Class.mixin = this.mixin || yaxi.impl.mixin;
     Class.prototype = prototype;
 
     prototype.constructor = Class;
@@ -3420,146 +3404,15 @@ Object.extend.call(Array, function (Class, base) {
     this.call = function (name, args) {
 
         var index = 0,
-            item;
+            item,
+            fn;
 
         while (item = this[index++])
         {
-            var fn = item[name];
-
-            if (fn)
+            if (fn = item[name])
             {
-                if (args)
-                {
-                    fn.call(item);
-                }
-                else
-                {
-                    fn.apply(item, args);
-                }
+                fn.apply(item, args);
             }
-        }
-
-        return this;
-    }
-
-
-
-    this.hasClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.hasClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-
-    this.addClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.addClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.removeClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.removeClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.toggleClass = function (name) {
-
-        if (name)
-        {
-            var index = 0,
-                item;
-
-            while (item = this[index++])
-            {
-                if (item.toggleClass(name))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return this;
-    }
-
-
-    this.style = function (value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.style = value;
-        }
-
-        return this;
-    }
-
-
-    this.setStyle = function (name, value) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.setStyle(name, value);
-        }
-
-        return this;
-    }
-
-
-    this.removeStyle = function (name) {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.removeStyle(name);
         }
 
         return this;
@@ -3622,19 +3475,6 @@ Object.extend.call(Array, function (Class, base) {
     }
 
 
-    this.remove = function () {
-
-        var index = 0,
-            item;
-
-        while (item = this[index++])
-        {
-            item.remove();
-        }
-
-        return this;
-    }
-
 
 });
 
@@ -3670,6 +3510,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     // 默认允许任意类型父控件
     Class.allowParent = true;
+
+    // 渲染器扩展
+    Class.renderer = renderer;
+
 
 
     classes[Class.typeName = this.typeName = 'Control'] = classes.control = Class;
@@ -3806,8 +3650,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$properties = create(null);
 
 
-    // 混入存储器(h5用来放置自定义渲染逻辑)
-    this.$mixin = create(null);
+    // 渲染器
+    this.$renderer = create(null);
 
 
 
@@ -4349,7 +4193,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('font-size', 1);
 
     //控件文字行高
-    style('line-height');
+    style('line-height', 1);
 
     //控件字体族 family-name generic-family  用于某个元素的字体族名称或/及类族名称的一个优先表
     style('font-family');
@@ -4713,14 +4557,25 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.__class_init = function (Class) {
 
-        Class.register = register;
         Class.allowParent = true;
+        
+        Class.register = register;
+        Class.renderer = renderer;
 
         this.$defaults = create(this.$defaults);
         this.$properties = create(this.$properties);
-        this.$mixin = create(this.$mixin);
+        this.$renderer = create(this.$renderer);
     }
 
+
+
+    function renderer(fn) {
+
+        var prototype = this.prototype;
+        var base = this.superclass;
+        
+        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+    }
 
 
     function register(name) {
@@ -5439,14 +5294,14 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     // 子控件集合
     this.$property('children', null, {
 
-        get: no_children,
-        set: no_children
+        get: nochildren,
+        set: nochildren
     });
 
 
-    function no_children () {
+    function nochildren () {
 
-        throw new Error('databox doesn\'t supports children, please use data and template!');
+        throw new Error('BataBox control doesn\'t supports children, please use data and template!');
     }
 
 
@@ -5970,6 +5825,28 @@ yaxi.ScrollBox = yaxi.Box.extend(function () {
 
 yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
+
+
+    this.$property('layout', {
+
+        get: nolayout,
+        set: nolayout
+    });
+
+
+    function nolayout() {
+
+        throw new Error('StackBox control doesn\'t supports layout! can only use full!');
+    }
+
+
+
+    // 子项是否充满容器
+    this.$property('full', false);
+
+
+
+
 }, function StackBox() {
 
     yaxi.Box.apply(this, arguments);
@@ -6054,20 +5931,8 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
-    // 线条(目前只支持top及bottom)
-    this.$property('line', 'bottom', {
-
-        kind: 'class',
-        data: 'yx-tab-'
-    });
-    
-
     // 页面容器
     this.$property('host', '', false);
-
-
-    // 页面充满模式
-    this.$property('full', true);
 
 
 
@@ -6139,12 +6004,12 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
             if (host = this.find(host))
             {
-                if (host instanceof yaxi.Box)
+                if (host instanceof yaxi.StackBox)
                 {
                     return host;
                 }
 
-                throwError('be a Box!');
+                throwError('be a StackBox!');
             }
 
             return null;
@@ -6154,7 +6019,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
     function throwError(text) {
 
-        throw new Error('the host property of TabBar must ' + text);
+        throw new Error('the host of TabBar must ' + text);
     }
 
 
@@ -6952,7 +6817,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
-yaxi.Control.mixin(function (mixin, base, yaxi) {
+yaxi.Control.renderer(function (renderer, base, yaxi) {
 
 
 
@@ -6989,7 +6854,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     function render(control, view, prefix, values) {
         
         var properties = control.$properties;
-        var mixin = control.$mixin;
+        var renderer = control.$renderer;
         var names = own(values);
         var index = 0;
         var classes, styles, property, name, value, any;
@@ -7002,26 +6867,47 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             switch (property && property.kind)
             {
                 case 'style': // 样式属性
-                    switch (property.data)
+                    if (any = renderer[name])
                     {
-                        case 1: // 处理单位值
-                            value = convertUnit(value);
-                            break;
+                        value = any.call(this, view, prefix, value);
 
-                        case 2: // 处理颜色值
-                            value = convertColor(value);
+                        if (value == null)
+                        {
                             break;
-
-                        case 3: // 处理单位及颜色值
-                            value = convertUnit(convertColor(value));
-                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (property.data)
+                        {
+                            case 1: // 处理单位值
+                                value = convertUnit(value);
+                                break;
+    
+                            case 2: // 处理颜色值
+                                value = convertColor(value);
+                                break;
+    
+                            case 3: // 处理单位及颜色值
+                                value = convertUnit(convertColor(value));
+                                break;
+                        }
                     }
 
                     (styles || (styles = control.__styles || (control.__styles = create(null))))[name] = value;
                     break;
 
                 case 'class': // class属性
-                    if (any = property.data)
+                    if (any = renderer[name])
+                    {
+                        value = any.call(this, view, prefix, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if (any = property.data)
                     {
                         if (property.type !== 'boolean')
                         {
@@ -7039,7 +6925,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
                 default:
                     if (property.change) // 配置了处理变更的属性才处理
                     {
-                        if (any = mixin[name])
+                        if (any = renderer[name])
                         {
                             any.call(control, view, prefix, value);
                         }
@@ -7105,7 +6991,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
         render(this, view, '', storage);
 
-        this.$mixin.onchange.call(this, view, '');
+        this.$renderer.onchange.call(this, view, '');
         return view;
     }
 
@@ -7144,7 +7030,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             assign(this.$storage, changes);
             render(this, view, prefix += '.', changes);
             
-            this.$mixin.onchange.call(this, view, prefix);
+            this.$renderer.onchange.call(this, view, prefix);
             this.__changes = null;
         }
     }
@@ -7237,7 +7123,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    mixin.onchange = function (view, prefix) {
+    renderer.onchange = function (view, prefix) {
     }
 
     
@@ -7247,7 +7133,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-yaxi.ContentControl.mixin(function (mixin, base) {
+yaxi.ContentControl.renderer(function (renderer, base) {
 
     
 
@@ -7279,7 +7165,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
 
     
-    mixin.content = function (view, prefix, value) {
+    renderer.content = function (view, prefix, value) {
 
         view[prefix + 'c'] = this.__render_content(this.__init_content() || '');
     }
@@ -7291,7 +7177,7 @@ yaxi.ContentControl.mixin(function (mixin, base) {
 
 
 
-yaxi.Box.mixin(function (mixin, base) {
+yaxi.Box.renderer(function (renderer, base) {
 
 
 
@@ -7320,7 +7206,7 @@ yaxi.Box.mixin(function (mixin, base) {
 
 
 
-yaxi.DataBox.mixin(function (mixin, base) {
+yaxi.DataBox.renderer(function (renderer, base) {
 
 
 
@@ -7348,11 +7234,11 @@ yaxi.DataBox.mixin(function (mixin, base) {
 
 
 
-yaxi.Marquee.mixin(function (mixin, base) {
+yaxi.Marquee.renderer(function (renderer, base) {
 
 
 
-    mixin.text = function (view, prefix, value) {
+    renderer.text = function (view, prefix, value) {
 
         // var length = value.length;
 
@@ -7380,9 +7266,9 @@ yaxi.Marquee.mixin(function (mixin, base) {
     }
 
 
-    mixin.speed = function (view) {
+    renderer.speed = function (view) {
 
-        mixin.text.call(this, view, this.text);
+        renderer.text.call(this, view, this.text);
     }
 
 
@@ -7392,7 +7278,7 @@ yaxi.Marquee.mixin(function (mixin, base) {
 
 
 
-yaxi.Page.mixin(function (mixin, base, yaxi) {
+yaxi.Page.renderer(function (renderer, base, yaxi) {
 
 
 
@@ -7619,11 +7505,11 @@ yaxi.Page.mixin(function (mixin, base, yaxi) {
 
 
 
-yaxi.Header.mixin(function (mixin, base) {
+yaxi.Header.renderer(function (renderer, base) {
 
 
 
-    mixin.onchange = function (view, prefix) {
+    renderer.onchange = function (view, prefix) {
 
         view[prefix + 'back'] = yaxi.currentPages.length > 1;
     }

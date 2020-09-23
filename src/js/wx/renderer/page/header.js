@@ -1,8 +1,8 @@
-yaxi.Header.mixin(function (mixin, base) {
+yaxi.Header.renderer(function (renderer, base) {
 
 
 
-    mixin.onchange = function (view, prefix) {
+    renderer.onchange = function (view, prefix) {
 
         view[prefix + 'back'] = yaxi.currentPages.length > 1;
     }

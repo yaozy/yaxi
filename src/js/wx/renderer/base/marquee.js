@@ -1,8 +1,8 @@
-yaxi.Marquee.mixin(function (mixin, base) {
+yaxi.Marquee.renderer(function (renderer, base) {
 
 
 
-    mixin.text = function (view, prefix, value) {
+    renderer.text = function (view, prefix, value) {
 
         // var length = value.length;
 
@@ -30,9 +30,9 @@ yaxi.Marquee.mixin(function (mixin, base) {
     }
 
 
-    mixin.speed = function (view) {
+    renderer.speed = function (view) {
 
-        mixin.text.call(this, view, this.text);
+        renderer.text.call(this, view, this.text);
     }
 
 

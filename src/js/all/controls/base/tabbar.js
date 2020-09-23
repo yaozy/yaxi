@@ -2,20 +2,8 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
 
-    // 线条(目前只支持top及bottom)
-    this.$property('line', 'bottom', {
-
-        kind: 'class',
-        data: 'yx-tab-'
-    });
-    
-
     // 页面容器
     this.$property('host', '', false);
-
-
-    // 页面充满模式
-    this.$property('full', true);
 
 
 
@@ -87,12 +75,12 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
             if (host = this.find(host))
             {
-                if (host instanceof yaxi.Box)
+                if (host instanceof yaxi.StackBox)
                 {
                     return host;
                 }
 
-                throwError('be a Box!');
+                throwError('be a StackBox!');
             }
 
             return null;
@@ -102,7 +90,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
     function throwError(text) {
 
-        throw new Error('the host property of TabBar must ' + text);
+        throw new Error('the host of TabBar must ' + text);
     }
 
 

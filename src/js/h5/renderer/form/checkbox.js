@@ -1,4 +1,4 @@
-yaxi.CheckBox.mixin(function (mixin, base) {
+yaxi.CheckBox.renderer(function (renderer, base) {
 
 
 
@@ -6,19 +6,19 @@ yaxi.CheckBox.mixin(function (mixin, base) {
 
 
 
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         view.lastChild.textContent = value;
     }
 
 
-    mixin.checked = function (view, value) {
+    renderer.checked = function (view, value) {
 
         view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
     }
 
 
-    mixin.checkedIcon = function (view, value) {
+    renderer.checkedIcon = function (view, value) {
 
         if (value && this.checked)
         {
@@ -27,7 +27,7 @@ yaxi.CheckBox.mixin(function (mixin, base) {
     }
 
 
-    mixin.uncheckedIcon = function (view, value) {
+    renderer.uncheckedIcon = function (view, value) {
 
         if (value && !this.checked)
         {

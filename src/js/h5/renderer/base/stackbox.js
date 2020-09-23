@@ -1,14 +1,22 @@
-yaxi.StackBox.mixin(function (Class, base) {
+yaxi.StackBox.renderer(function (renderer, base) {
+
 
 
     
-    yaxi.template(this, '<div class="$class"><div></div></div>');
+    yaxi.template(this, '<div class="$class"><div class="yx-stackbox-body"></div></div>');
 
 
 
-    mixin.current = function (view, value) {
+    this.getChildrenView = function (view) {
+
+        return view.firstChild;
+    }
 
 
+
+    renderer.full = function (view, value) {
+
+        view.firstChild.className = 'yx-stackbox-body' + (value ? ' yx-stackbox-full' : '');
     }
 
 

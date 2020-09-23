@@ -1,4 +1,4 @@
-yaxi.DataBox.mixin(function (mixin, base) {
+yaxi.DataBox.renderer(function (renderer, base) {
 
 
 

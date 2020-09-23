@@ -1,4 +1,4 @@
-yaxi.Box.mixin(function (mixin, base) {
+yaxi.Box.renderer(function (renderer, base) {
 
 
     
@@ -22,8 +22,14 @@ yaxi.Box.mixin(function (mixin, base) {
     
     this.patch = function (view) {
 
-        this.patchChildren(view, this.__children);
+        this.patchChildren(this.getChildrenView(view), this.__children);
         base.patch.call(this, view);
+    }
+
+
+    this.getChildrenView = function (view) {
+
+        return view;
     }
 
 

@@ -1,4 +1,4 @@
-yaxi.Header.mixin(function (mixin, base) {
+yaxi.Header.renderer(function (renderer, base) {
 
 
 
@@ -18,7 +18,7 @@ yaxi.Header.mixin(function (mixin, base) {
 
 
 
-    mixin.icon = function (view, value) {
+    renderer.icon = function (view, value) {
 
         view = view.firstChild.nextSibling;
         view.className = value ? 'yx-header-icon iconfont ' + value : 'yx-header-hidden';

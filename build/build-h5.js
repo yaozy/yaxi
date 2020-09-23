@@ -20,5 +20,5 @@ new Compressor()
     .combine('\r\n\r\n\r\n\r\n')
     .output('dist/platforms/h5/yaxi/js/yaxi.js')
 
-    // .compress()
-    // .output('dist/platforms/h5/yaxi/js/yaxi.min.js');
+    .compress()
+    .output('dist/platforms/h5/yaxi/js/yaxi.min.js');

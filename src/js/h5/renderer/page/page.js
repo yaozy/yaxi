@@ -1,4 +1,4 @@
-yaxi.Page.mixin(function (mixin, base) {
+yaxi.Page.renderer(function (renderer, base) {
 
 
 

@@ -1,4 +1,4 @@
-yaxi.Control.mixin(function (mixin, base, yaxi) {
+yaxi.Control.renderer(function (renderer, base, yaxi) {
 
 
 
@@ -35,7 +35,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     function render(control, view, prefix, values) {
         
         var properties = control.$properties;
-        var mixin = control.$mixin;
+        var renderer = control.$renderer;
         var names = own(values);
         var index = 0;
         var classes, styles, property, name, value, any;
@@ -48,26 +48,47 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             switch (property && property.kind)
             {
                 case 'style': // 样式属性
-                    switch (property.data)
+                    if (any = renderer[name])
                     {
-                        case 1: // 处理单位值
-                            value = convertUnit(value);
-                            break;
+                        value = any.call(this, view, prefix, value);
 
-                        case 2: // 处理颜色值
-                            value = convertColor(value);
+                        if (value == null)
+                        {
                             break;
-
-                        case 3: // 处理单位及颜色值
-                            value = convertUnit(convertColor(value));
-                            break;
+                        }
+                    }
+                    else
+                    {
+                        switch (property.data)
+                        {
+                            case 1: // 处理单位值
+                                value = convertUnit(value);
+                                break;
+    
+                            case 2: // 处理颜色值
+                                value = convertColor(value);
+                                break;
+    
+                            case 3: // 处理单位及颜色值
+                                value = convertUnit(convertColor(value));
+                                break;
+                        }
                     }
 
                     (styles || (styles = control.__styles || (control.__styles = create(null))))[name] = value;
                     break;
 
                 case 'class': // class属性
-                    if (any = property.data)
+                    if (any = renderer[name])
+                    {
+                        value = any.call(this, view, prefix, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if (any = property.data)
                     {
                         if (property.type !== 'boolean')
                         {
@@ -85,7 +106,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
                 default:
                     if (property.change) // 配置了处理变更的属性才处理
                     {
-                        if (any = mixin[name])
+                        if (any = renderer[name])
                         {
                             any.call(control, view, prefix, value);
                         }
@@ -151,7 +172,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
         render(this, view, '', storage);
 
-        this.$mixin.onchange.call(this, view, '');
+        this.$renderer.onchange.call(this, view, '');
         return view;
     }
 
@@ -190,7 +211,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
             assign(this.$storage, changes);
             render(this, view, prefix += '.', changes);
             
-            this.$mixin.onchange.call(this, view, prefix);
+            this.$renderer.onchange.call(this, view, prefix);
             this.__changes = null;
         }
     }
@@ -283,7 +304,7 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
 
 
-    mixin.onchange = function (view, prefix) {
+    renderer.onchange = function (view, prefix) {
     }
 
     

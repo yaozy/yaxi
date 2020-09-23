@@ -172,6 +172,7 @@
         id="{{ u }}"
         class="yx-control yx-box yx-scrollbox{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        scroll-y
         bindtouchstart="translateEvent">
         <box data-id="{{ u }}" children="{{ c }}" bindtouchstart="translateEvent" />
     </scroll-view>
@@ -262,13 +263,19 @@
 
 <template name="StackBox">
 
-    <box 
+    <view
         data-id="{{ u }}"
         id="{{ u }}"
         class="yx-control yx-box yx-stackbox{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
-        bindtouchstart="translateEvent" />
+        bindtouchstart="translateEvent">
+        <box 
+            data-id="{{ u }}" 
+            class="yx-stackbox-body{{ full ? ' yx-stackbox-full' : '' }}"
+            children="{{ c }}"
+            bindtouchstart="translateEvent" />
+    </view>
 
 </template>
 

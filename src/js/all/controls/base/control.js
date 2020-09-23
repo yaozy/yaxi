@@ -28,6 +28,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 默认允许任意类型父控件
     Class.allowParent = true;
 
+    // 渲染器扩展
+    Class.renderer = renderer;
+
+
 
     classes[Class.typeName = this.typeName = 'Control'] = classes.control = Class;
 
@@ -163,8 +167,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$properties = create(null);
 
 
-    // 混入存储器(h5用来放置自定义渲染逻辑)
-    this.$mixin = create(null);
+    // 渲染器
+    this.$renderer = create(null);
 
 
 
@@ -706,7 +710,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     style('font-size', 1);
 
     //控件文字行高
-    style('line-height');
+    style('line-height', 1);
 
     //控件字体族 family-name generic-family  用于某个元素的字体族名称或/及类族名称的一个优先表
     style('font-family');
@@ -1070,14 +1074,25 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.__class_init = function (Class) {
 
-        Class.register = register;
         Class.allowParent = true;
+        
+        Class.register = register;
+        Class.renderer = renderer;
 
         this.$defaults = create(this.$defaults);
         this.$properties = create(this.$properties);
-        this.$mixin = create(this.$mixin);
+        this.$renderer = create(this.$renderer);
     }
 
+
+
+    function renderer(fn) {
+
+        var prototype = this.prototype;
+        var base = this.superclass;
+        
+        fn.call(prototype, prototype.$renderer, base && base.prototype || null, yaxi);
+    }
 
 
     function register(name) {

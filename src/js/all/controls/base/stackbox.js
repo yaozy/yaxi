@@ -1,7 +1,7 @@
 yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
-    
+
     this.$property('layout', {
 
         get: nolayout,
@@ -16,16 +16,9 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
 
-    // 当前项
-    this.$property('current', 0);
-
-
     // 子项是否充满容器
-    this.$property('full', false, {
+    this.$property('full', false);
 
-        kind: 'class',
-        data: 'yx-layout-stackbox-full'
-    });
 
 
 

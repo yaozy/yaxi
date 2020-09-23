@@ -143,6 +143,31 @@
   background-color: #000000;
   opacity: 0.3;
 }
+.yx-stackbox {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  justify-items: flex-start;
+  align-content: flex-start;
+  overflow: hidden;
+  height: auto;
+}
+.yx-stackbox-body {
+  overflow: auto;
+  width: 100%;
+  height: auto;
+}
+.yx-stackbox-body > .yx-control {
+  width: 100%;
+}
+.yx-stackbox-full {
+  overflow: hidden;
+  height: 100%;
+}
+.yx-stackbox-full > .yx-control {
+  height: 100%;
+}
 .yx-swiper {
   height: 300rpx;
 }

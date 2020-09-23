@@ -1,4 +1,4 @@
-yaxi.ImageButton.mixin(function (mixin, base) {
+yaxi.ImageButton.renderer(function (renderer, base) {
 
 
 
@@ -9,13 +9,13 @@ yaxi.ImageButton.mixin(function (mixin, base) {
 
 
 
-    mixin.src = function (view, value) {
+    renderer.src = function (view, value) {
 
         view.firstChild.style.backgroundImage = value ? 'url(' + value + ')' : '';
     }
 
 
-    mixin.size = function (view, value) {
+    renderer.size = function (view, value) {
 
         var style = view.firstChild.style;
         style.width = style.height = value;

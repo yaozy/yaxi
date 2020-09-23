@@ -21,21 +21,6 @@ yaxi.impl = Object.create(null);
 
 
 
-// 混入
-yaxi.impl.mixin = function (fn) {
-
-    if (fn)
-    {
-        var prototype = this.prototype;
-        var base = this.superclass;
-        
-        fn.call(prototype, prototype.$mixin, base && base.prototype || null, yaxi);
-    }
-
-    return this;
-}
-
-
 
 // 对象继承实现
 Object.extend = function (fn, Class) {
@@ -68,7 +53,6 @@ Object.extend = function (fn, Class) {
 	
     Class.superclass = base ? this : null;
     Class.extend = this.extend || Object.extend;
-    Class.mixin = this.mixin || yaxi.impl.mixin;
     Class.prototype = prototype;
 
     prototype.constructor = Class;

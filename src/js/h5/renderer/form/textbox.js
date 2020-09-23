@@ -1,4 +1,4 @@
-yaxi.TextBox.mixin(function (mixin, base) {
+yaxi.TextBox.renderer(function (renderer, base) {
 
 
 
@@ -7,7 +7,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    mixin.focus = function (view, value) {
+    renderer.focus = function (view, value) {
 
         if (value)
         {
@@ -20,7 +20,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
     }
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         var format;
 
@@ -34,19 +34,19 @@ yaxi.TextBox.mixin(function (mixin, base) {
 
 
 
-    mixin.placeholder = function (view, value) {
+    renderer.placeholder = function (view, value) {
 
         view.setAttribute('placeholder', value);
     }
 
 
-    mixin.maxlength = function (view, value) {
+    renderer.maxlength = function (view, value) {
 
         view.setAttribute('maxlength', value);
     }
 
 
-    mixin.pattern = function (view, value) {
+    renderer.pattern = function (view, value) {
 
         view.setAttribute('pattern', value);
     }
@@ -65,7 +65,7 @@ yaxi.TextBox.mixin(function (mixin, base) {
         }
         else
         {
-            this.$mixin.value(this.$view, value);
+            this.$renderer.value(this.$view, value);
         }
     }
 

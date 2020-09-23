@@ -1,4 +1,4 @@
-yaxi.Button.mixin(function (mixin, base) {
+yaxi.Button.renderer(function (renderer, base) {
 
 
 

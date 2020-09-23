@@ -1,4 +1,4 @@
-yaxi.Memo.mixin(function (mixin, base) {
+yaxi.Memo.renderer(function (renderer, base) {
 
 
 
@@ -29,13 +29,13 @@ yaxi.Memo.mixin(function (mixin, base) {
 
 
 
-    mixin.value = function (view, value) {
+    renderer.value = function (view, value) {
 
         view.firstChild.value = value;
     }
 
 
-    mixin.placeholder = function (view, value) {
+    renderer.placeholder = function (view, value) {
 
         view.firstChild.placeholder = value;
     }
@@ -54,7 +54,7 @@ yaxi.Memo.mixin(function (mixin, base) {
         }
         else
         {
-            mixin.value(this.$view, value);
+            renderer.value(this.$view, value);
         }
     }
 

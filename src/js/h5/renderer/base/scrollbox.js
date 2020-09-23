@@ -1,4 +1,4 @@
-yaxi.ScrollBox.mixin(function (mixin, base) {
+yaxi.ScrollBox.renderer(function (renderer, base) {
 
 
 

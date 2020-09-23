@@ -1,4 +1,4 @@
-yaxi.PasswordBox.mixin(function (mixin, base) {
+yaxi.PasswordBox.renderer(function (renderer, base) {
 
 
 
@@ -7,7 +7,7 @@ yaxi.PasswordBox.mixin(function (mixin, base) {
 
 
 
-    mixin.type = function (view, value) {
+    renderer.type = function (view, value) {
 
         view.lastChild.className = value ? 'yx-password-' + value : '';
     }

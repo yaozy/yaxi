@@ -11,7 +11,8 @@ return (
 			[
 				"stackbox",
 				{
-					"flex": "auto"
+					"flex": "auto",
+					"full": "true"
 				}
 			],
 			[

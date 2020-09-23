@@ -1,4 +1,4 @@
-yaxi.Icon.mixin(function (mixin, base) {
+yaxi.Icon.renderer(function (renderer, base) {
 
 
 

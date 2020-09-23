@@ -1,4 +1,4 @@
-yaxi.Text.mixin(function (mixin, base) {
+yaxi.Text.renderer(function (renderer, base) {
 
 
 
@@ -6,7 +6,7 @@ yaxi.Text.mixin(function (mixin, base) {
 
     
 
-    mixin.text = function (view, value) {
+    renderer.text = function (view, value) {
 
         var format;
 
@@ -17,7 +17,7 @@ yaxi.Text.mixin(function (mixin, base) {
     }
 
 
-    mixin.security = function (view, value) {
+    renderer.security = function (view, value) {
 
         var format;
 

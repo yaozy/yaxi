@@ -1,4 +1,4 @@
-yaxi.Control.mixin(function (mixin) {
+yaxi.Control.renderer(function (renderer) {
 
 
 
@@ -50,24 +50,6 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    function combineClass(classes) {
-
-        var list = [];
-
-        for (var name in classes)
-        {
-            var value = classes[name];
-
-            if (value)
-            {
-                list.push(value);
-            }
-        }
-
-        return list.join(' ');
-    }
-
-
 
     // 渲染控件
     this.render = function () {
@@ -97,33 +79,56 @@ yaxi.Control.mixin(function (mixin) {
 
     this.patch = function (view) {
 
-        var changes;
+        var values;
 
         this.__dirty = false;
 
-        if (changes = this.__changes)
+        if (values = this.__changes)
         {
             var properties = this.$properties;
             var storage = this.$storage;
-            var mixin = this.$mixin;
-            var names = own(changes);
+            var renderer = this.$renderer;
+            var names = own(values);
             var index = 0;
             var classes, property, name, value, any;
 
             while (name = names[index++])
             {
                 property = properties[name];
-                value = storage[name] = changes[name];
+                value = storage[name] = values[name];
 
                 switch (property && property.kind)
                 {
                     case 'style': // 样式属性
                         // 处理颜色值
-                        view.style[name] = ((property.data) & 2 === 2) ? convertColor(value) : value;
+                        if (any = renderer[name])
+                        {
+                            value = any.call(this, view, value);
+
+                            if (value == null)
+                            {
+                                break;
+                            }
+                        }
+                        else if ((property.data) & 2 === 2)
+                        {
+                            value = convertColor(value);
+                        }
+
+                        view.style[name] = value;
                         break;
 
                     case 'class': // class属性
-                        if (any = property.data)
+                        if (any = renderer[name])
+                        {
+                            value = any.call(this, view, value);
+
+                            if (value == null)
+                            {
+                                break;
+                            }
+                        }
+                        else if (any = property.data)
                         {
                             if (property.type !== 'boolean')
                             {
@@ -139,9 +144,9 @@ yaxi.Control.mixin(function (mixin) {
                         break;
 
                     default:
-                        if (any = mixin[name])
+                        if (any = renderer[name])
                         {
-                            any.call(this, view, changes[name]);
+                            any.call(this, view, values[name]);
                         }
                         break;
                 }
@@ -150,12 +155,23 @@ yaxi.Control.mixin(function (mixin) {
             // 有变化的class则合并处理
             if (classes)
             {
-                view.className = this.$class + ' ' + combineClass(classes);
+                values = [];
+
+                for (name in classes)
+                {
+                    if (value = classes[name])
+                    {
+                        values.push(value);
+                    }
+                }
+
+                view.className = this.$class + ' ' + values.join(' ');
             }
 
             this.__changes = null;
         }
     }
+
 
 
     // 子控件变化补丁(给子类用)
@@ -241,13 +257,13 @@ yaxi.Control.mixin(function (mixin) {
 
 
 
-    mixin.hidden = function (view, value) {
+    renderer.hidden = function (view, value) {
 
         view.style.display = value ? 'none' : '';
     }
 
 
-    mixin.disabled = function (view, value) {
+    renderer.disabled = function (view, value) {
 
         if (value)
         {

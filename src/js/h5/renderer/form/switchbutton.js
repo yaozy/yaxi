@@ -1,4 +1,4 @@
-yaxi.SwitchButton.mixin(function (mixin, base) {
+yaxi.SwitchButton.renderer(function (renderer, base) {
 
 
 
@@ -6,7 +6,7 @@ yaxi.SwitchButton.mixin(function (mixin, base) {
 
 
 
-    mixin.checked = function (view, value) {
+    renderer.checked = function (view, value) {
 
         var classList = view.classList;
 
