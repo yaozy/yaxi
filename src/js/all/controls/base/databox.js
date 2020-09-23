@@ -9,7 +9,8 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     // 布局
     this.$property('layout', '', {
 
-        class: 'yx-layout-'
+        kind: 'class',
+        data: 'yx-layout-'
     });
 
 
@@ -81,19 +82,19 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     // 子控件集合
     this.$property('children', null, {
 
-        get: no_children,
-        set: no_children
+        get: nochildren,
+        set: nochildren
     });
 
 
-    function no_children () {
+    function nochildren () {
 
-        throw new Error('databox doesn\'t supports children, please use data and template!');
+        throw new Error('BataBox control doesn\'t supports children, please use data and template!');
     }
 
 
 
-    this.__load_content = function (value, scope) {
+    this.__load_subdata = function (value, scope) {
 
         var data;
 

@@ -4,6 +4,8 @@ yaxi.Control.mixin(function (mixin) {
 
     var own = Object.getOwnPropertyNames;
 
+    var create = Object.create;
+
     var div = document.createElement('div');
 
 
@@ -17,7 +19,9 @@ yaxi.Control.mixin(function (mixin) {
         return this[key];
 
     }.bind(yaxi.color));
-        
+
+    
+
     
 
     yaxi.template = function (target, html) {
@@ -42,6 +46,25 @@ yaxi.Control.mixin(function (mixin) {
         div.removeChild(view);
 
         return target.constructor.__dom_template = view;
+    }
+
+
+
+    function combineClass(classes) {
+
+        var list = [];
+
+        for (var name in classes)
+        {
+            var value = classes[name];
+
+            if (value)
+            {
+                list.push(value);
+            }
+        }
+
+        return list.join(' ');
     }
 
 
@@ -74,38 +97,60 @@ yaxi.Control.mixin(function (mixin) {
 
     this.patch = function (view) {
 
-        var values;
+        var changes;
 
         this.__dirty = false;
 
-        if (this.__class_dirty)
+        if (changes = this.__changes)
         {
-            this.__class_dirty = false;
-            this.__render_class(view);
-        }
-
-        if (values = this.__style)
-        {
-            style(this.$storage, view, values);
-            this.__style = null;
-        }
-
-        if (values = this.__changes)
-        {
+            var properties = this.$properties;
             var storage = this.$storage;
             var mixin = this.$mixin;
-            var names = own(values);
+            var names = own(changes);
             var index = 0;
-            var name, fn;
+            var classes, property, name, value, any;
 
             while (name = names[index++])
             {
-                storage[name] = values[name];
+                property = properties[name];
+                value = storage[name] = changes[name];
 
-                if (fn = mixin[name])
+                switch (property && property.kind)
                 {
-                    fn.call(this, view, values[name]);
+                    case 'style': // 样式属性
+                        // 处理颜色值
+                        view.style[name] = ((property.data) & 2 === 2) ? convertColor(value) : value;
+                        break;
+
+                    case 'class': // class属性
+                        if (any = property.data)
+                        {
+                            if (property.type !== 'boolean')
+                            {
+                                value = any + value.replace(/\s+/g, ' ' + any);
+                            }
+                        }
+                        else
+                        {
+                            value = '';
+                        }
+
+                        (classes || (classes = this.__classes = create(null)))[name] = value;
+                        break;
+
+                    default:
+                        if (any = mixin[name])
+                        {
+                            any.call(this, view, changes[name]);
+                        }
+                        break;
                 }
+            }
+
+            // 有变化的class则合并处理
+            if (classes)
+            {
+                view.className = this.$class + ' ' + combineClass(classes);
             }
 
             this.__changes = null;
@@ -193,33 +238,6 @@ yaxi.Control.mixin(function (mixin) {
         }
     }
 
-
-
-
-    function style(storage, view, values) {
-
-        var style = view.style;
-        var names = own(values);
-        var index = 0;
-        var name;
-
-        while (name = names[index++])
-        {
-            style[name] = convertColor(storage[name] = values[name]);
-        }
-    }
-
-
-    this.__render_class = function (view) {
-
-        var class1 = this.__class_list;
-        var class2 = this.__class_data;
-
-        class1 = class1 ? ' ' + class1.join(' ') : '';
-        class2 = class2 ? ' ' + class2.join(' ') : '';
-
-        view.className = this.$class + class1 + class2;
-    }
 
 
 

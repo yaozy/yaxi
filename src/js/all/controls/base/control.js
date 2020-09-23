@@ -181,89 +181,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 构建触发变更通知的属性
-    function build_set_style(name, convert) {
-
-        var init = create;
-
-        return function (value) {
-
-            var storage, style;
-
-            value = value ? convert('' + value) : '';
-
-            if (style = this.__style)
-            {
-                if (value !== style[name])
-                {
-                    style[name] = value;
-                    this.__dirty || patch(this);
-                }
-            }
-            else if (value !== (storage = this.$storage)[name])
-            {
-                (this.__style = init(storage))[name] = value;
-                this.__dirty || patch(this);
-            }
-        }
-    }
-
-
-
-    // 构建会造成class变更的属性
-    function build_set_class(name, boolean, prefix) {
-
-        return function (value) {
-
-            var storage = this.$storage;
-            var list, className;
-
-            value = boolean ? !!value : '' + value;
-
-            if (value !== storage[name])
-            {
-                storage[name] = value;
-                className = value === true ? prefix : prefix + value;
-                className = className.replace(/\s+/g, ' ' + prefix);
-
-                if (list = this.__class_data)
-                {
-                    for (var i = list.length; i--;)
-                    {
-                        if (list[i].indexOf(prefix) === 0)
-                        {
-                            if (value)
-                            {
-                                list[i] = className;
-                            }
-                            else
-                            {
-                                list.splice(i, 1);
-                            }
-                            
-                            value = 0;
-                            break;
-                        }
-                    }
-
-                    if (value)
-                    {
-                        list.push(className);
-                    }
-                }
-                else if (value)
-                {
-                    this.__class_data = [className];
-                }
-
-                this.__class_dirty = true;
-                this.__dirty || patch(this);
-            }
-        }
-    }
-
-
-
-    // 构建触发变更通知的属性
     function build_set_change(name, convert) {
 
         var init = create;
@@ -307,15 +224,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     this.__build_get = function (name, options) {
 
-        if (options.style)
-        {
-            return function () {
-
-                return (this.__style || this.$storage)[name];
-            }
-        }
-        
-        return options.change && !options.class ? function () {
+        return options.change ? function () {
 
             return (this.__changes || this.$storage)[name];
 
@@ -327,25 +236,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     this.__build_set = function (name, options) {
-
-        var value;
-
-        if (options.style)
-        {
-            return build_set_style(name, options.convert);
-        }
-
-        // 造成class变更的属性
-        if (value = options.class)
-        {
-            // 不支持触发自身变更通知
-            options.change = false;
-
-            // 不支持转换器
-            options.convert = null;
-
-            return build_set_class(name, options.type === 'boolean', value);
-        }
 
         return (options.change ? build_set_change : build_set_unchange)(name, options.convert);
     }
@@ -385,7 +275,8 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 控件风格
     this.$property('theme', '', {
 
-        class: 'yx-theme-'
+        kind: 'class',
+        data: 'yx-theme-'
     });
     
 
@@ -413,7 +304,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             if ((value = !!value) !== this.__selected)
             {
                 // 从不选中状态切换到选中有选中状态值时则切换状态
-                if (value && (value = this.__selected_status))
+                if ((this.__selected = value) && (value = this.__selected_status))
                 {
                     changeSelectedStatus(this, value);
                 }
@@ -535,7 +426,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }),
 
             kind: 'style',
-            data: data || '',
+            data: data | 0,
             style: true
         });
 
@@ -595,13 +486,13 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     style('border', 3);
 
-    style('border-top', 2);
+    style('border-top', 3);
 
-    style('border-right', 2);
+    style('border-right', 3);
 
-    style('border-bottom', 2);
+    style('border-bottom', 3);
 
-    style('border-left', 2);
+    style('border-left', 3);
 
 
     style('padding', 1);
@@ -925,11 +816,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
      *   ]
      * ]
     */
-    this.load = function (values, scope) {
+    this.load = function (options, scope) {
 
-        var attributes, properties, property, changes, style, fn, value;
+        var attributes, properties, property, changes, fn, value;
 
-        if (attributes = values[1])
+        if (attributes = options[1])
         {
             properties = this.$properties;
 
@@ -946,17 +837,17 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     {
                         value = fn.call(this, value);
 
-                        if (property.style)
+                        // 有属性值才处理, 像events, bindings等纯转换器不处理
+                        if (name)
                         {
-                            (style || (style = this.__style = create(this.$storage)))[name] = value;
-                        }
-                        else if (property.change) // 需要处理变化
-                        {
-                            (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
-                        }
-                        else
-                        {
-                            this.$storage[name] = value;
+                            if (property.change) // 需要处理变化
+                            {
+                                (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
+                            }
+                            else
+                            {
+                                this.$storage[name] = value;
+                            }
                         }
                     }
                     else if (fn !== false)
@@ -971,7 +862,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
 
-        if ((value = values[2]) && (fn = this.__load_content))
+        if ((value = options[2]) && (fn = this.__load_subdata))
         {
             fn.call(this, value, scope);
         }

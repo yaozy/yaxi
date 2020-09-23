@@ -58,6 +58,7 @@ yaxi.impl.property = function (target) {
             options = {
                 name: name,
                 type: typeof defaultValue,
+                kind: 'field',
                 change: options !== false
             };
         }
@@ -65,6 +66,7 @@ yaxi.impl.property = function (target) {
         {
             options.name = name;
             options.type || (options.type = typeof defaultValue);
+            options.kind || (options.kind = 'field');
             options.change = options.change !== false;
         }
 

@@ -258,10 +258,6 @@ Object.extend.call(Array, function (Class, base) {
             case '':
                 return control instanceof (classes[rule[1]] || Boolean);
 
-            case '.':
-                rule = rule[1];
-                return control.$class.indexOf(rule) >= 0 || ((control = control.__class) ? control.indexOf(rule) >= 0 : false);
-
             case '#':
                 return control.$storage.id === rule[1];
 

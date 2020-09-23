@@ -20,7 +20,7 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
     });
 
 
-    this.__load_content = function (value) {
+    this.__load_subdata = function (value) {
 
         this.text = value;
     }

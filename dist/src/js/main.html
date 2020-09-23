@@ -1,7 +1,7 @@
 <page>
     <template src="./components/header.html" />
-    <tabhost layout="page" flex="auto">
-    </tabhost>
+    <stackbox flex="auto">
+    </stackbox>
     <tabbar selected-index="0" border-top=".5px solid @border-level4">
         <iconbutton icon="tabbar-home" content="首页" d:module="require('home/main.js')" d:selected-status="{ theme: 'primary' }" />
         <iconbutton icon="tabbar-lesson" content="课程" d:module="require('lesson/main.js')" d:selected-status="{ theme: 'primary' }" />

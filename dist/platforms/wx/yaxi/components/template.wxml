@@ -260,12 +260,12 @@
 </template>
 
 
-<template name="TabHost">
+<template name="StackBox">
 
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-tabhost{{ class }}" 
+        class="yx-control yx-box yx-stackbox{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />

@@ -237,7 +237,7 @@ return (
 						]
 					],
 					[
-						"tabhost",
+						"stackbox",
 						null
 					]
 				]

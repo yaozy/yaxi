@@ -92,7 +92,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     }
 
 
-    this.__load_content = function (values) {
+    this.__load_subdata = function (values) {
 
         this.content = values;
     }

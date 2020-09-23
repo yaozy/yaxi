@@ -8,7 +8,8 @@ yaxi.IconButton = yaxi.ContentControl.extend(function (Class, base) {
     // 布局
     this.$property('layout', '', {
 
-        class: 'yx-layout-'
+        kind: 'class',
+        data: 'yx-layout-'
     });
     
 

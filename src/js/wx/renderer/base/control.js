@@ -4,6 +4,8 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
 
     var create = Object.create;
 
+    var assign = Object.assign;
+
     var own = Object.getOwnPropertyNames; 
 
 
@@ -18,115 +20,112 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         return this[key];
 
     }.bind(yaxi.color));
+
+
+    // 单位转换函数, 把rem转换成rpx
+    var convertUnit = function (value) {
+
+        return value.replace(this, 'rpx');
+
+    }.bind(/rem/g);
+
     
 
 
-
-    function renderStyle(control, style, outputs) {
-
-        var storage = control.$storage;
-        var names = own(style);
-        var index = 0;
-        var name, value;
-
-        while (name = names[index++])
-        {
-            if (value = style[name])
-            {
-                // 把默认的rem改成rpx, 系统规定1rem = 1rpx
-                outputs.push(name, ':', convertColor(value.replace(/rem/g, 'rpx')), ';');
-            }
-
-            storage[name] = value;
-        }
-
-        return outputs;
-    }
-
-
-    function renderStylePatch(control, style) {
+    function render(control, view, prefix, values) {
         
-        var storage = control.$storage;
         var properties = control.$properties;
-        var outputs = [];
-        var names = own(style);
-        var index = 0;
-        var convert, name;
-
-        while (name = names[index++])
-        {
-            storage[name] = style[name];
-        }
-
-        index = 0;
-        names = own(storage);
-
-        while (name = names[index++])
-        {
-            if ((convert = properties[name]) && convert.style)
-            {
-                outputs.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
-            }
-        }
-
-        return outputs.join('');
-    }
-
-
-    function renderStorage(control, view, style) {
-        
         var mixin = control.$mixin;
-        var storage = control.$storage;
-        var properties = control.$properties;
-        var names = own(storage);
+        var names = own(values);
         var index = 0;
-        var convert, name, fn;
+        var classes, styles, property, name, value, any;
 
         while (name = names[index++])
         {
-            if (convert = properties[name])
+            property = properties[name];
+            value = values[name];
+
+            switch (property && property.kind)
             {
-                if (convert.style)
-                {
-                    style.push(name, ':', storage[name].replace(/rem/g, 'rpx'), ';');
-                }
-                else if (convert.change) // 配置了处理变更的属性才处理
-                {
-                    if (fn = mixin[name])
+                case 'style': // 样式属性
+                    switch (property.data)
                     {
-                        fn.call(control, view, '', storage[name]);
+                        case 1: // 处理单位值
+                            value = convertUnit(value);
+                            break;
+
+                        case 2: // 处理颜色值
+                            value = convertColor(value);
+                            break;
+
+                        case 3: // 处理单位及颜色值
+                            value = convertUnit(convertColor(value));
+                            break;
                     }
-                    else if (fn !== false) // 自定义渲染为false不做任何处理
+
+                    (styles || (styles = control.__styles || (control.__styles = create(null))))[name] = value;
+                    break;
+
+                case 'class': // class属性
+                    if (any = property.data)
                     {
-                        view[name] = storage[name];
+                        if (property.type !== 'boolean')
+                        {
+                            value = any + value.replace(/\s+/g, ' ' + any);
+                        }
                     }
+                    else
+                    {
+                        value = '';
+                    }
+
+                    (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
+                    break;
+
+                default:
+                    if (property.change) // 配置了处理变更的属性才处理
+                    {
+                        if (any = mixin[name])
+                        {
+                            any.call(control, view, prefix, value);
+                        }
+                        else if (any !== false) // 自定义渲染为false不做任何处理
+                        {
+                            view[prefix + name] = value;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        if (classes)
+        {
+            values = [];
+
+            for (name in classes)
+            {
+                if (value = classes[name])
+                {
+                    values.push(value);
                 }
             }
+
+            view[prefix + 'class'] = ' ' + values.join(' ');
         }
-    }
 
-
-
-    function renderChanges(control, changes, view, prefix) {
-
-        var mixin = control.$mixin;
-        var storage = control.$storage;
-        var names = own(changes);
-        var index = 0;
-        var name, value, fn;
-
-        while (name = names[index++])
+        if (styles)
         {
-            value = storage[name] = changes[name];
+            values = [];
 
-            if (fn = mixin[name])
+            for (name in styles)
             {
-                fn.call(control, view, prefix, value);
+                if (value = styles[name])
+                {
+                    values.push(name, ':', value, ';');
+                }
             }
-            else if (fn !== false) // 自定义渲染为false不做任何处理
-            {
-                view[prefix + name] = value;
-            }
+
+            view[prefix + 's'] = values.join('');
         }
     }
 
@@ -135,40 +134,24 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     // 全局渲染
     this.render = function () {
 
+        var storage = this.$storage;
         var view = create(null);
-        var style = [];
-        var values;
+        var changes;
 
         this.__dirty = false;
 
         view.t = this.typeName;
         view.u = this.uuid;
 
-        renderStorage(this, view, style);
-
-        if (values = this.__style)
+        if (changes = this.__changes)
         {
-            renderStyle(this, values, style);
-            this.__style = null;
-        }
-
-        if (this.__class_dirty)
-        {
-            this.__class_dirty = false;
-            this.__render_class(view, '');
-        }
-
-        if (values = this.__changes)
-        {
-            renderChanges(this, values, view, '');
-            
-            this.$mixin.onchange.call(this, view, '');
+            assign(storage, changes);
             this.__changes = null;
         }
 
-        // 渲染样式并记录
-        this.__style_cache = style.length > 0 ? (view.s = style.join('')) : '';
+        render(this, view, '', storage);
 
+        this.$mixin.onchange.call(this, view, '');
         return view;
     }
 
@@ -198,27 +181,14 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
     // 增量渲染
     this.patch = function (view, prefix) {
 
-        var values;
+        var changes;
 
         this.__dirty = false;
 
-        prefix += '.';
-
-        if (this.__class_dirty)
+        if (changes = this.__changes)
         {
-            this.__class_dirty = false;
-            this.__render_class(view, prefix);
-        }
-
-        if (values = this.__style)
-        {
-            view[prefix + 's'] = renderStylePatch(this, values);
-            this.__style = null;
-        }
-
-        if (values = this.__changes)
-        {
-            renderChanges(this, values, view, prefix);
+            assign(this.$storage, changes);
+            render(this, view, prefix += '.', changes);
             
             this.$mixin.onchange.call(this, view, prefix);
             this.__changes = null;
@@ -311,26 +281,6 @@ yaxi.Control.mixin(function (mixin, base, yaxi) {
         }
     }
 
-
-
-
-    this.__render_class = function (view, prefix) {
-
-        var class1 = this.__class_list;
-        var class2 = this.__class_data;
-
-        class1 = class1 ? ' ' + class1.join(' ') : '';
-        class2 = class2 ? ' ' + class2.join(' ') : '';
-
-        view[prefix + 'class'] = class1 + class2;
-    }
-
-
-    
-    mixin.hidden = function (view, prefix, value) {
-
-        view[prefix + 'hidden'] = value;
-    }
 
 
     mixin.onchange = function (view, prefix) {

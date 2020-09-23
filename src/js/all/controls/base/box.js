@@ -10,7 +10,8 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     // 布局
     this.$property('layout', '', {
 
-        class: 'yx-layout-'
+        kind: 'class',
+        data: 'yx-layout-'
     });
 
     
@@ -51,7 +52,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     };
 
 
-    this.__load_content = function (values, model) {
+    this.__load_subdata = function (values, model) {
 
         this.__children.load(values, model);
     }

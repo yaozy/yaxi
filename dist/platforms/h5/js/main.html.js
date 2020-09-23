@@ -9,9 +9,8 @@ return (
 		[
 			require("./components/header.html")($owner, $data, $model),
 			[
-				"tabhost",
+				"stackbox",
 				{
-					"layout": "page",
 					"flex": "auto"
 				}
 			],
