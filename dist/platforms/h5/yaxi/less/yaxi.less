@@ -64,6 +64,18 @@
 
 
 
+.yx-floatlayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: auto;
+    z-index: 999;
+}
+
+
+
 .yx-icon {
     display: inline-block;
     overflow: hidden;
@@ -188,6 +200,7 @@
     left: 0;
     bottom: 0;
     width: 100%;
+    height: auto;
     background-color: @bg-black;
     opacity: .3;
 }
@@ -286,7 +299,8 @@
     width: 400rem;
     height: 70rem;
     line-height: 70rem;
-    border: 1px solid @line-standard;
+    border: 0;
+    border-bottom: 1px solid @line-standard;
     padding: 0 10rem;
     outline: none;
 }
@@ -807,6 +821,14 @@
 
 
 
+.yx-theme-bg-black {
+    background-color: @bg-black;
+}
+
+.yx-theme-bg-white {
+    background-color: @bg-white;
+}
+
 .yx-theme-bg-standard {
     background-color: @bg-standard;
 }
@@ -864,6 +886,14 @@
 }
 
 
+
+.yx-theme-text-black {
+    color: @text-black;
+}
+
+.yx-theme-text-white {
+    color: @text-white;
+}
 
 .yx-theme-text-standard {
     color: @text-standard;
@@ -923,6 +953,14 @@
 
 
 
+
+.yx-theme-line-black {
+    border-color: @line-black;
+}
+
+.yx-theme-line-white {
+    border-color: @line-white;
+}
 
 .yx-theme-line-standard {
     border-color: @line-standard;

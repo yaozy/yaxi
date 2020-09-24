@@ -1,11 +1,11 @@
-<box theme="bg-standard" opacity=".3" position="absolute" left="0" top="0" width="100%" height="100%">
-    <box width="500rem" left="100rem" top="50%" transform="translateY(-50%)">
-        <textbox placeholder="姓名" />
-        <textbox placeholder="姓名" />
-        <textbox placeholder="姓名" />
-        <textbox placeholder="姓名" />
-        <textbox placeholder="姓名" />
-        <button>确认</button>
-        <icon icon="common-close" />
+<floatlayer>
+    <box width="550rem" padding="50rem" left="100rem" top="50%" transform="translateY(-50%)">
+        <textbox b:text="$model.name" b:change="$model.name" placeholder="姓名" width="100%" text-align="center" />
+        <textbox b:text="$model.gendle" b:change="$model.gendle" placeholder="性别" width="100%" text-align="center" />
+        <textbox b:text="$model.tel" b:change="$model.tel" placeholder="电话" width="100%" text-align="center" />
+        <textbox b:text="$model.address" b:change="$model.address" placeholder="地址" width="100%" text-align="center" />
+        <textbox b:text="$model.house" b:change="$model.house" placeholder="楼宇门牌" width="100%" text-align="center" />
+        <button e:tap="handleOK">确认</button>
+        <icon icon="common-close" e:tap="handleClose" />
     </box>
-</box>
+</floatlayer>

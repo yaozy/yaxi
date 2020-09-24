@@ -1,11 +1,6 @@
 yaxi.Box.renderer(function (base) {
 
 
-    
-    yaxi.template(this, '<div class="$class"></div>');
-
-
-
 
     this.render = function (control) {
 

@@ -4,21 +4,14 @@ if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev
 
 return (
 	[
-		"box",
-		{
-			"theme": "bg-standard",
-			"opacity": ".3",
-			"position": "absolute",
-			"left": "0",
-			"top": "0",
-			"width": "100%",
-			"height": "100%"
-		},
+		"floatlayer",
+		null,
 		[
 			[
 				"box",
 				{
-					"width": "500rem",
+					"width": "550rem",
+					"padding": "50rem",
 					"left": "100rem",
 					"top": "50%",
 					"transform": "translateY(-50%)"
@@ -27,42 +20,79 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "姓名"
+							"placeholder": "姓名",
+							"width": "100%",
+							"text-align": "center",
+							"bindings": {
+								"text":  function () { return $model.name },
+								"change":  function () { return $model.name }
+							}
 						}
 					],
 					[
 						"textbox",
 						{
-							"placeholder": "姓名"
+							"placeholder": "性别",
+							"width": "100%",
+							"text-align": "center",
+							"bindings": {
+								"text":  function () { return $model.gendle },
+								"change":  function () { return $model.gendle }
+							}
 						}
 					],
 					[
 						"textbox",
 						{
-							"placeholder": "姓名"
+							"placeholder": "电话",
+							"width": "100%",
+							"text-align": "center",
+							"bindings": {
+								"text":  function () { return $model.tel },
+								"change":  function () { return $model.tel }
+							}
 						}
 					],
 					[
 						"textbox",
 						{
-							"placeholder": "姓名"
+							"placeholder": "地址",
+							"width": "100%",
+							"text-align": "center",
+							"bindings": {
+								"text":  function () { return $model.address },
+								"change":  function () { return $model.address }
+							}
 						}
 					],
 					[
 						"textbox",
 						{
-							"placeholder": "姓名"
+							"placeholder": "楼宇门牌",
+							"width": "100%",
+							"text-align": "center",
+							"bindings": {
+								"text":  function () { return $model.house },
+								"change":  function () { return $model.house }
+							}
 						}
 					],
 					[
 						"button",
-						null,
+						{
+							"events": {
+								"tap": $owner.handleOK.bind($owner)
+							}
+						},
 						"确认"
 					],
 					[
 						"icon",
 						{
-							"icon": "common-close"
+							"icon": "common-close",
+							"events": {
+								"tap": $owner.handleClose.bind($owner)
+							}
 						}
 					]
 				]

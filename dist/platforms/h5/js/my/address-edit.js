@@ -1,31 +1,44 @@
 const yaxi = require('../../yaxi/js/yaxi');
-const template = require('./address.html');
+const template = require('./address-edit.html');
 
 
 
-module.exports = yaxi.Page.extend(function (Class, base) {
+module.exports = yaxi.FloatLayer.extend(function (Class, base) {
   
 
 
-    this.init = function (model, callback) {
+    this.init = function (model) {
 
-        this.callback = callback;
-        this.load(template(this, this.model = model));
+        this.load(template(this, {}, this.model = model));
     }
 
+
+
+    this.handleClose = function () {
+
+        this.model = null;
+        this.remove();
+
+        return false;
+    }
 
 
     this.handleOK = function () {
 
-        this.callback(this.model);
-        this.callback = this.model = null;
+        var parent = this.$parent;
+        var model = this.model;
+
+        this.model = null;
+        this.remove();
+
+        parent.afterEdit(model);
     }
 
 
 
-    Class.open = function (model, callback) {
+    Class.open = function (parent, model) {
 
-        new this(model, callback);
+        parent.children.push(new this(model));
     }
 
 

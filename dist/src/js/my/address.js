@@ -39,13 +39,25 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
+    this.afterEdit = function (model) {
+
+        var index = arrayModel.indexOf(model);
+
+        if (index >= 0)
+        {
+            arrayModel.set(index, model);
+        }
+        else
+        {
+            arrayModel.push(model);
+        }
+    }
+
+
 
     this.handleAdd = function () {
 
-        require('./address-edit').open(arrayModel.create(), function (data) {
-
-            arrayModel.push(data);
-        });
+        require('./address-edit').open(this, arrayModel.create());
     }
 
 
@@ -55,10 +67,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
         if (index >= 0)
         {
-            require('./address-edit').open(arrayModel.copy(index), function (data) {
-
-                arrayModel.set(index, data);
-            });
+            require('./address-edit').open(this, arrayModel.copy(index));
         }
     }
 

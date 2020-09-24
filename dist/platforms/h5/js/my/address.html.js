@@ -102,7 +102,7 @@ return (
 													[
 														"text",
 														{
-															"theme": "text-lighter",
+															"theme": "text-lightest",
 															"font-size": "28rem",
 															"bindings": {
 																"text":  function () { return $item.address }
@@ -136,7 +136,7 @@ return (
 												"text",
 												{
 													"padding": "0 30rem",
-													"theme": "text-lighter",
+													"theme": "text-lightest",
 													"events": {
 														"tap": $owner.handleEdit.bind($owner)
 													}
@@ -147,7 +147,7 @@ return (
 												"text",
 												{
 													"padding": "0 30rem",
-													"theme": "text-lighter",
+													"theme": "text-lightest",
 													"events": {
 														"tap": $owner.handleDelete.bind($owner)
 													}
