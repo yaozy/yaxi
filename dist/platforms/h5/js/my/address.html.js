@@ -35,7 +35,7 @@ return (
 				{
 					"type": "model",
 					"data": $model,
-					"theme": "bg-level2",
+					"theme": "bg-thick",
 					"flex": "auto"
 				},
 				function (template, __data_list, __data_scope) {
@@ -52,7 +52,7 @@ return (
 								"box",
 								{
 									"margin-top": "20rem",
-									"theme": "level1"
+									"theme": "bg-standard"
 								},
 								[
 									[
@@ -102,7 +102,7 @@ return (
 													[
 														"text",
 														{
-															"theme": "text-level3",
+															"theme": "text-lighter",
 															"font-size": "28rem",
 															"bindings": {
 																"text":  function () { return $item.address }
@@ -119,7 +119,7 @@ return (
 											"tag": $item.id,
 											"layout": "row middle",
 											"padding": "0 20rem",
-											"theme": "border-level4 border-top"
+											"theme": "line-lightest line-top"
 										},
 										[
 											[
@@ -136,7 +136,7 @@ return (
 												"text",
 												{
 													"padding": "0 30rem",
-													"theme": "level3",
+													"theme": "text-lighter",
 													"events": {
 														"tap": $owner.handleEdit.bind($owner)
 													}
@@ -147,7 +147,7 @@ return (
 												"text",
 												{
 													"padding": "0 30rem",
-													"theme": "level3",
+													"theme": "text-lighter",
 													"events": {
 														"tap": $owner.handleDelete.bind($owner)
 													}

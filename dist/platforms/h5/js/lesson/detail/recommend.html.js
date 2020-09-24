@@ -7,7 +7,7 @@ return (
 		"databox",
 		{
 			"data": $data.recommends,
-			"theme": "level1",
+			"theme": "bg-standard",
 			"padding": "20rem"
 		},
 		function (template, __data_list, __data_scope) {
@@ -69,7 +69,7 @@ return (
 										{
 											"height": "50rem",
 											"overflow": "hidden",
-											"theme": "level3",
+											"theme": "text-lighter",
 											"font-size": "28rem"
 										},
 										[
@@ -102,7 +102,7 @@ return (
 									[
 										"box",
 										{
-											"theme": "primary",
+											"theme": "text-primary",
 											"height": "40rem",
 											"overflow": "hidden"
 										},

@@ -6,7 +6,7 @@ return (
 	[
 		"box",
 		{
-			"theme": "bg-level1",
+			"theme": "bg-standard",
 			"opacity": ".3",
 			"position": "absolute",
 			"left": "0",

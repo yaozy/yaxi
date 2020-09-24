@@ -128,12 +128,10 @@ yaxi.Control.renderer(function () {
                                 break;
                             }
                         }
-                        else if (any = property.data)
+                        else if (value)
                         {
-                            if (property.type !== 'boolean')
-                            {
-                                value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
-                            }
+                            any = property.data;
+                            value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
                         }
                         else
                         {

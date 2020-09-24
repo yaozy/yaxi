@@ -93,7 +93,7 @@ return (
 															"data": $item.remark,
 															"item": "$remark",
 															"layout": "flow",
-															"theme": "level3",
+															"theme": "text-lightest",
 															"height": "50rem",
 															"line-height": "40rem",
 															"font-size": "24rem",
@@ -116,7 +116,7 @@ return (
 																		"text",
 																		{
 																			"text": $remark,
-																			"theme": "bg-level2",
+																			"theme": "bg-thick",
 																			"border-radius": "20rem",
 																			"padding": "0 20rem",
 																			"margin-right": "10rem"

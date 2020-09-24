@@ -2,9 +2,10 @@ const Compressor = require('jiac/js-compressor');
 
 new Compressor()
     .load('src', [
-        'js/all/base/(yaxi|extend|html|buffer|math|property|event|stream|http).js',
+        'js/all/base/(yaxi|extend|html|buffer|math|property|event|stream|http|color).js',
+        'less/color/*.js',
         'js/all/model/(pipe|model|arraymodel).js',
-        'less/theme/default/*.js',
+        'less/color/blue.js',
         'js/all/controls/base/(query|control|collection|content-control|box).js',
         'js/all/controls/base/*.js',
         'js/all/controls/form/textbox.js',

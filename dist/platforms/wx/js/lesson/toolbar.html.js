@@ -10,7 +10,7 @@ return (
 			"overflow": "visible",
 			"z-index": "1",
 			"height": "80rem",
-			"theme": "border-level4 border-bottom"
+			"theme": "line-lightest line-bottom"
 		},
 		[
 			[
@@ -28,7 +28,7 @@ return (
 				"box",
 				{
 					"layout": "row",
-					"theme": "level1 border-level4 border-bottom",
+					"theme": "bg-standard line-lightest line-bottom",
 					"height": "80rem",
 					"line-height": "80rem",
 					"text-align": "center",
@@ -81,7 +81,7 @@ return (
 			[
 				"box",
 				{
-					"theme": "level1",
+					"theme": "bg-standard",
 					"bindings": {
 						"hidden":  function () { return $model.sort.hidden }
 					}
@@ -112,7 +112,7 @@ return (
 											"height": "80rem",
 											"line-height": "80rem",
 											"padding-left": "30rem",
-											"theme": "border-level4 border-top",
+											"theme": "line-lightest line-top",
 											"bindings": {
 												"key":  function () { return $item.$index }
 											}
@@ -154,7 +154,7 @@ return (
 				"box",
 				{
 					"layout": "row",
-					"theme": "level1",
+					"theme": "bg-standard",
 					"max-height": "640rem",
 					"bindings": {
 						"hidden":  function () { return $model.category.hidden }
@@ -166,7 +166,7 @@ return (
 						{
 							"type": "model",
 							"data": $model.category.level1s,
-							"theme": "bg-level3",
+							"theme": "bg-thicker",
 							"width": "25%",
 							"events": {
 								"tap": $owner.handleCategoryLevel1.bind($owner)
@@ -210,7 +210,7 @@ return (
 						{
 							"type": "model",
 							"data": $model.category.level2s,
-							"theme": "bg-level2",
+							"theme": "bg-thick",
 							"width": "35%",
 							"events": {
 								"tap": $owner.handleCategoryLevel2.bind($owner)
@@ -296,7 +296,7 @@ return (
 				"box",
 				{
 					"layout": "column",
-					"theme": "level1",
+					"theme": "bg-standard",
 					"max-height": "640rem",
 					"bindings": {
 						"hidden":  function () { return $model.filter.hidden }
@@ -315,7 +315,7 @@ return (
 								{
 									"type": "model",
 									"data": $model.filter.data,
-									"theme": "border-level4 border-top"
+									"theme": "line-lightest line-top"
 								},
 								function (template, __data_list, __data_scope) {
 
@@ -415,7 +415,7 @@ return (
 					[
 						"box",
 						{
-							"theme": "level1 border-level4 border-top",
+							"theme": "bg-standard line-lightest line-top",
 							"height": "80rem",
 							"line-height": "80rem"
 						},
@@ -423,7 +423,7 @@ return (
 							[
 								"text",
 								{
-									"theme": "primary",
+									"theme": "text-primary",
 									"padding": "0 30rem",
 									"events": {
 										"tap": $owner.handleClearFilter.bind($owner)

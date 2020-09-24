@@ -6,7 +6,7 @@ return (
 	[
 		"box",
 		{
-			"theme": "bg-level2"
+			"theme": "bg-thick"
 		},
 		[
 			[
@@ -14,7 +14,7 @@ return (
 				{
 					"layout": "row middle",
 					"height": "250rem",
-					"theme": "primary-reverse"
+					"theme": "bg-primary"
 				},
 				[
 					[
@@ -90,14 +90,14 @@ return (
 							[
 								"box",
 								{
-									"theme": "level1",
+									"theme": "bg-standard",
 									"margin-top": "10rem"
 								},
 								[
 									[
 										"box",
 										{
-											"theme": "border-level4 border-bottom",
+											"theme": "line-lightest line-bottom",
 											"padding-left": "50rem",
 											"line-height": "80rem"
 										},
@@ -164,7 +164,7 @@ return (
 			[
 				"box",
 				{
-					"theme": "primary-reverse",
+					"theme": "bg-primary",
 					"text-align": "center",
 					"line-height": "80rem",
 					"events": {

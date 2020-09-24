@@ -8,17 +8,17 @@ yaxi.ContentControl.renderer(function (base) {
         var view = base.render.call(this, control);
         var content = control.__init_content() || control.__no_content || '';
 
-        this.renderContent(view, content);
+        this.renderContent(control, view, content);
 
         return view;
     }
 
     
-    this.renderContent = function (view, content) {
+    this.renderContent = function (control, view, content) {
 
         if (typeof content === 'string')
         {
-            this.renderText(view, content);
+            this.renderText(control, view, content);
         }
         else
         {
@@ -28,7 +28,7 @@ yaxi.ContentControl.renderer(function (base) {
     }
 
 
-    this.renderText = function (view, text) {
+    this.renderText = function (control, view, text) {
 
         view.textContent = text;
     }
@@ -36,7 +36,7 @@ yaxi.ContentControl.renderer(function (base) {
 
     this.content = function (control, view) {
 
-        this.renderContent(view, control.__init_content());
+        this.renderContent(control, view, control.__init_content());
     }
 
 

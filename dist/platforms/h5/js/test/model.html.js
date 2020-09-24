@@ -24,7 +24,7 @@ return (
 						"box",
 						{
 							"layout": "row",
-							"background-color": "@bg-level2"
+							"theme": "@bg-thick"
 						},
 						[
 							[

@@ -7,7 +7,7 @@ return (
 		"databox",
 		{
 			"data": $data.test,
-			"theme": "level1"
+			"theme": "bg-standard"
 		},
 		function (template, __data_list, __data_scope) {
 
@@ -46,7 +46,7 @@ return (
 								{
 									"height": "50rem",
 									"overflow": "hidden",
-									"theme": "level3",
+									"theme": "text-lighter",
 									"font-size": "28rem"
 								},
 								[

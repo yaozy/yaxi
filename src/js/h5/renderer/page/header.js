@@ -10,9 +10,9 @@ yaxi.Header.renderer(function (base) {
 
 
 
-    this.renderContent = function (view, content) {
+    this.renderContent = function (control, view, content) {
 
-        base.renderContent.call(this, view.lastChild, content);
+        base.renderContent.call(this, control, view.lastChild, content);
         view.firstChild.style.display = yaxi.currentPages.length > 1 ? '' : 'none';
     }
 

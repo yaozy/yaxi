@@ -1,17 +1,17 @@
-<box theme="bg-level2" layout="column">
+<box theme="bg-thick" layout="column">
     <swiper flex-shrink="0">
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
         <image src="/images/splash-screen.jpg" />
     </swiper>
-    <marquee theme="level1" d:text="$data.marquee" />
+    <marquee theme="bg-standard" d:text="$data.marquee" />
     <databox key="host" flex="auto" min-height="200rem" margin-top="10rem">
-        <box d:key="$item.id" theme="level1" margin-bottom="10rem" padding="0 20rem">
+        <box d:key="$item.id" theme="bg-standard" margin-bottom="10rem" padding="0 20rem">
             <box height="60rem" line-height="60rem">
-                <icon theme="level2" d:icon="$item.icon" position="absolute" font-size="50rem" />
-                <text theme="level2" d:text="$item.text" position="absolute" left="60rem" />
-                <box layout="row" theme="level4" position="absolute" top="0" right="0" bottom="0" font-size="28rem">
+                <icon theme="text-light" d:icon="$item.icon" position="absolute" font-size="50rem" />
+                <text theme="text-light" d:text="$item.text" position="absolute" left="60rem" />
+                <box layout="row" theme="text-lightest" position="absolute" top="0" right="0" bottom="0" font-size="28rem">
                     <text>查看更多</text>
                     <icon icon="common-more" />
                 </box>
@@ -23,10 +23,10 @@
                         <box height="50rem" overflow="hidden">
                             <text d:text="$lesson.name" />
                         </box>
-                        <box theme="level4" height="70rem" font-size="24rem" overflow="hidden">
+                        <box theme="text-lightest" height="70rem" font-size="24rem" overflow="hidden">
                             <text d:text="$lesson.remark" />
                         </box>
-                        <box theme="primary" height="40rem" overflow="hidden">
+                        <box theme="text-primary" height="40rem" overflow="hidden">
                             <text d:text="'￥' + $lesson.price" />
                         </box>
                     </box>

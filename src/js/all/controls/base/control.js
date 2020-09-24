@@ -152,7 +152,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
 
-        throwError('no options, eg: ["box", { theme: "primary" }, [[...], ...]]');
+        throwError('no options, eg: ["box", { theme: "text-primary" }, [[...], ...]]');
     }
 
 

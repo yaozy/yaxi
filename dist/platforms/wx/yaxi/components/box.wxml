@@ -2,6 +2,6 @@
 
 <template 
     wx:for="{{ children }}"
-    wx:key="index"
+    wx:key="u"
     is="{{ item.t }}"
     data="{{ ...item }}" />

@@ -87,12 +87,10 @@ yaxi.Control.renderer(function (base, yaxi) {
                             break;
                         }
                     }
-                    else if (any = property.data)
+                    else if (value)
                     {
-                        if (property.type !== 'boolean')
-                        {
-                            value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
-                        }
+                        any = property.data;
+                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
                     }
                     else
                     {
@@ -219,6 +217,8 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         var last, any;
 
+        prefix += '.';
+
         if (last = children.__last)
         {
             children.__last = null;
@@ -253,7 +253,7 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         var item;
 
-        prefix += '.c[';
+        prefix += 'c[';
 
         for (var i = 0, l = children.length; i < l; i++)
         {
@@ -275,7 +275,7 @@ yaxi.Control.renderer(function (base, yaxi) {
             list[i] = children[i].$renderer.render(children[i]);
         }
 
-        view[prefix + '.c'] = view.children = list;
+        view[prefix + 'c'] = view.children = list;
     }
 
 
@@ -284,7 +284,7 @@ yaxi.Control.renderer(function (base, yaxi) {
         var length = children.length;
         var item;
 
-        prefix += '.c[';
+        prefix += 'c[';
 
         for (var i = 0; i < length; i++)
         {

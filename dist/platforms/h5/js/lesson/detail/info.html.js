@@ -11,20 +11,20 @@ return (
 				"box",
 				{
 					"layout": "vline",
-					"theme": "level1"
+					"theme": "bg-standard"
 				},
 				[
 					[
 						"box",
 						{
 							"padding": "20rem 0",
-							"theme": "border-level4 border-bottom"
+							"theme": "line-lightest line-bottom"
 						},
 						[
 							[
 								"text",
 								{
-									"border-left": "5rem solid @border-secondary",
+									"border-left": "5rem solid @line-secondary",
 									"padding": "0 20rem"
 								},
 								"任课教师"
@@ -86,20 +86,20 @@ return (
 				"box",
 				{
 					"margin-top": "10rem",
-					"theme": "level1"
+					"theme": "bg-standard"
 				},
 				[
 					[
 						"box",
 						{
 							"padding": "20rem 0",
-							"theme": "border-level4 border-bottom"
+							"theme": "line-lightest line-bottom"
 						},
 						[
 							[
 								"text",
 								{
-									"border-left": "5rem solid @border-secondary",
+									"border-left": "5rem solid @line-secondary",
 									"padding": "0 20rem"
 								},
 								"课程内容"

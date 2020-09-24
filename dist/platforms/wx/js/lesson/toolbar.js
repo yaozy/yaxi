@@ -57,7 +57,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.level1.id === this.id ? 'bg-level2 text-primary' : '';
+                        return this.$parent.level1.id === this.id ? 'bg-thick text-primary' : '';
                     }
                 }
             ],
@@ -69,7 +69,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                     theme: function () {
 
-                        return this.$parent.level2.id === this.id ? 'bg-level1 text-primary' : '';
+                        return this.$parent.level2.id === this.id ? 'bg-standard text-primary' : '';
                     }
                 }
             ],
@@ -109,7 +109,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
                             theme: function () {
 
-                                return this.checked ? 'bg-level2 border-primary text-primary' :  'bg-level3';
+                                return this.checked ? 'bg-thick line-primary text-primary' :  'bg-thicker';
                             }
                         }
                     ]
@@ -289,13 +289,20 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                     { id: 2, text: text + '演示数据2' },
                     { id: 3, text: text + '演示数据3' }
                 ];
+
+                category.level3s = [
+                    all,
+                    { id: 1, text: text + '演示数据1-1' },
+                    { id: 2, text: text + '演示数据1-2' },
+                    { id: 3, text: text + '演示数据1-3' }
+                ];
             }
             else
             {
                 category.level2s = [all];
             }
         }
-    } 
+    }
 
 
     this.handleCategoryLevel2 = function (event) {

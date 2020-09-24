@@ -1,25 +1,25 @@
-<box layout="column" flex="auto" theme="bg-level2">
+<box layout="column" flex="auto" theme="bg-thick">
     <box flex="auto">
         <image d:src="$data.image" width="100%" height="400rem" />
-        <box padding="0 20rem" theme="level1">
+        <box padding="0 20rem" theme="bg-standard">
             <box layout="row space-between" height="80rem" line-height="80rem">
                 <text d:text="$data.name" font-size="36rem" />
-                <text d:text="'￥' + $data.price" theme="primary" align-self="flex-end" />
+                <text d:text="'￥' + $data.price" theme="text-primary" align-self="flex-end" />
             </box>
-            <box layout="row space-between" theme="level1 border-level4 border-bottom" height="80rem" font-size="28rem">
+            <box layout="row space-between" theme="bg-standard text-light line-lightest line-bottom" height="80rem" font-size="28rem">
                 <box layout="row middle">
                     <icon icon="common-search" />
-                    <text theme="level3" margin-right="10rem">学习人数</text>
+                    <text theme="text-lighter" margin-right="10rem">学习人数</text>
                     <text theme="secondary" d:text="$data.study" />
                 </box>
                 <box layout="row middle">
                     <icon icon="common-search" />
-                    <text theme="level3" margin-right="10rem">浏览量</text>
+                    <text theme="text-lighter" margin-right="10rem">浏览量</text>
                     <text theme="secondary" d:text="$data.browse" />
                 </box>
                 <box layout="row middle">
                     <icon icon="common-search" />
-                    <text theme="level3" margin-right="10rem">分享次数</text>
+                    <text theme="text-lighter" margin-right="10rem">分享次数</text>
                     <text theme="secondary" d:text="$data.share" />
                 </box>
             </box>
@@ -32,7 +32,7 @@
             selected-index="0" 
             height="80rem" 
             line-height="80rem" 
-            theme="level1 border-level4 border-bottom"
+            theme="bg-standard line-lightest line-bottom"
             margin-top="10rem"
             text-align="center">
             <text 

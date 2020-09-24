@@ -1,6 +1,9 @@
 yaxi.Icon = yaxi.Control.extend(function (Class, base) {
 
 
+
+    this.$class += ' iconfont'
+
     
     // 图标名
     this.$property('icon', '', {

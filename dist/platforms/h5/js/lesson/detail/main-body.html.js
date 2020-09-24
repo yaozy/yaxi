@@ -8,7 +8,7 @@ return (
 		{
 			"layout": "column",
 			"flex": "auto",
-			"theme": "bg-level2"
+			"theme": "bg-thick"
 		},
 		[
 			[
@@ -29,7 +29,7 @@ return (
 						"box",
 						{
 							"padding": "0 20rem",
-							"theme": "level1"
+							"theme": "bg-standard"
 						},
 						[
 							[
@@ -51,7 +51,7 @@ return (
 										"text",
 										{
 											"text": '￥' + $data.price,
-											"theme": "primary",
+											"theme": "text-primary",
 											"align-self": "flex-end"
 										}
 									]
@@ -61,7 +61,7 @@ return (
 								"box",
 								{
 									"layout": "row space-between",
-									"theme": "level1 border-level4 border-bottom",
+									"theme": "bg-standard text-light line-lightest line-bottom",
 									"height": "80rem",
 									"font-size": "28rem"
 								},
@@ -81,7 +81,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "level3",
+													"theme": "text-lighter",
 													"margin-right": "10rem"
 												},
 												"学习人数"
@@ -110,7 +110,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "level3",
+													"theme": "text-lighter",
 													"margin-right": "10rem"
 												},
 												"浏览量"
@@ -139,7 +139,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "level3",
+													"theme": "text-lighter",
 													"margin-right": "10rem"
 												},
 												"分享次数"
@@ -177,7 +177,7 @@ return (
 							"selected-index": "0",
 							"height": "80rem",
 							"line-height": "80rem",
-							"theme": "level1 border-level4 border-bottom",
+							"theme": "bg-standard line-lightest line-bottom",
 							"margin-top": "10rem",
 							"text-align": "center"
 						},

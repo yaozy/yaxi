@@ -11,7 +11,7 @@ return (
 				"box",
 				{
 					"layout": "row middle space-between",
-					"theme": "level1 border-level4 border-bottom",
+					"theme": "bg-standard line-lightest line-bottom",
 					"height": "80rem",
 					"padding": "0 20rem"
 				},
@@ -43,7 +43,7 @@ return (
 				"databox",
 				{
 					"data": $data.comments,
-					"theme": "level1",
+					"theme": "bg-standard",
 					"padding": "20rem 0"
 				},
 				function (template, __data_list, __data_scope) {
@@ -88,7 +88,7 @@ return (
 													"layout": "row space-between",
 													"height": "50rem",
 													"overflow": "hidden",
-													"theme": "level2",
+													"theme": "text-light",
 													"font-size": "28rem"
 												},
 												[
@@ -110,7 +110,7 @@ return (
 												"text",
 												{
 													"text": $item.text,
-													"theme": "level3"
+													"theme": "text-lighter"
 												}
 											]
 										]

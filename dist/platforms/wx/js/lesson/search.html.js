@@ -27,7 +27,7 @@ return (
 				"box",
 				{
 					"layout": "row",
-					"theme": "level1",
+					"theme": "bg-standard",
 					"height": "80rem"
 				},
 				[
@@ -42,7 +42,7 @@ return (
 							"top": "50%",
 							"left": "20rem",
 							"transform": "translateY(-50%)",
-							"theme": "border-level4 border-all",
+							"theme": "line-lightest line-all",
 							"border-radius": "60rem",
 							"padding": "0 120rem 0 60rem",
 							"bindings": {
@@ -67,7 +67,7 @@ return (
 					[
 						"text",
 						{
-							"theme": "text-level2",
+							"theme": "text-lighter",
 							"position": "absolute",
 							"width": "120rem",
 							"height": "80rem",
@@ -88,7 +88,7 @@ return (
 			[
 				"box",
 				{
-					"theme": "level1",
+					"theme": "bg-standard",
 					"bindings": {
 						"hidden":  function () { return $model.hidden }
 					}
@@ -129,7 +129,7 @@ return (
 							[
 								"text",
 								{
-									"theme": "text-level4",
+									"theme": "text-lighter",
 									"margin-left": "50rem",
 									"events": {
 										"tap": $owner.handleCancel.bind($owner)
@@ -164,7 +164,7 @@ return (
 											"layout": "row middle",
 											"height": "80rem",
 											"line-height": "80rem",
-											"theme": "border-level4 border-top",
+											"theme": "line-lightest line-top",
 											"padding": "0 20rem"
 										},
 										[

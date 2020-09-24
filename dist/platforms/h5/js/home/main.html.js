@@ -6,7 +6,7 @@ return (
 	[
 		"box",
 		{
-			"theme": "bg-level2",
+			"theme": "bg-thick",
 			"layout": "column"
 		},
 		[
@@ -45,7 +45,7 @@ return (
 			[
 				"marquee",
 				{
-					"theme": "level1",
+					"theme": "bg-standard",
 					"text": $data.marquee
 				}
 			],
@@ -71,7 +71,7 @@ return (
 								"box",
 								{
 									"key": $item.id,
-									"theme": "level1",
+									"theme": "bg-standard",
 									"margin-bottom": "10rem",
 									"padding": "0 20rem"
 								},
@@ -86,7 +86,7 @@ return (
 											[
 												"icon",
 												{
-													"theme": "level2",
+													"theme": "text-light",
 													"icon": $item.icon,
 													"position": "absolute",
 													"font-size": "50rem"
@@ -95,7 +95,7 @@ return (
 											[
 												"text",
 												{
-													"theme": "level2",
+													"theme": "text-light",
 													"text": $item.text,
 													"position": "absolute",
 													"left": "60rem"
@@ -105,7 +105,7 @@ return (
 												"box",
 												{
 													"layout": "row",
-													"theme": "level4",
+													"theme": "text-lightest",
 													"position": "absolute",
 													"top": "0",
 													"right": "0",
@@ -194,7 +194,7 @@ return (
 																	[
 																		"box",
 																		{
-																			"theme": "level4",
+																			"theme": "text-lightest",
 																			"height": "70rem",
 																			"font-size": "24rem",
 																			"overflow": "hidden"
@@ -211,7 +211,7 @@ return (
 																	[
 																		"box",
 																		{
-																			"theme": "primary",
+																			"theme": "text-primary",
 																			"height": "40rem",
 																			"overflow": "hidden"
 																		},

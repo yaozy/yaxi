@@ -9,8 +9,8 @@
                     <box height="70rem" overflow="hidden">
                         <text d:text="$item.name" />
                     </box>
-                    <databox d:data="$item.remark" item="$remark" layout="flow" theme="level3" height="50rem" line-height="40rem" font-size="24rem" overflow="hidden">
-                        <text d:text="$remark" theme="bg-level2" border-radius="20rem" padding="0 20rem" margin-right="10rem" />
+                    <databox d:data="$item.remark" item="$remark" layout="flow" theme="text-lightest" height="50rem" line-height="40rem" font-size="24rem" overflow="hidden">
+                        <text d:text="$remark" theme="bg-thick" border-radius="20rem" padding="0 20rem" margin-right="10rem" />
                     </databox>
                     <box theme="important" height="40rem" overflow="hidden">
                         <text d:text="$item.price > 0 ? '￥' + $item.price : '免费'" />

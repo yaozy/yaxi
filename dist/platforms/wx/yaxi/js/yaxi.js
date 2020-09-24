@@ -1701,6 +1701,59 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
+;(function (colors) {
+
+    
+    var create = Object.create;
+    var names = 'black,white,standard,thick,thicker,thickest,light,lighter,lightest,primary,secondary,important,success,warning,danger,disabled'.split(',');
+
+    
+    colors.load = function (name, values) {
+
+        var color = yaxi.color = colors[name] = create(null);
+
+        parse(color, 'bg', values[0]);
+        parse(color, 'text', values[1]);
+        parse(color, 'line', values[2]);
+    }
+
+
+    function parse(color, type, values) {
+
+        var keys = names;
+        var item = create(null);
+
+        values = values.split(',');
+
+        for (var i = values.length; i--;)
+        {
+            var name = keys[i];
+            var value = '#' + values[i];
+
+            item[name] = value;
+            color[type + '-' + name] = value;
+        }
+
+        color[type] = item;
+    }
+
+
+})(yaxi.colors = Object.create(null));
+
+
+
+
+
+
+yaxi.colors.load('blue', [
+    '000000,ffffff,ffffff,f5f5f5,e0e0e0,bdbdbd,ffffff,ffffff,ffffff,1c86ee,5eaadd,ff6c6c,71c04a,e89518,c40606,eeeeee',
+    '000000,ffffff,212121,181818,121212,000000,37474f,616161,9e9e9e,1c86ee,5eaadd,ff6c6c,71c04a,e89518,c40606,999999',
+    '000000,ffffff,263238,212121,121212,000000,37474f,546e7a,78909c,1c86ee,5eaadd,ff6c6c,71c04a,e89518,c40606,999999'
+]);
+
+
+
+
 (function (yaxi) {
 
 
@@ -2859,106 +2912,6 @@ yaxi.http = Object.extend.call({}, function (Class) {
 
 
 
-(function (yaxi) {
-
-
-    var create = Object.create;
-
-    var colors = yaxi.colors || (yaxi.colors = create(null));
-
-    var color = yaxi.color = colors.default = create(null);
-
-
-    var bg = color.bg = create(null);
-
-    var font = color.font = create(null);
-
-    var border = color.border = create(null);
-
- 
-
-    bg.level1 = '#ffffff';
-    bg.level2 = '#f7f7f7';
-    bg.level3 = '#cccccc';
-    bg.level4 = '#888888';
-    bg.level5 = '#555555';
-
-    bg.important = '#c40606';
-    bg.primary = '#1c86ee';
-    bg.secondary = '#5eaadd';
-    bg.success = '#71c04a';
-    bg.warning = '#e89518';
-    bg.danger = '#ff6c6c';
-    bg.disabled = '#eeeeee';
-
-
-    font.level1 = '#31313d';
-    font.level2 = '#6c768b';
-    font.level3 = '#b8c0de';
-    font.level4 = '#cccccc';
-    font.level5 = '#f7f7f7';
-
-    font.important = '#c40606';
-    font.primary = '#1c86ee';
-    font.secondary = '#5eaadd';
-    font.success = '#71c04a';
-    font.warning = '#e89518';
-    font.danger = '#ff6c6c';
-    font.disabled = '#999999';
-
-
-    border.level1 = '#31313d';
-    border.level2 = '#6c768b';
-    border.level3 = '#b8c0de';
-    border.level4 = '#cccccc';
-    border.level5 = '#ffffff';
-
-    border.important = '#c40606';
-    border.primary = '#1c86ee';
-    border.secondary = '#5eaadd';
-    border.success = '#71c04a';
-    border.warning = '#e89518';
-    border.danger = '#ff6c6c';
-    border.disabled = '#999999';
-
-
-    color.mask = '#000000';
-    
-    color.shadow = '#888888';
-
-
-
-    (function combine(prefix, value) {
-
-        if (typeof value !== 'object')
-        {
-            if (prefix)
-            {
-                color[prefix] = value; 
-            }
-        }
-        else
-        {
-            if (prefix)
-            {
-                prefix += '-';
-            }
-
-            for (var name in value)
-            {
-                combine(prefix + name, value[name]);
-            }
-        }
-
-    })('', color);
-
-
-
-})(yaxi);
-
-
-
-
 
 Object.extend.call(Array, function (Class, base) {
 
@@ -3696,7 +3649,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
 
-        throwError('no options, eg: ["box", { theme: "primary" }, [[...], ...]]');
+        throwError('no options, eg: ["box", { theme: "text-primary" }, [[...], ...]]');
     }
 
 
@@ -5588,6 +5541,9 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 yaxi.Icon = yaxi.Control.extend(function (Class, base) {
 
 
+
+    this.$class += ' iconfont'
+
     
     // 图标名
     this.$property('icon', '', {
@@ -5724,7 +5680,7 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'text-level1');
+    this.$property('color', 'text-standard');
 
 
 
@@ -5744,7 +5700,7 @@ yaxi.Vline = yaxi.Control.extend(function (Class, base) {
     this.$property('size', '5rem');
 
 
-    this.$property('color', 'text-level1');
+    this.$property('color', 'text-standard');
 
 
 
@@ -6906,12 +6862,10 @@ yaxi.Control.renderer(function (base, yaxi) {
                             break;
                         }
                     }
-                    else if (any = property.data)
+                    else if (value)
                     {
-                        if (property.type !== 'boolean')
-                        {
-                            value = value ? any + value.replace(/\s+/g, ' ' + any) : '';
-                        }
+                        any = property.data;
+                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
                     }
                     else
                     {
@@ -7038,6 +6992,8 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         var last, any;
 
+        prefix += '.';
+
         if (last = children.__last)
         {
             children.__last = null;
@@ -7072,7 +7028,7 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         var item;
 
-        prefix += '.c[';
+        prefix += 'c[';
 
         for (var i = 0, l = children.length; i < l; i++)
         {
@@ -7094,7 +7050,7 @@ yaxi.Control.renderer(function (base, yaxi) {
             list[i] = children[i].$renderer.render(children[i]);
         }
 
-        view[prefix + '.c'] = view.children = list;
+        view[prefix + 'c'] = view.children = list;
     }
 
 
@@ -7103,7 +7059,7 @@ yaxi.Control.renderer(function (base, yaxi) {
         var length = children.length;
         var item;
 
-        prefix += '.c[';
+        prefix += 'c[';
 
         for (var i = 0; i < length; i++)
         {
@@ -7139,20 +7095,20 @@ yaxi.ContentControl.renderer(function (base) {
         var view = base.render.call(this, control);
         var content = control.__init_content() || control.__no_content || '';
 
-        this.renderContent(view, '', content);
+        this.renderContent(control, view, '', content);
 
         return view;
     }
     
     
 
-    this.renderContent = function (view, prefix, content) {
+    this.renderContent = function (control, view, prefix, content) {
 
         if (typeof content === 'string')
         {
             view[prefix + 'c'] = [{
                 t: 'Text',
-                u: this.uuid,
+                u: control.uuid,
                 text: content
             }];
         }
@@ -7166,7 +7122,7 @@ yaxi.ContentControl.renderer(function (base) {
     
     this.content = function (control, view, prefix, value) {
 
-        this.renderContent(view, prefix, control.__init_content() || '');
+        this.renderContent(control, view, prefix, control.__init_content() || '');
     }
 
 
