@@ -33,7 +33,6 @@ return (
 			[
 				"databox",
 				{
-					"type": "model",
 					"data": $model,
 					"theme": "bg-thick",
 					"flex": "auto"
@@ -116,7 +115,7 @@ return (
 									[
 										"box",
 										{
-											"tag": $item.id,
+											"tag": $index,
 											"layout": "row middle",
 											"padding": "0 20rem",
 											"theme": "line-lightest line-top"

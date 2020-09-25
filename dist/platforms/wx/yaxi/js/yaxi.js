@@ -2192,19 +2192,7 @@ yaxi.colors.load('blue', [
 
                 if (values)
                 {
-                    values = values.$storage || values;
-
-                    if (model)
-                    {
-                        for (var key in values)
-                        {
-                            model[key] = values[key];
-                        }
-                    }
-                    else
-                    {
-                        (this[name] = new Model(this)).$load(values);
-                    }
+                    (model || (this[name] = new Model(this))).$load(values);
                 }
                 else if (model)
                 {
@@ -2224,7 +2212,7 @@ yaxi.colors.load('blue', [
 
                 return this[name] || (this[name] = new ArrayModel(this));
             },
-            set: function (value) {
+            set: function (values) {
 
                 var arrayModel = this[name];
 
@@ -2240,9 +2228,9 @@ yaxi.colors.load('blue', [
                     arrayModel = this[name] = new ArrayModel(this);
                 }
 
-                if (value && value.length > 0)
+                if (values && values.length > 0)
                 {
-                    arrayModel.push.apply(arrayModel, value);
+                    arrayModel.push.apply(arrayModel, values);
                 }
             }
         };
@@ -2270,7 +2258,7 @@ yaxi.colors.load('blue', [
                     }
                     else if (name === 'onchange')
                     {
-                        this.__binding_change = fn;
+                        this.__b_onchange = fn;
                     }
                     else // 表达式绑定
                     {
@@ -2445,20 +2433,11 @@ yaxi.colors.load('blue', [
 
         if (values)
         {
-            var storage = this.$storage || (this.$storage = {}),
-                properties = this.$properties,
-                convert;
+            values = values.$storage || values;
 
             for (var name in values)
             {
-                if ((convert = properties[name]) && (convert = convert.convert))
-                {
-                    storage[name] = convert.call(this, values[name]);
-                }
-                else
-                {
-                    this[name] = values[name];
-                }
+                this[name] = values[name];
             }
         }
     }
@@ -2600,7 +2579,8 @@ yaxi.colors.load('blue', [
 
             if (data instanceof Model)
             {
-                data.$parent = parent;
+                model = data;
+                model.$parent = parent;
             }
             else
             {
@@ -3742,6 +3722,27 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 直接设置属性值
+    this.$set = function (name, value) {
+
+        var storage, changes;
+
+        if (changes = this.__changes)
+        {
+            if (value !== changes[name])
+            {
+                changes[name] = value;
+                this.__dirty || patch(this);
+            }
+        }
+        else if (value !== (storage = this.$storage)[name])
+        {
+            (this.__changes = create(storage))[name] = value;
+            this.__dirty || patch(this);
+        }
+    }
+
+
 
     // 唯一Id
     var uuid = 1;
@@ -3916,6 +3917,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 绝对定位
+    // 本系统不支持 display, position, float等布局相关的属性
+    // 布局使用flex, 在容器上设置layout实现
+    // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
+    // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
+    this.$property('absolute', '', {
+
+        kind: 'class',
+        data: 'yx-absolute-'
+    });
+
+
+
+    // 是否使用静态定位(默认使用相对定位)
+    this.$property('static', false, {
+
+        kind: 'class',
+        data: 'yx-static'
+    });
+
+
+
+
     var style = function (name, data) {
 
         this.$property(name, '', {
@@ -3932,9 +3956,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     }.bind(this);
 
-
-
-    style('position');
 
 
     style('overflow');
@@ -4758,7 +4779,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             value = build(controls[this.$uuid], value);
 
-            this.__last || patch();
+            this.__last || patch(this);
             this[index] = value;
         }
     }
@@ -5246,14 +5267,8 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    // 数据容器类型, 只支持data和model
-    // data:    直接数据绑定, 只能通过修改data重新渲染子控件, 不能直接对渲染好的控件进行修改, 性能好, 适合渲染后不需要太多变化的场景
-    // model:   模型数据绑定, 可通过操作模型对子控件进行操控
-    this.$property('type', 'data', false);
-
-
-
     // 数据集合
+    // 可以是数组模型也可以是普通的数组, 如果是普通数组不能实现双向绑定
     this.$property('data', null, {
 
         change: false,
@@ -5437,7 +5452,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
             if (controls.length > 0)
             {
-                this.__children.set(index, control);
+                this.__children.set(index, controls[0]);
             }
         }
     }
@@ -6173,10 +6188,6 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     });
 
 
-    
-    this.$property('focus', false);
-
-
 
     this.$property('selectionStart', 0, {
 
@@ -6189,6 +6200,22 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
         alias: 'selection-end'
     });
+
+
+
+
+    this.focus = function () {
+
+        this.$renderer.focus(this);
+    }
+
+
+
+    this.__on_change = function (value) {
+
+        this.$push(value);
+    }
+
 
 
 
@@ -6400,10 +6427,17 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 	}
 
 
+	// 关闭窗口
+	this.close = function (type, data) {
 
-	function open(options) {
+		yaxi.closePage(type, data);
+	}
 
-		yaxi.openPage(this, options);
+
+
+	function open(options, callback) {
+
+		yaxi.openPage(this, options, callback);
 	}
 
 
@@ -6420,6 +6454,22 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
 
 }).register('Page');
+
+
+
+
+yaxi.Dialog = yaxi.Page.extend(function (Class) {
+	
+	
+	
+
+
+
+}, function Dialog() {
+
+	yaxi.Box.call(this);
+
+}).register('Dialog');
 
 
 
@@ -6451,7 +6501,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (event.flag === 'back')
         {
-            yaxi.closePage();
+            yaxi.closePage('back');
         }
     }
 
@@ -6461,22 +6511,6 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 }).register('Header');
-
-
-
-
-yaxi.Dialog = yaxi.Page.extend(function (Class) {
-	
-	
-	
-
-
-
-}, function Dialog() {
-
-	yaxi.Box.call(this);
-
-}).register('Dialog');
 
 
 
@@ -6500,6 +6534,7 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
             success: function (res) {
                 
+                yaxi.wx.statusBarHeight = res.statusBarHeight;
                 callback(res);
             }
         });
@@ -6743,27 +6778,54 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
 
 
-    translates.input = translates.change = function (event) {
+    translates.input = function (event) {
 
         var dataset = event.target.dataset;
-        var control, detail;
+        var control, fn, value;
 
         if (control = findControl(dataset.id))
         {
-            detail = event.detail;
+            value = event.detail.value;
+
+            if ((fn = control.__on_input) && fn.call(control, value) === false)
+            {
+                return false;
+            }
 
             event = new Event(event.type);
             event.target = control;
             event.flag = dataset.flag;
-
-            if (detail)
-            {
-                event.value = detail.value || detail.current;
-            }
+            event.value = value;
 
             return control.trigger(event);
         }
     }
+
+
+
+    translates.change = function (event) {
+
+        var dataset = event.target.dataset;
+        var control, fn, value;
+
+        if (control = findControl(dataset.id))
+        {
+            value = event.detail.value;
+
+            if ((fn = control.__on_change) && fn.call(control, value) === false)
+            {
+                return false;
+            }
+            
+            event = new Event(event.type);
+            event.target = control;
+            event.flag = dataset.flag;
+            event.value = value;
+
+            return control.trigger(event);
+        }
+    }
+
 
     
 
@@ -7258,7 +7320,7 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 
-    function find(uuid, index) {
+    function find(uuid) {
 
         var list = all;
 
@@ -7266,7 +7328,7 @@ yaxi.Page.renderer(function (base, yaxi) {
         {
             if (list[i].uuid === uuid)
             {
-                return index ? i : list[i];
+                return list[i];
             }
         }
 
@@ -7326,17 +7388,43 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 
+
+    // 打开微信主页面
+    yaxi.openMainPage = function (Page, options, wxPage) {
+
+        var page = new Page(options);
+        var uuid = page.uuid;
+        
+        page.onloading(options);
+        page.options = options;
+
+        all.push(page);
+
+        yaxi.__on_page_open(uuid, wxPage, true);
+
+        return uuid;
+    }
+    
+
 	// 打开指定页面
-    yaxi.openPage = function (Page, options) {
+    yaxi.openPage = function (Page, options, callback) {
 
         try
         {
+            if (typeof options === 'function')
+            {
+                callback = options;
+                options = null;
+            }
+            
             var page = new Page(options);
         
             if (page.onloading(options) !== false)
             {
                 all.push(page);
+
                 page.options = options;
+                page.__callback = callback;
     
                 wx.navigateTo({
     
@@ -7353,54 +7441,41 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 	// 关闭当前页面
-    yaxi.closePage = function (delta) {
+    yaxi.closePage = function (type, data) {
 
         wx.navigateBack({
 
-            delta: delta || 1
+            delta: 1,
+            complete: closePage.bind(this, type, data)
         });
 	}
     
 
 
-    // 打开微信主页面
-    yaxi.openMainPage = function (Page, options, wxPage, wxName) {
-
-        var page = new Page(options);
-        var uuid = page.uuid;
-        
-        page.onloading(options);
-        page.options = options;
-            
-        all.push(page);
-
-        yaxi.__on_page_open(uuid, wxPage, wxName);
-
-        return uuid;
-    }
-    
-
-    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
+    yaxi.__on_page_open = function (uuid, wxPage) {
 
         try
         {
-            var page = find(uuid);
-            var data;
+            yaxi.getSystemInfo(info => {
 
-            notifyRender(renderings);
+                var page = find(uuid);
+                var data;
 
-            data = {};
-            data[wxName || (wxName = 'data')] = page.$renderer.render(page);
+                notifyRender(renderings);
+    
+                page.__wx_page = wxPage;
 
-            console.log(data);
+                data = page.$renderer.render(page);
+                data.top = (info.statusBarHeight | 0) + 'px';
+                data = { p: data };
+                
+                console.log(data);
 
-            page.__wx_page = wxPage;
-            page.__wx_name = wxName;
+                wxPage.setData(data, function () {
 
-            wxPage.setData(data, function () {
-
-                notifyRender(rendereds);
-                page.onload(page.options);
+                    notifyRender(rendereds);
+                    page.onload(page.options);
+                });
             });
         }
         catch (e)
@@ -7425,7 +7500,7 @@ yaxi.Page.renderer(function (base, yaxi) {
             {
                 times++;
 
-                control.$renderer.patch(control, data = create(null), control.__wx_name);
+                control.$renderer.patch(control, data = create(null), 'p');
                 console.log(data);
 
                 page.setData(data, function () {
@@ -7440,17 +7515,23 @@ yaxi.Page.renderer(function (base, yaxi) {
     }
 
 
-    yaxi.__on_page_close = function (uuid) {
+    function closePage(type, data) {
 
-        var index = find(uuid, true);
-        var page = all[index];
-
-        page.onunload();
-
-        page.__wx = null;
-        page.destroy();
-
-        all.splice(index, 1);
+        var page, callback;
+        
+        if (page= all.pop())
+        {
+            page.onunload();
+    
+            page.options = page.__wx_page = null;
+            page.destroy();
+    
+            if (callback = page.__callback)
+            {
+                page.__callback = null;
+                callback(type, data);
+            }
+        }
     }
 
 

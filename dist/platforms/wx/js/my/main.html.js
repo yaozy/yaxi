@@ -47,6 +47,7 @@ return (
 							[
 								"text",
 								{
+									"theme": "text-white",
 									"bindings": {
 										"text":  function () { return $model.name }
 									}
@@ -55,6 +56,9 @@ return (
 							[
 								"text",
 								{
+									"theme": "text-white",
+									"margin-top": "20rem",
+									"font-size": "24rem",
 									"bindings": {
 										"text":  function () { return $model.nickname }
 									}
@@ -63,6 +67,9 @@ return (
 							[
 								"text",
 								{
+									"theme": "text-white",
+									"margin-top": "10rem",
+									"font-size": "24rem",
 									"bindings": {
 										"text":  function () { return $model.tel }
 									}
@@ -162,22 +169,13 @@ return (
 				}
 			],
 			[
-				"box",
+				"button",
 				{
-					"theme": "bg-primary",
-					"text-align": "center",
-					"line-height": "80rem",
 					"events": {
 						"tap": $owner.openTest.bind($owner)
 					}
 				},
-				[
-					[
-						"text",
-						null,
-						"Open Test"
-					]
-				]
+				"Open Test"
 			]
 		]
 	]

@@ -245,6 +245,27 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 直接设置属性值
+    this.$set = function (name, value) {
+
+        var storage, changes;
+
+        if (changes = this.__changes)
+        {
+            if (value !== changes[name])
+            {
+                changes[name] = value;
+                this.__dirty || patch(this);
+            }
+        }
+        else if (value !== (storage = this.$storage)[name])
+        {
+            (this.__changes = create(storage))[name] = value;
+            this.__dirty || patch(this);
+        }
+    }
+
+
 
     // 唯一Id
     var uuid = 1;
@@ -419,6 +440,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 绝对定位
+    // 本系统不支持 display, position, float等布局相关的属性
+    // 布局使用flex, 在容器上设置layout实现
+    // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
+    // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
+    this.$property('absolute', '', {
+
+        kind: 'class',
+        data: 'yx-absolute-'
+    });
+
+
+
+    // 是否使用静态定位(默认使用相对定位)
+    this.$property('static', false, {
+
+        kind: 'class',
+        data: 'yx-static'
+    });
+
+
+
+
     var style = function (name, data) {
 
         this.$property(name, '', {
@@ -435,9 +479,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     }.bind(this);
 
-
-
-    style('position');
 
 
     style('overflow');

@@ -1,37 +1,18 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./address.html');
+const arrayModel = require('./model/address');
 
 
 
 module.exports = yaxi.Page.extend(function (Class, base) {
 
-
-
-    var arrayModel = new (yaxi.arrayModel({
-
-        id: 0,
-
-        name: '',
-
-        gendle: 0,
-
-        address: '',
-
-        house: '',
-
-        tel: '',
-        
-        default: false
-
-    }))();
-
-
     
+
     this.init = function () {
 
         this.load(template(this, {}, arrayModel));
 
-        yaxi.http.get('address').json(function (data) {
+        yaxi.http.get('my/address').json(function (data) {
 
             arrayModel.load(data);
         });
@@ -39,17 +20,20 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
-    this.afterEdit = function (model) {
+    function onclosed(type, model) {
 
-        var index = arrayModel.indexOf(model);
+        if (model)
+        {
+            var index = model.__index;
 
-        if (index >= 0)
-        {
-            arrayModel.set(index, model);
-        }
-        else
-        {
-            arrayModel.push(model);
+            if (index >= 0)
+            {
+                arrayModel[index].$load(model);
+            }
+            else
+            {
+                arrayModel.push(model);
+            }
         }
     }
 
@@ -57,7 +41,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleAdd = function () {
 
-        require('./address-edit').open(this, arrayModel.create());
+        require('./address-edit').open(arrayModel.create(), onclosed);
     }
 
 
@@ -67,7 +51,10 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
         if (index >= 0)
         {
-            require('./address-edit').open(this, arrayModel.copy(index));
+            var model = arrayModel.copy(index);
+
+            model.__index = index;
+            require('./address-edit').open(model, onclosed);
         }
     }
 

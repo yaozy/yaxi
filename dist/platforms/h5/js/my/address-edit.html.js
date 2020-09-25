@@ -4,17 +4,21 @@ if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev
 
 return (
 	[
-		"floatlayer",
+		"page",
 		null,
 		[
+			require("../components/header.html")($owner, $data, $model),
+			[
+				"masklayer",
+				null
+			],
 			[
 				"box",
 				{
 					"width": "550rem",
+					"absolute": "middle center",
 					"padding": "50rem",
-					"left": "100rem",
-					"top": "50%",
-					"transform": "translateY(-50%)"
+					"theme": "bg-standard"
 				},
 				[
 					[
@@ -24,8 +28,8 @@ return (
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
-								"text":  function () { return $model.name },
-								"change":  function () { return $model.name }
+								"value":  function () { return $model.name },
+								"onchange":  function (value) { $model.name = value; }
 							}
 						}
 					],
@@ -36,8 +40,8 @@ return (
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
-								"text":  function () { return $model.gendle },
-								"change":  function () { return $model.gendle }
+								"value":  function () { return $model.gendle },
+								"onchange":  function (value) { $model.gendle = value; }
 							}
 						}
 					],
@@ -48,8 +52,8 @@ return (
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
-								"text":  function () { return $model.tel },
-								"change":  function () { return $model.tel }
+								"value":  function () { return $model.tel },
+								"onchange":  function (value) { $model.tel = value; }
 							}
 						}
 					],
@@ -60,8 +64,8 @@ return (
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
-								"text":  function () { return $model.address },
-								"change":  function () { return $model.address }
+								"value":  function () { return $model.address },
+								"onchange":  function (value) { $model.address = value; }
 							}
 						}
 					],
@@ -72,9 +76,19 @@ return (
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
-								"text":  function () { return $model.house },
-								"change":  function () { return $model.house }
+								"value":  function () { return $model.house },
+								"onchange":  function (value) { $model.house = value; }
 							}
+						}
+					],
+					[
+						"text",
+						{
+							"key": "error",
+							"theme": "text-danger",
+							"width": "100%",
+							"height": "80rem",
+							"line-height": "80rem"
 						}
 					],
 					[
@@ -85,15 +99,6 @@ return (
 							}
 						},
 						"确认"
-					],
-					[
-						"icon",
-						{
-							"icon": "common-close",
-							"events": {
-								"tap": $owner.handleClose.bind($owner)
-							}
-						}
 					]
 				]
 			]

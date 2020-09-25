@@ -17,6 +17,7 @@
 
             success: function (res) {
                 
+                yaxi.wx.statusBarHeight = res.statusBarHeight;
                 callback(res);
             }
         });

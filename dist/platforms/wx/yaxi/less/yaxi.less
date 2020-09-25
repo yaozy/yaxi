@@ -188,6 +188,7 @@
     left: 0;
     bottom: 0;
     width: 100%;
+    height: auto;
     background-color: @bg-black;
     opacity: .3;
 }
@@ -286,7 +287,8 @@
     width: 400rem;
     height: 70rem;
     line-height: 70rem;
-    border: 1px solid @line-standard;
+    border: 0;
+    border-bottom: 1px solid @line-standard;
     padding: 0 10rem;
     outline: none;
 }
@@ -560,16 +562,6 @@
 
 
 
-.yx-floatlayer {
-    position: absolute;
-    z-index: 30;
-    border-width: 1px;
-    background-color: @bg-standard;
-    box-shadow: 0 0 8rem @line-standard;
-}
-
-
-
 .yx-header {
     display: inline-flex;
     overflow: hidden;
@@ -666,6 +658,52 @@
     background-size: contain;
 }
 
+
+
+
+.yx-absolute-left {
+    position: absolute;
+    left: 0;
+}
+
+.yx-absolute-top {
+    position: absolute;
+    top: 0;
+}
+
+.yx-absolute-right {
+    position: absolute;
+    right: 0;
+}
+
+.yx-absolute-bottom {
+    position: absolute;
+    bottom: 0;
+}
+
+.yx-absolute-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.yx-absolute-middle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.yx-absolute-center.yx-absolute-middle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.yx-static {
+    position: static;
+}
 
 
 
@@ -807,6 +845,14 @@
 
 
 
+.yx-theme-bg-black {
+    background-color: @bg-black;
+}
+
+.yx-theme-bg-white {
+    background-color: @bg-white;
+}
+
 .yx-theme-bg-standard {
     background-color: @bg-standard;
 }
@@ -864,6 +910,14 @@
 }
 
 
+
+.yx-theme-text-black {
+    color: @text-black;
+}
+
+.yx-theme-text-white {
+    color: @text-white;
+}
 
 .yx-theme-text-standard {
     color: @text-standard;
@@ -923,6 +977,14 @@
 
 
 
+
+.yx-theme-line-black {
+    border-color: @line-black;
+}
+
+.yx-theme-line-white {
+    border-color: @line-white;
+}
 
 .yx-theme-line-standard {
     border-color: @line-standard;

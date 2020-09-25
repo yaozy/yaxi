@@ -10,11 +10,13 @@ new Compressor()
         'js/all/controls/base/*.js',
         'js/all/controls/form/textbox.js',
         'js/all/controls/form/*.js',
-        'js/all/controls/page/(page|header|dialog).js',
+        'js/all/controls/page/page.js',
+        'js/all/controls/page/*.js',
         'js/wx/base/(init|event).js',
         'js/wx/renderer/base/(control|content-control|box).js',
         'js/wx/renderer/base/*.js',
-        'js/wx/renderer/page/(page|header).js'
+        'js/wx/renderer/page/page.js',
+        'js/wx/renderer/page/*.js',
     ])
     .combine('\r\n\r\n\r\n\r\n')
     .output('dist/platforms/wx/yaxi/js/yaxi.js')

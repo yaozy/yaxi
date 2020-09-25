@@ -229,27 +229,54 @@
 
 
 
-    translates.input = translates.change = function (event) {
+    translates.input = function (event) {
 
         var dataset = event.target.dataset;
-        var control, detail;
+        var control, fn, value;
 
         if (control = findControl(dataset.id))
         {
-            detail = event.detail;
+            value = event.detail.value;
+
+            if ((fn = control.__on_input) && fn.call(control, value) === false)
+            {
+                return false;
+            }
 
             event = new Event(event.type);
             event.target = control;
             event.flag = dataset.flag;
-
-            if (detail)
-            {
-                event.value = detail.value || detail.current;
-            }
+            event.value = value;
 
             return control.trigger(event);
         }
     }
+
+
+
+    translates.change = function (event) {
+
+        var dataset = event.target.dataset;
+        var control, fn, value;
+
+        if (control = findControl(dataset.id))
+        {
+            value = event.detail.value;
+
+            if ((fn = control.__on_change) && fn.call(control, value) === false)
+            {
+                return false;
+            }
+            
+            event = new Event(event.type);
+            event.target = control;
+            event.flag = dataset.flag;
+            event.value = value;
+
+            return control.trigger(event);
+        }
+    }
+
 
     
 

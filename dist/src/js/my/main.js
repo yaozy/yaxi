@@ -1,11 +1,11 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
+const user = require('./model/user');
+
 
 
 module.exports = yaxi.Box.extend(function (Class, base) {
 
-
-    var user = require('./user');
 
     var data = [
         {
@@ -39,76 +39,31 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             ]
         },
         {
-            text: '我的信息',
+            text: '产品服务',
             data: [
                 {
                     icon: 'tabbar-lesson',
-                    text: '地址信息',
+                    text: '我的地址',
                     url: './address'
                 },
                 {
                     icon: 'tabbar-lesson',
-                    text: '帐户信息',
+                    text: '我的帐户',
                     url: './lesson'
                 },
                 {
                     icon: 'tabbar-lesson',
                     text: '发票抬头',
                     url: './lesson'
-                }
-            ]
-        },
-        {
-            text: '我的资产',
-            data: [
-                {
-                    icon: 'tabbar-lesson',
-                    text: '账户余额',
-                    url: './lesson'
                 },
                 {
                     icon: 'tabbar-lesson',
-                    text: '充值',
-                    url: './lesson'
+                    text: '我的订单',
+                    url: './order'
                 },
                 {
                     icon: 'tabbar-lesson',
-                    text: '提现',
-                    url: './lesson'
-                },
-                {
-                    icon: 'tabbar-lesson',
-                    text: '积分',
-                    url: './lesson'
-                }
-            ]
-        },
-        {
-            text: '我的订单',
-            data: [
-                {
-                    icon: 'tabbar-lesson',
-                    text: '全部订单',
-                    url: './lesson'
-                },
-                {
-                    icon: 'tabbar-lesson',
-                    text: '待付款',
-                    url: './lesson'
-                },
-                {
-                    icon: 'tabbar-lesson',
-                    text: '待发货',
-                    url: './lesson'
-                },
-                {
-                    icon: 'tabbar-lesson',
-                    text: '已完成',
-                    url: './lesson'
-                },
-                {
-                    icon: 'tabbar-lesson',
-                    text: '已退款',
+                    text: '我的资产',
                     url: './lesson'
                 }
             ]

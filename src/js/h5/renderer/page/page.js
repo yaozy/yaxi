@@ -79,15 +79,23 @@ yaxi.Page.renderer(function (base) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, options) {
+	yaxi.openPage = function (Page, options, callback) {
+
+        if (typeof options === 'function')
+        {
+            callback = options;
+            options = null;
+        }
 
         var page = new Page(options);
         
         if (page.onloading(options) !== false)
         {
             all.push(page);
-			page.options = options;
-			
+
+            page.options = options;
+            page.__callback = callback;
+
 			host.appendChild(page.$renderer.render(page));
 
 			notifyRender(renderings);
@@ -97,32 +105,24 @@ yaxi.Page.renderer(function (base) {
 
 	
 	// 关闭当前页面
-    yaxi.closePage = function (delta, callback) {
+    yaxi.closePage = function (type, data) {
 
-		var page;
-		
-        if (typeof delta === 'function')
+        var page, callback;
+
+        if (page = all.pop())
         {
-            callback = delta;
-            delta = 1;
+            host.removeChild(page.$view);
+
+            page.onunload();
+            page.options = null;
+            page.destroy();
+            
+            if (callback = page.__callback)
+            {
+                page.__callback = null;
+                callback(type, data);
+            }
         }
-		else if ((delta |= 0) < 1)
-		{
-			delta = 1;
-		}
-
-		while (page = all.pop())
-		{
-			host.removeChild(page.$view);
-
-			page.onunload();
-			page.destroy();
-
-			if (--delta <= 0)
-			{
-				return;
-			}
-		}
 	}
     
     

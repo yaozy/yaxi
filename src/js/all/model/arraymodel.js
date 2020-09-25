@@ -101,7 +101,8 @@
 
             if (data instanceof Model)
             {
-                data.$parent = parent;
+                model = data;
+                model.$parent = parent;
             }
             else
             {

@@ -23,7 +23,7 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 
-    function find(uuid, index) {
+    function find(uuid) {
 
         var list = all;
 
@@ -31,7 +31,7 @@ yaxi.Page.renderer(function (base, yaxi) {
         {
             if (list[i].uuid === uuid)
             {
-                return index ? i : list[i];
+                return list[i];
             }
         }
 
@@ -91,17 +91,43 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 
+
+    // 打开微信主页面
+    yaxi.openMainPage = function (Page, options, wxPage) {
+
+        var page = new Page(options);
+        var uuid = page.uuid;
+        
+        page.onloading(options);
+        page.options = options;
+
+        all.push(page);
+
+        yaxi.__on_page_open(uuid, wxPage, true);
+
+        return uuid;
+    }
+    
+
 	// 打开指定页面
-    yaxi.openPage = function (Page, options) {
+    yaxi.openPage = function (Page, options, callback) {
 
         try
         {
+            if (typeof options === 'function')
+            {
+                callback = options;
+                options = null;
+            }
+            
             var page = new Page(options);
         
             if (page.onloading(options) !== false)
             {
                 all.push(page);
+
                 page.options = options;
+                page.__callback = callback;
     
                 wx.navigateTo({
     
@@ -118,54 +144,41 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 	// 关闭当前页面
-    yaxi.closePage = function (delta) {
+    yaxi.closePage = function (type, data) {
 
         wx.navigateBack({
 
-            delta: delta || 1
+            delta: 1,
+            complete: closePage.bind(this, type, data)
         });
 	}
     
 
 
-    // 打开微信主页面
-    yaxi.openMainPage = function (Page, options, wxPage, wxName) {
-
-        var page = new Page(options);
-        var uuid = page.uuid;
-        
-        page.onloading(options);
-        page.options = options;
-            
-        all.push(page);
-
-        yaxi.__on_page_open(uuid, wxPage, wxName);
-
-        return uuid;
-    }
-    
-
-    yaxi.__on_page_open = function (uuid, wxPage, wxName) {
+    yaxi.__on_page_open = function (uuid, wxPage) {
 
         try
         {
-            var page = find(uuid);
-            var data;
+            yaxi.getSystemInfo(info => {
 
-            notifyRender(renderings);
+                var page = find(uuid);
+                var data;
 
-            data = {};
-            data[wxName || (wxName = 'data')] = page.$renderer.render(page);
+                notifyRender(renderings);
+    
+                page.__wx_page = wxPage;
 
-            console.log(data);
+                data = page.$renderer.render(page);
+                data.top = (info.statusBarHeight | 0) + 'px';
+                data = { p: data };
+                
+                console.log(data);
 
-            page.__wx_page = wxPage;
-            page.__wx_name = wxName;
+                wxPage.setData(data, function () {
 
-            wxPage.setData(data, function () {
-
-                notifyRender(rendereds);
-                page.onload(page.options);
+                    notifyRender(rendereds);
+                    page.onload(page.options);
+                });
             });
         }
         catch (e)
@@ -190,7 +203,7 @@ yaxi.Page.renderer(function (base, yaxi) {
             {
                 times++;
 
-                control.$renderer.patch(control, data = create(null), control.__wx_name);
+                control.$renderer.patch(control, data = create(null), 'p');
                 console.log(data);
 
                 page.setData(data, function () {
@@ -205,17 +218,23 @@ yaxi.Page.renderer(function (base, yaxi) {
     }
 
 
-    yaxi.__on_page_close = function (uuid) {
+    function closePage(type, data) {
 
-        var index = find(uuid, true);
-        var page = all[index];
-
-        page.onunload();
-
-        page.__wx = null;
-        page.destroy();
-
-        all.splice(index, 1);
+        var page, callback;
+        
+        if (page= all.pop())
+        {
+            page.onunload();
+    
+            page.options = page.__wx_page = null;
+            page.destroy();
+    
+            if (callback = page.__callback)
+            {
+                page.__callback = null;
+                callback(type, data);
+            }
+        }
     }
 
 

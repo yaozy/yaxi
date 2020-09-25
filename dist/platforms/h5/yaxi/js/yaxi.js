@@ -2192,19 +2192,7 @@ yaxi.colors.load('blue', [
 
                 if (values)
                 {
-                    values = values.$storage || values;
-
-                    if (model)
-                    {
-                        for (var key in values)
-                        {
-                            model[key] = values[key];
-                        }
-                    }
-                    else
-                    {
-                        (this[name] = new Model(this)).$load(values);
-                    }
+                    (model || (this[name] = new Model(this))).$load(values);
                 }
                 else if (model)
                 {
@@ -2224,7 +2212,7 @@ yaxi.colors.load('blue', [
 
                 return this[name] || (this[name] = new ArrayModel(this));
             },
-            set: function (value) {
+            set: function (values) {
 
                 var arrayModel = this[name];
 
@@ -2240,9 +2228,9 @@ yaxi.colors.load('blue', [
                     arrayModel = this[name] = new ArrayModel(this);
                 }
 
-                if (value && value.length > 0)
+                if (values && values.length > 0)
                 {
-                    arrayModel.push.apply(arrayModel, value);
+                    arrayModel.push.apply(arrayModel, values);
                 }
             }
         };
@@ -2270,7 +2258,7 @@ yaxi.colors.load('blue', [
                     }
                     else if (name === 'onchange')
                     {
-                        this.__binding_change = fn;
+                        this.__b_onchange = fn;
                     }
                     else // 表达式绑定
                     {
@@ -2445,20 +2433,11 @@ yaxi.colors.load('blue', [
 
         if (values)
         {
-            var storage = this.$storage || (this.$storage = {}),
-                properties = this.$properties,
-                convert;
+            values = values.$storage || values;
 
             for (var name in values)
             {
-                if ((convert = properties[name]) && (convert = convert.convert))
-                {
-                    storage[name] = convert.call(this, values[name]);
-                }
-                else
-                {
-                    this[name] = values[name];
-                }
+                this[name] = values[name];
             }
         }
     }
@@ -2600,7 +2579,8 @@ yaxi.colors.load('blue', [
 
             if (data instanceof Model)
             {
-                data.$parent = parent;
+                model = data;
+                model.$parent = parent;
             }
             else
             {
@@ -3742,6 +3722,27 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 直接设置属性值
+    this.$set = function (name, value) {
+
+        var storage, changes;
+
+        if (changes = this.__changes)
+        {
+            if (value !== changes[name])
+            {
+                changes[name] = value;
+                this.__dirty || patch(this);
+            }
+        }
+        else if (value !== (storage = this.$storage)[name])
+        {
+            (this.__changes = create(storage))[name] = value;
+            this.__dirty || patch(this);
+        }
+    }
+
+
 
     // 唯一Id
     var uuid = 1;
@@ -3916,6 +3917,29 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
+    // 绝对定位
+    // 本系统不支持 display, position, float等布局相关的属性
+    // 布局使用flex, 在容器上设置layout实现
+    // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
+    // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
+    this.$property('absolute', '', {
+
+        kind: 'class',
+        data: 'yx-absolute-'
+    });
+
+
+
+    // 是否使用静态定位(默认使用相对定位)
+    this.$property('static', false, {
+
+        kind: 'class',
+        data: 'yx-static'
+    });
+
+
+
+
     var style = function (name, data) {
 
         this.$property(name, '', {
@@ -3932,9 +3956,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     }.bind(this);
 
-
-
-    style('position');
 
 
     style('overflow');
@@ -4758,7 +4779,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             value = build(controls[this.$uuid], value);
 
-            this.__last || patch();
+            this.__last || patch(this);
             this[index] = value;
         }
     }
@@ -5246,14 +5267,8 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    // 数据容器类型, 只支持data和model
-    // data:    直接数据绑定, 只能通过修改data重新渲染子控件, 不能直接对渲染好的控件进行修改, 性能好, 适合渲染后不需要太多变化的场景
-    // model:   模型数据绑定, 可通过操作模型对子控件进行操控
-    this.$property('type', 'data', false);
-
-
-
     // 数据集合
+    // 可以是数组模型也可以是普通的数组, 如果是普通数组不能实现双向绑定
     this.$property('data', null, {
 
         change: false,
@@ -5437,7 +5452,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
             if (controls.length > 0)
             {
-                this.__children.set(index, control);
+                this.__children.set(index, controls[0]);
             }
         }
     }
@@ -5534,27 +5549,6 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     }
 
 }).register('DataBox');
-
-
-
-
-yaxi.FloatLayer = yaxi.Box.extend(function (Class, base) {
-
-
-
-    this.close = function () {
-
-        this.remove();
-        this.trigger('closed');
-    }
-
-
-    
-}, function FloatLayer() {
-
-    yaxi.Box.apply(this, arguments);
-
-}).register('FloatLayer');
 
 
 
@@ -6194,10 +6188,6 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     });
 
 
-    
-    this.$property('focus', false);
-
-
 
     this.$property('selectionStart', 0, {
 
@@ -6210,6 +6200,22 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
         alias: 'selection-end'
     });
+
+
+
+
+    this.focus = function () {
+
+        this.$renderer.focus(this);
+    }
+
+
+
+    this.__on_change = function (value) {
+
+        this.$push(value);
+    }
+
 
 
 
@@ -6421,10 +6427,17 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 	}
 
 
+	// 关闭窗口
+	this.close = function (type, data) {
 
-	function open(options) {
+		yaxi.closePage(type, data);
+	}
 
-		yaxi.openPage(this, options);
+
+
+	function open(options, callback) {
+
+		yaxi.openPage(this, options, callback);
 	}
 
 
@@ -6441,6 +6454,22 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
 
 }).register('Page');
+
+
+
+
+yaxi.Dialog = yaxi.Page.extend(function (Class) {
+	
+	
+	
+
+
+
+}, function Dialog() {
+
+	yaxi.Box.call(this);
+
+}).register('Dialog');
 
 
 
@@ -6472,7 +6501,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (event.flag === 'back')
         {
-            yaxi.closePage();
+            yaxi.closePage('back');
         }
     }
 
@@ -6482,22 +6511,6 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 }).register('Header');
-
-
-
-
-yaxi.Dialog = yaxi.Page.extend(function (Class) {
-	
-	
-	
-
-
-
-}, function Dialog() {
-
-	yaxi.Box.call(this);
-
-}).register('Dialog');
 
 
 
@@ -6831,20 +6844,22 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     bind('input', function (event) {
 
-        var control, e;
+        var control, fn, value;
 
         if (control = findControl(event.target))
         {
-            if ((fn = control.__on_input) && fn.call(control, event) === false)
+            value = event.target.value;
+
+            if ((fn = control.__on_input) && fn.call(control, value) === false)
             {
                 return false;
             }
 
-            e = new Event('input');
-            e.flag = flag;
-            e.value = event.target.value;
+            event = new Event('input');
+            event.flag = flag;
+            event.value = value;
 
-            return control.trigger(e);
+            return control.trigger(event);
         }
 
     }, true);
@@ -6852,20 +6867,22 @@ yaxi.Dialog = yaxi.Page.extend(function (Class) {
 
     bind('change', function (event) {
 
-        var control, fn, e;
+        var control, fn, value;
 
         if (control = findControl(event.target))
         {
-            if (fn = control.__on_change)
+            value = event.target.value;
+
+            if ((fn = control.__on_change) && fn.call(control, value) === false)
             {
-                fn.call(control, event);
+                return false;
             }
 
-            e = new Event('change');
-            e.flag = flag;
-            e.value = event.target.value;
+            event = new Event('change');
+            event.flag = flag;
+            event.value = value;
 
-            return control.trigger(e);
+            return control.trigger(event);
         }
 
     }, true);
@@ -7435,32 +7452,6 @@ yaxi.DataBox.renderer(function (base) {
 
 
 
-yaxi.FloatLayer.renderer(function (base) {
-
-
-    
-    yaxi.template(this, '<div class="$class"><div class="yx-masklayer"></div><div></div></div>');
-
-
-
-    this.getChildrenView = function (view) {
-
-        return view.lastChild;
-    }
-
-
-    // 重载layout把属性设置到子容器上
-    this.layout = function (control, view, value) {
-
-        view.lastChild.className = value ? 'yx-layout-' + value.replace(/\s+/g, ' yx-layout-') : '';
-    }
-
-
-});
-
-
-
-
 yaxi.Icon.renderer(function (base) {
 
 
@@ -7758,18 +7749,6 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-    this.focus = function (control, view, value) {
-
-        if (value)
-        {
-            view.focus();
-        }
-        else
-        {
-            view.blur();
-        }
-    }
-
 
     this.value = function (control, view, value) {
 
@@ -7803,10 +7782,22 @@ yaxi.TextBox.renderer(function (base) {
     }
 
 
-    
-    this.__on_change = function (event) {
+    this.selectionStart = function (control, view, value) {
 
-        
+        view.selectionStart = value;
+    }
+
+
+    this.selectionEnd = function (control, view, value) {
+
+        view.selectionEnd = value;
+    }
+
+
+
+    this.focus = function (control) {
+
+        control.$view.focus();
     }
 
 
@@ -7926,24 +7917,6 @@ yaxi.Memo.renderer(function (base) {
 
 
 
-    this.__on_change = function (event) {
-
-        var value = control.value;
-
-        control.value = event.target.value;
-
-        if (control.value !== value)
-        {
-            control.$push(control.value);
-        }
-        else
-        {
-            this.value(control.$view, value);
-        }
-    }
-
-
-
 });
 
 
@@ -8051,15 +8024,23 @@ yaxi.Page.renderer(function (base) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, options) {
+	yaxi.openPage = function (Page, options, callback) {
+
+        if (typeof options === 'function')
+        {
+            callback = options;
+            options = null;
+        }
 
         var page = new Page(options);
         
         if (page.onloading(options) !== false)
         {
             all.push(page);
-			page.options = options;
-			
+
+            page.options = options;
+            page.__callback = callback;
+
 			host.appendChild(page.$renderer.render(page));
 
 			notifyRender(renderings);
@@ -8069,32 +8050,24 @@ yaxi.Page.renderer(function (base) {
 
 	
 	// 关闭当前页面
-    yaxi.closePage = function (delta, callback) {
+    yaxi.closePage = function (type, data) {
 
-		var page;
-		
-        if (typeof delta === 'function')
+        var page, callback;
+
+        if (page = all.pop())
         {
-            callback = delta;
-            delta = 1;
+            host.removeChild(page.$view);
+
+            page.onunload();
+            page.options = null;
+            page.destroy();
+            
+            if (callback = page.__callback)
+            {
+                page.__callback = null;
+                callback(type, data);
+            }
         }
-		else if ((delta |= 0) < 1)
-		{
-			delta = 1;
-		}
-
-		while (page = all.pop())
-		{
-			host.removeChild(page.$view);
-
-			page.onunload();
-			page.destroy();
-
-			if (--delta <= 0)
-			{
-				return;
-			}
-		}
 	}
     
     
@@ -8152,3 +8125,139 @@ yaxi.Header.renderer(function (base) {
 
 
 });
+
+
+
+
+(function () {
+
+
+    var view = document.createElement('div');
+
+    var mask = document.createElement('div');
+
+    var delay;
+
+
+
+    view.className = 'yx-toast';
+    mask.className = 'yx-mask';
+
+
+
+    function show(options) {
+
+        var host = yaxi.__view_host,
+            style = view.style;
+
+        close();
+
+        view.innerHTML = (options.loading ? '<span class="yx-toast-loading"></span>' : '')
+            + '<span>' + options.text + '</span>';
+    
+        if (options.mask || options.loading && options.mask !== false)
+        {
+            mask.style.backgroundColor = '';
+            host.appendChild(mask);
+        }
+
+        host.appendChild(view);
+
+        style.cssText = options.style || '';
+        style.left = (host.clientWidth - view.offsetWidth >> 1) + 'px';
+
+        switch (options.position)
+        {
+            case 'top':
+                style.top = options.offset == null ? '.8rem' : options.offset;
+                break;
+
+            case 'bottom':
+                style.bottom = options.offset == null ? '.8rem' : options.offset;
+                break;
+
+            default:
+                style.top = (host.clientHeight - view.offsetHeight >> 1) + 'px';
+                break;
+        }
+
+        if (options.time >= 0)
+        {
+            delay = setTimeout(close, options.time || 2500);
+        }
+    }
+
+
+    function close() {
+
+        var any;
+        
+        if (delay)
+        {
+            clearTimeout(delay);
+            delay = 0;
+        }
+
+        if (any = view.parentNode)
+        {
+            any.removeChild(view);
+        }
+
+        if (any = mask.parentNode)
+        {
+            any.removeChild(mask);
+        }
+    }
+
+
+    this.toast = function (options) {
+
+        if (delay)
+        {
+            clearTimeout(delay);
+            delay = 0;
+        }
+
+        if (!options)
+        {
+            return;
+        }
+
+        if (typeof options === 'string')
+        {
+            options = { text: options, time: 2500 };
+        }
+        else if (!options.time)
+        {
+            options.time = 2500;
+        }
+    
+        if (options.delay > 0)
+        {
+            if (!mask.parentNode)
+            {
+                mask.style.backgroundColor = 'rgba(255,255,255,0)';
+                yaxi.__view_host.appendChild(mask);
+            }
+
+            delay = setTimeout(function () {
+
+                show(options);
+
+            }, options.delay);
+        }
+        else
+        {
+            show(options);
+        }
+    }
+
+
+    this.toast.hide = function () {
+
+        close();
+    }
+
+    
+
+}).call(yaxi);

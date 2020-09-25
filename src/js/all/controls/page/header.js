@@ -25,7 +25,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (event.flag === 'back')
         {
-            yaxi.closePage();
+            yaxi.closePage('back');
         }
     }
 

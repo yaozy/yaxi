@@ -1,10 +1,13 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./search.html');
+const toolbar = require('./model/toolbar');
+
 
 
 module.exports = yaxi.Box.extend(function () {
 
 
+    
     var model = yaxi.store1 = new (yaxi.model({
 
         last: '',
@@ -20,7 +23,10 @@ module.exports = yaxi.Box.extend(function () {
     }))();
 
 
-    var data;
+
+
+    this.max = 8;
+
 
 
     this.init = function (size) {
@@ -34,13 +40,9 @@ module.exports = yaxi.Box.extend(function () {
 
 
 
-    this.max = 8;
-
-
-
     function loadData(search, value) {
 
-        var list = data = [];
+        var list = [];
 
         for (var i = 1, l = search.max || 8; i <= l; i++)
         {
@@ -79,6 +81,7 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleFocus = function () {
 
+        toolbar.type = '';
         loadData(this, model.text);
     }
 
@@ -103,6 +106,7 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleSuggest = function (event) {
 
+        var data = find('>>@search-body').data;
         var item = +event.source.tag;
 
         if (item >= 0 && (item = data[item]))

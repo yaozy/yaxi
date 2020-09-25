@@ -23,7 +23,7 @@
         placeholder="{{ placeholder || '' }}"
         disabled="{{ disabled }}"
         maxlength="{{ maxlength == null ? -1 : maxlength }}"
-        focus="{{ focus }}"
+        focus="{{ focused }}"
         confirm-type="{{ confirmType || 'done' }}"
         confirm-hold="{{ confirmHold }}"
         selection-start="{{ selectionStart }}"
@@ -174,7 +174,7 @@
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         scroll-y
         bindtouchstart="translateEvent">
-        <box data-id="{{ u }}" children="{{ c }}" bindtouchstart="translateEvent" />
+        <box data-id="{{ u }}" class="{{ layout }}" children="{{ c }}" bindtouchstart="translateEvent" />
     </scroll-view>
 
 </template>
@@ -268,7 +268,6 @@
         id="{{ u }}"
         class="yx-control yx-box yx-stackbox{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        children="{{ c }}"
         bindtouchstart="translateEvent">
         <box 
             data-id="{{ u }}" 
@@ -319,6 +318,24 @@
         class="yx-control yx-masklayer{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent" />
+
+</template>
+
+
+
+<template name="Page">
+
+    <box 
+        data-id="{{ u }}"
+        class="yx-host yx-page{{ class }}" 
+        style="{{ s }}top:{{ top }};"
+        children="{{ c }}"
+        bindtouchstart="translateEvent"
+        bindtouchmove="translateEvent"
+        bindtouchcancel="translateEvent"
+        bindtouchend="translateEvent"
+        bindtouchforcechange="translateEvent">
+    </box>
 
 </template>
 

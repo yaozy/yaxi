@@ -6,7 +6,7 @@ return (
 	[
 		"box",
 		{
-			"position": "static",
+			"static": "true",
 			"overflow": "visible",
 			"z-index": "1",
 			"height": "80rem",
@@ -90,7 +90,6 @@ return (
 					[
 						"databox",
 						{
-							"type": "model",
 							"data": $model.sort.data,
 							"events": {
 								"tap": $owner.handleSort.bind($owner)
@@ -114,14 +113,14 @@ return (
 											"padding-left": "30rem",
 											"theme": "line-lightest line-top",
 											"bindings": {
-												"key":  function () { return $item.$index }
+												"key":  function () { return ("$index" in $item ? $item.$index : $index) }
 											}
 										},
 										[
 											[
 												"vline",
 												{
-													"position": "absolute",
+													"absolute": "left middle",
 													"top": "0",
 													"left": "0",
 													"bindings": {
@@ -164,7 +163,6 @@ return (
 					[
 						"databox",
 						{
-							"type": "model",
 							"data": $model.category.level1s,
 							"theme": "bg-thicker",
 							"width": "25%",
@@ -190,7 +188,7 @@ return (
 											"height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return $item.$index },
+												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
 												"icon":  function () { return $item.icon },
 												"content":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
@@ -208,7 +206,6 @@ return (
 					[
 						"databox",
 						{
-							"type": "model",
 							"data": $model.category.level2s,
 							"theme": "bg-thick",
 							"width": "35%",
@@ -234,7 +231,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return $item.$index },
+												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -251,7 +248,6 @@ return (
 					[
 						"databox",
 						{
-							"type": "model",
 							"data": $model.category.level3s,
 							"width": "40%",
 							"events": {
@@ -276,7 +272,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return $item.$index },
+												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -313,7 +309,6 @@ return (
 							[
 								"databox",
 								{
-									"type": "model",
 									"data": $model.filter.data,
 									"theme": "line-lightest line-top"
 								},
@@ -352,12 +347,11 @@ return (
 													[
 														"databox",
 														{
-															"type": "model",
 															"data": $item.data,
 															"padding-left": "20rem",
 															"tag": "filter",
 															"bindings": {
-																"key":  function () { return $item.$index }
+																"key":  function () { return ("$index" in $item ? $item.$index : $index) }
 															},
 															"events": {
 																"tap": $owner.handleChangeFilter.bind($owner)
@@ -386,7 +380,7 @@ return (
 																			"border-radius": "40rem",
 																			"text-align": "center",
 																			"bindings": {
-																				"key":  function () { return $item.$index },
+																				"key":  function () { return ("$index" in $item ? $item.$index : $index) },
 																				"text":  function () { return $item.text },
 																				"theme":  function () { return $item.theme }
 																			}
@@ -436,8 +430,7 @@ return (
 								{
 									"width": "200rem",
 									"height": "60rem",
-									"position": "absolute",
-									"top": "10rem",
+									"absolute": "middle right",
 									"right": "30rem",
 									"events": {
 										"tap": $owner.handleFilter.bind($owner)

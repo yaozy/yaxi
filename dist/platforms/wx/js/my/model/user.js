@@ -1,4 +1,4 @@
-const yaxi = require('../../yaxi/js/yaxi');
+const yaxi = require('../../../yaxi/js/yaxi');
 
 
 module.exports = new (yaxi.model({

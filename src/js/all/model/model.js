@@ -277,27 +277,12 @@
 
     function checkSubArrayModel(options) {
 
-        var message = 'define model error: ';
-        var properties = options[0];
-        var itemName = options[1];
-        var itemIndex = options[2];
-
-        if (!properties || typeof properties !== 'object')
+        if (options.length !== 1 && !options[0] || typeof options[0] !== 'object')
         {
-            throw new Error(message + 'the first item of sub array model must be a none empty object!');
+            throw new Error('define model error: sub array model must be a none empty object only!');
         }
 
-        if (itemName != null && typeof itemName !== 'string')
-        {
-            throw new Error(message + 'the second item for sub array model must be a string or null!');
-        }
-
-        if (itemIndex != null && typeof itemIndex !== 'string')
-        {
-            throw new Error(message + 'the third item for sub array model must be a string or null!');
-        }
-
-        return yaxi.arrayModel(properties, itemName, itemIndex);
+        return yaxi.arrayModel(options[0], itemName, itemIndex);
     }
 
 
@@ -317,19 +302,7 @@
 
                 if (values)
                 {
-                    values = values.$storage || values;
-
-                    if (model)
-                    {
-                        for (var key in values)
-                        {
-                            model[key] = values[key];
-                        }
-                    }
-                    else
-                    {
-                        (this[name] = new Model(this)).$load(values);
-                    }
+                    (model || (this[name] = new Model(this))).$load(values);
                 }
                 else if (model)
                 {
@@ -349,7 +322,7 @@
 
                 return this[name] || (this[name] = new ArrayModel(this));
             },
-            set: function (value) {
+            set: function (values) {
 
                 var arrayModel = this[name];
 
@@ -365,9 +338,9 @@
                     arrayModel = this[name] = new ArrayModel(this);
                 }
 
-                if (value && value.length > 0)
+                if (values && values.length > 0)
                 {
-                    arrayModel.push.apply(arrayModel, value);
+                    arrayModel.push.apply(arrayModel, values);
                 }
             }
         };
@@ -395,7 +368,7 @@
                     }
                     else if (name === 'onchange')
                     {
-                        this.__binding_change = fn;
+                        this.__b_onchange = fn;
                     }
                     else // 表达式绑定
                     {
@@ -570,20 +543,11 @@
 
         if (values)
         {
-            var storage = this.$storage || (this.$storage = {}),
-                properties = this.$properties,
-                convert;
+            values = values.$storage || values;
 
             for (var name in values)
             {
-                if ((convert = properties[name]) && (convert = convert.convert))
-                {
-                    storage[name] = convert.call(this, values[name]);
-                }
-                else
-                {
-                    this[name] = values[name];
-                }
+                this[name] = values[name];
             }
         }
     }

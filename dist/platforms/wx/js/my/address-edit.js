@@ -3,42 +3,42 @@ const template = require('./address-edit.html');
 
 
 
-module.exports = yaxi.FloatLayer.extend(function (Class, base) {
+module.exports = yaxi.Page.extend(function (Class, base) {
   
 
 
-    this.init = function (model) {
-
-        this.load(template(this, {}, this.model = model));
-    }
+    var model;
 
 
 
-    this.handleClose = function () {
+    this.init = function (options) {
 
-        this.model = null;
-        this.remove();
-
-        return false;
+        this.load(template(this, {}, model = options));
     }
 
 
     this.handleOK = function () {
 
-        var parent = this.$parent;
-        var model = this.model;
-
-        this.model = null;
-        this.remove();
-
-        parent.afterEdit(model);
+        if (check(this, 'name', '姓名') &&
+            check(this, 'tel', '电话') &&
+            check(this, 'address', '地址') &&
+            check(this, 'house', '楼宇门牌'))
+        {
+            this.close('ok', model);
+        }
     }
 
 
+    function check(control, name, text) {
 
-    Class.open = function (parent, model) {
-
-        parent.children.push(new this(model));
+        if (!model[name].trim())
+        {
+            control.find('>>@error').text = '必须输入' + text + '!';
+        }
+        else
+        {
+            return true;
+        }
     }
 
 

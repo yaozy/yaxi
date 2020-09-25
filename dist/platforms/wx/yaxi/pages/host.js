@@ -6,8 +6,7 @@ Page({
      * 组件的属性列表
      */
     data: {
-        top: 0,
-        d: Object
+        p: Object
     },
 
 
@@ -15,29 +14,13 @@ Page({
 
         var uuid;
         
-        yaxi.getSystemInfo(info => {
-
-            this.setData({ top: info.statusBarHeight });
-        });
-
         if (uuid = options && +options.uuid)
         {
-            yaxi.__on_page_open(this.__uuid = uuid, this, 'd');
+            yaxi.__on_page_open(uuid, this);
         }
         else
         {
-            this.__uuid = yaxi.openMainPage(require('../../js/main'), options, this, 'd');
-        }
-    },
-
-
-    onUnload: function () {
-
-        var uuid;
-
-        if (uuid = this.__uuid)
-        {
-            yaxi.__on_page_close(uuid);
+            yaxi.openMainPage(require('../../js/main'), options, this);
         }
     },
 

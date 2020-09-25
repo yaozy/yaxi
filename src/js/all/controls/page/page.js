@@ -30,10 +30,17 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 	}
 
 
+	// 关闭窗口
+	this.close = function (type, data) {
 
-	function open(options) {
+		yaxi.closePage(type, data);
+	}
 
-		yaxi.openPage(this, options);
+
+
+	function open(options, callback) {
+
+		yaxi.openPage(this, options, callback);
 	}
 
 

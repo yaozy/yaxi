@@ -79,6 +79,7 @@ return (
 									[
 										"box",
 										{
+											"layout": "row",
 											"height": "60rem",
 											"line-height": "60rem"
 										},
@@ -88,7 +89,6 @@ return (
 												{
 													"theme": "text-light",
 													"icon": $item.icon,
-													"position": "absolute",
 													"font-size": "50rem"
 												}
 											],
@@ -96,9 +96,7 @@ return (
 												"text",
 												{
 													"theme": "text-light",
-													"text": $item.text,
-													"position": "absolute",
-													"left": "60rem"
+													"text": $item.text
 												}
 											],
 											[
@@ -106,10 +104,6 @@ return (
 												{
 													"layout": "row",
 													"theme": "text-lightest",
-													"position": "absolute",
-													"top": "0",
-													"right": "0",
-													"bottom": "0",
 													"font-size": "28rem"
 												},
 												[

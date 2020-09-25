@@ -38,10 +38,6 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     });
 
 
-    
-    this.$property('focus', false);
-
-
 
     this.$property('selectionStart', 0, {
 
@@ -54,6 +50,22 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
         alias: 'selection-end'
     });
+
+
+
+
+    this.focus = function () {
+
+        this.$renderer.focus(this);
+    }
+
+
+
+    this.__on_change = function (value) {
+
+        this.$push(value);
+    }
+
 
 
 

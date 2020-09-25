@@ -1,9 +1,4 @@
-<box 
-    position="static" 
-    overflow="visible" 
-    z-index="1" 
-    height="80rem" 
-    theme="line-lightest line-bottom">
+<box static="true" overflow="visible" z-index="1" height="80rem" theme="line-lightest line-bottom">
     <masklayer b:hidden="$model.hidden" e:tap="handleClose" />
     <box 
         e:tap="handleSwitch" 
@@ -35,20 +30,20 @@
             height="100%" />
     </box>
     <box b:hidden="$model.sort.hidden" theme="bg-standard">
-        <databox type="model" d:data="$model.sort.data" e:tap="handleSort">
+        <databox d:data="$model.sort.data" e:tap="handleSort">
             <box 
                 b:key="$index" 
                 height="80rem" 
                 line-height="80rem" 
                 padding-left="30rem" 
                 theme="line-lightest line-top" >
-                <vline b:color="$item.theme" position="absolute" top="0" left="0" />
+                <vline b:color="$item.theme" absolute="left middle" top="0" left="0" />
                 <text b:theme="$item.theme" b:text="$item.text" />
             </box>
         </databox>
     </box>
     <box b:hidden="$model.category.hidden" layout="row" theme="bg-standard" max-height="640rem">
-        <databox type="model" d:data="$model.category.level1s" theme="bg-thicker" width="25%" e:tap="handleCategoryLevel1">
+        <databox d:data="$model.category.level1s" theme="bg-thicker" width="25%" e:tap="handleCategoryLevel1">
             <iconbutton 
                 b:key="$index" 
                 b:icon="$item.icon" 
@@ -59,7 +54,7 @@
                 height="80rem" 
                 padding-left="20rem" />
         </databox>
-        <databox type="model" d:data="$model.category.level2s" theme="bg-thick" width="35%" e:tap="handleCategoryLevel2" >
+        <databox d:data="$model.category.level2s" theme="bg-thick" width="35%" e:tap="handleCategoryLevel2" >
             <text 
                 b:key="$index" 
                 b:text="$item.text" 
@@ -69,7 +64,7 @@
                 line-height="80rem" 
                 padding-left="20rem" />
         </databox>
-        <databox type="model" d:data="$model.category.level3s" width="40%" e:tap="handleCategoryLevel3">
+        <databox d:data="$model.category.level3s" width="40%" e:tap="handleCategoryLevel3">
             <text 
                 b:key="$index" 
                 b:text="$item.text" 
@@ -82,13 +77,12 @@
     </box>
     <box b:hidden="$model.filter.hidden" layout="column" theme="bg-standard" max-height="640rem">
         <box flex="auto" font-size="28rem">
-            <databox type="model" d:data="$model.filter.data" theme="line-lightest line-top">
+            <databox d:data="$model.filter.data" theme="line-lightest line-top">
                 <box>
                     <box height="80rem" line-height="80rem" padding-left="20rem">
                         <text b:text="$item.text" />
                     </box>
                     <databox 
-                        type="model"
                         b:key="$index" 
                         d:data="$item.data" 
                         padding-left="20rem" 
@@ -113,8 +107,7 @@
             <button 
                 width="200rem" 
                 height="60rem" 
-                position="absolute" 
-                top="10rem" 
+                absolute="middle right"
                 right="30rem"
                 e:tap="handleFilter">确定</button>
         </box>

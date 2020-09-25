@@ -64,18 +64,6 @@
 
 
 
-.yx-floatlayer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    height: auto;
-    z-index: 999;
-}
-
-
-
 .yx-icon {
     display: inline-block;
     overflow: hidden;
@@ -576,10 +564,19 @@
 
 .yx-floatlayer {
     position: absolute;
-    z-index: 30;
-    border-width: 1px;
-    background-color: @bg-standard;
-    box-shadow: 0 0 8rem @line-standard;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.yx-floatlayer-body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 
@@ -680,6 +677,52 @@
     background-size: contain;
 }
 
+
+
+
+.yx-absolute-left {
+    position: absolute;
+    left: 0;
+}
+
+.yx-absolute-top {
+    position: absolute;
+    top: 0;
+}
+
+.yx-absolute-right {
+    position: absolute;
+    right: 0;
+}
+
+.yx-absolute-bottom {
+    position: absolute;
+    bottom: 0;
+}
+
+.yx-absolute-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.yx-absolute-middle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.yx-absolute-center.yx-absolute-middle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.yx-static {
+    position: static;
+}
 
 
 

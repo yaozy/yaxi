@@ -281,20 +281,22 @@
 
     bind('input', function (event) {
 
-        var control, e;
+        var control, fn, value;
 
         if (control = findControl(event.target))
         {
-            if ((fn = control.__on_input) && fn.call(control, event) === false)
+            value = event.target.value;
+
+            if ((fn = control.__on_input) && fn.call(control, value) === false)
             {
                 return false;
             }
 
-            e = new Event('input');
-            e.flag = flag;
-            e.value = event.target.value;
+            event = new Event('input');
+            event.flag = flag;
+            event.value = value;
 
-            return control.trigger(e);
+            return control.trigger(event);
         }
 
     }, true);
@@ -302,20 +304,22 @@
 
     bind('change', function (event) {
 
-        var control, fn, e;
+        var control, fn, value;
 
         if (control = findControl(event.target))
         {
-            if (fn = control.__on_change)
+            value = event.target.value;
+
+            if ((fn = control.__on_change) && fn.call(control, value) === false)
             {
-                fn.call(control, event);
+                return false;
             }
 
-            e = new Event('change');
-            e.flag = flag;
-            e.value = event.target.value;
+            event = new Event('change');
+            event.flag = flag;
+            event.value = value;
 
-            return control.trigger(e);
+            return control.trigger(event);
         }
 
     }, true);

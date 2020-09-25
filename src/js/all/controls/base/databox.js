@@ -45,14 +45,8 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    // 数据容器类型, 只支持data和model
-    // data:    直接数据绑定, 只能通过修改data重新渲染子控件, 不能直接对渲染好的控件进行修改, 性能好, 适合渲染后不需要太多变化的场景
-    // model:   模型数据绑定, 可通过操作模型对子控件进行操控
-    this.$property('type', 'data', false);
-
-
-
     // 数据集合
+    // 可以是数组模型也可以是普通的数组, 如果是普通数组不能实现双向绑定
     this.$property('data', null, {
 
         change: false,
@@ -236,7 +230,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
             if (controls.length > 0)
             {
-                this.__children.set(index, control);
+                this.__children.set(index, controls[0]);
             }
         }
     }

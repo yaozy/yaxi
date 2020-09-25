@@ -127,7 +127,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
         {
             value = build(controls[this.$uuid], value);
 
-            this.__last || patch();
+            this.__last || patch(this);
             this[index] = value;
         }
     }

@@ -7,18 +7,6 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-    this.focus = function (control, view, value) {
-
-        if (value)
-        {
-            view.focus();
-        }
-        else
-        {
-            view.blur();
-        }
-    }
-
 
     this.value = function (control, view, value) {
 
@@ -52,10 +40,22 @@ yaxi.TextBox.renderer(function (base) {
     }
 
 
-    
-    this.__on_change = function (event) {
+    this.selectionStart = function (control, view, value) {
 
-        
+        view.selectionStart = value;
+    }
+
+
+    this.selectionEnd = function (control, view, value) {
+
+        view.selectionEnd = value;
+    }
+
+
+
+    this.focus = function (control) {
+
+        control.$view.focus();
     }
 
 

@@ -72,7 +72,6 @@ return (
 					[
 						"databox",
 						{
-							"type": "model",
 							"data": $model,
 							"flex": "auto"
 						},
@@ -89,6 +88,7 @@ return (
 									[
 										"box",
 										{
+											"layout": "row",
 											"height": "200rem"
 										},
 										[
@@ -98,7 +98,6 @@ return (
 													"width": "50rem",
 													"height": "120rem",
 													"line-height": "120rem",
-													"position": "absolute",
 													"top": "0",
 													"left": "20rem"
 												},
@@ -107,7 +106,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function () { return $item.$index }
+																"text":  function () { return ("$index" in $item ? $item.$index : $index) }
 															}
 														}
 													]
@@ -118,7 +117,6 @@ return (
 												{
 													"height": "180rem",
 													"width": "700rem",
-													"position": "absolute",
 													"left": "70rem",
 													"top": "20rem"
 												},
@@ -151,7 +149,6 @@ return (
 													[
 														"databox",
 														{
-															"type": "model",
 															"data": $item.submodel,
 															"item": "$subitem",
 															"index": "$subindex"
@@ -173,7 +170,7 @@ return (
 																		"text",
 																		{
 																			"bindings": {
-																				"text":  function () { return 'index:' + $item.$index + '  subindex:' + $subitem.$index + '  text:' + $subitem.text }
+																				"text":  function () { return 'index:' + ("$index" in $item ? $item.$index : $index) + '  subindex:' + ("$index" in $subitem ? $subitem.$index : $subindex) + '  text:' + $subitem.text }
 																			}
 																		}
 																	]

@@ -1,14 +1,4 @@
 <import src="../components/template.wxml" />
 
-<view class="yx-statusbar" style="height:{{ top }}px;" />
-<box 
-    data-id="{{ d.u }}"
-    class="yx-host yx-page{{ d.class }}" 
-    style="{{ d.s }}top:{{ top }}px;"
-    bindtouchstart="translateEvent"
-    bindtouchmove="translateEvent"
-    bindtouchcancel="translateEvent"
-    bindtouchend="translateEvent"
-    bindtouchforcechange="translateEvent"
-    children="{{ d.c }}">
-</box>
+<view class="yx-statusbar" style="height:{{ p.top }};" />
+<template is="{{ p.t }}" data="{{ ...p }}" />

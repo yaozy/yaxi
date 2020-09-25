@@ -4,9 +4,9 @@
             <image b:src="$model.image" width="150rem" height="150rem" border-radius="75rem" />
         </box>
         <box layout="vline" width="550rem">
-            <Text b:text="$model.name" />
-            <Text b:text="$model.nickname" />
-            <Text b:text="$model.tel" />
+            <Text b:text="$model.name" theme="text-white" />
+            <Text b:text="$model.nickname" theme="text-white" margin-top="20rem" font-size="24rem" />
+            <Text b:text="$model.tel" theme="text-white" margin-top="10rem" font-size="24rem" />
         </box>
     </box>
     <databox d:data="$data">
@@ -19,7 +19,5 @@
             </databox>
         </box>
     </databox>
-    <box theme="bg-primary" text-align="center" line-height="80rem" e:tap="openTest">
-        <text>Open Test</text>
-    </box>
+    <button e:tap="openTest">Open Test</button>
 </box>

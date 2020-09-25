@@ -42,22 +42,4 @@ yaxi.Memo.renderer(function (base) {
 
 
 
-    this.__on_change = function (event) {
-
-        var value = control.value;
-
-        control.value = event.target.value;
-
-        if (control.value !== value)
-        {
-            control.$push(control.value);
-        }
-        else
-        {
-            this.value(control.$view, value);
-        }
-    }
-
-
-
 });
