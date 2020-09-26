@@ -7,6 +7,12 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 
 
 
+
+    // 是否顶级控件
+    this.isTopLevel = true;
+
+
+
 	this.__find_up = function () {
 	
 		return null;
@@ -25,8 +31,14 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
 	}
 	
 
+
+	// 页面卸载前处理(返回false退停止关闭窗口)
+	this.onunloading = function (options) {
+	}
+
+
 	// 页面卸载后处理
-	this.onunload = function () {
+	this.onunload = function (options) {
 	}
 
 

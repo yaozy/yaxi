@@ -46,7 +46,7 @@ yaxi.Control.renderer(function () {
         view = div.firstChild;
         div.removeChild(view);
 
-        return target.__dom_template = view;
+        return control.constructor.__dom_template = view;
     }
 
 
@@ -55,7 +55,7 @@ yaxi.Control.renderer(function () {
     // 渲染控件
     this.render = function (control) {
 
-        var view = control.$view || (control.$view = (this.__dom_template || init_template(this, control)).cloneNode(true));
+        var view = control.$view || (control.$view = (control.constructor.__dom_template || init_template(this, control)).cloneNode(true));
 
         view.id = control.uuid;
         this.patch(control, view);

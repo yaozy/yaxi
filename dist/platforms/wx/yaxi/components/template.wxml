@@ -90,11 +90,12 @@
         data-id="{{ u }}"
         id="{{ u }}"
         class="yx-control yx-iconbutton{{ class }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <view 
             data-id="{{ u }}"
-            class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}" />
+            class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}"
+            style="{{ size ? 'font-size:' + size + ';' : '' }}" />
         <box 
             data-id="{{ u }}"
             class="yx-iconbutton-content"
@@ -110,11 +111,12 @@
         data-id="{{ u }}"
         id="{{ u }}"
         class="yx-control yx-imagebutton{{ class }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <image 
             data-id="{{ u }}" 
-            class="yx-imagebutton-image" 
+            class="yx-imagebutton-image"
+            style="{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
             src="{{ src }}" />
         <box 
             data-id="{{ u }}" 
@@ -214,12 +216,8 @@
         <swiper 
             data-id="{{ u }}"
             class="yx-swiper-host"
-            autoplay="{{ autoplay !== false }}"
             current="{{ current || 0 }}"
-            interval="{{ interval || 5000 }}"
-            duration="{{ duration || 500 }}"
-            circular="{{ circular !== false }}"
-            vertical="{{ vertical }}"
+            circular="{{ true }}"
             previous-margin="{{ before }}"
             next-margin="{{ after }}"
             bindchange="translateEvent">

@@ -107,20 +107,27 @@ yaxi.Page.renderer(function (base) {
 	// 关闭当前页面
     yaxi.closePage = function (type, data) {
 
-        var page, callback;
+        var page, options, callback;
 
         if (page = all.pop())
         {
-            host.removeChild(page.$view);
-
-            page.onunload();
-            page.options = null;
-            page.destroy();
-            
-            if (callback = page.__callback)
+            if (page.onunloading(options = page.options) !== false)
             {
-                page.__callback = null;
-                callback(type, data);
+                host.removeChild(page.$view);
+
+                page.onunload(options);
+                page.options = null;
+                page.destroy();
+                
+                if (callback = page.__callback)
+                {
+                    page.__callback = null;
+                    callback(type, data);
+                }
+            }
+            else
+            {
+                all.push(page);
             }
         }
 	}

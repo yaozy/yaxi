@@ -12,27 +12,27 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             text: '我的学习',
             data: [
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-class',
                     text: '班级',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-course',
                     text: '课程',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-test',
                     text: '试卷',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-exercise',
                     text: '练习',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-timetable',
                     text: '课程表',
                     url: './lesson'
                 }
@@ -42,27 +42,27 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             text: '产品服务',
             data: [
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'common-address',
                     text: '我的地址',
                     url: './address'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-account',
                     text: '我的帐户',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-receipt',
                     text: '发票抬头',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-order',
                     text: '我的订单',
                     url: './order'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'my-asset',
                     text: '我的资产',
                     url: './lesson'
                 }
@@ -72,17 +72,17 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             text: '其它',
             data: [
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'common-favorite',
                     text: '我的收藏',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'common-follow',
                     text: '我的关注',
                     url: './lesson'
                 },
                 {
-                    icon: 'tabbar-lesson',
+                    icon: 'common-thumbup',
                     text: '我的点赞',
                     url: './lesson'
                 }

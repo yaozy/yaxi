@@ -146,11 +146,34 @@ yaxi.Page.renderer(function (base, yaxi) {
 	// 关闭当前页面
     yaxi.closePage = function (type, data) {
 
-        wx.navigateBack({
+        var page = all[all.length - 1];
 
-            delta: 1,
-            complete: closePage.bind(this, type, data)
-        });
+        if (page && page.onunloading(page.options) !== false)
+        {
+            wx.navigateBack({
+
+                delta: 1,
+
+                complete: function () {
+
+                    var page = all.pop();
+                    var callback;
+            
+                    all.pop();
+            
+                    page.onunload(page.options);
+            
+                    page.options = page.__wx_page = null;
+                    page.destroy();
+            
+                    if (callback = page.__callback)
+                    {
+                        page.__callback = null;
+                        callback(type, data);
+                    }
+                }
+            });
+        }
 	}
     
 
@@ -213,26 +236,6 @@ yaxi.Page.renderer(function (base, yaxi) {
                         notifyRender(rendereds);
                     }
                 });
-            }
-        }
-    }
-
-
-    function closePage(type, data) {
-
-        var page, callback;
-        
-        if (page= all.pop())
-        {
-            page.onunload();
-    
-            page.options = page.__wx_page = null;
-            page.destroy();
-    
-            if (callback = page.__callback)
-            {
-                page.__callback = null;
-                callback(type, data);
             }
         }
     }

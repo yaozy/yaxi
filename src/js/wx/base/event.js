@@ -261,7 +261,7 @@
 
         if (control = findControl(dataset.id))
         {
-            value = event.detail.value;
+            value = event.detail.value || event.detail.current;
 
             if ((fn = control.__on_change) && fn.call(control, value) === false)
             {

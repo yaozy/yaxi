@@ -213,8 +213,9 @@
   width: 400rpx;
   height: 70rpx;
   line-height: 70rpx;
-  border: 0;
-  border-bottom: 1px solid #263238;
+  border-style: solid;
+  border-color: #263238;
+  border-width: 0 0 0.5px 0;
   padding: 0 10rpx;
   outline: none;
 }

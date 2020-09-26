@@ -75,7 +75,7 @@ return (
 											[
 												"icon",
 												{
-													"icon": "common-search"
+													"icon": "my-study"
 												}
 											],
 											[
@@ -104,7 +104,7 @@ return (
 											[
 												"icon",
 												{
-													"icon": "common-search"
+													"icon": "common-browse"
 												}
 											],
 											[
@@ -133,7 +133,7 @@ return (
 											[
 												"icon",
 												{
-													"icon": "common-search"
+													"icon": "common-share"
 												}
 											],
 											[

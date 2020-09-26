@@ -1,6 +1,6 @@
-<page>
-    <template src="../components/header.html" />
+<dialog>
     <masklayer />
+    <template src="../components/header.html" />
     <box width="550rem" absolute="middle center" padding="50rem" theme="bg-standard">
         <textbox b:value="$model.name" b:onchange="$model.name" placeholder="姓名" width="100%" text-align="center" />
         <textbox b:value="$model.gendle" b:onchange="$model.gendle" placeholder="性别" width="100%" text-align="center" />
@@ -10,4 +10,4 @@
         <text key="error" theme="text-danger" width="100%" height="80rem" line-height="80rem" />
         <button e:tap="handleOK">确认</button>
     </box>
-</page>
+</dialog>

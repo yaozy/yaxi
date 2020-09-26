@@ -4,14 +4,14 @@ if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev
 
 return (
 	[
-		"page",
+		"dialog",
 		null,
 		[
-			require("../components/header.html")($owner, $data, $model),
 			[
 				"masklayer",
 				null
 			],
+			require("../components/header.html")($owner, $data, $model),
 			[
 				"box",
 				{

@@ -80,8 +80,9 @@ return (
 										"box",
 										{
 											"layout": "row",
-											"height": "60rem",
-											"line-height": "60rem"
+											"overflow": "hidden",
+											"height": "70rem",
+											"line-height": "80rem"
 										},
 										[
 											[
@@ -96,13 +97,16 @@ return (
 												"text",
 												{
 													"theme": "text-light",
-													"text": $item.text
+													"text": $item.text,
+													"font-size": "30rem"
 												}
 											],
 											[
 												"box",
 												{
 													"layout": "row",
+													"absolute": "middle right",
+													"margin-top": "10rem",
 													"theme": "text-lightest",
 													"font-size": "28rem"
 												},

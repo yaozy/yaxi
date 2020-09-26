@@ -282,7 +282,7 @@
             throw new Error('define model error: sub array model must be a none empty object only!');
         }
 
-        return yaxi.arrayModel(options[0], itemName, itemIndex);
+        return yaxi.arrayModel(options[0]);
     }
 
 

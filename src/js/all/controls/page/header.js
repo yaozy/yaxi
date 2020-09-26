@@ -1,19 +1,22 @@
-yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
+yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
+
 
 
     // 标记不能被继承
     Class.sealed = true;
 
 
+
     Class.allowParent = function (parent) {
 
-        if (parent instanceof yaxi.Page)
+        if (parent && parent.isTopLevel)
         {
             return true;
         }
 
-        throw new Error('Header component can only add to Page!');
+        throw new Error('Header can only add to top level control!');
     }
+
 
 
 
@@ -25,7 +28,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (event.flag === 'back')
         {
-            yaxi.closePage('back');
+            this.parent.close('back');
         }
     }
 

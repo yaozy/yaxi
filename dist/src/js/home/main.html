@@ -8,10 +8,10 @@
     <marquee theme="bg-standard" d:text="$data.marquee" />
     <databox key="host" flex="auto" min-height="200rem" margin-top="10rem">
         <box d:key="$item.id" theme="bg-standard" margin-bottom="10rem" padding="0 20rem">
-            <box layout="row" height="60rem" line-height="60rem">
+            <box layout="row" overflow="hidden" height="70rem" line-height="80rem">
                 <icon theme="text-light" d:icon="$item.icon" font-size="50rem" />
-                <text theme="text-light" d:text="$item.text" />
-                <box layout="row" theme="text-lightest" font-size="28rem">
+                <text theme="text-light" d:text="$item.text" font-size="30rem" />
+                <box layout="row" absolute="middle right" margin-top="10rem" theme="text-lightest" font-size="28rem">
                     <text>查看更多</text>
                     <icon icon="common-more" />
                 </box>

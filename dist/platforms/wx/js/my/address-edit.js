@@ -3,7 +3,7 @@ const template = require('./address-edit.html');
 
 
 
-module.exports = yaxi.Page.extend(function (Class, base) {
+module.exports = yaxi.Dialog.extend(function (Class, base) {
   
 
 

@@ -2152,27 +2152,12 @@ yaxi.colors.load('blue', [
 
     function checkSubArrayModel(options) {
 
-        var message = 'define model error: ';
-        var properties = options[0];
-        var itemName = options[1];
-        var itemIndex = options[2];
-
-        if (!properties || typeof properties !== 'object')
+        if (options.length !== 1 && !options[0] || typeof options[0] !== 'object')
         {
-            throw new Error(message + 'the first item of sub array model must be a none empty object!');
+            throw new Error('define model error: sub array model must be a none empty object only!');
         }
 
-        if (itemName != null && typeof itemName !== 'string')
-        {
-            throw new Error(message + 'the second item for sub array model must be a string or null!');
-        }
-
-        if (itemIndex != null && typeof itemIndex !== 'string')
-        {
-            throw new Error(message + 'the third item for sub array model must be a string or null!');
-        }
-
-        return yaxi.arrayModel(properties, itemName, itemIndex);
+        return yaxi.arrayModel(options[0]);
     }
 
 
@@ -5882,9 +5867,9 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.__on_change = function (event) {
+    this.__on_change = function (value) {
 
-        this.current = event.value;
+        this.current = value;
     }
 
 
@@ -6810,7 +6795,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base) {
 
         if (control = findControl(dataset.id))
         {
-            value = event.detail.value;
+            value = event.detail.value || event.detail.current;
 
             if ((fn = control.__on_change) && fn.call(control, value) === false)
             {
@@ -7248,6 +7233,38 @@ yaxi.DataBox.renderer(function (base) {
 
 
 });
+
+
+
+yaxi.IconButton.renderer(function (base) {
+
+
+
+    this.size = function (control, view, prefix, value) {
+
+        view[prefix + 'size'] = value ? value.replace('rem', 'rpx') : '';
+    }
+
+
+
+});
+
+
+
+
+yaxi.ImageButton.renderer(function (base) {
+
+
+
+    this.size = function (control, view, prefix, value) {
+
+        view[prefix + 'size'] = value ? value.replace('rem', 'rpx') : '';
+    }
+
+
+
+});
+
 
 
 

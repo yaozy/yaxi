@@ -144,10 +144,13 @@ return (
 														"iconbutton",
 														{
 															"icon": $subitem.icon,
+															"size": "60rem",
+															"font-size": "28rem",
+															"theme": "text-light",
 															"content": $subitem.text,
 															"tag": $subitem.url,
 															"width": "160rem",
-															"height": "120rem"
+															"height": "140rem"
 														}
 													]
 												);

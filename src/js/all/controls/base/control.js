@@ -429,7 +429,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             var target = this,
                 parent;
 
-            while (parent = target.parent)
+            while (!target.isTopLevel && (parent = target.parent))
             {
                 target = parent;
             }
