@@ -1,12 +1,12 @@
 <page>
-    <template src="../components/header.html" />
+    <header theme="bg-standard" content="我的地址" />
     <box text-align="center" line-height="100rem" e:tap="handleAdd">
         <iconbutton width="auto" icon="common-search" content="添加地址" layout="row middle" theme="text-primary" />
     </box>
     <databox d:data="$model" theme="bg-thick" flex="auto">
         <box margin-top="20rem" theme="bg-standard">
             <box layout="row middle" height="150rem">
-                <icon icon="tabbar-my" width="100rem" />
+                <icon b:icon="$item.gendle ? 'common-man' : 'common-woman'" width="100rem" />
                 <box width="600rem">
                     <box layout="row space-between">
                         <text b:text="$item.name" />
@@ -16,7 +16,13 @@
                 </box>
             </box>
             <box d:tag="$index" layout="row middle" padding="0 20rem" theme="line-lightest line-top">
-                <iconbutton icon="common-search" content="默认地址" layout="row before" flex="auto" theme="warning" />
+                <iconbutton 
+                    b:icon="$item.default ? 'common-checked' : 'common-unchecked'" 
+                    b:theme="$item.default ? 'text-warning' : 'text-lighter'"
+                    content="默认地址" 
+                    layout="row before" 
+                    flex="auto" 
+                    e:tap="handleDefault" />
                 <text padding="0 30rem" theme="text-lightest" e:tap="handleEdit">编辑</text>
                 <text padding="0 30rem" theme="text-lightest" e:tap="handleDelete">删除</text>
             </box>

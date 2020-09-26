@@ -28,7 +28,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
 
         if (event.flag === 'back')
         {
-            this.parent.close('back');
+            this.parent.close('Back');
         }
     }
 

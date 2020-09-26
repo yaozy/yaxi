@@ -11,7 +11,7 @@
             <box layout="row" overflow="hidden" height="70rem" line-height="80rem">
                 <icon theme="text-light" d:icon="$item.icon" font-size="50rem" />
                 <text theme="text-light" d:text="$item.text" font-size="30rem" />
-                <box layout="row" absolute="middle right" margin-top="10rem" theme="text-lightest" font-size="28rem">
+                <box layout="row" absolute="middle right" margin-top="10rem" theme="text-lightest" font-size="28rem" e:tap="handleMore">
                     <text>查看更多</text>
                     <icon icon="common-more" />
                 </box>
@@ -27,7 +27,7 @@
                             <text d:text="$lesson.remark" />
                         </box>
                         <box theme="text-primary" height="40rem" overflow="hidden">
-                            <text d:text="'￥' + $lesson.price" />
+                            <text d:text="$lesson.price > 0 ? '￥' + $lesson.price : '免费'" />
                         </box>
                     </box>
                 </box>

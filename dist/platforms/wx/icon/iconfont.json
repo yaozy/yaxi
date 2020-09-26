@@ -6,6 +6,13 @@
   "description": "教育软件项目",
   "glyphs": [
     {
+      "icon_id": "10299105",
+      "name": "已完成",
+      "font_class": "-common-completed",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
       "icon_id": "2611812",
       "name": "子帐号管理",
       "font_class": "-my-account",
@@ -155,7 +162,7 @@
     {
       "icon_id": "13546376",
       "name": "未选中",
-      "font_class": "-common-uncheck",
+      "font_class": "-common-unchecked",
       "unicode": "e612",
       "unicode_decimal": 58898
     },

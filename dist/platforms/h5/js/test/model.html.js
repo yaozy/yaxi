@@ -106,7 +106,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function () { return ("$index" in $item ? $item.$index : $index) }
+																"text":  function () { return ($item.$index != null ? $item.$index : $index) }
 															}
 														}
 													]
@@ -170,7 +170,7 @@ return (
 																		"text",
 																		{
 																			"bindings": {
-																				"text":  function () { return 'index:' + ("$index" in $item ? $item.$index : $index) + '  subindex:' + ("$index" in $subitem ? $subitem.$index : $subindex) + '  text:' + $subitem.text }
+																				"text":  function () { return 'index:' + ($item.$index != null ? $item.$index : $index) + '  subindex:' + ($subitem.$index != null ? $subitem.$index : $subindex) + '  text:' + $subitem.text }
 																			}
 																		}
 																	]

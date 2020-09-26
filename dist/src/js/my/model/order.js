@@ -14,6 +14,19 @@ module.exports = yaxi.arrayModel({
             price: 0,
             amount: 0
         }
-    ]
+    ],
+
+    total: function () {
+
+        var data = this.data;
+        var total = 0;
+
+        for (var i = data.length; i--;)
+        {
+            total += data[i].amount * data[i].price;
+        }
+
+        return Math.round(total * 100) / 100;
+    }
 
 });

@@ -1,33 +1,80 @@
 <page theme="bg-thick">
-    <template src="../components/header.html" />
+    <header theme="bg-standard" content="我的订单" />
     <databox 
         d:data="$model.categories" 
-        height="80rem" 
-        layout="row middle space-between" 
-        margin-bottom="10rem" 
+        height="100rem" 
+        line-height="100rem" 
+        layout="row middle" 
+        theme="bg-standard line-lightest line-bottom"
         padding="0 20rem" 
         e:tap="handleSwitch">
-        <text b:theme="$item.theme" d:text="$item.text" tag="$item.status" />
+        <text 
+            b:theme="$index === $model.status ? 'text-primary' : ''" 
+            d:text="$item.text" 
+            d:tag="$index" 
+            flex="auto" 
+            text-align="center" />
     </databox>
     <databox d:data="$model.data" flex="auto">
-        <box margin-bottom="10rem" theme="bg-standard">
+        <box b:hidden="$model.status && $item.status !== $model.status" margin-top="10rem" theme="bg-standard">
             <box line-height="80rem" padding="0 20rem" theme="line-lightest line-bottom">
                 <text d:text="$item.time" />
-                <icon d:tag="$index" icon="common-delete" absolute="middle right" />
+                <text
+                    b:text="$model.categories[$item.status].text"
+                    b:hidden="$item.status >= 3" 
+                    absolute="middle right" 
+                    margin-right="50rem" />
+                <icon 
+                    b:tag="$index" 
+                    b:hidden="$item.status < 3" 
+                    icon="common-delete" 
+                    absolute="middle right" 
+                    width="100rem"
+                    e:tap="handleDelete" />
             </box>
             <databox d:data="$item.data" item="$lesson" padding="0 20rem">
-                <box layout="line" d:tag="$lesson.id" height="100rem" margin="20rem 0" overflow="hidden" e:tap="handleOpenDetail">
+                <box d:tag="$lesson.id" layout="line" height="100rem" margin="20rem 0" overflow="hidden" e:tap="handleOpenDetail">
                     <image d:src="$lesson.image" width="140rem" height="100%" />
                     <box width="560rem" height="100%" padding-left="20rem">
                         <box height="50rem" overflow="hidden">
                             <text d:text="$lesson.name" />
                         </box>
-                        <box theme="text-lightest" height="40rem" overflow="hidden" font-size="24rem">
-                            <text d:text="$lesson.amount + ' * ￥' + $lesson.price + ' = ' + $owner.pipe('round:2')($lesson.amount * $lesson.price)" />
+                        <box layout="row middle" theme="text-lightest" height="40rem" overflow="hidden" font-size="28rem">
+                            <text>单价:</text>
+                            <text d:text="'￥' + $lesson.price" />
+                            <text margin-left="50rem">数量:</text>
+                            <text d:text="$lesson.amount" />
                         </box>
                     </box>
                 </box>
             </databox>
+            <icon 
+                b:tag="$index" 
+                b:hidden="$item.status < 3" 
+                icon="common-completed" 
+                absolute="right"
+                width="120rem"
+                height="120rem"
+                line-height="120rem"
+                font-size="120rem"
+                top="90rem"
+                right="20rem" />
+            <box height="80rem" line-height="80rem" theme="line-lightest line-top" padding-left="20rem">
+                <text>总价:</text>
+                <text d:text="'￥' + $item.total" />
+                <button 
+                    b:hidden="$item.status === 1" 
+                    absolute="middle right" 
+                    width="200rem" 
+                    height="60rem" 
+                    margin-right="20rem">去付款</button>
+                <button 
+                    b:hidden="$item.status === 2" 
+                    absolute="middle right" 
+                    width="200rem" 
+                    height="60rem" 
+                    margin-right="20rem">提醒发货</button>
+            </box>
         </box>
     </databox>
 </page>

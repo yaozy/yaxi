@@ -12,7 +12,8 @@ module.exports = yaxi.DataBox.extend(function (Class, base) {
 
 
     this.handleOpenDetail = function (event) {
-
+        
+        require('../lesson/detail/main').open(event.source.tag);
     }
 
     

@@ -9,14 +9,21 @@ return (
 			"theme": "bg-thick"
 		},
 		[
-			require("../components/header.html")($owner, $data, $model),
+			[
+				"header",
+				{
+					"theme": "bg-standard",
+					"content": "我的订单"
+				}
+			],
 			[
 				"databox",
 				{
 					"data": $model.categories,
-					"height": "80rem",
-					"layout": "row middle space-between",
-					"margin-bottom": "10rem",
+					"height": "100rem",
+					"line-height": "100rem",
+					"layout": "row middle",
+					"theme": "bg-standard line-lightest line-bottom",
 					"padding": "0 20rem",
 					"events": {
 						"tap": $owner.handleSwitch.bind($owner)
@@ -36,9 +43,11 @@ return (
 								"text",
 								{
 									"text": $item.text,
-									"tag": "$item.status",
+									"tag": $index,
+									"flex": "auto",
+									"text-align": "center",
 									"bindings": {
-										"theme":  function () { return $item.theme }
+										"theme":  function () { return ($item.$index != null ? $item.$index : $index) === $model.status ? 'text-primary' : '' }
 									}
 								}
 							]
@@ -69,8 +78,11 @@ return (
 							[
 								"box",
 								{
-									"margin-bottom": "10rem",
-									"theme": "bg-standard"
+									"margin-top": "10rem",
+									"theme": "bg-standard",
+									"bindings": {
+										"hidden":  function () { return $model.status && $item.status !== $model.status }
+									}
 								},
 								[
 									[
@@ -88,11 +100,29 @@ return (
 												}
 											],
 											[
+												"text",
+												{
+													"absolute": "middle right",
+													"margin-right": "50rem",
+													"bindings": {
+														"text":  function () { return $model.categories[$item.status].text },
+														"hidden":  function () { return $item.status >= 3 }
+													}
+												}
+											],
+											[
 												"icon",
 												{
-													"tag": $index,
 													"icon": "common-delete",
-													"absolute": "middle right"
+													"absolute": "middle right",
+													"width": "100rem",
+													"bindings": {
+														"tag":  function () { return ($item.$index != null ? $item.$index : $index) },
+														"hidden":  function () { return $item.status < 3 }
+													},
+													"events": {
+														"tap": $owner.handleDelete.bind($owner)
+													}
 												}
 											]
 										]
@@ -120,8 +150,8 @@ return (
 													[
 														"box",
 														{
-															"layout": "line",
 															"tag": $lesson.id,
+															"layout": "line",
 															"height": "100rem",
 															"margin": "20rem 0",
 															"overflow": "hidden",
@@ -164,16 +194,35 @@ return (
 																	[
 																		"box",
 																		{
+																			"layout": "row middle",
 																			"theme": "text-lightest",
 																			"height": "40rem",
 																			"overflow": "hidden",
-																			"font-size": "24rem"
+																			"font-size": "28rem"
 																		},
 																		[
 																			[
 																				"text",
+																				null,
+																				"单价:"
+																			],
+																			[
+																				"text",
 																				{
-																					"text": $lesson.amount + ' * ￥' + $lesson.price + ' = ' + $owner.pipe('round:2')($lesson.amount * $lesson.price)
+																					"text": '￥' + $lesson.price
+																				}
+																			],
+																			[
+																				"text",
+																				{
+																					"margin-left": "50rem"
+																				},
+																				"数量:"
+																			],
+																			[
+																				"text",
+																				{
+																					"text": $lesson.amount
 																				}
 																			]
 																		]
@@ -189,6 +238,71 @@ return (
 
 											// end function
 										}
+									],
+									[
+										"icon",
+										{
+											"icon": "common-completed",
+											"absolute": "right",
+											"width": "120rem",
+											"height": "120rem",
+											"line-height": "120rem",
+											"font-size": "120rem",
+											"top": "90rem",
+											"right": "20rem",
+											"bindings": {
+												"tag":  function () { return ($item.$index != null ? $item.$index : $index) },
+												"hidden":  function () { return $item.status < 3 }
+											}
+										}
+									],
+									[
+										"box",
+										{
+											"height": "80rem",
+											"line-height": "80rem",
+											"theme": "line-lightest line-top",
+											"padding-left": "20rem"
+										},
+										[
+											[
+												"text",
+												null,
+												"总价:"
+											],
+											[
+												"text",
+												{
+													"text": '￥' + $item.total
+												}
+											],
+											[
+												"button",
+												{
+													"absolute": "middle right",
+													"width": "200rem",
+													"height": "60rem",
+													"margin-right": "20rem",
+													"bindings": {
+														"hidden":  function () { return $item.status === 1 }
+													}
+												},
+												"去付款"
+											],
+											[
+												"button",
+												{
+													"absolute": "middle right",
+													"width": "200rem",
+													"height": "60rem",
+													"margin-right": "20rem",
+													"bindings": {
+														"hidden":  function () { return $item.status === 2 }
+													}
+												},
+												"提醒发货"
+											]
+										]
 									]
 								]
 							]

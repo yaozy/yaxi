@@ -14,27 +14,27 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-class',
                     text: '班级',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-course',
                     text: '课程',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-test',
                     text: '试卷',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-exercise',
                     text: '练习',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-timetable',
                     text: '课程表',
-                    url: './lesson'
+                    url: './order'
                 }
             ]
         },
@@ -49,12 +49,12 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-account',
                     text: '我的帐户',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-receipt',
                     text: '发票抬头',
-                    url: './lesson'
+                    url: './order'
                 },
                 {
                     icon: 'my-order',
@@ -64,7 +64,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-asset',
                     text: '我的资产',
-                    url: './lesson'
+                    url: './order'
                 }
             ]
         },
@@ -74,17 +74,17 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'common-favorite',
                     text: '我的收藏',
-                    url: './lesson'
+                    url: './favorite'
                 },
                 {
                     icon: 'common-follow',
                     text: '我的关注',
-                    url: './lesson'
+                    url: './follow'
                 },
                 {
                     icon: 'common-thumbup',
                     text: '我的点赞',
-                    url: './lesson'
+                    url: './thumbup'
                 }
             ]
         }

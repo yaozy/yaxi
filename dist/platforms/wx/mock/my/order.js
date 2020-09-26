@@ -33,28 +33,28 @@ module.exports = [
         status: 2,
         data: [
             {
-                id: 2,
+                id: 5,
                 name: 'rust编程入门',
                 image: '/images/demo/demo5.jpg',
                 price: 18,
                 amount: 1
             },
             {
-                id: 3,
+                id: 6,
                 name: 'flutter进阶',
                 image: '/images/demo/demo6.jpg',
                 price: 20,
                 amount: 3
             },
             {
-                id: 4,
+                id: 7,
                 name: 'yaxi前端框架系列',
                 image: '/images/demo/demo7.jpg',
                 price: 15,
                 amount: 1
             },
             {
-                id: 5,
+                id: 8,
                 name: '区块链技术讲座',
                 image: '/images/demo/demo8.jpg',
                 price: 15,

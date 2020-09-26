@@ -7,7 +7,13 @@ return (
 		"page",
 		null,
 		[
-			require("../components/header.html")($owner, $data, $model),
+			[
+				"header",
+				{
+					"theme": "bg-standard",
+					"content": "我的地址"
+				}
+			],
 			[
 				"box",
 				{
@@ -64,8 +70,10 @@ return (
 											[
 												"icon",
 												{
-													"icon": "tabbar-my",
-													"width": "100rem"
+													"width": "100rem",
+													"bindings": {
+														"icon":  function () { return $item.gendle ? 'common-man' : 'common-woman' }
+													}
 												}
 											],
 											[
@@ -124,11 +132,16 @@ return (
 											[
 												"iconbutton",
 												{
-													"icon": "common-search",
 													"content": "默认地址",
 													"layout": "row before",
 													"flex": "auto",
-													"theme": "warning"
+													"bindings": {
+														"icon":  function () { return $item.default ? 'common-checked' : 'common-unchecked' },
+														"theme":  function () { return $item.default ? 'text-warning' : 'text-lighter' }
+													},
+													"events": {
+														"tap": $owner.handleDefault.bind($owner)
+													}
 												}
 											],
 											[

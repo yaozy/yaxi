@@ -34,16 +34,54 @@ return (
 						}
 					],
 					[
-						"textbox",
+						"box",
 						{
-							"placeholder": "性别",
-							"width": "100%",
-							"text-align": "center",
-							"bindings": {
-								"value":  function () { return $model.gendle },
-								"onchange":  function (value) { $model.gendle = value; }
-							}
-						}
+							"height": "80rem",
+							"layout": "row middle center",
+							"theme": "line-standard line-bottom"
+						},
+						[
+							[
+								"icon",
+								{
+									"icon": "common-man",
+									"width": "200rem",
+									"height": "80rem",
+									"line-height": "80rem",
+									"bindings": {
+										"theme":  function () { return $model.gendle ? 'text-primary' : '' }
+									},
+									"events": {
+										"tap": $owner.handleMan.bind($owner)
+									}
+								}
+							],
+							[
+								"text",
+								{
+									"width": "60rem",
+									"text-align": "center",
+									"bindings": {
+										"text":  function () { return $model.gendle ? '男' : '女' }
+									}
+								}
+							],
+							[
+								"icon",
+								{
+									"icon": "common-woman",
+									"width": "200rem",
+									"height": "80rem",
+									"line-height": "80rem",
+									"bindings": {
+										"theme":  function () { return $model.gendle ? '' : 'text-primary' }
+									},
+									"events": {
+										"tap": $owner.handleWoman.bind($owner)
+									}
+								}
+							]
+						]
 					],
 					[
 						"textbox",

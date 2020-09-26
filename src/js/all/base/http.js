@@ -19,7 +19,7 @@ yaxi.http = Object.extend.call({}, function (Class) {
     
                 if (typeof response === 'function')
                 {
-                    stream.resolve(response(method, data));
+                    stream.resolve(response(data));
                 }
                 else
                 {

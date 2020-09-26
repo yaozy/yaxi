@@ -17,6 +17,19 @@ module.exports = yaxi.Dialog.extend(function (Class, base) {
     }
 
 
+    this.handleMan = function () {
+
+        model.gendle = 1;
+    }
+
+
+    this.handleWoman = function () {
+
+        model.gendle = 0;
+    }
+
+
+
     this.handleOK = function () {
 
         if (check(this, 'name', '姓名') &&
@@ -24,7 +37,7 @@ module.exports = yaxi.Dialog.extend(function (Class, base) {
             check(this, 'address', '地址') &&
             check(this, 'house', '楼宇门牌'))
         {
-            this.close('ok', model);
+            this.close('OK', model);
         }
     }
 

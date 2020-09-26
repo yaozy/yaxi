@@ -39,6 +39,26 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
+    this.handleDefault = function (event) {
+
+        var index = +event.target.parent.tag;
+
+        if (index >= 0)
+        {
+            var model = arrayModel[index];
+
+            if (!model.default)
+            {
+                for (var i = arrayModel.length; i--;)
+                {
+                    arrayModel[i].default = i === index;
+                }
+            }
+        }
+    }
+
+
+
     this.handleAdd = function () {
 
         require('./address-edit').open(arrayModel.create(), onclosed);
@@ -65,7 +85,13 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
         if (index >= 0)
         {
-            arrayModel.splice(index, 1);
+            yaxi.MessageBox.delete('这条地址信息', function (type) {
+
+                if (type === 'OK')
+                {
+                    arrayModel.splice(index, 1);
+                }
+            });
         }
     }
 

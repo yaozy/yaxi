@@ -113,7 +113,7 @@ return (
 											"padding-left": "30rem",
 											"theme": "line-lightest line-top",
 											"bindings": {
-												"key":  function () { return ("$index" in $item ? $item.$index : $index) }
+												"key":  function () { return ($item.$index != null ? $item.$index : $index) }
 											}
 										},
 										[
@@ -188,7 +188,7 @@ return (
 											"height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
+												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
 												"icon":  function () { return $item.icon },
 												"content":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
@@ -231,7 +231,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
+												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -272,7 +272,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ("$index" in $item ? $item.$index : $index) },
+												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -351,7 +351,7 @@ return (
 															"padding-left": "20rem",
 															"tag": "filter",
 															"bindings": {
-																"key":  function () { return ("$index" in $item ? $item.$index : $index) }
+																"key":  function () { return ($item.$index != null ? $item.$index : $index) }
 															},
 															"events": {
 																"tap": $owner.handleChangeFilter.bind($owner)
@@ -380,7 +380,7 @@ return (
 																			"border-radius": "40rem",
 																			"text-align": "center",
 																			"bindings": {
-																				"key":  function () { return ("$index" in $item ? $item.$index : $index) },
+																				"key":  function () { return ($item.$index != null ? $item.$index : $index) },
 																				"text":  function () { return $item.text },
 																				"theme":  function () { return $item.theme }
 																			}

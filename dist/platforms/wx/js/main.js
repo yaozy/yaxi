@@ -16,6 +16,11 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     this.init = function () {
 
         this.load(template(this));
+
+        this.on('more', function () {
+
+            this.find('>tabbar').selectedIndex = 1;
+        });
     }
 
 

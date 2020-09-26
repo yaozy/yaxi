@@ -50,13 +50,37 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
     this.handleOpenDetail = function (event) {
-
+        
+        require('../lesson/detail/main').open(event.source.tag);
     }
 
 
     this.handleSwitch = function (event) {
 
+        model.status = event.target.tag;
+    }
 
+
+    this.handleDelete = function (event) {
+
+        var data = model.data;
+        var index = +event.target.tag;
+        var item;
+
+        if ((item = data[index]) && item.status >= 3)
+        {
+            yaxi.MessageBox.delete('此订单吗', function (type) {
+
+                if (type === 'OK')
+                {
+                    data.splice(index, 1);
+                }
+            });
+        }
+        else
+        {
+            yaxi.MessageBox.info('不能删除未完成的订单');
+        }
     }
 
 

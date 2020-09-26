@@ -27,12 +27,14 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.handleOpenDetail = function (event) {
 
-        var control;
+        require('../lesson/detail/main').open(event.source.tag);
+    }
 
-        if (control = event.target.findHasTag())
-        {
-            require('../lesson/detail/main').open(control.tag);
-        }
+
+    this.handleMore = function (event) {
+
+        var target = event.target;
+        this.trigger('more', target.tag || target.parent.tag);
     }
 
 

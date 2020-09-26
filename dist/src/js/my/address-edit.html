@@ -3,7 +3,23 @@
     <template src="../components/header.html" />
     <box width="550rem" absolute="middle center" padding="50rem" theme="bg-standard">
         <textbox b:value="$model.name" b:onchange="$model.name" placeholder="姓名" width="100%" text-align="center" />
-        <textbox b:value="$model.gendle" b:onchange="$model.gendle" placeholder="性别" width="100%" text-align="center" />
+        <box height="80rem" layout="row middle center" theme="line-standard line-bottom">
+            <icon 
+                b:theme="$model.gendle ? 'text-primary' : ''" 
+                icon="common-man" 
+                width="200rem" 
+                height="80rem" 
+                line-height="80rem" 
+                e:tap="handleMan" />
+            <text b:text="$model.gendle ? '男' : '女'" width="60rem" text-align="center" />
+            <icon 
+                b:theme="$model.gendle ? '' : 'text-primary'" 
+                icon="common-woman" 
+                width="200rem" 
+                height="80rem" 
+                line-height="80rem" 
+                e:tap="handleWoman" />
+        </box>
         <textbox b:value="$model.tel" b:onchange="$model.tel" placeholder="电话" width="100%" text-align="center" />
         <textbox b:value="$model.address" b:onchange="$model.address" placeholder="地址" width="100%" text-align="center" />
         <textbox b:value="$model.house" b:onchange="$model.house" placeholder="楼宇门牌" width="100%" text-align="center" />

@@ -22,12 +22,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     
     this.handleOpenDetail = function (event) {
 
-        var control;
-
-        if (control = event.target.findHasTag())
-        {
-            require('../lesson/detail/main').open(control.tag);
-        }
+        require('../lesson/detail/main').open(event.source.tag);
     }
 
 

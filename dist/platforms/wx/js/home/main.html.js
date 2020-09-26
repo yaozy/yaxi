@@ -108,7 +108,10 @@ return (
 													"absolute": "middle right",
 													"margin-top": "10rem",
 													"theme": "text-lightest",
-													"font-size": "28rem"
+													"font-size": "28rem",
+													"events": {
+														"tap": $owner.handleMore.bind($owner)
+													}
 												},
 												[
 													[
@@ -217,7 +220,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": '￥' + $lesson.price
+																					"text": $lesson.price > 0 ? '￥' + $lesson.price : '免费'
 																				}
 																			]
 																		]
