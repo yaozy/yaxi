@@ -3,21 +3,20 @@ module.exports = function ($data, $model) {
 return (
 	[
 		"page",
-		{
-			"events": {
-				"tap": this.handleTap.bind(this)
-			}
-		},
+		null,
 		[
 			[
 				"header",
-				{
-					"content": "yaxi test page"
-				}
+				null,
+				"yaxi test page"
 			],
 			[
 				"box",
-				null,
+				{
+					"events": {
+						"tap": this.handleTap.bind(this)
+					}
+				},
 				[
 					[
 						"button",

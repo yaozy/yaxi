@@ -3,18 +3,13 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('text', '');
+    this.$('text', '');
     
 
-    this.property('checked', false);
-
-    
-    this.property('color', '');
-
-
+    this.$('checked', false);
 
 
     this.__set_checked = function (value) {
@@ -24,6 +19,13 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     }
 
 
+    this.$('color', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
+
+    
 
     this.__on_tap = function () {
 

@@ -2,16 +2,20 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
     
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('value', '');
+    this.$('value', '');
 
     
-    this.property('placeholder', '');
+    this.$('placeholder', '');
 
 
-    this.property('text', '');
+    this.$('text', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
 
 
     

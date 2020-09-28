@@ -197,7 +197,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 }
             }
         }
-        while ((target = target.parent) && target.bubble !== false);
+        while (target = target.parent);
 
         return !event || !event.defaultPrevented;
     }

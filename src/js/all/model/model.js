@@ -24,7 +24,7 @@
 
 
     // 定义属性方法
-    var property = yaxi.impl.property();
+    var $ = yaxi.impl.property();
 
 
 
@@ -260,13 +260,13 @@
                         break;
 
                     default:
-                        property.call(prototype, name, options);
+                        $.call(prototype, name, options);
                         break; 
                 }
             }
             else
             {
-                property.call(prototype, name, options);
+                $.call(prototype, name, options);
             }
         }
     }

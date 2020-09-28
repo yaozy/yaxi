@@ -2,11 +2,15 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('checked', false);
+    this.$('checked', false);
     
+
+    // 是否禁用
+    this.$('disabled', false);
+
 
 
 }, function SwitchButton() {

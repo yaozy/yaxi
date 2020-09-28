@@ -8,9 +8,9 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard",
-					"content": "我的收藏"
-				}
+					"theme": "bg-standard"
+				},
+				"我的收藏"
 			],
 			[
 				"databox",

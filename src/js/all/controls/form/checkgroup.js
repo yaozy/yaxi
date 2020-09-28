@@ -2,6 +2,7 @@ yaxi.CheckGroup = yaxi.Box.extend(function (Class, base) {
 
 
 
+
 }, function CheckGroup() {
 
 

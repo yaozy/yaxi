@@ -6,13 +6,13 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.property('text', '');
+    this.$('text', '');
 
 
-    this.property('security', '');
+    this.$('security', '');
 
 
-    this.property('format', null, false);
+    this.$('format', null, false);
 
 
     this.__set_format = function (value) {

@@ -305,6 +305,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 }, function Collection(control) {
 
-    this.$uuid = control.uuid;
+    this.$uuid = control && control.uuid;
     
 });

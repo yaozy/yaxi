@@ -2,7 +2,7 @@ yaxi.RichText = yaxi.Control.extend(function (Class, base) {
 
 
     
-    this.property('html', '');
+    this.$('html', '');
 
 
 

@@ -30,10 +30,10 @@ return (
 					[
 						"button",
 						{
-							"content": "评论",
 							"width": "150rem",
 							"height": "60rem"
-						}
+						},
+						"评论"
 					]
 				]
 			],

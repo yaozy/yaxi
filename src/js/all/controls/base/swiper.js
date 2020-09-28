@@ -3,28 +3,28 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
     // 是否自动切换
-    this.property('autoplay', true, false);
+    this.$('autoplay', true, false);
 
 
     // 当前所在滑块的 index
-    this.property('current', 0);
+    this.$('current', 0);
 
 
     // 自动切换时间间隔
-    this.property('interval', 5000, false);
+    this.$('interval', 5000, false);
 
 
     // 滑动动画时长
-    this.property('duration', 500, false);
+    this.$('duration', 500, false);
 
 
 
     // 前边距, 可用于露出前一项的一小部分, 接受px和rem值
-    this.property('before', '');
+    this.$('before', '');
 
 
     // 后边距, 可用于露出后一项的一小部分, 接受px和rem值
-    this.property('after', '');
+    this.$('after', '');
 
 
 

@@ -2,7 +2,7 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.property('layout', {
+    this.$('layout', {
 
         get: nolayout,
         set: nolayout
@@ -17,7 +17,7 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
     // 子项是否充满容器
-    this.property('full', false);
+    this.$('full', false);
 
 
 

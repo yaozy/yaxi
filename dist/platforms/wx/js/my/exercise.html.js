@@ -10,9 +10,9 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard",
-					"content": "我的练习"
-				}
+					"theme": "bg-standard"
+				},
+				"我的练习"
 			],
 			[
 				"databox",

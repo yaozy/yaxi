@@ -8,9 +8,9 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard",
-					"content": "发票抬头"
-				}
+					"theme": "bg-standard"
+				},
+				"发票抬头"
 			],
 			[
 				"box",

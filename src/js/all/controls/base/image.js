@@ -2,7 +2,7 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
 
 
     // 图片资源地址
-    this.property('src', '');
+    this.$('src', '');
 
 
     // 图片裁剪、缩放的模式
@@ -22,11 +22,11 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
      *  bottom left	裁剪模式, 不缩放图片, 只显示图片的左下边区域	
      *  bottom right	裁剪模式, 不缩放图片, 只显示图片的右下边区域
     */
-    this.property('mode', '');
+    this.$('mode', '');
 
 
     // 图片懒加载，在即将进入一定范围（上下三屏）时才开始加载
-    this.property('lazyLoad', false, {
+    this.$('lazyLoad', false, {
 
         alias: 'lazy-load'
     });

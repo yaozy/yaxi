@@ -6,7 +6,7 @@ yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -14,15 +14,15 @@ yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
     
 
     // 图像路径
-    this.property('src', '');
+    this.$('src', '');
 
 
     // 图像大小
-    this.property('size', '');
+    this.$('size', '');
 
 
     // 文字内容
-    this.property('text', '');
+    this.$('text', '');
 
 
 

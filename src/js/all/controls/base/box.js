@@ -8,7 +8,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -17,7 +17,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     
 
     // 子控件集合
-    this.property('children', null, {
+    this.$('children', null, {
 
         get: function () {
 

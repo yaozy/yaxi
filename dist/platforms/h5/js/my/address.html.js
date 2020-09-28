@@ -8,9 +8,9 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard",
-					"content": "我的地址"
-				}
+					"theme": "bg-standard"
+				},
+				"我的地址"
 			],
 			[
 				"box",

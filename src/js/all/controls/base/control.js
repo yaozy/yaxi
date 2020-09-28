@@ -90,14 +90,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             throwError('type can not be null!');
         }
 
-        if (!parent)
-        {
-            throwError('parent can not be null!');
-        }
-
         if (check = Class.allowParent)
         {
-            if (check !== true && !check(parent))
+            if (check !== true && !check(parent || (parent = yaxi.Box.prototype)))
             {
                 throwError(Class.typeName + ' can not be a sub type of ' + parent.typeName + '!');
             }
@@ -123,7 +118,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             if (options.$storage && (Class = options.constructor))
             {
                 checkParent(Class, parent);
-
                 control = options;
 
                 if (control.parent && control.parent !== parent)
@@ -131,7 +125,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     control.remove();
                 }
 
-                control.parent = parent;
+                if (scope !== false)
+                {
+                    control.parent = parent;
+                }
+                else // scope === false时不设置parent
+                {
+                    control.__own = parent;
+                }
+                
                 return control;
             }
 
@@ -150,7 +152,16 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                 checkParent(Class, parent);
 
                 control = new Class();
-                control.parent = parent;
+
+                if (scope !== false)
+                {
+                    control.parent = parent;
+                }
+                else // scope === false时不设置parent
+                {
+                    control.__own = parent;
+                }
+
                 control.__load(options, scope);
 
                 return control;
@@ -158,6 +169,44 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
 
         throwError('no options, eg: ["box", { theme: "text-primary" }, [[...], ...]]');
+    }
+
+
+    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
+    this.findEventTarget = function () {
+
+        var target = this;
+        var parent = this;
+
+        while (parent = parent.parent)
+        {
+            if (parent.disabled)
+            {
+                target = parent.parent;
+            }
+            else if (parent.__own)
+            {
+                return parent;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (parent = target.__own)
+        {
+            do
+            {
+                if (parent.disabled)
+                {
+                    target = parent.parent;
+                }
+            }
+            while (parent = parent.parent);
+        }
+
+        return target;
     }
 
 
@@ -183,7 +232,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 扩展属性实现
-    this.property = yaxi.impl.property();
+    this.$ = this.property = yaxi.impl.property();
 
 
 
@@ -292,7 +341,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 控件唯一id
-    this.property('uuid', 0, {
+    this.$('uuid', 0, {
 
         get: function () {
 
@@ -303,7 +352,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
-    this.property('id', '', false);
+    this.$('id', '', false);
 
 
     // 默认class
@@ -313,7 +362,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     
     // 控件风格
-    this.property('theme', '', {
+    this.$('theme', '', {
 
         kind: 'class',
         data: 'yx-theme-'
@@ -322,19 +371,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 插槽名
-    this.property('slot', '', false);
+    this.$('slot', '', false);
 
 
     // 是否隐藏
-    this.property('hidden', false);
-
-
-    // 是否禁用
-    this.property('disabled', false);
+    this.$('hidden', false);
 
 
     // 是否选中
-    this.property('selected', false, {
+    this.$('selected', false, {
 
         change: false,
 
@@ -362,7 +407,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 选中时状态
-    this.property('selectedStatus', null, {
+    this.$('selectedStatus', null, {
         
         change: false,
 
@@ -429,11 +474,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
 
     // 自定义key
-    this.property('key', '', false);
+    this.$('key', '', false);
     
 
     // 自定义tag
-    this.property('tag', null, false);
+    this.$('tag', null, false);
 
 
 
@@ -442,7 +487,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 顶级控件
-    this.property('root', null, {
+    this.$('root', null, {
 
         get: function () {
 
@@ -465,7 +510,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 布局使用flex, 在容器上设置layout实现
     // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
     // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
-    this.property('absolute', '', {
+    this.$('absolute', '', {
 
         kind: 'class',
         data: 'yx-absolute-'
@@ -474,7 +519,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 是否使用静态定位(默认使用相对定位)
-    this.property('static', false, {
+    this.$('static', false, {
 
         kind: 'class',
         data: 'yx-static'
@@ -485,7 +530,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     var style = function (name, data) {
 
-        this.property(name, '', {
+        this.$(name, '', {
 
             alias: name.replace(/-(\w)/g, function (_, x) {
         
@@ -1055,30 +1100,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
-    this.findEventTarget = function () {
-
-        var target = this;
-        var parent = target;
-
-        while (parent)
-        {
-            if (parent.disabled)
-            {
-                target = parent.parent;
-            }
-            else if (parent.__is_content) // 记录下content控件, content控件内部不能触发事件
-            {
-                target = parent;
-            }
-
-            parent = parent.parent;
-        }
-
-        return target;
-    }
-
-
+    
 
     this.remove = function () {
 

@@ -10,16 +10,20 @@ yaxi.Radio = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
 
 
-    this.property('text', '');
+    this.$('text', '');
 
 
-    this.property('checked', false);
+    this.$('checked', false);
 
 
-    this.property('color', '');
+    this.$('color', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
 
 
 

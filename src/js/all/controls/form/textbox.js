@@ -7,22 +7,22 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     
 
 
-    this.property('name', '');
+    this.$('name', '');
 
 
-    this.property('value', '');
+    this.$('value', '');
 
     
-    this.property('placeholder', '');
+    this.$('placeholder', '');
 
 
-    this.property('maxlength', -1);
+    this.$('maxlength', -1);
 
 
-    this.property('pattern', '');
+    this.$('pattern', '');
 
 
-    this.property('format', null, false);
+    this.$('format', null, false);
 
 
 
@@ -33,20 +33,24 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.property('selectionStart', 0, {
+    this.$('selectionStart', 0, {
 
         alias: 'selection-start'
     });
 
 
     
-    this.property('selectionEnd', 0, {
+    this.$('selectionEnd', 0, {
 
         alias: 'selection-end'
     });
 
 
 
+    // 是否禁用
+    this.$('disabled', false);
+
+    
 
     this.focus = function () {
 

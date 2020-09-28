@@ -1,11 +1,11 @@
 <page>
-    <header content="yaxi model page" />
+    <header>yaxi model page</header>
     <box layout="column" flex="auto">
         <box layout="row" theme="@bg-thick">
-            <button flex="auto" content="Append" e:tap="handleAppend" />
-            <button flex="auto" content="Replace" e:tap="handleReplace" />
-            <button flex="auto" content="Remove" e:tap="handleRemove" />
-            <button flex="auto" content="Reorder" e:tap="handleReorder" />
+            <button flex="auto" e:tap="handleAppend">Append</button>
+            <button flex="auto" e:tap="handleReplace">Replace</button>
+            <button flex="auto" e:tap="handleRemove">Remove</button>
+            <button flex="auto" e:tap="handleReorder">Reorder</button>
         </box>
         <databox d:data="$model" flex="auto">
             <box layout="row" height="200rem">

@@ -1,4 +1,4 @@
-yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
+yaxi.Control.extend(function (Class, base, yaxi) {
 
 
     
@@ -7,20 +7,16 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
     var assign = Object.assign;
 
 
+    var A = Array;
+    
+    var build = yaxi.Control.build;
+    
 
     // 管道编译器
     var compile = yaxi.pipe.compile;
 
     // 控件对象集合
     var controls = yaxi.$controls || (yaxi.$controls = create(null));
-
-
-    var Collection = yaxi.Collection;
-
-
-
-    // 阻止子控件向上冒泡
-    this.bubble = false;
 
 
 
@@ -129,22 +125,31 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
     this.load = function (options) {
 
-        this.__template = options || [];
+        this.__template = options;
         return this;
     }
 
 
     this.loadTemplate = function (template, data, model) {
 
-        this.__template = template.call(this, data, model) || [];
+        this.__template = template.call(this, data, model);
         return this;
     }
 
 
     this.__load = function (options, scope) {
 
-        var template = this.__template;
-        var values;
+        var template = this.__template || [];
+        var shadow, values;
+
+        if (shadow = this.__shadow)
+        {
+            for (var i = shadow.length; i--;)
+            {
+                shadow[i].destroy();
+                shadow[i].__own = null;
+            }
+        }
 
         if (values = template[0])
         {
@@ -165,8 +170,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         if (values = template[1])
         {
-            parseSlot(values, options[2]);
-            (this.__children || (this.__children = new Collection(this))).load(values, scope);
+            this.__shadow = createControls(this, values);
         }
     }
 
@@ -178,7 +182,21 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
             // if (value)
         }
     }
-    
+
+
+    function createControls(parent, values) {
+
+        var length = values.length;
+        var list = new A(length);
+
+        for (var i = 0; i < length; i++)
+        {
+            list[i] = build(parent, values[i], false);
+        }
+
+        return list;
+    }
+
 
 
     // 观测属性变化
@@ -297,6 +315,21 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
+    this.destroy = function () {
+
+        var children = this.__children;
+
+        for (var i = children.length; i--;)
+        {
+            children[i].destroy();
+            children[i].__own = null;
+        }
+
+        base.destroy.call(this);
+    }
+
+
+
     yaxi.component = function (name, fn) {
 
         if (typeof name === 'function')
@@ -373,9 +406,6 @@ yaxi.component('Header', function (Class, base) {
 
 
     this.property('text', '')
-
-
-
 
 
 });

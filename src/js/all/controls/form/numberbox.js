@@ -2,15 +2,15 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
     // 是否显示button
-    this.property('button', false);
+    this.$('button', false);
 
 
     // 当前值
-    this.property('value', 0, {
+    this.$('value', 0, {
     
         convert: function (value) {
 
@@ -35,15 +35,15 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
     
 
     // 最小值
-    this.property('min', -Infinity, false);
+    this.$('min', -Infinity, false);
 
 
     // 最大值
-    this.property('max', Infinity, false);
+    this.$('max', Infinity, false);
 
 
     // 加减步进
-    this.property('step', 1);
+    this.$('step', 1);
 
 
 

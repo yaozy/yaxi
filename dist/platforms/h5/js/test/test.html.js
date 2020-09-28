@@ -7,9 +7,8 @@ return (
 		[
 			[
 				"header",
-				{
-					"content": "yaxi test page"
-				}
+				null,
+				"yaxi test page"
 			],
 			[
 				"box",
@@ -31,21 +30,21 @@ return (
 					[
 						"button",
 						{
-							"content": "append",
 							"events": {
 								"tap": this.handleAppend.bind(this)
 							}
-						}
+						},
+						"append"
 					],
 					[
 						"button",
 						{
-							"content": "remove last",
 							"margin-top": "10rem",
 							"events": {
 								"tap": this.handleRemove.bind(this)
 							}
-						}
+						},
+						"remove last"
 					]
 				]
 			]

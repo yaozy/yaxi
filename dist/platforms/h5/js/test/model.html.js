@@ -7,9 +7,8 @@ return (
 		[
 			[
 				"header",
-				{
-					"content": "yaxi model page"
-				}
+				null,
+				"yaxi model page"
 			],
 			[
 				"box",
@@ -29,41 +28,41 @@ return (
 								"button",
 								{
 									"flex": "auto",
-									"content": "Append",
 									"events": {
 										"tap": this.handleAppend.bind(this)
 									}
-								}
+								},
+								"Append"
 							],
 							[
 								"button",
 								{
 									"flex": "auto",
-									"content": "Replace",
 									"events": {
 										"tap": this.handleReplace.bind(this)
 									}
-								}
+								},
+								"Replace"
 							],
 							[
 								"button",
 								{
 									"flex": "auto",
-									"content": "Remove",
 									"events": {
 										"tap": this.handleRemove.bind(this)
 									}
-								}
+								},
+								"Remove"
 							],
 							[
 								"button",
 								{
 									"flex": "auto",
-									"content": "Reorder",
 									"events": {
 										"tap": this.handleReorder.bind(this)
 									}
-								}
+								},
+								"Reorder"
 							]
 						]
 					],

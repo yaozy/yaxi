@@ -1,4 +1,4 @@
-yaxi.ContentControl.renderer(function (base) {
+yaxi.Button.renderer(function (base) {
 
     
 
@@ -21,17 +21,17 @@ yaxi.ContentControl.renderer(function (base) {
     this.render = function (control) {
 
         var view = base.render.call(this, control);
-        var content = control.__init_content() || control.__no_content || '';
 
-        this.renderContent(control, view, '', content);
+        renderContent.call(this, control, view, '');
 
         return view;
     }
     
     
 
-    this.renderContent = function (control, view, prefix, content) {
+    function renderContent(control, view, prefix) {
 
+        var content = control.__content || '';
         var controls;
 
         if (typeof content === 'string')
@@ -51,9 +51,9 @@ yaxi.ContentControl.renderer(function (base) {
 
 
     
-    this.content = function (control, view, prefix, value) {
+    this.text = function (control, view, prefix) {
 
-        this.renderContent(control, view, prefix, control.__init_content() || '');
+        renderContent.call(this, control, view, prefix);
     }
 
 

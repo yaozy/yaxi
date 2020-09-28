@@ -4,9 +4,9 @@ return (
 	[
 		"header",
 		{
-			"theme": "bg-standard",
-			"content": "华旅教育"
-		}
+			"theme": "bg-standard"
+		},
+		"华旅教育"
 	]
 )
 

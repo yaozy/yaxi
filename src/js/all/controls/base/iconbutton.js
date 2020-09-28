@@ -6,7 +6,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -14,15 +14,15 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     
 
     // 图标名
-    this.property('icon', '');
+    this.$('icon', '');
 
 
     // 图标大小
-    this.property('size', '');
+    this.$('size', '');
 
 
     // 文字内容
-    this.property('text', '');
+    this.$('text', '');
 
 
 

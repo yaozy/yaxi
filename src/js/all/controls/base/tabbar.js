@@ -3,12 +3,12 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 页面容器
-    this.property('host', '', false);
+    this.$('host', '', false);
 
 
 
     // 获取或设置当前页索引
-    this.property('selectedIndex', -1, {
+    this.$('selectedIndex', -1, {
 
         change: false,
 
@@ -47,7 +47,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 选中的页头
-    this.property('selectedItem', null, {
+    this.$('selectedItem', null, {
 
         get: function () {
 
@@ -58,7 +58,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 选中的页签容器
-    this.property('selectedHost', null, {
+    this.$('selectedHost', null, {
 
         get: function () {
 

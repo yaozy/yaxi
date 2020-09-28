@@ -1091,7 +1091,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 }
             }
         }
-        while ((target = target.parent) && target.bubble !== false);
+        while (target = target.parent);
 
         return !event || !event.defaultPrevented;
     }
@@ -3534,14 +3534,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             throwError('type can not be null!');
         }
 
-        if (!parent)
-        {
-            throwError('parent can not be null!');
-        }
-
         if (check = Class.allowParent)
         {
-            if (check !== true && !check(parent))
+            if (check !== true && !check(parent || (parent = yaxi.Box.prototype)))
             {
                 throwError(Class.typeName + ' can not be a sub type of ' + parent.typeName + '!');
             }
@@ -3567,7 +3562,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             if (options.$storage && (Class = options.constructor))
             {
                 checkParent(Class, parent);
-
                 control = options;
 
                 if (control.parent && control.parent !== parent)
@@ -3575,7 +3569,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     control.remove();
                 }
 
-                control.parent = parent;
+                if (scope !== false)
+                {
+                    control.parent = parent;
+                }
+                else // scope === false时不设置parent
+                {
+                    control.__own = parent;
+                }
+                
                 return control;
             }
 
@@ -3594,7 +3596,16 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                 checkParent(Class, parent);
 
                 control = new Class();
-                control.parent = parent;
+
+                if (scope !== false)
+                {
+                    control.parent = parent;
+                }
+                else // scope === false时不设置parent
+                {
+                    control.__own = parent;
+                }
+
                 control.__load(options, scope);
 
                 return control;
@@ -3602,6 +3613,44 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
 
         throwError('no options, eg: ["box", { theme: "text-primary" }, [[...], ...]]');
+    }
+
+
+    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
+    this.findEventTarget = function () {
+
+        var target = this;
+        var parent = this;
+
+        while (parent = parent.parent)
+        {
+            if (parent.disabled)
+            {
+                target = parent.parent;
+            }
+            else if (parent.__own)
+            {
+                return parent;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (parent = target.__own)
+        {
+            do
+            {
+                if (parent.disabled)
+                {
+                    target = parent.parent;
+                }
+            }
+            while (parent = parent.parent);
+        }
+
+        return target;
     }
 
 
@@ -3736,7 +3785,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 控件唯一id
-    this.property('uuid', 0, {
+    this.$('uuid', 0, {
 
         get: function () {
 
@@ -3747,7 +3796,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
-    this.property('id', '', false);
+    this.$('id', '', false);
 
 
     // 默认class
@@ -3757,7 +3806,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     
     // 控件风格
-    this.property('theme', '', {
+    this.$('theme', '', {
 
         kind: 'class',
         data: 'yx-theme-'
@@ -3766,19 +3815,15 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 插槽名
-    this.property('slot', '', false);
+    this.$('slot', '', false);
 
 
     // 是否隐藏
-    this.property('hidden', false);
-
-
-    // 是否禁用
-    this.property('disabled', false);
+    this.$('hidden', false);
 
 
     // 是否选中
-    this.property('selected', false, {
+    this.$('selected', false, {
 
         change: false,
 
@@ -3806,7 +3851,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 选中时状态
-    this.property('selectedStatus', null, {
+    this.$('selectedStatus', null, {
         
         change: false,
 
@@ -3873,11 +3918,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
 
     // 自定义key
-    this.property('key', '', false);
+    this.$('key', '', false);
     
 
     // 自定义tag
-    this.property('tag', null, false);
+    this.$('tag', null, false);
 
 
 
@@ -3886,7 +3931,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 顶级控件
-    this.property('root', null, {
+    this.$('root', null, {
 
         get: function () {
 
@@ -3909,7 +3954,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 布局使用flex, 在容器上设置layout实现
     // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
     // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
-    this.property('absolute', '', {
+    this.$('absolute', '', {
 
         kind: 'class',
         data: 'yx-absolute-'
@@ -3918,7 +3963,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 是否使用静态定位(默认使用相对定位)
-    this.property('static', false, {
+    this.$('static', false, {
 
         kind: 'class',
         data: 'yx-static'
@@ -3929,7 +3974,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     var style = function (name, data) {
 
-        this.property(name, '', {
+        this.$(name, '', {
 
             alias: name.replace(/-(\w)/g, function (_, x) {
         
@@ -4499,30 +4544,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
-    this.findEventTarget = function () {
-
-        var target = this;
-        var parent = target;
-
-        while (parent)
-        {
-            if (parent.disabled)
-            {
-                target = parent.parent;
-            }
-            else if (parent.__is_content) // 记录下content控件, content控件内部不能触发事件
-            {
-                target = parent;
-            }
-
-            parent = parent.parent;
-        }
-
-        return target;
-    }
-
-
+    
 
     this.remove = function () {
 
@@ -4955,148 +4977,8 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 }, function Collection(control) {
 
-    this.$uuid = control.uuid;
+    this.$uuid = control && control.uuid;
     
-});
-
-
-
-
-/*
- * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件, 不支持嵌套其它ContentControl
- * 不支持对子控件进行操作
-*/
-yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
-
-
-
-    var A = Array;
-    
-    var build = yaxi.Control.build;
-    
-
-
-
-    // 标记当前控件为content控件(事件检测用)
-    this.__is_content = true;
-
-
-    
-    
-    // 内容
-    this.property('content', null, {
-
-        convert: function (value) {
-
-            var content = this.__content;
-
-            if (content)
-            {
-                this.__content = null;
-
-                if (typeof content === 'object')
-                {
-                    for (var i = content.length; i--;)
-                    {
-                        content[i].destroy();
-                    }
-                }
-            }
-
-            return value;
-        }
-    });
-
-
-
-    function createControls(parent, values) {
-
-        var length = values.length;
-        var list = new A(length);
-
-        for (var i = 0; i < length; i++)
-        {
-            list[i] = build(parent, values[i]);
-        }
-
-        return list;
-    }
-
-
-
-    this.__load_children = function (values) {
-
-        this.content = values;
-    }
-
-
-
-    var loading;
-
-
-    // 初始化内容
-    this.__init_content = function () {
-
-        var content = this.__content;
-
-        if (content)
-        {
-            return content;
-        }
-
-        content = this.content;
-
-        if (content instanceof A)
-        {
-            if (loading)
-            {
-                throw new Error('create control error: content control can not inside content control!');
-            }
-
-            try
-            {
-                loading = true;
-
-                if (content[0] instanceof A)
-                {
-                    content = createControls(this, content);
-                }
-                else
-                {
-                    content = [build(this, content)];
-                }
-            }
-            finally
-            {
-                loading = false;
-            }
-        }
-        else
-        {
-            content = '' + content; 
-        }
-
-        return this.__content = content;
-    }
-
-
-
-    this.destroy = function () {
-
-        var content = this.__content;
-
-        if (content && typeof content !== 'string')
-        {
-            for (var i = content.length; i--;)
-            {
-                content[i].destroy();
-            }
-        }
-
-        base.destroy.call(this);
-    }
-
-
 });
 
 
@@ -5112,7 +4994,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -5121,7 +5003,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
     
 
     // 子控件集合
-    this.property('children', null, {
+    this.$('children', null, {
 
         get: function () {
 
@@ -5200,7 +5082,7 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
 
 
 
-yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
+yaxi.Control.extend(function (Class, base, yaxi) {
 
 
     
@@ -5215,14 +5097,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
     // 控件对象集合
     var controls = yaxi.$controls || (yaxi.$controls = create(null));
-
-
-    var Collection = yaxi.Collection;
-
-
-
-    // 阻止子控件向上冒泡
-    this.bubble = false;
 
 
 
@@ -5331,22 +5205,27 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
     this.load = function (options) {
 
-        this.__template = options || [];
+        this.__template = options;
         return this;
     }
 
 
     this.loadTemplate = function (template, data, model) {
 
-        this.__template = template.call(this, data, model) || [];
+        this.__template = template.call(this, data, model);
         return this;
     }
 
 
     this.__load = function (options, scope) {
 
-        var template = this.__template;
-        var values;
+        var template = this.__template || [];
+        var shadow, values;
+
+        if (shadow = this.__shadow)
+        {
+            shadow.destroy();
+        }
 
         if (values = template[0])
         {
@@ -5367,8 +5246,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         if (values = template[1])
         {
-            parseSlot(values, options[2]);
-            (this.__children || (this.__children = new Collection(this))).load(values, scope);
+            this.__shadow.load(values);
         }
     }
 
@@ -5499,6 +5377,20 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
+    this.destroy = function () {
+
+        var children = this.__children;
+
+        for (var i = children.length; i--;)
+        {
+            children[i].destroy();
+        }
+
+        base.destroy.call(this);
+    }
+
+
+
     yaxi.component = function (name, fn) {
 
         if (typeof name === 'function')
@@ -5517,6 +5409,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
     var init;
 
     this.$storage = Object.create(this.$defaults);
+    this.__shadows = new yaxi.Collection();
 
     if (init = this.init)
     {
@@ -5574,10 +5467,7 @@ yaxi.component('Header', function (Class, base) {
 
 
 
-    this.property('text', '')
-
-
-
+    this.$('text', '')
 
 
 });
@@ -5600,7 +5490,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -5608,7 +5498,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
     // 模板
-    this.property('template', null, {
+    this.$('template', null, {
      
         change: false,
 
@@ -5634,7 +5524,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     // 数据集合
     // 可以是数组模型也可以是普通的数组, 如果是普通数组不能实现双向绑定
-    this.property('data', null, {
+    this.$('data', null, {
 
         change: false,
 
@@ -5675,7 +5565,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     
 
     // 子控件集合
-    this.property('children', null, {
+    this.$('children', null, {
 
         get: nochildren,
         set: nochildren
@@ -5926,7 +5816,7 @@ yaxi.Icon = yaxi.Control.extend(function (Class, base) {
 
     
     // 图标名
-    this.property('icon', '', {
+    this.$('icon', '', {
 
         kind: 'class',
         data: 'icon-'
@@ -5951,7 +5841,7 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -5959,15 +5849,15 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     
 
     // 图标名
-    this.property('icon', '');
+    this.$('icon', '');
 
 
     // 图标大小
-    this.property('size', '');
+    this.$('size', '');
 
 
     // 文字内容
-    this.property('text', '');
+    this.$('text', '');
 
 
 
@@ -5993,7 +5883,7 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
 
 
     // 图片资源地址
-    this.property('src', '');
+    this.$('src', '');
 
 
     // 图片裁剪、缩放的模式
@@ -6013,11 +5903,11 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
      *  bottom left	裁剪模式, 不缩放图片, 只显示图片的左下边区域	
      *  bottom right	裁剪模式, 不缩放图片, 只显示图片的右下边区域
     */
-    this.property('mode', '');
+    this.$('mode', '');
 
 
     // 图片懒加载，在即将进入一定范围（上下三屏）时才开始加载
-    this.property('lazyLoad', false, {
+    this.$('lazyLoad', false, {
 
         alias: 'lazy-load'
     });
@@ -6041,7 +5931,7 @@ yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.property('layout', '', {
+    this.$('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -6049,15 +5939,15 @@ yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
     
 
     // 图像路径
-    this.property('src', '');
+    this.$('src', '');
 
 
     // 图像大小
-    this.property('size', '');
+    this.$('size', '');
 
 
     // 文字内容
-    this.property('text', '');
+    this.$('text', '');
 
 
 
@@ -6083,10 +5973,10 @@ yaxi.Line = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('size', '5rem');
+    this.$('size', '5rem');
 
 
-    this.property('color', 'text-standard');
+    this.$('color', 'text-standard');
 
 
 
@@ -6103,10 +5993,10 @@ yaxi.Vline = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('size', '5rem');
+    this.$('size', '5rem');
 
 
-    this.property('color', 'text-standard');
+    this.$('color', 'text-standard');
 
 
 
@@ -6138,11 +6028,11 @@ yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('text', '');
+    this.$('text', '');
 
 
     // 速度, 每32字显示的秒数
-    this.property('speed', 10);
+    this.$('speed', 10);
 
 
     
@@ -6177,7 +6067,7 @@ yaxi.RichText = yaxi.Control.extend(function (Class, base) {
 
 
     
-    this.property('html', '');
+    this.$('html', '');
 
 
 
@@ -6208,7 +6098,7 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.property('layout', {
+    this.$('layout', {
 
         get: nolayout,
         set: nolayout
@@ -6223,7 +6113,7 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 
     // 子项是否充满容器
-    this.property('full', false);
+    this.$('full', false);
 
 
 
@@ -6242,28 +6132,28 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
 
     // 是否自动切换
-    this.property('autoplay', true, false);
+    this.$('autoplay', true, false);
 
 
     // 当前所在滑块的 index
-    this.property('current', 0);
+    this.$('current', 0);
 
 
     // 自动切换时间间隔
-    this.property('interval', 5000, false);
+    this.$('interval', 5000, false);
 
 
     // 滑动动画时长
-    this.property('duration', 500, false);
+    this.$('duration', 500, false);
 
 
 
     // 前边距, 可用于露出前一项的一小部分, 接受px和rem值
-    this.property('before', '');
+    this.$('before', '');
 
 
     // 后边距, 可用于露出后一项的一小部分, 接受px和rem值
-    this.property('after', '');
+    this.$('after', '');
 
 
 
@@ -6288,12 +6178,12 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 页面容器
-    this.property('host', '', false);
+    this.$('host', '', false);
 
 
 
     // 获取或设置当前页索引
-    this.property('selectedIndex', -1, {
+    this.$('selectedIndex', -1, {
 
         change: false,
 
@@ -6332,7 +6222,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 选中的页头
-    this.property('selectedItem', null, {
+    this.$('selectedItem', null, {
 
         get: function () {
 
@@ -6343,7 +6233,7 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
 
 
     // 选中的页签容器
-    this.property('selectedHost', null, {
+    this.$('selectedHost', null, {
 
         get: function () {
 
@@ -6503,13 +6393,13 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
     
 
 
-    this.property('text', '');
+    this.$('text', '');
 
 
-    this.property('security', '');
+    this.$('security', '');
 
 
-    this.property('format', null, false);
+    this.$('format', null, false);
 
 
     this.__set_format = function (value) {
@@ -6544,22 +6434,22 @@ yaxi.TextBox = yaxi.Control.extend(function () {
     
 
 
-    this.property('name', '');
+    this.$('name', '');
 
 
-    this.property('value', '');
+    this.$('value', '');
 
     
-    this.property('placeholder', '');
+    this.$('placeholder', '');
 
 
-    this.property('maxlength', -1);
+    this.$('maxlength', -1);
 
 
-    this.property('pattern', '');
+    this.$('pattern', '');
 
 
-    this.property('format', null, false);
+    this.$('format', null, false);
 
 
 
@@ -6570,20 +6460,24 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-    this.property('selectionStart', 0, {
+    this.$('selectionStart', 0, {
 
         alias: 'selection-start'
     });
 
 
     
-    this.property('selectionEnd', 0, {
+    this.$('selectionEnd', 0, {
 
         alias: 'selection-end'
     });
 
 
 
+    // 是否禁用
+    this.$('disabled', false);
+
+    
 
     this.focus = function () {
 
@@ -6609,39 +6503,122 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-yaxi.Button = yaxi.Box.extend(function (Class, base) {
+yaxi.Button = yaxi.Control.extend(function (Class, base) {
 
 
     
-    // 内容
-    this.property('text', null, {
+    var A = Array;
+    
+    var build = yaxi.Control.build;
+    
+    var loading;
 
-        convert: function (value) {
 
-            var content = this.__content;
 
-            if (content)
+    this.$('text', '');
+
+
+    this.__set_text = function (value) {
+
+        this.content(value);
+    }
+
+
+    // 是否禁用
+    this.$('disabled', false);
+
+
+
+    function createControls(parent, values) {
+
+        var length = values.length;
+        var list = new A(length);
+
+        for (var i = 0; i < length; i++)
+        {
+            list[i] = build(parent, values[i], false);
+            list[i].__own = this;
+        }
+
+        return list;
+    }
+
+
+    this.content = this.__load_children = function (values) {
+
+        var content;
+
+        if (content = this.__content)
+        {
+            if (typeof content === 'object')
             {
-                this.__content = null;
-
-                if (typeof content === 'object')
+                for (var i = content.length; i--;)
                 {
-                    for (var i = content.length; i--;)
-                    {
-                        content[i].destroy();
-                    }
+                    content[i].destroy();
                 }
             }
-
-            return value;
         }
-    });
+
+        if (values instanceof A)
+        {
+            if (loading)
+            {
+                throw new Error('load button error: button can not embed button!');
+            }
+
+            try
+            {
+                loading = true;
+
+                if (values[0] instanceof A)
+                {
+                    values = createControls(this, values);
+                }
+                else
+                {
+                    values = [build(this, values, false)];
+                }
+
+                this.$storage.text = '';
+            }
+            finally
+            {
+                loading = false;
+            }
+        }
+        else
+        {
+            this.$storage.text = values = '' + values; 
+        }
+
+        this.__content = values;
+    }
+
+
+
+    this.destroy = function () {
+
+        var content = this.__content;
+
+        if (content && typeof content !== 'string')
+        {
+            for (var i = content.length; i--;)
+            {
+                content[i].destroy();
+                content[i].__own = null;
+            }
+        }
+
+        base.destroy.call(this);
+    }
 
 
 
 }, function Button() {
 
-    yaxi.Box.apply(this, arguments);
+
+    yaxi.Control.apply(this, arguments);
+
 
 }).register('Button');
 
@@ -6653,18 +6630,13 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('text', '');
+    this.$('text', '');
     
 
-    this.property('checked', false);
-
-    
-    this.property('color', '');
-
-
+    this.$('checked', false);
 
 
     this.__set_checked = function (value) {
@@ -6674,6 +6646,13 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     }
 
 
+    this.$('color', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
+
+    
 
     this.__on_tap = function () {
 
@@ -6695,6 +6674,7 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
 
 
 yaxi.CheckGroup = yaxi.Box.extend(function (Class, base) {
+
 
 
 
@@ -6728,16 +6708,20 @@ yaxi.Memo = yaxi.Control.extend(function () {
 
 
     
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('value', '');
+    this.$('value', '');
 
     
-    this.property('placeholder', '');
+    this.$('placeholder', '');
 
 
-    this.property('text', '');
+    this.$('text', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
 
 
     
@@ -6754,15 +6738,15 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
     // 是否显示button
-    this.property('button', false);
+    this.$('button', false);
 
 
     // 当前值
-    this.property('value', 0, {
+    this.$('value', 0, {
     
         convert: function (value) {
 
@@ -6787,15 +6771,15 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
     
 
     // 最小值
-    this.property('min', -Infinity, false);
+    this.$('min', -Infinity, false);
 
 
     // 最大值
-    this.property('max', Infinity, false);
+    this.$('max', Infinity, false);
 
 
     // 加减步进
-    this.property('step', 1);
+    this.$('step', 1);
 
 
 
@@ -6840,16 +6824,20 @@ yaxi.Radio = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
 
 
-    this.property('text', '');
+    this.$('text', '');
 
 
-    this.property('checked', false);
+    this.$('checked', false);
 
 
-    this.property('color', '');
+    this.$('color', '');
+
+
+    // 是否禁用
+    this.$('disabled', false);
 
 
 
@@ -6908,6 +6896,9 @@ yaxi.RichEdit = yaxi.Control.extend(function (Class, base) {
 
 
     
+    // 是否禁用
+    this.$('disabled', false);
+
 
 
 }, function RichEdit() {
@@ -6925,11 +6916,15 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.property('name', '');
+    this.$('name', '');
     
 
-    this.property('checked', false);
+    this.$('checked', false);
     
+
+    // 是否禁用
+    this.$('disabled', false);
+
 
 
 }, function SwitchButton() {
@@ -6947,6 +6942,9 @@ yaxi.TextArea = yaxi.TextBox.extend(function () {
 
 
     
+    // 是否禁用
+    this.$('disabled', false);
+
 
 
 }, function TextArea() {
@@ -7315,7 +7313,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
+yaxi.component('Header', function (Class, base) {
 
 
 
@@ -7338,7 +7336,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
 
 
     // 图标
-    this.property('icon', '');
+    this.$('icon', '');
 
 
     this.__on_tap = function (event) {
@@ -7350,11 +7348,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
     }
 
 
-}, function Header() {
-
-    yaxi.Control.apply(this, arguments);
-
-}).register('Header');
+});
 
 
 
@@ -8173,54 +8167,6 @@ yaxi.Control.renderer(function () {
 
 
 
-yaxi.ContentControl.renderer(function (base) {
-
-
-
-
-    this.render = function (control) {
-
-        var view = base.render.call(this, control);
-        var content = control.__init_content() || control.__no_content || '';
-
-        this.renderContent(control, view, content);
-
-        return view;
-    }
-
-    
-    this.renderContent = function (control, view, content) {
-
-        if (typeof content === 'string')
-        {
-            this.renderText(control, view, content);
-        }
-        else
-        {
-            view.textContent = '';
-            this.renderChildren(view, content);
-        }
-    }
-
-
-    this.renderText = function (control, view, text) {
-
-        view.textContent = text;
-    }
-
-
-    this.content = function (control, view) {
-
-        this.renderContent(control, view, control.__init_content());
-    }
-
-
-
-});
-
-
-
-
 yaxi.Box.renderer(function (base) {
 
 
@@ -8253,17 +8199,6 @@ yaxi.Box.renderer(function (base) {
 
 
 });
-
-
-
-
-yaxi.Button.renderer(function (base) {
-
-
-
-
-});
-
 
 
 
@@ -8582,6 +8517,49 @@ yaxi.Text.renderer(function (base) {
 
 
 });
+
+
+
+
+yaxi.Button.renderer(function (base) {
+
+
+
+    function renderContent(control, view) {
+
+        var content = control.__content || '';
+
+        if (typeof content === 'string')
+        {
+            view.textContent = content;
+        }
+        else
+        {
+            view.textContent = '';
+            this.renderChildren(view, content);
+        }
+    }
+
+
+
+    this.render = function (control) {
+
+        var view = base.render.call(this, control);
+
+        renderContent.call(this, control, view);
+        return view;
+    }
+    
+
+    this.text = function (control, view) {
+
+        renderContent.call(this, control, view);
+    }
+
+
+
+});
+
 
 
 
@@ -8954,35 +8932,3 @@ yaxi.Page.renderer(function (base) {
 
 
 
-
-
-
-
-yaxi.Header.renderer(function (base) {
-
-
-
-    yaxi.template(this, '<div class="$class">'
-            + '<span class="yx-header-back iconfont icon-common-back" flag="back" style="display:none;"></span>'
-            + '<span class="yx-header-hide"></span>'
-            + '<span class="yx-header-host"></span>'
-        + '</div>');
-
-
-
-    this.renderContent = function (control, view, content) {
-
-        base.renderContent.call(this, control, view.lastChild, content);
-        view.firstChild.style.display = yaxi.currentPages.length > 1 ? '' : 'none';
-    }
-
-
-
-    this.icon = function (control, view, value) {
-
-        view = view.firstChild.nextSibling;
-        view.className = value ? 'yx-header-icon iconfont ' + value : 'yx-header-hidden';
-    }
-
-
-});
