@@ -14,7 +14,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this));
+        this.loadTemplate(template);
         yaxi.http.get('lesson/list').json(render.bind(this));
     }
 

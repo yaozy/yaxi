@@ -48,6 +48,7 @@ yaxi.Dialog = yaxi.Box.extend(function (Class, base, yaxi) {
 
 		var page = yaxi.currentPage;
 		var options = this.options;
+		var callback;
 
 		if (page && this.onunloading(options) !== false)
 		{
@@ -219,7 +220,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 						width: '80%',
 						minHeight: '250rem',
 						maxHeight: '80%',
-						layout: 'vline'
+						layout: 'column'
 					},
 					[
 						title,

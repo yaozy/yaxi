@@ -1,22 +1,38 @@
 yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
 
 
-    this.$property('text', '');
+
+
+    this.property('name', '');
     
 
-    this.$property('checked', false);
+    this.property('text', '');
+    
+
+    this.property('checked', false);
+
+    
+    this.property('color', '');
 
 
-    this.$property('checkedIcon', 'icon-yaxi-checkbox-checked', {
-        
-        alias: 'checked-icon'
-    });
 
 
-    this.$property('uncheckedIcon', 'icon-yaxi-checkbox-unchecked', {
-        
-        alias: 'unchecked-icon'
-    });
+    this.__set_checked = function (value) {
+
+        this.$push(value);
+        this.trigger('change');
+    }
+
+
+
+    this.__on_tap = function () {
+
+        if (this.trigger('changing') !== false)
+        {
+            this.checked = !this.value;
+        }
+    }
+
 
     
 }, function CheckBox() {

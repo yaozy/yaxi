@@ -10,6 +10,7 @@
 
 
 .yx-control {
+    overflow: hidden;
     box-sizing: border-box;
     flex-grow: 0;
     flex-shrink: 0;
@@ -25,7 +26,6 @@
 .yx-box {
     position: relative;
     display: block;
-    overflow: auto;
     height: auto;
 }
 
@@ -41,9 +41,12 @@
     overflow: hidden;
     width: 100%;
     height: 80rem;
+    border-radius: 0;
+    padding: 0 20rem;
     white-space: nowrap;
     background-color: @bg-primary;
     color: @text-white;
+    font-size: inherit;
 }
 
 .yx-button:active {
@@ -72,11 +75,16 @@
 
 
 .iconfont {
+    position: relative;
     font-size: 50rem;
     font-style: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
 
 
 
@@ -207,6 +215,12 @@
 
 
 
+.yx-scrollbox {
+    overflow: auto;
+}
+
+
+
 .yx-stackbox {
     display: -webkit-flex;
     display: flex;
@@ -312,26 +326,22 @@
 
 
 .yx-checkbox {
-    display: inline-block;
-    height: 60rem;
-    line-height: 60rem;
-}
-
-.yx-checkbox>svg {
-    display: inline-block;
-    vertical-align: middle;
+    display: inline-flex;
     overflow: hidden;
-    margin: 0 8rem;
-    width: 1em;
-    height: 1em;
-    vertical-align: text-bottom;
+    align-content: center;
+    align-items: center;
 }
 
-.yx-checkbox>span {
-    display: inline-block;
-    vertical-align: middle;
-    margin-top: .1em;
+.yx-checkbox-icon {
+    flex-grow: 0;
+    flex-shrink: 0;
+    text-align: center;
 }
+
+.yx-checkbox-content {
+    white-space: nowrap;
+}
+
 
 
 
@@ -435,26 +445,21 @@
 
 
 
-.yx-radiobutton {
-    display: inline-block;
-    height: 60rem;
-    line-height: 60rem;
-}
-
-.yx-radiobutton>svg {
-    display: inline-block;
-    vertical-align: middle;
+.yx-radio {
+    display: inline-flex;
     overflow: hidden;
-    margin: 0 8rem;
-    width: 1em;
-    height: 1em;
-    vertical-align: text-bottom;
+    align-content: center;
+    align-items: center;
 }
 
-.yx-radiobutton>span {
-    display: inline-block;
-    vertical-align: middle;
-    margin-top: .1em;
+.yx-radio-icon {
+    flex-grow: 0;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.yx-radio-content {
+    white-space: nowrap;
 }
 
 
@@ -717,67 +722,11 @@
     align-items: flex-end;
 }
 
-
-.yx-layout-line {
-    display: block;
-    white-space: nowrap;
-    overflow: auto;
+.yx-layout-baseline {
+    align-content: baseline;
+    align-items: baseline;
 }
 
-.yx-layout-line>.yx-control {
-    display: inline-block;
-}
-
-.yx-layout-line>.yx-layout-row,
-.yx-layout-line>.yx-layout-column,
-.yx-layout-line>.yx-layout-row-reverse,
-.yx-layout-line>.yx-layout-column-reverse {
-    display: -webkit-inline-flex;
-    display: inline-flex;
-}
-
-.yx-layout-vline {
-    display: block;
-    overflow: auto;
-}
-
-.yx-layout-vline>.yx-control {
-    display: block;
-}
-
-.yx-layout-vline>.yx-layout-row,
-.yx-layout-vline>.yx-layout-column,
-.yx-layout-vline>.yx-layout-row-reverse,
-.yx-layout-vline>.yx-layout-column-reverse {
-    display: -webkit-flex;
-    display: flex;
-}
-
-.yx-layout-flow {
-    display: block;
-}
-
-.yx-layout-flow>.yx-control {
-    display: inline-block;
-}
-
-.yx-layout-flow>.yx-layout-row,
-.yx-layout-flow>.yx-layout-column,
-.yx-layout-flow>.yx-layout-row-reverse,
-.yx-layout-flow>.yx-layout-column-reverse {
-    display: -webkit-inline-flex;
-    display: inline-flex;
-}
-
-
-
-.yx-layout-page>.yx-control {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
 
 
 

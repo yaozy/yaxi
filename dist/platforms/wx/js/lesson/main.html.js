@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\main.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -46,13 +44,12 @@ return (
 									[
 										"box",
 										{
-											"layout": "line",
+											"layout": "row",
 											"tag": $item.id,
 											"height": "160rem",
 											"margin": "20rem 0",
-											"overflow": "hidden",
 											"events": {
-												"tap": $owner.handleOpenDetail.bind($owner)
+												"tap": this.handleOpenDetail.bind(this)
 											}
 										},
 										[
@@ -75,8 +72,7 @@ return (
 													[
 														"box",
 														{
-															"height": "70rem",
-															"overflow": "hidden"
+															"height": "70rem"
 														},
 														[
 															[
@@ -92,12 +88,10 @@ return (
 														{
 															"data": $item.remark,
 															"item": "$remark",
-															"layout": "flow",
 															"theme": "text-lightest",
 															"height": "50rem",
 															"line-height": "40rem",
-															"font-size": "24rem",
-															"overflow": "hidden"
+															"font-size": "24rem"
 														},
 														function (template, __data_list, __data_scope) {
 
@@ -124,18 +118,17 @@ return (
 																	]
 																);
 
-																})();
+																}).call(this);
 															}
 
 															// end function
-														}
+														}.bind(this)
 													],
 													[
 														"box",
 														{
 															"theme": "important",
-															"height": "40rem",
-															"overflow": "hidden"
+															"height": "40rem"
 														},
 														[
 															[
@@ -152,11 +145,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			]

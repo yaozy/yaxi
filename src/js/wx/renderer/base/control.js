@@ -188,7 +188,7 @@ yaxi.Control.renderer(function (base, yaxi) {
                 list[i] = children[i].$renderer.render(children[i]);
             }
             
-            view[prefix + 'c'] = list;
+            return view[prefix + 'c'] = list;
         }
     }
 

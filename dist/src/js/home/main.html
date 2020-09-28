@@ -8,7 +8,7 @@
     <marquee theme="bg-standard" d:text="$data.marquee" />
     <databox key="host" flex="auto" min-height="200rem" margin-top="10rem">
         <box d:key="$item.id" theme="bg-standard" margin-bottom="10rem" padding="0 20rem">
-            <box layout="row" overflow="hidden" height="70rem" line-height="80rem">
+            <box layout="row" height="70rem" line-height="80rem">
                 <icon theme="text-light" d:icon="$item.icon" font-size="50rem" />
                 <text theme="text-light" d:text="$item.text" font-size="30rem" />
                 <box layout="row" absolute="middle right" margin-top="10rem" theme="text-lightest" font-size="28rem" e:tap="handleMore">
@@ -17,16 +17,16 @@
                 </box>
             </box>
             <databox d:data="$item.data" item="$lesson">
-                <box layout="line" d:tag="$lesson.id" height="160rem" margin="20rem 0" overflow="hidden" e:tap="handleOpenDetail">
+                <box layout="row" d:tag="$lesson.id" height="160rem" margin="20rem 0" e:tap="handleOpenDetail">
                     <image d:src="$lesson.image" width="200rem" height="100%" />
                     <box width="500rem" height="100%" padding-left="20rem">
-                        <box height="50rem" overflow="hidden">
+                        <box height="50rem">
                             <text d:text="$lesson.name" />
                         </box>
-                        <box theme="text-lightest" height="70rem" font-size="24rem" overflow="hidden">
+                        <box theme="text-lightest" height="70rem" font-size="24rem">
                             <text d:text="$lesson.remark" />
                         </box>
-                        <box theme="text-primary" height="40rem" overflow="hidden">
+                        <box theme="text-primary" height="40rem">
                             <text d:text="$lesson.price > 0 ? '￥' + $lesson.price : '免费'" />
                         </box>
                     </box>

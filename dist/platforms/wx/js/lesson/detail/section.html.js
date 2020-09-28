@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\section.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -23,13 +21,12 @@ return (
 					[
 						"box",
 						{
-							"layout": "line",
+							"layout": "row",
 							"tag": $item.id,
 							"height": "160rem",
 							"margin-bottom": "20rem",
-							"overflow": "hidden",
 							"events": {
-								"tap": $owner.handleOpenDetail.bind($owner)
+								"tap": this.handleOpenDetail.bind(this)
 							}
 						},
 						[
@@ -52,8 +49,7 @@ return (
 									[
 										"box",
 										{
-											"height": "70rem",
-											"overflow": "hidden"
+											"height": "70rem"
 										},
 										[
 											[
@@ -68,7 +64,6 @@ return (
 										"box",
 										{
 											"height": "50rem",
-											"overflow": "hidden",
 											"theme": "text-lighter",
 											"font-size": "28rem"
 										},
@@ -103,8 +98,7 @@ return (
 										"box",
 										{
 											"theme": "text-primary",
-											"height": "40rem",
-											"overflow": "hidden"
+											"height": "40rem"
 										},
 										[
 											[
@@ -121,11 +115,11 @@ return (
 					]
 				);
 
-				})();
+				}).call(this);
 			}
 
 			// end function
-		}
+		}.bind(this)
 	]
 )
 

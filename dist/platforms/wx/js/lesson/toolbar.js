@@ -1,6 +1,6 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./toolbar.html');
-const model = require('./model/toolbar');
+const model = require('./toolbar-model');
 
 
 module.exports = yaxi.Box.extend(function (Class, base) {
@@ -90,7 +90,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this, {}, model));
+        this.loadTemplate(template, {}, model);
     }
 
 

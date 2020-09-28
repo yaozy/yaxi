@@ -139,6 +139,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 if (typeof Class === 'string' && !(Class = classes[Class]))
                 {
+                    if (options[0] === 'slot')
+                    {
+                        throwError('can only use slot in component!');
+                    }
+
                     throwError('"' + options[0] + '" doesn\'t register!');
                 }
                 
@@ -146,7 +151,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
                 control = new Class();
                 control.parent = parent;
-                control.load(options, scope);
+                control.__load(options, scope);
 
                 return control;
             }
@@ -178,7 +183,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 扩展属性实现
-    this.$property = yaxi.impl.property();
+    this.property = yaxi.impl.property();
 
 
 
@@ -187,24 +192,25 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     function build_set_change(name, convert) {
 
         var init = create;
+        var key = '__set_' + name;
 
         return function (value) {
 
-            var storage, changes;
+            var changes;
 
             value = convert ? convert.call(this, value) : value;
 
             if (changes = this.__changes)
             {
-                if (value !== changes[name])
+                if (value !== changes[name] && !(this[key] && this[key](value) === false))
                 {
                     changes[name] = value;
                     this.__dirty || patch(this);
                 }
             }
-            else if (value !== (storage = this.$storage)[name])
+            else if (value !== this.$storage[name] && !(this[key] && this[key](value) === false))
             {
-                (this.__changes = init(storage))[name] = value;
+                (this.__changes = init(this.$storage))[name] = value;
                 this.__dirty || patch(this);
             }
         }
@@ -214,15 +220,24 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 构建不触发变更通知的属性
     function build_set_unchange(name, convert) {
 
+        var key = '__set_' + name;
+
         return convert ? function (value) {
 
-            this.$storage[name] = convert.call(this, value);
+            if (!this[key] || this[key](value) !== false)
+            {
+                this.$storage[name] = convert.call(this, value);
+            }
 
         } : function (value) {
 
-            this.$storage[name] = value;
+            if (!this[key] || this[key](value) !== false)
+            {
+                this.$storage[name] = value;
+            }
         }
     }
+
 
     
     this.__build_get = function (name, options) {
@@ -242,6 +257,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         return (options.change ? build_set_change : build_set_unchange)(name, options.convert);
     }
+
 
 
 
@@ -276,7 +292,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 控件唯一id
-    this.$property('uuid', 0, {
+    this.property('uuid', 0, {
 
         get: function () {
 
@@ -287,7 +303,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
-    this.$property('id', '', false);
+    this.property('id', '', false);
 
 
     // 默认class
@@ -297,7 +313,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     
     // 控件风格
-    this.$property('theme', '', {
+    this.property('theme', '', {
 
         kind: 'class',
         data: 'yx-theme-'
@@ -305,16 +321,20 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
 
 
+    // 插槽名
+    this.property('slot', '', false);
+
+
     // 是否隐藏
-    this.$property('hidden', false);
+    this.property('hidden', false);
 
 
     // 是否禁用
-    this.$property('disabled', false);
+    this.property('disabled', false);
 
 
     // 是否选中
-    this.$property('selected', false, {
+    this.property('selected', false, {
 
         change: false,
 
@@ -342,7 +362,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 选中时状态
-    this.$property('selectedStatus', null, {
+    this.property('selectedStatus', null, {
         
         change: false,
 
@@ -409,11 +429,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
 
     // 自定义key
-    this.$property('key', '', false);
+    this.property('key', '', false);
     
 
     // 自定义tag
-    this.$property('tag', null, false);
+    this.property('tag', null, false);
 
 
 
@@ -422,7 +442,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 顶级控件
-    this.$property('root', null, {
+    this.property('root', null, {
 
         get: function () {
 
@@ -445,7 +465,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     // 布局使用flex, 在容器上设置layout实现
     // 绝对定位使用absolute, 设置了absolute的情况下top, left, right, bottom属性才生效
     // 这么限制的目的是为了让系统能够更容易的跨平台, 使用上述布局体系也能很方便的实现业务布局需求
-    this.$property('absolute', '', {
+    this.property('absolute', '', {
 
         kind: 'class',
         data: 'yx-absolute-'
@@ -454,7 +474,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 是否使用静态定位(默认使用相对定位)
-    this.$property('static', false, {
+    this.property('static', false, {
 
         kind: 'class',
         data: 'yx-static'
@@ -465,7 +485,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     var style = function (name, data) {
 
-        this.$property(name, '', {
+        this.property(name, '', {
 
             alias: name.replace(/-(\w)/g, function (_, x) {
         
@@ -860,58 +880,78 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
      *   ]
      * ]
     */
-    this.load = function (options, scope) {
+    this.__load = function (options, scope) {
 
-        var attributes, properties, property, changes, fn, value;
+        var data, fn;
 
-        if (attributes = options[1])
+        if (data = options[1])
         {
-            properties = this.$properties;
+            this.__load_attributes(data);
+        }
 
-            for (var name in attributes)
+        if ((data = options[2]) && (fn = this.__load_children))
+        {
+            fn.call(this, data, scope);
+        }
+
+        return this;
+    }
+
+
+    this.__load_attributes = function (attributes) {
+
+        var properties = this.$properties;
+        var property, changes, fn, value;
+
+        for (var name in attributes)
+        {
+            value = attributes[name];
+
+            if (property = properties[name])
             {
-                value = attributes[name];
+                // 从转换器中获取存储名以解决别名存储的问题
+                name = property.name;
 
-                if (property = properties[name])
+                if (fn = property.convert)
                 {
-                    // 从转换器中获取存储名以解决别名存储的问题
-                    name = property.name;
+                    value = fn.call(this, value);
 
-                    if (fn = property.convert)
+                    // 有属性值才处理, 像events, bindings等纯转换器不处理
+                    if (name)
                     {
-                        value = fn.call(this, value);
-
-                        // 有属性值才处理, 像events, bindings等纯转换器不处理
-                        if (name)
+                        if (property.change) // 需要处理变化
                         {
-                            if (property.change) // 需要处理变化
-                            {
-                                (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
-                            }
-                            else
-                            {
-                                this.$storage[name] = value;
-                            }
+                            (changes || (changes = this.__changes = create(this.$storage)))[name] = value;
+                        }
+                        else
+                        {
+                            this.$storage[name] = value;
                         }
                     }
-                    else if (fn !== false)
-                    {
-                        this[name] = value;
-                    }
                 }
-                else
+                else if (fn !== false)
                 {
                     this[name] = value;
                 }
             }
+            else
+            {
+                this[name] = value;
+            }
         }
+    }
 
-        if ((value = options[2]) && (fn = this.__load_subdata))
-        {
-            fn.call(this, value, scope);
-        }
 
-        return this;
+
+    this.load = function (options) {
+
+        this.__load(options);
+    }
+
+
+    this.loadTemplate = function (template, data, model) {
+
+        this.__load(template.call(this, data, model));
     }
     
 
@@ -969,19 +1009,9 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // content控件加载计数器, 如果大于0表示正在加载content控件内部子控件
-    yaxi.__content_count = 0;
-
-
     this.$properties.events = {
         
         convert: function (events) {
-
-            // 容器控件内部不允许绑定事件
-            if (yaxi.__content_count > 0)
-            {
-                throw new Error('register event error: no support event inside the content control!');
-            }
 
             for (var name in events)
             {
@@ -1037,7 +1067,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             {
                 target = parent.parent;
             }
-            else if (parent.__is_content) // 记录下content控件, 仅最外层的content control触发事件
+            else if (parent.__is_content) // 记录下content控件, content控件内部不能触发事件
             {
                 target = parent;
             }
@@ -1092,7 +1122,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__model = this.__b_onchange = this.__d_scope = null;
+        this.parent = this.__b_onchange = this.__d_scope = null;
     }
 
 
@@ -1109,6 +1139,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
             }
         }
     }
+
 
 
     

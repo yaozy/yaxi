@@ -1,21 +1,16 @@
 .yx-checkbox {
-    display: inline-block;
-    height: 60rem;
-    line-height: 60rem;
-}
-
-.yx-checkbox>svg {
-    display: inline-block;
-    vertical-align: middle;
+    display: inline-flex;
     overflow: hidden;
-    margin: 0 8rem;
-    width: 1em;
-    height: 1em;
-    vertical-align: text-bottom;
+    align-content: center;
+    align-items: center;
 }
 
-.yx-checkbox>span {
-    display: inline-block;
-    vertical-align: middle;
-    margin-top: .1em;
+.yx-checkbox-icon {
+    flex-grow: 0;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.yx-checkbox-content {
+    white-space: nowrap;
 }

@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\address.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -20,7 +18,7 @@ return (
 					"text-align": "center",
 					"line-height": "100rem",
 					"events": {
-						"tap": $owner.handleAdd.bind($owner)
+						"tap": this.handleAdd.bind(this)
 					}
 				},
 				[
@@ -29,7 +27,7 @@ return (
 						{
 							"width": "auto",
 							"icon": "common-search",
-							"content": "添加地址",
+							"text": "添加地址",
 							"layout": "row middle",
 							"theme": "text-primary"
 						}
@@ -64,13 +62,14 @@ return (
 										"box",
 										{
 											"layout": "row middle",
-											"height": "150rem"
+											"height": "180rem"
 										},
 										[
 											[
 												"icon",
 												{
 													"width": "100rem",
+													"font-size": "60rem",
 													"bindings": {
 														"icon":  function () { return $item.gendle ? 'common-man' : 'common-woman' }
 													}
@@ -109,6 +108,7 @@ return (
 													[
 														"text",
 														{
+															"margin-top": "20rem",
 															"theme": "text-lightest",
 															"font-size": "28rem",
 															"bindings": {
@@ -123,24 +123,27 @@ return (
 									[
 										"box",
 										{
-											"tag": $index,
 											"layout": "row middle",
+											"height": "100rem",
 											"padding": "0 20rem",
-											"theme": "line-lightest line-top"
+											"theme": "line-lightest line-top",
+											"bindings": {
+												"tag":  function () { return ($item && $item.$index != null ? $item.$index : $index) }
+											}
 										},
 										[
 											[
-												"iconbutton",
+												"checkbox",
 												{
-													"content": "默认地址",
+													"text": "默认地址",
 													"layout": "row before",
 													"flex": "auto",
 													"bindings": {
-														"icon":  function () { return $item.default ? 'common-checked' : 'common-unchecked' },
-														"theme":  function () { return $item.default ? 'text-warning' : 'text-lighter' }
+														"theme":  function () { return $item.default ? 'text-warning' : 'text-lighter' },
+														"checked":  function () { return $item.default }
 													},
 													"events": {
-														"tap": $owner.handleDefault.bind($owner)
+														"tap": this.handleDefault.bind(this)
 													}
 												}
 											],
@@ -150,7 +153,7 @@ return (
 													"padding": "0 30rem",
 													"theme": "text-lightest",
 													"events": {
-														"tap": $owner.handleEdit.bind($owner)
+														"tap": this.handleEdit.bind(this)
 													}
 												},
 												"编辑"
@@ -161,7 +164,7 @@ return (
 													"padding": "0 30rem",
 													"theme": "text-lightest",
 													"events": {
-														"tap": $owner.handleDelete.bind($owner)
+														"tap": this.handleDelete.bind(this)
 													}
 												},
 												"删除"
@@ -172,11 +175,11 @@ return (
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
+				}.bind(this)
 			]
 		]
 	]

@@ -21,7 +21,7 @@ yaxi.Header = yaxi.ContentControl.extend(function (Class, base, yaxi) {
 
 
     // 图标
-    this.$property('icon', '');
+    this.property('icon', '');
 
 
     this.__on_tap = function (event) {

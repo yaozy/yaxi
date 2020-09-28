@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\order.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -26,7 +24,7 @@ return (
 					"theme": "bg-standard line-lightest line-bottom",
 					"padding": "0 20rem",
 					"events": {
-						"tap": $owner.handleSwitch.bind($owner)
+						"tap": this.handleSwitch.bind(this)
 					}
 				},
 				function (template, __data_list, __data_scope) {
@@ -47,17 +45,17 @@ return (
 									"flex": "auto",
 									"text-align": "center",
 									"bindings": {
-										"theme":  function () { return ($item.$index != null ? $item.$index : $index) === $model.status ? 'text-primary' : '' }
+										"theme":  function () { return ($item && $item.$index != null ? $item.$index : $index) === $model.status ? 'text-primary' : '' }
 									}
 								}
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
+				}.bind(this)
 			],
 			[
 				"databox",
@@ -115,13 +113,13 @@ return (
 												{
 													"icon": "common-delete",
 													"absolute": "middle right",
-													"width": "100rem",
+													"width": "120rem",
 													"bindings": {
-														"tag":  function () { return ($item.$index != null ? $item.$index : $index) },
+														"tag":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 														"hidden":  function () { return $item.status < 3 }
 													},
 													"events": {
-														"tap": $owner.handleDelete.bind($owner)
+														"tap": this.handleDelete.bind(this)
 													}
 												}
 											]
@@ -131,7 +129,7 @@ return (
 										"databox",
 										{
 											"data": $item.data,
-											"item": "$lesson",
+											"item": "$detail",
 											"padding": "0 20rem"
 										},
 										function (template, __data_list, __data_scope) {
@@ -144,26 +142,25 @@ return (
 												// 添加作用域解决循环变量绑定变化的问题
 												(function () {
 
-												var $lesson = __data_list[$index];
+												var $detail = __data_list[$index];
 
-												template($index, $lesson,
+												template($index, $detail,
 													[
 														"box",
 														{
-															"tag": $lesson.id,
-															"layout": "line",
+															"tag": $detail.lessonid,
+															"layout": "row",
 															"height": "100rem",
 															"margin": "20rem 0",
-															"overflow": "hidden",
 															"events": {
-																"tap": $owner.handleOpenDetail.bind($owner)
+																"tap": this.handleOpenDetail.bind(this)
 															}
 														},
 														[
 															[
 																"image",
 																{
-																	"src": $lesson.image,
+																	"src": $detail.image,
 																	"width": "140rem",
 																	"height": "100%"
 																}
@@ -179,14 +176,13 @@ return (
 																	[
 																		"box",
 																		{
-																			"height": "50rem",
-																			"overflow": "hidden"
+																			"height": "50rem"
 																		},
 																		[
 																			[
 																				"text",
 																				{
-																					"text": $lesson.name
+																					"text": $detail.name
 																				}
 																			]
 																		]
@@ -197,7 +193,6 @@ return (
 																			"layout": "row middle",
 																			"theme": "text-lightest",
 																			"height": "40rem",
-																			"overflow": "hidden",
 																			"font-size": "28rem"
 																		},
 																		[
@@ -209,7 +204,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": '￥' + $lesson.price
+																					"text": '￥' + $detail.price
 																				}
 																			],
 																			[
@@ -222,7 +217,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": $lesson.amount
+																					"text": $detail.amount
 																				}
 																			]
 																		]
@@ -233,11 +228,11 @@ return (
 													]
 												);
 
-												})();
+												}).call(this);
 											}
 
 											// end function
-										}
+										}.bind(this)
 									],
 									[
 										"icon",
@@ -248,10 +243,10 @@ return (
 											"height": "120rem",
 											"line-height": "120rem",
 											"font-size": "120rem",
-											"top": "90rem",
+											"top": "300rem",
 											"right": "20rem",
 											"bindings": {
-												"tag":  function () { return ($item.$index != null ? $item.$index : $index) },
+												"tag":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 												"hidden":  function () { return $item.status < 3 }
 											}
 										}
@@ -284,7 +279,7 @@ return (
 													"height": "60rem",
 													"margin-right": "20rem",
 													"bindings": {
-														"hidden":  function () { return $item.status === 1 }
+														"hidden":  function () { return $item.status !== 1 }
 													}
 												},
 												"去付款"
@@ -297,7 +292,7 @@ return (
 													"height": "60rem",
 													"margin-right": "20rem",
 													"bindings": {
-														"hidden":  function () { return $item.status === 2 }
+														"hidden":  function () { return $item.status !== 2 }
 													}
 												},
 												"提醒发货"
@@ -308,11 +303,11 @@ return (
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
+				}.bind(this)
 			]
 		]
 	]

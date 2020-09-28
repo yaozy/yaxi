@@ -15,7 +15,7 @@ new Compressor()
         'js/h5/base/(init|event|http).js',
         'js/h5/renderer/base/(control|content-control|box).js',
         'js/h5/renderer/base/*.js',
-        'js/h5/renderer/form/(textbox|checkbox|numberbox|passwordbox|memo|radiobutton|switchbutton).js',
+        'js/h5/renderer/form/*.js',
         'js/h5/renderer/page/page.js',
         'js/h5/renderer/page/*.js',
     ])

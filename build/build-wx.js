@@ -15,6 +15,7 @@ new Compressor()
         'js/wx/base/(init|event).js',
         'js/wx/renderer/base/(control|content-control|box).js',
         'js/wx/renderer/base/*.js',
+        'js/wx/renderer/form/*.js',
         'js/wx/renderer/page/page.js',
         'js/wx/renderer/page/*.js',
     ])

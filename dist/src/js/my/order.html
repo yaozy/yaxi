@@ -29,21 +29,21 @@
                     b:hidden="$item.status < 3" 
                     icon="common-delete" 
                     absolute="middle right" 
-                    width="100rem"
+                    width="120rem"
                     e:tap="handleDelete" />
             </box>
-            <databox d:data="$item.data" item="$lesson" padding="0 20rem">
-                <box d:tag="$lesson.id" layout="line" height="100rem" margin="20rem 0" overflow="hidden" e:tap="handleOpenDetail">
-                    <image d:src="$lesson.image" width="140rem" height="100%" />
+            <databox d:data="$item.data" item="$detail" padding="0 20rem">
+                <box d:tag="$detail.lessonid" layout="row" height="100rem" margin="20rem 0" e:tap="handleOpenDetail">
+                    <image d:src="$detail.image" width="140rem" height="100%" />
                     <box width="560rem" height="100%" padding-left="20rem">
-                        <box height="50rem" overflow="hidden">
-                            <text d:text="$lesson.name" />
+                        <box height="50rem">
+                            <text d:text="$detail.name" />
                         </box>
-                        <box layout="row middle" theme="text-lightest" height="40rem" overflow="hidden" font-size="28rem">
+                        <box layout="row middle" theme="text-lightest" height="40rem" font-size="28rem">
                             <text>单价:</text>
-                            <text d:text="'￥' + $lesson.price" />
+                            <text d:text="'￥' + $detail.price" />
                             <text margin-left="50rem">数量:</text>
-                            <text d:text="$lesson.amount" />
+                            <text d:text="$detail.amount" />
                         </box>
                     </box>
                 </box>
@@ -57,19 +57,19 @@
                 height="120rem"
                 line-height="120rem"
                 font-size="120rem"
-                top="90rem"
+                top="300rem"
                 right="20rem" />
             <box height="80rem" line-height="80rem" theme="line-lightest line-top" padding-left="20rem">
                 <text>总价:</text>
                 <text d:text="'￥' + $item.total" />
                 <button 
-                    b:hidden="$item.status === 1" 
+                    b:hidden="$item.status !== 1" 
                     absolute="middle right" 
                     width="200rem" 
                     height="60rem" 
                     margin-right="20rem">去付款</button>
                 <button 
-                    b:hidden="$item.status === 2" 
+                    b:hidden="$item.status !== 2" 
                     absolute="middle right" 
                     width="200rem" 
                     height="60rem" 

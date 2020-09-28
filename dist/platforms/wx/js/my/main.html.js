@@ -1,12 +1,12 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\main.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
 		"box",
 		{
-			"theme": "bg-thick"
+			"theme": "bg-thick",
+			"layout": "column",
+			"overflow": "auto"
 		},
 		[
 			[
@@ -40,7 +40,7 @@ return (
 					[
 						"box",
 						{
-							"layout": "vline",
+							"layout": "column",
 							"width": "550rem"
 						},
 						[
@@ -82,7 +82,8 @@ return (
 			[
 				"databox",
 				{
-					"data": $data
+					"data": $data,
+					"overflow": "hidden"
 				},
 				function (template, __data_list, __data_scope) {
 
@@ -122,9 +123,10 @@ return (
 										{
 											"data": $item.data,
 											"item": "$subitem",
+											"overflow": "hidden",
 											"padding": "20rem 50rem",
 											"events": {
-												"tap": $owner.handleOpen.bind($owner)
+												"tap": this.handleOpen.bind(this)
 											}
 										},
 										function (template, __data_list, __data_scope) {
@@ -147,7 +149,7 @@ return (
 															"size": "60rem",
 															"font-size": "28rem",
 															"theme": "text-light",
-															"content": $subitem.text,
+															"text": $subitem.text,
 															"tag": $subitem.url,
 															"width": "160rem",
 															"height": "140rem"
@@ -155,30 +157,21 @@ return (
 													]
 												);
 
-												})();
+												}).call(this);
 											}
 
 											// end function
-										}
+										}.bind(this)
 									]
 								]
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
-			],
-			[
-				"button",
-				{
-					"events": {
-						"tap": $owner.openTest.bind($owner)
-					}
-				},
-				"Open Test"
+				}.bind(this)
 			]
 		]
 	]

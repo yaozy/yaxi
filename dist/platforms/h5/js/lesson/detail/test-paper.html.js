@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\test-paper.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -29,8 +27,7 @@ return (
 							[
 								"box",
 								{
-									"height": "70rem",
-									"overflow": "hidden"
+									"height": "70rem"
 								},
 								[
 									[
@@ -45,7 +42,6 @@ return (
 								"box",
 								{
 									"height": "50rem",
-									"overflow": "hidden",
 									"theme": "text-lighter",
 									"font-size": "28rem"
 								},
@@ -80,11 +76,11 @@ return (
 					]
 				);
 
-				})();
+				}).call(this);
 			}
 
 			// end function
-		}
+		}.bind(this)
 	]
 )
 

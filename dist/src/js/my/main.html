@@ -1,23 +1,22 @@
-<box theme="bg-thick">
+<box theme="bg-thick" layout="column" overflow="auto">
     <box layout="row middle" height="250rem" theme="bg-primary">
         <box width="250rem" padding-left="50rem">
             <image b:src="$model.image" width="150rem" height="150rem" border-radius="75rem" />
         </box>
-        <box layout="vline" width="550rem">
+        <box layout="column" width="550rem">
             <Text b:text="$model.name" theme="text-white" />
             <Text b:text="$model.nickname" theme="text-white" margin-top="20rem" font-size="24rem" />
             <Text b:text="$model.tel" theme="text-white" margin-top="10rem" font-size="24rem" />
         </box>
     </box>
-    <databox d:data="$data">
+    <databox d:data="$data" overflow="hidden">
         <box theme="bg-standard" margin-top="10rem">
             <box theme="line-lightest line-bottom" padding-left="50rem" line-height="80rem">
                 <text d:text="$item.text" />
             </box>
-            <databox d:data="$item.data" item="$subitem" padding="20rem 50rem" e:tap="handleOpen">
-                <iconbutton d:icon="$subitem.icon" size="60rem" font-size="28rem" theme="text-light" d:content="$subitem.text" d:tag="$subitem.url" width="160rem" height="140rem" />
+            <databox d:data="$item.data" item="$subitem" overflow="hidden" padding="20rem 50rem" e:tap="handleOpen">
+                <iconbutton d:icon="$subitem.icon" size="60rem" font-size="28rem" theme="text-light" d:text="$subitem.text" d:tag="$subitem.url" width="160rem" height="140rem" />
             </databox>
         </box>
     </databox>
-    <button e:tap="openTest">Open Test</button>
 </box>

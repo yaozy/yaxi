@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\test\\model.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -33,7 +31,7 @@ return (
 									"flex": "auto",
 									"content": "Append",
 									"events": {
-										"tap": $owner.handleAppend.bind($owner)
+										"tap": this.handleAppend.bind(this)
 									}
 								}
 							],
@@ -43,7 +41,7 @@ return (
 									"flex": "auto",
 									"content": "Replace",
 									"events": {
-										"tap": $owner.handleReplace.bind($owner)
+										"tap": this.handleReplace.bind(this)
 									}
 								}
 							],
@@ -53,7 +51,7 @@ return (
 									"flex": "auto",
 									"content": "Remove",
 									"events": {
-										"tap": $owner.handleRemove.bind($owner)
+										"tap": this.handleRemove.bind(this)
 									}
 								}
 							],
@@ -63,7 +61,7 @@ return (
 									"flex": "auto",
 									"content": "Reorder",
 									"events": {
-										"tap": $owner.handleReorder.bind($owner)
+										"tap": this.handleReorder.bind(this)
 									}
 								}
 							]
@@ -106,7 +104,7 @@ return (
 														"text",
 														{
 															"bindings": {
-																"text":  function () { return ($item.$index != null ? $item.$index : $index) }
+																"text":  function () { return ($item && $item.$index != null ? $item.$index : $index) }
 															}
 														}
 													]
@@ -170,17 +168,17 @@ return (
 																		"text",
 																		{
 																			"bindings": {
-																				"text":  function () { return 'index:' + ($item.$index != null ? $item.$index : $index) + '  subindex:' + ($subitem.$index != null ? $subitem.$index : $subindex) + '  text:' + $subitem.text }
+																				"text":  function () { return 'index:' + ($item && $item.$index != null ? $item.$index : $index) + '  subindex:' + ($subitem && $subitem.$index != null ? $subitem.$index : $subindex) + '  text:' + $subitem.text }
 																			}
 																		}
 																	]
 																);
 
-																})();
+																}).call(this);
 															}
 
 															// end function
-														}
+														}.bind(this)
 													]
 												]
 											]
@@ -188,11 +186,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			]

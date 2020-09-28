@@ -5,6 +5,7 @@
   color: transparent;
 }
 .yx-control {
+  overflow: hidden;
   box-sizing: border-box;
   flex-grow: 0;
   flex-shrink: 0;
@@ -16,7 +17,6 @@
 .yx-box {
   position: relative;
   display: block;
-  overflow: auto;
   height: auto;
 }
 .yx-button {
@@ -28,9 +28,12 @@
   overflow: hidden;
   width: 100%;
   height: 80rpx;
+  border-radius: 0;
+  padding: 0 20rpx;
   white-space: nowrap;
   background-color: #1c86ee;
   color: #ffffff;
+  font-size: inherit;
 }
 .yx-button:active {
   background-color: #5eaadd;
@@ -48,10 +51,14 @@
   text-align: center;
 }
 .iconfont {
+  position: relative;
   font-size: 50rpx;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 .yx-iconbutton {
   display: inline-flex;
@@ -108,6 +115,14 @@
   width: 5rpx;
   height: 100%;
 }
+.yx-loading {
+  display: inline-block;
+  width: 80rpx;
+  height: 80rpx;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M33.567 33.908c-8.886 9.074-8.733 23.64.34 32.525s23.64 8.733 32.526-.34m-2.787-2.73c-7.346 7.503-19.436 7.7-27.01.283s-7.629-19.508-.282-27.01'%3E%3CanimateTransform attributeName='transform' attributeType='XML' type='rotate' dur='1s' from='0 50 50' to='360 50 50' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
 .yx-marquee {
   position: relative;
   height: 60rpx;
@@ -141,6 +156,10 @@
   height: auto;
   background-color: #000000;
   opacity: 0.3;
+  z-index: -1;
+}
+.yx-scrollbox {
+  overflow: auto;
 }
 .yx-stackbox {
   display: -webkit-flex;
@@ -218,25 +237,22 @@
   border-width: 0 0 0.5px 0;
   padding: 0 10rpx;
   outline: none;
+  font-size: 32rpx;
+  color: #212121;
 }
 .yx-checkbox {
-  display: inline-block;
-  height: 60rpx;
-  line-height: 60rpx;
-}
-.yx-checkbox > svg {
-  display: inline-block;
-  vertical-align: middle;
+  display: inline-flex;
   overflow: hidden;
-  margin: 0 8rpx;
-  width: 1em;
-  height: 1em;
-  vertical-align: text-bottom;
+  align-content: center;
+  align-items: center;
 }
-.yx-checkbox > span {
-  display: inline-block;
-  vertical-align: middle;
-  margin-top: 0.1em;
+.yx-checkbox-icon {
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+.yx-checkbox-content {
+  white-space: nowrap;
 }
 .yx-memo {
   display: inline-block;
@@ -317,24 +333,19 @@
   right: 1rpx;
   margin-top: -0.6em;
 }
-.yx-radiobutton {
-  display: inline-block;
-  height: 60rpx;
-  line-height: 60rpx;
-}
-.yx-radiobutton > svg {
-  display: inline-block;
-  vertical-align: middle;
+.yx-radio {
+  display: inline-flex;
   overflow: hidden;
-  margin: 0 8rpx;
-  width: 1em;
-  height: 1em;
-  vertical-align: text-bottom;
+  align-content: center;
+  align-items: center;
 }
-.yx-radiobutton > span {
-  display: inline-block;
-  vertical-align: middle;
-  margin-top: 0.1em;
+.yx-radio-icon {
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+.yx-radio-content {
+  white-space: nowrap;
 }
 .yx-switchbutton {
   position: relative;
@@ -375,61 +386,12 @@
 }
 .yx-dialog {
   position: absolute;
-  overflow: hidden;
-  width: 630rpx;
-  height: auto;
-  min-height: 240rpx;
-  border-radius: 10rpx;
-  background-color: #ffffff;
-  z-index: 20;
-}
-.yx-dialog > .yx-header {
-  position: relative;
-  text-align: center;
-  font-weight: bold;
-  box-shadow: none;
-  color: #37474f;
-}
-.yx-dialog > .yx-content {
-  position: relative;
-  top: 0;
-  min-height: 180rpx;
-  background-color: #ffffff;
-}
-.yx-dialog > .yx-footer {
-  position: relative;
-  height: 80rpx;
-  line-height: 60rpx;
-  box-shadow: none;
-  border-top-width: 1px;
-  border-color: #263238;
-}
-.yx-mask {
-  position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
   overflow: hidden;
-  z-index: 20;
-  background-color: #000000;
-  opacity: 0.2;
-}
-.yx-messagebox {
-  position: absolute;
-  left: 10%;
-  width: 80%;
-  z-index: 20;
-  background-color: #ffffff;
-}
-.yx-messagebox > .yx-content {
-  max-height: 60%;
-  padding: 30rpx;
-  background-color: #ffffff;
-}
-.yx-messagebox > .yx-footer > .yx-button {
-  height: 80rpx;
-  border-color: #263238;
 }
 .yx-header {
   display: inline-flex;
@@ -475,6 +437,9 @@
   bottom: 0;
   width: 100%;
   height: auto;
+  font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
+  font-size: 32rpx;
+  color: #212121;
 }
 .yx-page {
   position: absolute;
@@ -488,24 +453,6 @@
   height: auto;
   background-color: #ffffff;
   z-index: 1;
-  font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
-  font-size: 32rpx;
-}
-.yx-toast {
-  position: absolute;
-  border: 1px solid #263238;
-  border-radius: 10rpx;
-  padding: 20rpx;
-  background-color: #212121;
-  color: #ffffff;
-  z-index: 30;
-}
-.yx-toast-loading {
-  width: 1.5em;
-  height: 1.5em;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M33.567 33.908c-8.886 9.074-8.733 23.64.34 32.525s23.64 8.733 32.526-.34m-2.787-2.73c-7.346 7.503-19.436 7.7-27.01.283s-7.629-19.508-.282-27.01'%3E%3CanimateTransform attributeName='transform' attributeType='XML' type='rotate' dur='1s' from='0 50 50' to='360 50 50' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: contain;
 }
 .yx-absolute-left {
   position: absolute;
@@ -600,54 +547,9 @@
   align-content: flex-end;
   align-items: flex-end;
 }
-.yx-layout-line {
-  display: block;
-  white-space: nowrap;
-  overflow: auto;
-}
-.yx-layout-line > .yx-control {
-  display: inline-block;
-}
-.yx-layout-line > .yx-layout-row,
-.yx-layout-line > .yx-layout-column,
-.yx-layout-line > .yx-layout-row-reverse,
-.yx-layout-line > .yx-layout-column-reverse {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-}
-.yx-layout-vline {
-  display: block;
-  overflow: auto;
-}
-.yx-layout-vline > .yx-control {
-  display: block;
-}
-.yx-layout-vline > .yx-layout-row,
-.yx-layout-vline > .yx-layout-column,
-.yx-layout-vline > .yx-layout-row-reverse,
-.yx-layout-vline > .yx-layout-column-reverse {
-  display: -webkit-flex;
-  display: flex;
-}
-.yx-layout-flow {
-  display: block;
-}
-.yx-layout-flow > .yx-control {
-  display: inline-block;
-}
-.yx-layout-flow > .yx-layout-row,
-.yx-layout-flow > .yx-layout-column,
-.yx-layout-flow > .yx-layout-row-reverse,
-.yx-layout-flow > .yx-layout-column-reverse {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-}
-.yx-layout-page > .yx-control {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.yx-layout-baseline {
+  align-content: baseline;
+  align-items: baseline;
 }
 .yx-theme-bg-black {
   background-color: #000000;

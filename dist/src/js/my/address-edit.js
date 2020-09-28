@@ -13,7 +13,7 @@ module.exports = yaxi.Dialog.extend(function (Class, base) {
 
     this.init = function (options) {
 
-        this.load(template(this, {}, model = options));
+        this.loadTemplate(template, {}, model = options);
     }
 
 

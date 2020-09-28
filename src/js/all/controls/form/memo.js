@@ -1,13 +1,17 @@
 yaxi.Memo = yaxi.Control.extend(function () {
 
 
-    this.$property('value', '');
+    
+    this.property('name', '');
+    
+
+    this.property('value', '');
 
     
-    this.$property('placeholder', '');
+    this.property('placeholder', '');
 
 
-    this.$property('text', '');
+    this.property('text', '');
 
 
     

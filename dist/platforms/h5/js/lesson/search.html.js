@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\search.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -19,7 +17,7 @@ return (
 						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
-						"tap": $owner.handleClear.bind($owner)
+						"tap": this.handleClear.bind(this)
 					}
 				}
 			],
@@ -47,8 +45,8 @@ return (
 								"value":  function () { return $model.text }
 							},
 							"events": {
-								"input": $owner.handleInput.bind($owner),
-								"focus": $owner.handleFocus.bind($owner)
+								"input": this.handleInput.bind(this),
+								"focus": this.handleFocus.bind(this)
 							}
 						}
 					],
@@ -74,7 +72,7 @@ return (
 								"hidden":  function () { return $model.hidden }
 							},
 							"events": {
-								"tap": $owner.handleClear.bind($owner)
+								"tap": this.handleClear.bind(this)
 							}
 						},
 						"清除"
@@ -98,7 +96,7 @@ return (
 							"line-height": "80rem",
 							"padding": "0 20rem",
 							"events": {
-								"tap": $owner.handleSearch.bind($owner)
+								"tap": this.handleSearch.bind(this)
 							}
 						},
 						[
@@ -128,7 +126,7 @@ return (
 									"theme": "text-lighter",
 									"margin-left": "50rem",
 									"events": {
-										"tap": $owner.handleCancel.bind($owner)
+										"tap": this.handleCancel.bind(this)
 									}
 								},
 								"取消搜索"
@@ -140,7 +138,7 @@ return (
 						{
 							"key": "search-body",
 							"events": {
-								"tap": $owner.handleSuggest.bind($owner)
+								"tap": this.handleSuggest.bind(this)
 							}
 						},
 						function (template, __data_list, __data_scope) {
@@ -189,11 +187,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			]

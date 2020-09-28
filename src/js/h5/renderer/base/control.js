@@ -41,6 +41,8 @@ yaxi.Control.renderer(function () {
 
     function init_template(target, control) {
 
+        var view;
+        
         div.innerHTML = target.__html_template.replace('$class', control.$class);
 
         view = div.firstChild;

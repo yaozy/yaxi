@@ -1,3 +1,7 @@
+'use strict'
+
+
+
 // yaxi全局变量
 var yaxi = Object.create(null);
 

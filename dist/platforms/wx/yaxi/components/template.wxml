@@ -43,13 +43,18 @@
 
 <template name="Button">
 
-    <box 
+    <button 
         data-id="{{ u }}"
         id="{{ u }}"
         class="yx-control yx-button{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        children="{{ c }}"
-        bindtouchstart="translateEvent" />
+        bindtouchstart="translateEvent">
+        <template 
+            wx:for="{{ c }}"
+            wx:key="u"
+            is="{{ item.t }}"
+            data="{{ ...item }}" />
+    </button>
 
 </template>
 
@@ -96,10 +101,7 @@
             data-id="{{ u }}"
             class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}"
             style="{{ size ? 'font-size:' + size + ';' : '' }}" />
-        <box 
-            data-id="{{ u }}"
-            class="yx-iconbutton-content"
-            children="{{ c }}" />
+        <text data-id="{{ u }}" class="yx-iconbutton-content">{{ text || '' }}</text>
     </view>
 
 </template>
@@ -118,11 +120,64 @@
             class="yx-imagebutton-image"
             style="{{ size ? 'width:' + size + ';height:' + size + ';' : '' }}"
             src="{{ src }}" />
-        <box 
-            data-id="{{ u }}" 
-            class="yx-iconbutton-content"
-            children="{{ c }}" />
+        <text data-id="{{ u }}" class="yx-imagebutton-content">{{ text || '' }}</text>
     </view>
+
+</template>
+
+
+<template name="CheckBox">
+
+    <view
+        data-id="{{ u }}"
+        id="{{ u }}"
+        class="yx-control yx-checkbox{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        bindtouchstart="translateEvent">
+        <view data-id="{{ u }}" class="yx-checkbox-icon iconfont icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <text data-id="{{ u }}" class="yx-checkbox-content">{{ text || '' }}</text>
+    </view>
+
+</template>
+
+
+<template name="CheckGroup">
+
+    <box 
+        data-id="{{ u }}"
+        id="{{ u }}"
+        class="yx-control yx-box yx-checkgroup{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="translateEvent" />
+
+</template>
+
+
+<template name="Radio">
+
+    <view
+        data-id="{{ u }}"
+        id="{{ u }}"
+        class="yx-control yx-radio{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        bindtouchstart="translateEvent">
+        <view data-id="{{ u }}" class="yx-radio-icon iconfont icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <text data-id="{{ u }}" class="yx-radio-content">{{ text || '' }}</text>
+    </view>
+
+</template>
+
+
+<template name="RadioGroup">
+
+    <box 
+        data-id="{{ u }}"
+        id="{{ u }}"
+        class="yx-control yx-box yx-radiogroup{{ class }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
+        bindtouchstart="translateEvent" />
 
 </template>
 
@@ -336,6 +391,21 @@
     </box>
 
 </template>
+
+
+
+<template name="Dialog">
+
+<box 
+    data-id="{{ u }}"
+    class="yx-host yx-dialog{{ class }}" 
+    style="{{ s }}"
+    children="{{ c }}"
+    bindtouchstart="translateEvent">
+</box>
+
+</template>
+
 
 
 

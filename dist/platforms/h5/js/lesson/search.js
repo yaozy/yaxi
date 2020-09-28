@@ -1,6 +1,6 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./search.html');
-const toolbar = require('./model/toolbar');
+const toolbar = require('./toolbar-model');
 
 
 
@@ -31,11 +31,11 @@ module.exports = yaxi.Box.extend(function () {
 
     this.init = function (size) {
 
-        this.load(template(this, {
+        this.loadTemplate(template, {
 
             size: size || '100%'
 
-        }, model));
+        }, model);
     }
 
 

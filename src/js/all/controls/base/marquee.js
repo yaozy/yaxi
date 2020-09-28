@@ -2,11 +2,11 @@ yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.$property('text', '');
+    this.property('text', '');
 
 
     // 速度, 每32字显示的秒数
-    this.$property('speed', 10);
+    this.property('speed', 10);
 
 
     

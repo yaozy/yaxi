@@ -2,39 +2,23 @@ yaxi.CheckBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<span class="$class"><svg aria-hidden="true"><use xlink:href="#icon-yaxi-checkbox-unchecked"></use></svg><span></span></span>');
+    yaxi.template(this, '<div class="$class">'
+            + '<div class="yx-checkbox-icon iconfont icon-common-unchecked"></div>'
+            + '<div class="yx-checkbox-content"></div>'
+        + '</div>');
 
-
-
-    this.text = function (control, view, value) {
-
-        view.lastChild.textContent = value;
-    }
 
 
     this.checked = function (control, view, value) {
 
-        view.firstChild.firstChild.setAttribute('xlink:href', '#' + (value ? this.checkedIcon : this.uncheckedIcon));
+        view.firstChild.className = 'yx-checkbox-icon iconfont icon-common-' + (value ? 'checked' : 'unchecked');
     }
+    
+    
+    this.text = function (control, view, value) {
 
-
-    this.checkedIcon = function (control, view, value) {
-
-        if (value && this.checked)
-        {
-            view.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
-        }
+        view.lastChild.textContent = value;
     }
-
-
-    this.uncheckedIcon = function (control, view, value) {
-
-        if (value && !this.checked)
-        {
-            view.firstChild.firstChild.setAttribute('xlink:href', '#' + value);
-        }
-    }
-
 
 
 });

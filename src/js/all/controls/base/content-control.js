@@ -1,5 +1,5 @@
 /*
- * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件
+ * ContentControl主要作为自定义内容展示用, 子控件不支持绑定事件, 不支持嵌套其它ContentControl
  * 不支持对子控件进行操作
 */
 yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
@@ -20,7 +20,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
     
     
     // 内容
-    this.$property('content', null, {
+    this.property('content', null, {
 
         convert: function (value) {
 
@@ -60,11 +60,14 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
-    this.__load_subdata = function (values) {
+    this.__load_children = function (values) {
 
         this.content = values;
     }
 
+
+
+    var loading;
 
 
     // 初始化内容
@@ -81,9 +84,14 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
 
         if (content instanceof A)
         {
+            if (loading)
+            {
+                throw new Error('create control error: content control can not inside content control!');
+            }
+
             try
             {
-                yaxi.__content_count++;
+                loading = true;
 
                 if (content[0] instanceof A)
                 {
@@ -96,7 +104,7 @@ yaxi.ContentControl = yaxi.Control.extend(function (Class, base, yaxi) {
             }
             finally
             {
-                yaxi.__content_count--;
+                loading = false;
             }
         }
         else

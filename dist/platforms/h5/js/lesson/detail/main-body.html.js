@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\main-body.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -14,7 +12,8 @@ return (
 			[
 				"box",
 				{
-					"flex": "auto"
+					"flex": "auto",
+					"overflow": "auto"
 				},
 				[
 					[

@@ -9,14 +9,14 @@
         text-align="center">
         <iconbutton 
             b:icon="$model.sort.icon" 
-            b:content="$model.sort.text" 
+            b:text="$model.sort.text" 
             layout="row-reverse" 
             tag="sort" 
             width="33%" 
             height="100%" />
         <iconbutton 
             b:icon="$model.category.icon" 
-            b:content="$model.category.text"
+            b:text="$model.category.text"
             layout="row-reverse" 
             tag="category" 
             width="34%" 
@@ -24,7 +24,7 @@
         <iconbutton 
             b:icon="$model.filter.icon" 
             layout="row-reverse" 
-            content="筛选" 
+            text="筛选" 
             tag="filter" 
             width="33%" 
             height="100%" />
@@ -47,7 +47,7 @@
             <iconbutton 
                 b:key="$index" 
                 b:icon="$item.icon" 
-                b:content="$item.text" 
+                b:text="$item.text" 
                 b:theme="$item.theme" 
                 layout="row before" 
                 width="100%" 
@@ -76,32 +76,30 @@
         </databox>
     </box>
     <box b:hidden="$model.filter.hidden" layout="column" theme="bg-standard" max-height="640rem">
-        <box flex="auto" font-size="28rem">
-            <databox d:data="$model.filter.data" theme="line-lightest line-top">
-                <box>
-                    <box height="80rem" line-height="80rem" padding-left="20rem">
-                        <text b:text="$item.text" />
-                    </box>
-                    <databox 
-                        b:key="$index" 
-                        d:data="$item.data" 
-                        padding-left="20rem" 
-                        tag="filter"
-                        e:tap="handleChangeFilter" >
-                        <text 
-                            b:key="$index" 
-                            b:text="$item.text" 
-                            b:theme="$item.theme" 
-                            width="220rem" 
-                            height="60rem" 
-                            line-height="60rem" 
-                            margin="0 20rem 20rem 0" 
-                            border-radius="40rem" 
-                            text-align="center" />
-                    </databox>
+        <databox d:data="$model.filter.data" flex="auto" theme="line-lightest line-top" font-size="28rem">
+            <box>
+                <box height="80rem" line-height="80rem" padding-left="20rem">
+                    <text b:text="$item.text" />
                 </box>
-            </databox>
-        </box>
+                <databox 
+                    b:key="$index" 
+                    d:data="$item.data" 
+                    padding-left="20rem" 
+                    tag="filter"
+                    e:tap="handleChangeFilter" >
+                    <text 
+                        b:key="$index" 
+                        b:text="$item.text" 
+                        b:theme="$item.theme" 
+                        width="220rem" 
+                        height="60rem" 
+                        line-height="60rem" 
+                        margin="0 20rem 20rem 0" 
+                        border-radius="40rem" 
+                        text-align="center" />
+                </databox>
+            </box>
+        </databox>
         <box theme="bg-standard line-lightest line-top" height="80rem" line-height="80rem">
             <text theme="text-primary" padding="0 30rem" e:tap="handleClearFilter">清空筛选</text>
             <button 

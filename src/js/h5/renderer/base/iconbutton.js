@@ -21,9 +21,9 @@ yaxi.IconButton.renderer(function (base) {
     }
 
 
-    this.renderContent = function (control, view, content) {
+    this.text = function (control, view, value) {
 
-        base.renderContent.call(this, control, view.lastChild, content);
+        view.lastChild.textContent = value;
     }
 
 

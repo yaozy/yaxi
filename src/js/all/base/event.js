@@ -87,7 +87,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
         if (typeof listener === 'function')
         {
-            function callback(event) {
+            var callback = function (event) {
 
                 listener.call(this, event);
                 this.off(type, callback);
@@ -197,7 +197,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
                 }
             }
         }
-        while (target = target.parent);
+        while ((target = target.parent) && target.bubble !== false);
 
         return !event || !event.defaultPrevented;
     }

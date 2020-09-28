@@ -2,8 +2,13 @@ yaxi.PasswordBox = yaxi.TextBox.extend(function () {
 
 
 
-    this.$property('type', '');
 
+
+
+}, function PasswordBox() {
+
+
+    yaxi.Control.apply(this, arguments);
 
 
 }).register('PasswordBox');

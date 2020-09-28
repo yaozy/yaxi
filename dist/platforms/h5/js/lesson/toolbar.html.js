@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\toolbar.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -20,7 +18,7 @@ return (
 						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
-						"tap": $owner.handleClose.bind($owner)
+						"tap": this.handleClose.bind(this)
 					}
 				}
 			],
@@ -33,7 +31,7 @@ return (
 					"line-height": "80rem",
 					"text-align": "center",
 					"events": {
-						"tap": $owner.handleSwitch.bind($owner)
+						"tap": this.handleSwitch.bind(this)
 					}
 				},
 				[
@@ -46,7 +44,7 @@ return (
 							"height": "100%",
 							"bindings": {
 								"icon":  function () { return $model.sort.icon },
-								"content":  function () { return $model.sort.text }
+								"text":  function () { return $model.sort.text }
 							}
 						}
 					],
@@ -59,7 +57,7 @@ return (
 							"height": "100%",
 							"bindings": {
 								"icon":  function () { return $model.category.icon },
-								"content":  function () { return $model.category.text }
+								"text":  function () { return $model.category.text }
 							}
 						}
 					],
@@ -67,7 +65,7 @@ return (
 						"iconbutton",
 						{
 							"layout": "row-reverse",
-							"content": "筛选",
+							"text": "筛选",
 							"tag": "filter",
 							"width": "33%",
 							"height": "100%",
@@ -92,7 +90,7 @@ return (
 						{
 							"data": $model.sort.data,
 							"events": {
-								"tap": $owner.handleSort.bind($owner)
+								"tap": this.handleSort.bind(this)
 							}
 						},
 						function (template, __data_list, __data_scope) {
@@ -113,7 +111,7 @@ return (
 											"padding-left": "30rem",
 											"theme": "line-lightest line-top",
 											"bindings": {
-												"key":  function () { return ($item.$index != null ? $item.$index : $index) }
+												"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) }
 											}
 										},
 										[
@@ -141,11 +139,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			],
@@ -167,7 +165,7 @@ return (
 							"theme": "bg-thicker",
 							"width": "25%",
 							"events": {
-								"tap": $owner.handleCategoryLevel1.bind($owner)
+								"tap": this.handleCategoryLevel1.bind(this)
 							}
 						},
 						function (template, __data_list, __data_scope) {
@@ -188,20 +186,20 @@ return (
 											"height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
+												"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 												"icon":  function () { return $item.icon },
-												"content":  function () { return $item.text },
+												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
 										}
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					],
 					[
 						"databox",
@@ -210,7 +208,7 @@ return (
 							"theme": "bg-thick",
 							"width": "35%",
 							"events": {
-								"tap": $owner.handleCategoryLevel2.bind($owner)
+								"tap": this.handleCategoryLevel2.bind(this)
 							}
 						},
 						function (template, __data_list, __data_scope) {
@@ -231,7 +229,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
+												"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -239,11 +237,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					],
 					[
 						"databox",
@@ -251,7 +249,7 @@ return (
 							"data": $model.category.level3s,
 							"width": "40%",
 							"events": {
-								"tap": $owner.handleCategoryLevel3.bind($owner)
+								"tap": this.handleCategoryLevel3.bind(this)
 							}
 						},
 						function (template, __data_list, __data_scope) {
@@ -272,7 +270,7 @@ return (
 											"line-height": "80rem",
 											"padding-left": "20rem",
 											"bindings": {
-												"key":  function () { return ($item.$index != null ? $item.$index : $index) },
+												"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 												"text":  function () { return $item.text },
 												"theme":  function () { return $item.theme }
 											}
@@ -280,11 +278,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			],
@@ -300,111 +298,104 @@ return (
 				},
 				[
 					[
-						"box",
+						"databox",
 						{
+							"data": $model.filter.data,
 							"flex": "auto",
+							"theme": "line-lightest line-top",
 							"font-size": "28rem"
 						},
-						[
-							[
-								"databox",
-								{
-									"data": $model.filter.data,
-									"theme": "line-lightest line-top"
-								},
-								function (template, __data_list, __data_scope) {
+						function (template, __data_list, __data_scope) {
 
-									for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
-									{
-										// 添加作用域解决循环变量绑定变化的问题
-										(function () {
+							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							{
+								// 添加作用域解决循环变量绑定变化的问题
+								(function () {
 
-										var $item = __data_list[$index];
+								var $item = __data_list[$index];
 
-										template($index, $item,
+								template($index, $item,
+									[
+										"box",
+										null,
+										[
 											[
 												"box",
-												null,
+												{
+													"height": "80rem",
+													"line-height": "80rem",
+													"padding-left": "20rem"
+												},
 												[
 													[
-														"box",
+														"text",
 														{
-															"height": "80rem",
-															"line-height": "80rem",
-															"padding-left": "20rem"
-														},
-														[
-															[
-																"text",
-																{
-																	"bindings": {
-																		"text":  function () { return $item.text }
-																	}
-																}
-															]
-														]
-													],
-													[
-														"databox",
-														{
-															"data": $item.data,
-															"padding-left": "20rem",
-															"tag": "filter",
 															"bindings": {
-																"key":  function () { return ($item.$index != null ? $item.$index : $index) }
-															},
-															"events": {
-																"tap": $owner.handleChangeFilter.bind($owner)
+																"text":  function () { return $item.text }
 															}
-														},
-														function (template, __data_list, __data_scope) {
-
-															var $index = __data_scope[0];
-															var $item = __data_scope[1];
-
-															for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
-															{
-																// 添加作用域解决循环变量绑定变化的问题
-																(function () {
-
-																var $item = __data_list[$index];
-
-																template($index, $item,
-																	[
-																		"text",
-																		{
-																			"width": "220rem",
-																			"height": "60rem",
-																			"line-height": "60rem",
-																			"margin": "0 20rem 20rem 0",
-																			"border-radius": "40rem",
-																			"text-align": "center",
-																			"bindings": {
-																				"key":  function () { return ($item.$index != null ? $item.$index : $index) },
-																				"text":  function () { return $item.text },
-																				"theme":  function () { return $item.theme }
-																			}
-																		}
-																	]
-																);
-
-																})();
-															}
-
-															// end function
 														}
 													]
 												]
+											],
+											[
+												"databox",
+												{
+													"data": $item.data,
+													"padding-left": "20rem",
+													"tag": "filter",
+													"bindings": {
+														"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) }
+													},
+													"events": {
+														"tap": this.handleChangeFilter.bind(this)
+													}
+												},
+												function (template, __data_list, __data_scope) {
+
+													var $index = __data_scope[0];
+													var $item = __data_scope[1];
+
+													for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+													{
+														// 添加作用域解决循环变量绑定变化的问题
+														(function () {
+
+														var $item = __data_list[$index];
+
+														template($index, $item,
+															[
+																"text",
+																{
+																	"width": "220rem",
+																	"height": "60rem",
+																	"line-height": "60rem",
+																	"margin": "0 20rem 20rem 0",
+																	"border-radius": "40rem",
+																	"text-align": "center",
+																	"bindings": {
+																		"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
+																		"text":  function () { return $item.text },
+																		"theme":  function () { return $item.theme }
+																	}
+																}
+															]
+														);
+
+														}).call(this);
+													}
+
+													// end function
+												}.bind(this)
 											]
-										);
+										]
+									]
+								);
 
-										})();
-									}
+								}).call(this);
+							}
 
-									// end function
-								}
-							]
-						]
+							// end function
+						}.bind(this)
 					],
 					[
 						"box",
@@ -420,7 +411,7 @@ return (
 									"theme": "text-primary",
 									"padding": "0 30rem",
 									"events": {
-										"tap": $owner.handleClearFilter.bind($owner)
+										"tap": this.handleClearFilter.bind(this)
 									}
 								},
 								"清空筛选"
@@ -433,7 +424,7 @@ return (
 									"absolute": "middle right",
 									"right": "30rem",
 									"events": {
-										"tap": $owner.handleFilter.bind($owner)
+										"tap": this.handleFilter.bind(this)
 									}
 								},
 								"确定"

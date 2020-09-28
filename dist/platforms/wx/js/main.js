@@ -15,7 +15,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this));
+        this.loadTemplate(template);
 
         this.on('more', function () {
 

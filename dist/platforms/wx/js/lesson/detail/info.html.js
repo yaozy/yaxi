@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\lesson\\detail\\info.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -10,7 +8,7 @@ return (
 			[
 				"box",
 				{
-					"layout": "vline",
+					"layout": "column",
 					"theme": "bg-standard"
 				},
 				[
@@ -35,7 +33,7 @@ return (
 						"databox",
 						{
 							"data": $data.teachers,
-							"layout": "line",
+							"layout": "row",
 							"padding": "10rem 20rem"
 						},
 						function (template, __data_list, __data_scope) {
@@ -74,11 +72,11 @@ return (
 									]
 								);
 
-								})();
+								}).call(this);
 							}
 
 							// end function
-						}
+						}.bind(this)
 					]
 				]
 			],

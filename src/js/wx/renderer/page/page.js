@@ -159,8 +159,6 @@ yaxi.Page.renderer(function (base, yaxi) {
                     var page = all.pop();
                     var callback;
             
-                    all.pop();
-            
                     page.onunload(page.options);
             
                     page.options = page.__wx_page = null;

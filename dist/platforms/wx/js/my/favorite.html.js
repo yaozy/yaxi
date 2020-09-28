@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\favorite.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -18,7 +16,6 @@ return (
 				"databox",
 				{
 					"data": $model,
-					"item": "$lesson",
 					"flex": "auto",
 					"padding": "0 20rem"
 				},
@@ -29,26 +26,25 @@ return (
 						// 添加作用域解决循环变量绑定变化的问题
 						(function () {
 
-						var $lesson = __data_list[$index];
+						var $item = __data_list[$index];
 
-						template($index, $lesson,
+						template($index, $item,
 							[
 								"box",
 								{
-									"layout": "line",
-									"tag": $lesson.id,
+									"layout": "row",
+									"tag": $item.lessonid,
 									"height": "160rem",
 									"margin": "20rem 0",
-									"overflow": "hidden",
 									"events": {
-										"tap": $owner.handleOpenDetail.bind($owner)
+										"tap": this.handleOpenDetail.bind(this)
 									}
 								},
 								[
 									[
 										"image",
 										{
-											"src": $lesson.image,
+											"src": $item.image,
 											"width": "200rem",
 											"height": "100%"
 										}
@@ -64,14 +60,13 @@ return (
 											[
 												"box",
 												{
-													"height": "70rem",
-													"overflow": "hidden"
+													"height": "70rem"
 												},
 												[
 													[
 														"text",
 														{
-															"text": $lesson.name
+															"text": $item.name
 														}
 													]
 												]
@@ -80,14 +75,13 @@ return (
 												"box",
 												{
 													"theme": "text-primary",
-													"height": "50rem",
-													"overflow": "hidden"
+													"height": "50rem"
 												},
 												[
 													[
 														"text",
 														{
-															"text": $lesson.price > 0 ? '￥' + $lesson.price : '免费'
+															"text": $item.price > 0 ? '￥' + $item.price : '免费'
 														}
 													]
 												]
@@ -98,7 +92,6 @@ return (
 													"layout": "row middle",
 													"theme": "text-lightest",
 													"height": "40rem",
-													"overflow": "hidden",
 													"font-size": "28rem"
 												},
 												[
@@ -110,7 +103,7 @@ return (
 													[
 														"text",
 														{
-															"text": $lesson.time
+															"text": $item.time
 														}
 													]
 												]
@@ -121,11 +114,11 @@ return (
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
+				}.bind(this)
 			]
 		]
 	]

@@ -1,4 +1,4 @@
-;(function () {
+;(function (yaxi) {
 
 
 
@@ -7,9 +7,8 @@
     var define = Object.defineProperty;
 
 
-    // 管理编译器
+    // 管道编译器
     var compile = yaxi.pipe.compile;
-
 
     // 控件对象集合
     var controls = yaxi.$controls || (yaxi.$controls = create(null));
@@ -18,8 +17,6 @@
     // 绑定的目标
     var bindingTarget = null;
 
-    // 注册的观测变化数量
-    var watchKeys = create(null);
 
 
     // 模型原型
@@ -78,8 +75,8 @@
     
     this.__build_set = function (name, options) {
 
-        var watches = watchKeys;
         var convert = options.convert;
+        var watches;
 
         return function (value) {
 
@@ -91,7 +88,7 @@
                 value = convert(value);
             }
 
-            if (value === storage[name] || watches[name] && this.$notify(name, value) === false)
+            if (value === storage[name] || (watches = this.__watches) && watches[name] && this.$notify(name, value) === false)
             {
                 return this;
             }
@@ -372,7 +369,7 @@
                     }
                     else // 表达式绑定
                     {
-                        bindingTarget = {
+                        bindingTarget = yaxi.__bindingTarget = {
                             control: uuid,
                             property: name,
                             fn: fn
@@ -386,7 +383,7 @@
         finally
         {
             // 终止收集依赖
-            bindingTarget = null;
+            bindingTarget = yaxi.__bindingTarget = null;
         }
     }
 
@@ -414,17 +411,11 @@
     // 观测属性变化
     this.$watch = function (name, listener) {
 
+        var watches, items;
+
         if (name && typeof listener === 'function')
         {
-            if (!++watchKeys[name])
-            {
-                watchKeys[name] = 1;
-            }
-            
-            var watches = this.__watches,
-                items;
-
-            if (watches)
+            if (watches = this.__watches)
             {
                 if (items = watches[name])
                 {
@@ -437,7 +428,7 @@
             }
             else
             {
-                (this.__watches || (this.__watches = {}))[name] = [listener];
+                (this.__watches || (this.__watches = create(null)))[name] = [listener];
             }
         }
     }
@@ -446,51 +437,41 @@
     // 取消观测属性变化
     this.$unwatch = function (name, listener) {
 
-        var watches = this.__watches,
-            items;
+        var watches, items;
 
-        if (!watches)
+        if (watches = this.__watches)
         {
-            return;
-        }
-
-        if (typeof listener === 'function')
-        {
-            if (watches && (items = watches[name]))
+            if (typeof listener === 'function')
             {
-                for (var i = items.length; i--;)
+                if (items = watches[name])
                 {
-                    if (items[i] === listener)
+                    for (var i = items.length; i--;)
                     {
-                        items.splice(i, 1);
-                        watchKeys[name]--;
-                        return;
+                        if (items[i] === listener)
+                        {
+                            items.splice(i, 1);
+                            return;
+                        }
                     }
                 }
             }
-        }
-        else if (name)
-        {
-            if ((items = watches[name]) && items.length > 0)
-            {
-                watchKeys[name] -= items.length;
-                items.length = 0;
-
-                delete watches[name];
-            }
-        }
-        else
-        {
-            for (name in watches)
+            else if (name)
             {
                 if ((items = watches[name]) && items.length > 0)
                 {
-                    watchKeys[name] -= items.length;
                     items.length = 0;
+                    delete watches[name];
                 }
             }
-
-            this.__watches = null;
+            else
+            {
+                for (name in watches)
+                {
+                    watches[name].length = 0;
+                }
+    
+                this.__watches = null;
+            }
         }
     }
 
@@ -498,11 +479,8 @@
     // 通知属性变化
     this.$notify = function (name, value) {
 
-        var target = this,
-            watches,
-            items,
-            index,
-            fn;
+        var target = this;
+        var watches, items, index, fn;
 
         while (target)
         {
@@ -581,4 +559,4 @@
 
 
 
-}).call(Object.create(null));
+}).call(Object.create(null), yaxi);

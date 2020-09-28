@@ -1,6 +1,6 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
-const user = require('./model/user');
+const user = require('./user');
 
 
 
@@ -24,12 +24,12 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-test',
                     text: '试卷',
-                    url: './order'
+                    url: './testpaper'
                 },
                 {
                     icon: 'my-exercise',
                     text: '练习',
-                    url: './order'
+                    url: './exercise'
                 },
                 {
                     icon: 'my-timetable',
@@ -47,14 +47,9 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                     url: './address'
                 },
                 {
-                    icon: 'my-account',
-                    text: '我的帐户',
-                    url: './order'
-                },
-                {
                     icon: 'my-receipt',
                     text: '发票抬头',
-                    url: './order'
+                    url: './receipt'
                 },
                 {
                     icon: 'my-order',
@@ -77,14 +72,14 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                     url: './favorite'
                 },
                 {
-                    icon: 'common-follow',
-                    text: '我的关注',
-                    url: './follow'
-                },
-                {
                     icon: 'common-thumbup',
                     text: '我的点赞',
                     url: './thumbup'
+                },
+                {
+                    icon: 'my-test',
+                    text: '测试',
+                    url: '../test/main'
                 }
             ]
         }
@@ -94,7 +89,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this, data, user));
+        this.loadTemplate(template, data, user);
     }
 
 
@@ -107,13 +102,6 @@ module.exports = yaxi.Box.extend(function (Class, base) {
         {
             require(tag).open();
         }
-    }
-
-
-
-    this.openTest = function () {
-
-        require('../test/main').open();
     }
 
     

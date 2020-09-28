@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\home\\main.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -80,7 +78,6 @@ return (
 										"box",
 										{
 											"layout": "row",
-											"overflow": "hidden",
 											"height": "70rem",
 											"line-height": "80rem"
 										},
@@ -110,7 +107,7 @@ return (
 													"theme": "text-lightest",
 													"font-size": "28rem",
 													"events": {
-														"tap": $owner.handleMore.bind($owner)
+														"tap": this.handleMore.bind(this)
 													}
 												},
 												[
@@ -151,13 +148,12 @@ return (
 													[
 														"box",
 														{
-															"layout": "line",
+															"layout": "row",
 															"tag": $lesson.id,
 															"height": "160rem",
 															"margin": "20rem 0",
-															"overflow": "hidden",
 															"events": {
-																"tap": $owner.handleOpenDetail.bind($owner)
+																"tap": this.handleOpenDetail.bind(this)
 															}
 														},
 														[
@@ -180,8 +176,7 @@ return (
 																	[
 																		"box",
 																		{
-																			"height": "50rem",
-																			"overflow": "hidden"
+																			"height": "50rem"
 																		},
 																		[
 																			[
@@ -197,8 +192,7 @@ return (
 																		{
 																			"theme": "text-lightest",
 																			"height": "70rem",
-																			"font-size": "24rem",
-																			"overflow": "hidden"
+																			"font-size": "24rem"
 																		},
 																		[
 																			[
@@ -213,8 +207,7 @@ return (
 																		"box",
 																		{
 																			"theme": "text-primary",
-																			"height": "40rem",
-																			"overflow": "hidden"
+																			"height": "40rem"
 																		},
 																		[
 																			[
@@ -231,21 +224,21 @@ return (
 													]
 												);
 
-												})();
+												}).call(this);
 											}
 
 											// end function
-										}
+										}.bind(this)
 									]
 								]
 							]
 						);
 
-						})();
+						}).call(this);
 					}
 
 					// end function
-				}
+				}.bind(this)
 			]
 		]
 	]

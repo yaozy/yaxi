@@ -1,16 +1,36 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./address.html');
-const arrayModel = require('./model/address');
+
+
+
+var arrayModel = new (yaxi.arrayModel({
+
+    id: 0,
+
+    name: '',
+
+    gendle: 0,
+
+    address: '',
+
+    house: '',
+
+    tel: '',
+    
+    default: false
+
+}))();
+
 
 
 
 module.exports = yaxi.Page.extend(function (Class, base) {
 
-    
+
 
     this.init = function () {
 
-        this.load(template(this, {}, arrayModel));
+        this.loadTemplate(template, {}, arrayModel);
 
         yaxi.http.get('my/address').json(function (data) {
 
@@ -28,7 +48,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
             if (index >= 0)
             {
-                arrayModel[index].$load(model);
+                arrayModel[index].load(model);
             }
             else
             {
@@ -41,18 +61,13 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleDefault = function (event) {
 
-        var index = +event.target.parent.tag;
+        var index = +event.source.parent.tag;
 
         if (index >= 0)
         {
-            var model = arrayModel[index];
-
-            if (!model.default)
+            for (var i = arrayModel.length; i--;)
             {
-                for (var i = arrayModel.length; i--;)
-                {
-                    arrayModel[i].default = i === index;
-                }
+                arrayModel[i].default = i === index;
             }
         }
     }

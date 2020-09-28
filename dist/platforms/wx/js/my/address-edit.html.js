@@ -1,6 +1,4 @@
-module.exports = function ($owner, $data, $model) {
-
-if (!$owner) throw new Error("template must input $owner argument! file: D:\\dev\\yaxi\\dist\\src\\js\\my\\address-edit.html")
+module.exports = function ($data, $model) {
 
 return (
 	[
@@ -11,7 +9,7 @@ return (
 				"masklayer",
 				null
 			],
-			require("../components/header.html")($owner, $data, $model),
+			require("../components/header.html").call(this, $data, $model),
 			[
 				"box",
 				{
@@ -52,7 +50,7 @@ return (
 										"theme":  function () { return $model.gendle ? 'text-primary' : '' }
 									},
 									"events": {
-										"tap": $owner.handleMan.bind($owner)
+										"tap": this.handleMan.bind(this)
 									}
 								}
 							],
@@ -77,7 +75,7 @@ return (
 										"theme":  function () { return $model.gendle ? '' : 'text-primary' }
 									},
 									"events": {
-										"tap": $owner.handleWoman.bind($owner)
+										"tap": this.handleWoman.bind(this)
 									}
 								}
 							]
@@ -133,7 +131,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": $owner.handleOK.bind($owner)
+								"tap": this.handleOK.bind(this)
 							}
 						},
 						"确认"

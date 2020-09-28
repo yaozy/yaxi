@@ -1,9 +1,9 @@
 <box>
-    <box layout="vline" theme="bg-standard">
+    <box layout="column" theme="bg-standard">
         <box padding="20rem 0" theme="line-lightest line-bottom">
             <text border-left="5rem solid @line-secondary" padding="0 20rem">任课教师</text>
         </box>
-        <databox d:data="$data.teachers" layout="line" padding="10rem 20rem">
+        <databox d:data="$data.teachers" layout="row" padding="10rem 20rem">
             <box layout="column center" margin-left="20rem">
                 <image d:src="$item.image" width="100rem" height="100rem" border-radius="100rem" />
                 <text d:text="$item.name" />

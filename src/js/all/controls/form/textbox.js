@@ -2,51 +2,45 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 
 
-
-    this.$property('value', '');
-
-
-    this.$property('text', {
-
-        get: function () {
-
-            var format = this.__format;
-            return format ? format(this.value) : this.value;
-        }
-    });
+    var pipe = yaxi.pipe.compile;
 
     
-    this.$property('placeholder', '');
 
 
-    this.$property('maxlength', -1);
+    this.property('name', '');
 
 
-    this.$property('pattern', '');
+    this.property('value', '');
 
-
-    this.$property('format', null, {
     
-        change: false,
-
-        convert: function (value) {
-
-            this.__format = typeof value === 'function' ? value : yaxi.pipe.compile(value);
-            return value;
-        }
-        
-    });
+    this.property('placeholder', '');
 
 
+    this.property('maxlength', -1);
 
-    this.$property('selectionStart', 0, {
+
+    this.property('pattern', '');
+
+
+    this.property('format', null, false);
+
+
+
+    this.__set_format = function (value) {
+
+        this.__format = typeof value === 'function' ? value : pipe(value);
+    }
+
+
+
+    this.property('selectionStart', 0, {
 
         alias: 'selection-start'
     });
 
 
     
-    this.$property('selectionEnd', 0, {
+    this.property('selectionEnd', 0, {
 
         alias: 'selection-end'
     });

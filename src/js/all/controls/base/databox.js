@@ -13,7 +13,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     
     // 布局
-    this.$property('layout', '', {
+    this.property('layout', '', {
 
         kind: 'class',
         data: 'yx-layout-'
@@ -21,7 +21,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
     // 模板
-    this.$property('template', null, {
+    this.property('template', null, {
      
         change: false,
 
@@ -47,7 +47,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
     // 数据集合
     // 可以是数组模型也可以是普通的数组, 如果是普通数组不能实现双向绑定
-    this.$property('data', null, {
+    this.property('data', null, {
 
         change: false,
 
@@ -88,7 +88,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
     
 
     // 子控件集合
-    this.$property('children', null, {
+    this.property('children', null, {
 
         get: nochildren,
         set: nochildren
@@ -102,7 +102,7 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
 
 
 
-    this.__load_subdata = function (value, scope) {
+    this.__load_children = function (value, scope) {
 
         var data;
 

@@ -1,25 +1,25 @@
 <page>
     <header theme="bg-standard" content="我的地址" />
     <box text-align="center" line-height="100rem" e:tap="handleAdd">
-        <iconbutton width="auto" icon="common-search" content="添加地址" layout="row middle" theme="text-primary" />
+        <iconbutton width="auto" icon="common-search" text="添加地址" layout="row middle" theme="text-primary" />
     </box>
     <databox d:data="$model" theme="bg-thick" flex="auto">
         <box margin-top="20rem" theme="bg-standard">
-            <box layout="row middle" height="150rem">
-                <icon b:icon="$item.gendle ? 'common-man' : 'common-woman'" width="100rem" />
+            <box layout="row middle" height="180rem">
+                <icon b:icon="$item.gendle ? 'common-man' : 'common-woman'" width="100rem" font-size="60rem" />
                 <box width="600rem">
                     <box layout="row space-between">
                         <text b:text="$item.name" />
                         <text b:text="$item.tel" />
                     </box>
-                    <text b:text="$item.address" theme="text-lightest" font-size="28rem" />
+                    <text b:text="$item.address" margin-top="20rem" theme="text-lightest" font-size="28rem" />
                 </box>
             </box>
-            <box d:tag="$index" layout="row middle" padding="0 20rem" theme="line-lightest line-top">
-                <iconbutton 
-                    b:icon="$item.default ? 'common-checked' : 'common-unchecked'" 
+            <box b:tag="$index" layout="row middle" height="100rem" padding="0 20rem" theme="line-lightest line-top">
+                <checkbox 
                     b:theme="$item.default ? 'text-warning' : 'text-lighter'"
-                    content="默认地址" 
+                    b:checked="$item.default"
+                    text="默认地址" 
                     layout="row before" 
                     flex="auto" 
                     e:tap="handleDefault" />

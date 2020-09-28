@@ -1,0 +1,18 @@
+<page theme="bg-thick">
+    <header theme="bg-standard" content="我的练习" />
+    <databox d:data="$model" flex="auto">
+        <box d:tag="$index" theme="bg-standard" layout="row" height="150rem" margin-top="10rem" padding="20rem 0" e:tap="handleStart">
+            <icon icon="my-exercise" width="120rem" height="100%" line-height="" font-size="80rem" />
+            <box layout="column" flex="auto" height="100%" padding-left="20rem">
+                <text d:text="$item.name" height="70rem" line-height="35rem" />
+                <box layout="row middle" theme="text-lightest" height="40rem" font-size="28rem">
+                    <text>总分:</text>
+                    <text d:text="$item.score" />
+                    <text margin-left="50rem">时长:</text>
+                    <text d:text="$item.time" />
+                    <text>分钟</text>
+                </box>
+            </box>
+        </box>
+    </databox>
+</page>

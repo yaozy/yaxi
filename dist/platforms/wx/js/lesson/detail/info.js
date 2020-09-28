@@ -7,7 +7,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.init = function (data) {
 
-        this.load(template(this, data));
+        this.loadTemplate(template, data);
     }
 
 

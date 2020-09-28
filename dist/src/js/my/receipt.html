@@ -1,0 +1,42 @@
+<page>
+    <header theme="bg-standard" content="发票抬头" />
+    <box text-align="center" line-height="100rem" e:tap="handleAdd">
+        <iconbutton width="auto" icon="common-search" text="添加发票抬头" layout="row middle" theme="text-primary" />
+    </box>
+    <databox d:data="$model" theme="bg-thick" flex="auto">
+        <box margin-top="20rem" theme="bg-standard">
+            <box layout="column" height="200rem" padding="50rem">
+                <box layout="row">
+                    <text 
+                        b:text="$item.type === 1 ? '公司' : '个人'" 
+                        theme="bg-primary text-white" 
+                        width="70rem" 
+                        height="40rem"
+                        line-height="40rem"
+                        margin-right="10rem"
+                        border-radius="5rem"
+                        text-align="center" 
+                        font-size="24rem" />
+                    <text b:text="$item.name" />
+                </box>
+                <box flex="auto" margin-top="20rem" layout="row baseline">
+                    <text b:hidden="$item.type !== 1" text="税务识别号:" theme="text-lightest" font-size="28rem" />
+                    <text b:hidden="$item.type !== 1" b:text="$item.taxid" margin-left="10rem" theme="text-lightest" font-size="28rem" />
+                    <text b:hidden="$item.type !== 2" b:text="$item.bank" theme="text-lightest" font-size="28rem" />
+                    <text b:hidden="$item.type !== 2" b:text="$item.account" margin-left="10rem" theme="text-lightest" font-size="28rem" />
+                </box>
+            </box>
+            <box b:tag="$index" layout="row middle" height="100rem" padding="0 20rem" theme="line-lightest line-top">
+                <checkbox 
+                    b:theme="$item.default ? 'text-warning' : 'text-lighter'"
+                    b:checked="$item.default"
+                    text="默认发票抬头" 
+                    layout="row before" 
+                    flex="auto" 
+                    e:tap="handleDefault" />
+                <text padding="0 30rem" theme="text-lightest" e:tap="handleEdit">编辑</text>
+                <text padding="0 30rem" theme="text-lightest" e:tap="handleDelete">删除</text>
+            </box>
+        </box>
+    </databox>
+</page>

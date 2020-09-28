@@ -1,6 +1,37 @@
 const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./order.html');
-const arrayModel = require('./model/order');
+
+
+const arrayModel = yaxi.arrayModel({
+
+    id: 1,
+    time: '',
+    status: 1,
+    data: [
+        {
+            id: 0,
+            lessonid: 0,
+            name: '',
+            image: '',
+            price: 0,
+            amount: 0
+        }
+    ],
+
+    total: function () {
+
+        var data = this.data;
+        var total = 0;
+
+        for (var i = data.length; i--;)
+        {
+            total += data[i].amount * data[i].price;
+        }
+
+        return Math.round(total * 100) / 100;
+    }
+
+});
 
 
 
@@ -39,7 +70,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
-        this.load(template(this, {}, model));
+        this.loadTemplate(template, {}, model);
 
         yaxi.http.get('my/order').json(function (data) {
 

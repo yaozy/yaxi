@@ -1,4 +1,4 @@
 <import src="../components/template.wxml" />
 
 <view class="yx-statusbar" style="height:{{ p.top }};" />
-<template is="{{ p.t }}" data="{{ ...p }}" />
+<template wx:if="{{ p.t }}" is="{{ p.t }}" data="{{ ...p }}" />
