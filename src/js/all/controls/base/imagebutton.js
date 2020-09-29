@@ -1,4 +1,4 @@
-yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('ImageButton', function (Class, base) {
 
 
     // 标记不能被继承
@@ -39,4 +39,4 @@ yaxi.ImageButton = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
     
-}).register('ImageButton');
+});

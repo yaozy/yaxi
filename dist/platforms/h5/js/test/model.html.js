@@ -7,8 +7,9 @@ return (
 		[
 			[
 				"header",
-				null,
-				"yaxi model page"
+				{
+					"text": "yaxi model page"
+				}
 			],
 			[
 				"box",

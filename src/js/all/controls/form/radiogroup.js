@@ -1,4 +1,4 @@
-yaxi.RadioGroup = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('RadioGroup', function (Class, base) {
 
 
 
@@ -25,4 +25,4 @@ yaxi.RadioGroup = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
     
 
-}).register('RadioGroup');
+});

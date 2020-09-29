@@ -9,7 +9,12 @@ return (
 				"masklayer",
 				null
 			],
-			require("../components/header.html").call(this, $data, $model),
+			[
+				"header",
+				{
+					"text": "我的地址"
+				}
+			],
 			[
 				"box",
 				{

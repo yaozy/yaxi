@@ -2,7 +2,7 @@ yaxi.Text.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<span class="$class"></span>');
+    yaxi.template(this, '<span class="@class"></span>');
 
     
 

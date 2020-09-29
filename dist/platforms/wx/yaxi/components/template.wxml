@@ -64,7 +64,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-icon iconfont{{ class }}"
+        class="yx-control yx-icon {{ class }}"
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent" />
 
@@ -99,7 +99,7 @@
         bindtouchstart="translateEvent">
         <view 
             data-id="{{ u }}"
-            class="{{ icon ? 'yx-iconbutton-icon iconfont icon-' + icon : '' }}"
+            class="{{ icon ? 'yx-iconbutton-icon icon-' + icon : '' }}"
             style="{{ size ? 'font-size:' + size + ';' : '' }}" />
         <text data-id="{{ u }}" class="yx-iconbutton-content">{{ text || '' }}</text>
     </view>
@@ -134,7 +134,7 @@
         class="yx-control yx-checkbox{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
-        <view data-id="{{ u }}" class="yx-checkbox-icon iconfont icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
         <text data-id="{{ u }}" class="yx-checkbox-content">{{ text || '' }}</text>
     </view>
 
@@ -162,7 +162,7 @@
         class="yx-control yx-radio{{ class }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
-        <view data-id="{{ u }}" class="yx-radio-icon iconfont icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
         <text data-id="{{ u }}" class="yx-radio-content">{{ text || '' }}</text>
     </view>
 
@@ -327,36 +327,6 @@
             class="yx-stackbox-body{{ full ? ' yx-stackbox-full' : '' }}"
             children="{{ c }}"
             bindtouchstart="translateEvent" />
-    </view>
-
-</template>
-
-
-
-<template name="Header">
-
-    <view 
-        data-id="{{ u }}"
-        id="{{ u }}"
-        class="yx-control yx-header{{ class }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        bindtouchstart="translateEvent">
-        <view 
-            data-id="{{ u }}" 
-            data-flag="back"
-            class="yx-header-back iconfont icon-common-back" 
-            style="{{ back ? '' : 'display:none;' }}" />
-        <view 
-            data-id="{{ u }}"
-            data-flag="icon"
-            class="{{ icon ? 'yx-header-icon ' + icon : '' }}"
-            style="{{ icon ? '' : 'display:none;' }}" />
-        <box 
-            data-id="{{ u }}" 
-            data-flag="content"
-            class="yx-header-host"
-            children="{{ c }}"
-            bind:touchstart="translateEvent" />
     </view>
 
 </template>

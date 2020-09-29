@@ -1,4 +1,4 @@
-yaxi.Memo = yaxi.Control.extend(function () {
+yaxi.Control.extend('Memo', function () {
 
 
     
@@ -21,6 +21,8 @@ yaxi.Memo = yaxi.Control.extend(function () {
     
 }, function Memo() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('Memo');
+
+});

@@ -1,4 +1,4 @@
-yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
+yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
 
@@ -22,7 +22,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     var schedule = 0;
 
 
-
     
 
     // 默认允许任意类型父控件
@@ -30,10 +29,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
     // 渲染器扩展
     Class.renderer = renderer;
-
-
-
-    classes[Class.typeName = this.typeName = 'Control'] = classes.control = Class;
 
 
 
@@ -73,11 +68,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     }
 
 
-
     function throwError(text) {
 
         throw new Error('create control error: ' + text);
     }
+
 
 
     // 检查父控件
@@ -111,35 +106,35 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     
     Class.build = function (parent, options, scope) {
 
-        var Class, control;
+        var type, control;
 
         if (options)
         {
-            if (options.$storage && (Class = options.constructor))
+            // 本来就是控件
+            if (options instanceof Class)
             {
-                checkParent(Class, parent);
+                // 插槽控件不处理, 插槽控件的父控件直接指向component组件对象
+                if (options.__slot)
+                {
+                    return options;
+                }
+
                 control = options;
+                checkParent(control.constructor, parent);
 
                 if (control.parent && control.parent !== parent)
                 {
                     control.remove();
                 }
 
-                if (scope !== false)
-                {
-                    control.parent = parent;
-                }
-                else // scope === false时不设置parent
-                {
-                    control.__own = parent;
-                }
-                
+                control.parent = parent;
+
                 return control;
             }
 
-            if (Class = options[0])
+            if (type = options[0])
             {
-                if (typeof Class === 'string' && !(Class = classes[Class]))
+                if (typeof type === 'string' && !(type = classes[type]))
                 {
                     if (options[0] === 'slot')
                     {
@@ -149,19 +144,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
                     throwError('"' + options[0] + '" doesn\'t register!');
                 }
                 
-                checkParent(Class, parent);
+                checkParent(type, parent);
 
-                control = new Class();
+                control = new type();
 
-                if (scope !== false)
-                {
-                    control.parent = parent;
-                }
-                else // scope === false时不设置parent
-                {
-                    control.__own = parent;
-                }
-
+                control.parent = parent;
                 control.__load(options, scope);
 
                 return control;
@@ -169,44 +156,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         }
 
         throwError('no options, eg: ["box", { theme: "text-primary" }, [[...], ...]]');
-    }
-
-
-    // 查找事件触发目标, disabled的控件不能触发, content control会接管所有子控件事件
-    this.findEventTarget = function () {
-
-        var target = this;
-        var parent = this;
-
-        while (parent = parent.parent)
-        {
-            if (parent.disabled)
-            {
-                target = parent.parent;
-            }
-            else if (parent.__own)
-            {
-                return parent;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if (parent = target.__own)
-        {
-            do
-            {
-                if (parent.disabled)
-                {
-                    target = parent.parent;
-                }
-            }
-            while (parent = parent.parent);
-        }
-
-        return target;
     }
 
 
@@ -271,18 +220,11 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         var key = '__set_' + name;
 
-        return convert ? function (value) {
+        return function (value) {
 
             if (!this[key] || this[key](value) !== false)
             {
-                this.$storage[name] = convert.call(this, value);
-            }
-
-        } : function (value) {
-
-            if (!this[key] || this[key](value) !== false)
-            {
-                this.$storage[name] = value;
+                this.$storage[name] = convert ? convert.call(this, value) : value;
             }
         }
     }
@@ -337,7 +279,7 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls1 = yaxi.$controls || (yaxi.$controls = create(null));
 
 
     // 控件唯一id
@@ -345,9 +287,20 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
         get: function () {
 
-            return this.__uuid || (controls[uuid] = this, this.__uuid = uuid++);
+            return this.__uuid || (controls1[uuid] = this, this.__uuid = uuid++);
         }
     });
+
+
+
+    var controls2 = create(null);
+
+
+    // 通过id获取控件
+    yaxi.id = function (id) {
+
+        return (id = controls2[id]) && controls1[id] || null;
+    }
 
 
 
@@ -355,8 +308,31 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.$('id', '', false);
 
 
-    // 默认class
-    this.$class = 'yx-control';
+    this.__set_id = function (value) {
+
+        var id = this.$storage.id;
+
+        if ((value = '' + value) !== id)
+        {
+            if (controls2[id])
+            {
+                throwError('id must be unique, "' + value + '" has exists!');
+            }
+
+            if (id)
+            {
+                controls2[id] = null;
+            }
+
+            controls2[value] = this.uuid;
+        }
+    }
+
+
+
+
+    // 类型的class
+    this.__class = 'yx-control';
 
 
 
@@ -375,7 +351,10 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
     // 是否隐藏
-    this.$('hidden', false);
+    this.$('hidden', false, {
+
+        kind: 'attribute'
+    });
 
 
     // 是否选中
@@ -1026,10 +1005,41 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-
     // 扩展查找实现
     yaxi.impl.find.call(this);
     
+
+    // 查找存在非空key值的控件
+    this.findHasKey = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.key)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
+
+
+    // 查找存在非空tag值的控件
+    this.findHasTag = function () {
+
+        var control = this;
+
+        do
+        {
+            if (control.tag != null)
+            {
+                return control;
+            }
+        }
+        while (control = control.parent);
+    }
+
 
 
     
@@ -1068,72 +1078,47 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
 
 
 
-    // 查找存在非空key值的控件
-    this.findHasKey = function () {
-
-        var control = this;
-
-        do
-        {
-            if (control.key)
-            {
-                return control;
-            }
-        }
-        while (control = control.parent);
-    }
-
-
-    // 查找存在非空tag值的控件
-    this.findHasTag = function () {
-
-        var control = this;
-
-        do
-        {
-            if (control.tag != null)
-            {
-                return control;
-            }
-        }
-        while (control = control.parent);
-    }
-
-
-    
-
     this.remove = function () {
 
-        var parent = this.parent,
-            children,
-            index;
+        var parent = this.parent;
+        var children;
+        var index;
 
         if (parent && (children = parent.__children) && (index = children.indexOf(this)) >= 0)
         {
+            // 插槽控件被移除后就不再是插槽控件了
+            if (this.__slot)
+            {
+                this.__slot = false;
+            }
+
             children.splice(index, 1);
         }
     }
 
-
-
     
     this.destroy = function () {
 
-        var bindings, uuid;
+        var bindings, id;
 
-        if (uuid = this.__uuid)
+        if (id = this.$storage.id)
         {
-            delete controls[uuid];
+            controls2[id] = '';
         }
 
-        if (bindings = this.__bindings)
+        if (id = this.__uuid)
         {
-            for (var i = bindings.length; i--;)
+            controls1[id] = null;
+
+            if (bindings = this.__bindings)
             {
-                bindings[i--].$unbind(bindings[i], uuid);
+                for (var i = bindings.length; i--;)
+                {
+                    bindings[i--].$unbind(bindings[i], id);
+                }
+                
+                this.__bindings = null;
             }
-            
-            this.__bindings = null;
         }
 
         if (this.__event_keys)
@@ -1168,8 +1153,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
     this.__class_init = function (Class) {
 
         Class.allowParent = true;
-        
-        Class.register = register;
         Class.renderer = renderer;
 
         this.$defaults = create(this.$defaults);
@@ -1192,21 +1175,6 @@ yaxi.Control = Object.extend.call({}, function (Class, base, yaxi) {
         fn.call(prototype.$renderer, base || null, yaxi);
     }
 
-
-    function register(name) {
-
-        if (name)
-        {
-            var prototype = this.prototype;
-
-            classes[this.typeName = prototype.typeName = name] = this;
-            classes[name = name.toLowerCase()] = this;
-
-            prototype.$class = prototype.$class + ' yx-' + name;
-        }
-
-        return this;
-    }
 
 
 

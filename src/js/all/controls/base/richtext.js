@@ -1,4 +1,4 @@
-yaxi.RichText = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('RichText', function (Class, base) {
 
 
     
@@ -12,4 +12,4 @@ yaxi.RichText = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('RichText');
+});

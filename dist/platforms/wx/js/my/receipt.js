@@ -54,7 +54,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
             if (index >= 0)
             {
-                arrayModel[index].load(model);
+                arrayModel[index].$assign(model);
             }
             else
             {

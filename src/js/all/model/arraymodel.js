@@ -107,7 +107,7 @@
             else
             {
                 model = new Model(parent);
-                model.$load(data);    
+                model.$assign(data);    
             }
 
             outputs.push(model);
@@ -191,7 +191,7 @@
 
         if (data)
         {
-            model.$load(data);
+            model.$assign(data);
         }
 
         return model;
@@ -206,7 +206,7 @@
 
         if (data = this[index])
         {
-            model.$load(data.$storage);
+            model.$assign(data.$storage);
         }
 
         return model;
@@ -229,7 +229,7 @@
             else
             {
                 model = new Model(this.$parent);
-                data && model.$load(data);
+                data && model.$assign(data);
             }
 
             this[index] = model;

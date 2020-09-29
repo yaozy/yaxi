@@ -2,7 +2,7 @@ yaxi.Image.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<image class="$class"></image>');
+    yaxi.template(this, '<image class="@class"></image>');
 
 
 

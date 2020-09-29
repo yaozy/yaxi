@@ -1,4 +1,4 @@
-yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('CheckBox', function (Class, base) {
 
 
 
@@ -39,6 +39,8 @@ yaxi.CheckBox = yaxi.Control.extend(function (Class, base) {
     
 }, function CheckBox() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('CheckBox');
+
+});

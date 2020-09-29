@@ -1,4 +1,4 @@
-yaxi.Image = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Image', function (Class, base) {
 
 
     // 图片资源地址
@@ -35,6 +35,8 @@ yaxi.Image = yaxi.Control.extend(function (Class, base) {
 
 }, function Image() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('Image');
+
+});

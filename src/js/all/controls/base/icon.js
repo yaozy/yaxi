@@ -1,8 +1,5 @@
-yaxi.Icon = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Icon', function (Class, base) {
 
-
-
-    this.$class += ' iconfont'
 
     
     // 图标名
@@ -16,6 +13,8 @@ yaxi.Icon = yaxi.Control.extend(function (Class, base) {
 
 }, function Icon() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('Icon');
+
+});

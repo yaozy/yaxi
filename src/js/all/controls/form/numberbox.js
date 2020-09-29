@@ -1,4 +1,4 @@
-yaxi.NumberBox = yaxi.TextBox.extend(function () {
+yaxi.TextBox.extend('NumberBox', function () {
 
 
 
@@ -53,4 +53,4 @@ yaxi.NumberBox = yaxi.TextBox.extend(function () {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('NumberBox');
+});

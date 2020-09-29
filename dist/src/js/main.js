@@ -13,6 +13,11 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     Class.main = true;
 
 
+    // 默认窗口标题
+    yaxi.Header.text = '华旅教育';
+
+    
+
     this.init = function () {
 
         this.loadTemplate(template);

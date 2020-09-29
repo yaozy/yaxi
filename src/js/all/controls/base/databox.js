@@ -2,7 +2,7 @@
  * DataBox是一个通过数据集合(data)和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
 */
-yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('DataBox', function (Class, base) {
 
 
 
@@ -326,4 +326,4 @@ yaxi.DataBox = yaxi.Control.extend(function (Class, base) {
         init.apply(this, arguments);
     }
 
-}).register('DataBox');
+});

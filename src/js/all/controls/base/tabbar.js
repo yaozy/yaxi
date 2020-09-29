@@ -1,4 +1,4 @@
-yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
@@ -205,4 +205,4 @@ yaxi.TabBar = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
 
 
-}).register('TabBar');
+});

@@ -1,4 +1,4 @@
-yaxi.Text = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Text', function (Class, base) {
 
 
 
@@ -31,6 +31,8 @@ yaxi.Text = yaxi.Control.extend(function (Class, base) {
 
 }, function Text() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('Text');
+
+});

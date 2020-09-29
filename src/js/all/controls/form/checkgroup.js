@@ -1,4 +1,4 @@
-yaxi.CheckGroup = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('CheckGroup', function (Class, base) {
 
 
 
@@ -9,4 +9,4 @@ yaxi.CheckGroup = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
 
 
-}).register('CheckGroup');
+});

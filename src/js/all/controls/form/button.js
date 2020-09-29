@@ -1,4 +1,4 @@
-yaxi.Button = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Button', function (Class, base) {
 
 
     
@@ -24,31 +24,32 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
 
 
 
-    function createControls(parent, values) {
+    function createShadows(parent, values) {
 
         var length = values.length;
-        var list = new A(length);
+        var controls = new A(length);
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = build(parent, values[i], false);
+            controls[i] = build(parent, values[i]);
+            controls[i].__shadow = true;
         }
 
-        return list;
+        return controls;
     }
 
 
     this.content = this.__load_children = function (values) {
 
-        var content;
+        var shadows;
 
-        if (content = this.__content)
+        if (shadows = this.__shadows)
         {
-            if (typeof content === 'object')
+            if (typeof shadows === 'object')
             {
-                for (var i = content.length; i--;)
+                for (var i = shadows.length; i--;)
                 {
-                    content[i].destroy();
+                    shadows[i].destroy();
                 }
             }
         }
@@ -66,11 +67,12 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
 
                 if (values[0] instanceof A)
                 {
-                    values = createControls(this, values);
+                    values = createShadows(this, values);
                 }
                 else
                 {
-                    values = [build(this, values, false)];
+                    values = [build(this, values)];
+                    values[0].__shadow = true;
                 }
 
                 this.$storage.text = '';
@@ -85,21 +87,20 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
             this.$storage.text = values = '' + values; 
         }
 
-        this.__content = values;
+        this.__shadows = values;
     }
 
 
 
     this.destroy = function () {
 
-        var content = this.__content;
+        var shadows = this.__shadows;
 
-        if (content && typeof content !== 'string')
+        if (shadows && typeof shadows !== 'string')
         {
-            for (var i = content.length; i--;)
+            for (var i = shadows.length; i--;)
             {
-                content[i].destroy();
-                content[i].__own = null;
+                shadows[i].destroy();
             }
         }
 
@@ -114,4 +115,4 @@ yaxi.Button = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('Button');
+});

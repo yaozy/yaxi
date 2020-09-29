@@ -1,4 +1,4 @@
-yaxi.Page = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('Page', function (Class, base) {
 
 
 	
@@ -66,6 +66,8 @@ yaxi.Page = yaxi.Box.extend(function (Class, base) {
     
 }, function Page() {
 
+
     yaxi.Box.apply(this, arguments);
 
-}).register('Page');
+
+});

@@ -1,4 +1,4 @@
-yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Marquee', function (Class, base) {
 
 
 
@@ -12,6 +12,8 @@ yaxi.Marquee = yaxi.Control.extend(function (Class, base) {
     
 }, function Marquee() {
 
+
     yaxi.Control.apply(this, arguments);
 
-}).register('Marquee');
+    
+});

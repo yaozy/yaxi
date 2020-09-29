@@ -1,4 +1,4 @@
-yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('Swiper', function (Class, base) {
 
 
 
@@ -39,4 +39,4 @@ yaxi.Swiper = yaxi.Box.extend(function (Class, base) {
 
     yaxi.Box.apply(this, arguments);
 
-}).register("Swiper");
+});

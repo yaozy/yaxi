@@ -1,8 +1,12 @@
-yaxi.ScrollBox = yaxi.Box.extend(function () {
+yaxi.Box.extend('ScrollBox', function () {
+
+
 
 
 }, function ScrollBox() {
 
+
     yaxi.Box.call(this);
 
-}).register('ScrollBox');
+
+});

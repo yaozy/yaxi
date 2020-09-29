@@ -25,7 +25,7 @@ yaxi.Memo.renderer(function (base) {
 
     
 
-    yaxi.template(this, '<span class="$class"><textarea></textarea></span>');
+    yaxi.template(this, '<span class="@class"><textarea></textarea></span>');
 
 
 

@@ -14,7 +14,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
             theme: 'text-primary line-primary line-bottom'
         };
 
-        this.find('>box').load(bodyTemplate(this, data));
+        this.find('>box').loadTemplate(bodyTemplate, data);
     }
 
     

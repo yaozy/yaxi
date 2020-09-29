@@ -1,4 +1,4 @@
-yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('StackBox', function (Class, base) {
 
 
 
@@ -24,6 +24,8 @@ yaxi.StackBox = yaxi.Box.extend(function (Class, base) {
 
 }, function StackBox() {
 
+
     yaxi.Box.apply(this, arguments);
 
-}).register('StackBox');
+
+});

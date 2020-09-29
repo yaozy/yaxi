@@ -1,4 +1,4 @@
-yaxi.TextBox = yaxi.Control.extend(function () {
+yaxi.Control.extend('TextBox', function () {
 
 
 
@@ -69,6 +69,8 @@ yaxi.TextBox = yaxi.Control.extend(function () {
 
 }, function TextBox() {
 
+
     yaxi.Control.apply(this, arguments);
     
-}).register('TextBox');
+
+});

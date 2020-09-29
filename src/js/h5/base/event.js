@@ -65,11 +65,13 @@
             if ((uuid = view.id) && (control = controls[uuid]))
             {
                 flag = f || '';
-                return control.findEventTarget();
+                return control.disabled ? control.parent || null : control;
             }
 
             view = view.parentNode;
         }
+
+        return null;
     }
 
     

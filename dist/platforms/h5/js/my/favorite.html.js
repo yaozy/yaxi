@@ -8,9 +8,8 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard"
-				},
-				"我的收藏"
+					"text": "我的收藏"
+				}
 			],
 			[
 				"databox",

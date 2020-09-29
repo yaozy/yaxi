@@ -1,4 +1,4 @@
-yaxi.Dialog = yaxi.Box.extend(function (Class, base, yaxi) {
+yaxi.Box.extend('Dialog', function (Class, base, yaxi) {
 	
 
 
@@ -96,9 +96,11 @@ yaxi.Dialog = yaxi.Box.extend(function (Class, base, yaxi) {
 	
 }, function Dialog() {
 
+
 	yaxi.Box.apply(this, arguments);
 
-}).register('Dialog');
+
+});
 
 
 

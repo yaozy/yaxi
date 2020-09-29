@@ -8,9 +8,8 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard"
-				},
-				"发票抬头"
+					"text": "发票抬头"
+				}
 			],
 			[
 				"box",

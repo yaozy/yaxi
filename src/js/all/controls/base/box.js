@@ -2,7 +2,7 @@
  * Box是一个自由的容器控件
  * 不仅可以通过children属性访问子控件集合, 也可以通过find及query方法对子控件进行处理
 */
-yaxi.Box = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Box', function (Class, base) {
 
 
 
@@ -90,5 +90,5 @@ yaxi.Box = yaxi.Control.extend(function (Class, base) {
         init.apply(this, arguments);
     }
 
-}).register('Box');
+});
 

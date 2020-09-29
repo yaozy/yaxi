@@ -1,10 +1,10 @@
-yaxi.Control.extend(function (Class, base, yaxi) {
+yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
     
     var create = Object.create;
 
-    var assign = Object.assign;
+    var own = Object.getOwnPropertyNames;
 
 
     var A = Array;
@@ -15,15 +15,17 @@ yaxi.Control.extend(function (Class, base, yaxi) {
     // 管道编译器
     var compile = yaxi.pipe.compile;
 
+
     // 控件对象集合
-    var controls = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls = yaxi.$controls;
+
 
 
 
     this.__build_get = function (name) {
 
         var yx = yaxi;
-        var create = Object.create;
+        var init = create;
 
         return function () {
 
@@ -45,17 +47,20 @@ yaxi.Control.extend(function (Class, base, yaxi) {
                 }
                 else
                 {
-                    (this.__observes = create(null))[name] = [target];
+                    (this.__observes = init(null))[name] = [target];
                 }
     
-                // 给控件记录依赖关系以便控件销毁时自动解除绑定
-                if (bindings = control.__bindings)
+                if (target = controls[target])
                 {
-                    bindings.push(name, this);
-                }
-                else
-                {
-                    control.__bindings = [name, this];
+                    // 给控件记录依赖关系以便控件销毁时自动解除绑定
+                    if (bindings = target.__bindings)
+                    {
+                        bindings.push(name, this);
+                    }
+                    else
+                    {
+                        target.__bindings = [name, this];
+                    }
                 }
             }
 
@@ -64,9 +69,10 @@ yaxi.Control.extend(function (Class, base, yaxi) {
     }
 
 
-    this.__build_set = function (name, convert) {
+    this.__build_set = function (name, options) {
 
         var init = create;
+        var convert = options.convert;
 
         return function (value) {
 
@@ -78,18 +84,14 @@ yaxi.Control.extend(function (Class, base, yaxi) {
             {
                 if (value !== changes[name])
                 {
-                    onchange.call(this, name);
-
                     changes[name] = value;
-                    this.__dirty || patch(this);
+                    onchange.call(this, name);
                 }
             }
             else if (value !== this.$storage[name])
             {
-                onchange.call(this, name);
-
                 (this.__changes = init(this.$storage))[name] = value;
-                this.__dirty || patch(this);
+                onchange.call(this, name);
             }
         }
     }
@@ -97,7 +99,7 @@ yaxi.Control.extend(function (Class, base, yaxi) {
 
     function onchange(name) {
 
-        var observes, observe, control, index;
+        var observes, observe, control, index, fn;
         
         if ((observes = this.__observes) && (observes = observes[name]))
         {
@@ -122,79 +124,165 @@ yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
-
-    this.load = function (options) {
-
-        this.__template = options;
-        return this;
-    }
-
-
-    this.loadTemplate = function (template, data, model) {
-
-        this.__template = template.call(this, data, model);
-        return this;
-    }
-
-
     this.__load = function (options, scope) {
 
-        var template = this.__template || [];
-        var shadow, values;
+        var template = this.template;
+        var shadowRoot;
 
-        if (shadow = this.__shadow)
+        if (template)
         {
-            for (var i = shadow.length; i--;)
+            if (typeof template === 'function')
             {
-                shadow[i].destroy();
-                shadow[i].__own = null;
-            }
-        }
-
-        if (values = template[0])
-        {
-            if (options[1])
-            {
-                assign(values, options[1]);
+                template = template.call(this) || [];
             }
         }
         else
         {
-            values = options[1];
+            template = [];
         }
 
-        if (values)
+        if (options[1])
         {
-            this.__load_attributes(values);
+            this.__load_attributes(options[1]);
         }
 
-        if (values = template[1])
+        if (template[2])
         {
-            this.__shadow = createControls(this, values);
+            parseSlots(this, template[2], options[2]);
+        }
+
+        shadowRoot = this.__shadowRoot = build(this, template, scope);
+        shadowRoot.__shadow = true;
+        shadowRoot.__class += this.constructor.class || '';
+    }
+
+
+    function parseSlots(component, options, slots) {
+
+        var values;
+
+        for (var i = options.length; i--;)
+        {
+            if (values = options[i])
+            {
+                if (values[0] === 'slot')
+                {
+                    values = handleSlots(values[1], slots, values[2]);
+
+                    if (values && values.length > 0)
+                    {
+                        values = createSlots(component, i, values);
+                        options.splice.apply(options, values);
+                    }
+                }
+                else if (values[2])
+                {
+                    parseSlots(component, values[2], slots);
+                }
+            }    
         }
     }
 
 
-    function parseSlot(values, slots) {
+    function handleSlots(name, slots, defaults) {
 
-        for (var i = values.length; i--;)
+        // 使用者传入了插槽
+        if (slots != null)
         {
-            // if (value)
+            name = name && name.name;
+
+            if (typeof slots === 'string')
+            {
+                if (name)
+                {
+                    throw new Error('slot input error: named slot can not support string, current slot name "' + name + '"!');
+                }
+
+                return [['text', null, slots]];
+            }
+            
+            if (slots.length > 0)
+            {
+                var outputs = [];
+                var index = 0;
+                var item;
+
+                // 指定了slot名称
+                if (name)
+                {
+                    while (item = slots[index++])
+                    {
+                        if (item.slot === name)
+                        {
+                            outputs.push(item);
+                        }
+                    }
+                }
+                else
+                {
+                    while (item = slots[index++])
+                    {
+                        if (!item.slot)
+                        {
+                            outputs.push(item);
+                        }
+                    }
+                }
+
+                return outputs;
+            }
         }
+        
+        return defaults;
     }
 
 
-    function createControls(parent, values) {
 
-        var length = values.length;
-        var list = new A(length);
+    function createSlots(parent, index, items) {
+
+        var length = items.length;
+        var outputs = new A(length + 2);
+        var control;
+
+        outputs[0] = index;
+        outputs[1] = 1;
 
         for (var i = 0; i < length; i++)
         {
-            list[i] = build(parent, values[i], false);
+            control = outputs[i + 2] = build(parent, items[i]);
+            control.__slot = true;
         }
 
-        return list;
+        return outputs;
+    }
+
+
+
+    this.$combineChanges = function () {
+
+        var changes;
+
+        if (changes = this.__changes)
+        {
+            var shadowRoot = this.__shadowRoot;
+            var properties = this.$properties;
+            var names = own(changes);
+            var index = 0;
+            var name, values;
+
+            while (name = names[index++])
+            {
+                switch (properties[name].kind)
+                {
+                    // 从以下三类属性同步到shadowRoot上, 其它属性不处理
+                    case 'class':
+                    case 'style':
+                    case 'attribute':
+                        (values || (values = shadowRoot.__changes || (shadowRoot.__changes = create(null))))[name] = changes[name];
+                        break;
+                }
+            }
+        }
     }
 
 
@@ -308,42 +396,23 @@ yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
-    this.__load_children = function (values, scope) {
-
-        
-    }
-
-
-
     this.destroy = function () {
 
-        var children = this.__children;
+        var root;
 
-        for (var i = children.length; i--;)
+        if (root = this.__shadowRoot)
         {
-            children[i].destroy();
-            children[i].__own = null;
+            root.destroy();
+            this.__shadowRoot = null;
         }
 
         base.destroy.call(this);
     }
 
-
-
-    yaxi.component = function (name, fn) {
-
-        if (typeof name === 'function')
-        {
-            fn = name;
-            name = '';
-        }
-
-        return Class.extend(fn).register(name);
-    }
     
 
 
-}, function Component () {
+}, function Component() {
 
     var init;
 
@@ -356,56 +425,3 @@ yaxi.Control.extend(function (Class, base, yaxi) {
 
 });
 
-
-
-
-
-
-yaxi.component('Header', function (Class, base) {
-
-
-
-    var template = function ($owner, $data, $model) {
-
-        var $property = $owner.$property;
-
-        return (
-            [
-                "box",
-                null,
-                [
-                    [
-                        "icon",
-                        {
-                            "icon": "icon-common-back",
-                            "hidden": "true",
-                            "bindings": {
-                                "text": function () {
-
-                                    return this.text;
-                                }
-                            }
-                        }
-                    ],
-                    [
-                        "slot",
-                        null
-                    ]
-                ]
-            ]
-        )
-    }
-
-
-
-    this.init = function () {
-
-        this.loadTemplate(template);
-    }
-
-
-
-    this.property('text', '')
-
-
-});

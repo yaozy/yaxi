@@ -10,9 +10,8 @@ return (
 			[
 				"header",
 				{
-					"theme": "bg-standard"
-				},
-				"我的试卷"
+					"text": "我的试卷"
+				}
 			],
 			[
 				"databox",

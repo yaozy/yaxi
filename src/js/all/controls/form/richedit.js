@@ -1,4 +1,4 @@
-yaxi.RichEdit = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('RichEdit', function (Class, base) {
 
 
     
@@ -13,4 +13,4 @@ yaxi.RichEdit = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('RichEdit');
+});

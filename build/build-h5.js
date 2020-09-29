@@ -20,6 +20,8 @@ new Compressor()
         'js/h5/renderer/page/*.js',
     ])
     .combine('\r\n\r\n\r\n\r\n')
+    .push('yaxi.classHost = null;')
+
     .output('dist/platforms/h5/yaxi/js/yaxi.js')
 
     .compress()

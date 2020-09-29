@@ -1,4 +1,4 @@
-yaxi.Form = yaxi.Box.extend(function (Class, base) {
+yaxi.Box.extend('Form', function (Class, base) {
 
 
 
@@ -8,4 +8,4 @@ yaxi.Form = yaxi.Box.extend(function (Class, base) {
     yaxi.Box.apply(this, arguments);
 
 
-}).register('Form');
+});

@@ -2,18 +2,18 @@ yaxi.Button.renderer(function (base) {
 
 
 
-    function renderContent(control, view) {
+    function renderShadows(control, view) {
 
-        var content = control.__content || '';
+        var shadows = control.__shadows || '';
 
-        if (typeof content === 'string')
+        if (typeof shadows === 'string')
         {
-            view.textContent = content;
+            view.textContent = shadows;
         }
         else
         {
             view.textContent = '';
-            this.renderChildren(view, content);
+            this.renderChildren(view, shadows);
         }
     }
 
@@ -23,14 +23,14 @@ yaxi.Button.renderer(function (base) {
 
         var view = base.render.call(this, control);
 
-        renderContent.call(this, control, view);
+        renderShadows.call(this, control, view);
         return view;
     }
     
 
     this.text = function (control, view) {
 
-        renderContent.call(this, control, view);
+        renderShadows.call(this, control, view);
     }
 
 

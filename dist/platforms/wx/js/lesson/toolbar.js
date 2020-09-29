@@ -10,7 +10,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     const all = { id: 0, text: '全部' };
 
 
-    model.$load({
+    model.$assign({
 
         sort: {
             data: [

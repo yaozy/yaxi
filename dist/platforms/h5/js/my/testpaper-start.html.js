@@ -7,8 +7,9 @@ return (
 		[
 			[
 				"header",
-				null,
-				"我的试卷"
+				{
+					"text": "我的试卷"
+				}
 			],
 			[
 				"box",

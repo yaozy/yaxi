@@ -5,7 +5,10 @@ return (
 		"page",
 		null,
 		[
-			require("./components/header.html").call(this, $data, $model),
+			[
+				"header",
+				null
+			],
 			[
 				"stackbox",
 				{

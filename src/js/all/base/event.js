@@ -196,10 +196,16 @@ yaxi.EventTarget = Object.extend(function (Class) {
                     }
                 }
             }
+
+            // 影子控件再向上冒泡时要修改target为容器控件
+            if (target.__shadow)
+            {
+                event.target = target.parent;
+            }
         }
         while (target = target.parent);
 
-        return !event || !event.defaultPrevented;
+        return !event.defaultPrevented;
     }
 
 

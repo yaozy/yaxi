@@ -6,18 +6,11 @@ Object.extend.call(Array, function (Class, base) {
     var create = Object.create;
 
 
-    var classes = yaxi.classes = create(null);
+    var classes = yaxi.classes;
 
     var cache = create(null);
     
 
-
-    if (typeof jiac !== 'undefined')
-    {
-        jiac.classes = classes;
-    }
-
-    
 
     // 实现查找单个控件
     yaxi.impl.find = function () {

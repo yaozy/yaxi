@@ -1,4 +1,4 @@
-yaxi.PasswordBox = yaxi.TextBox.extend(function () {
+yaxi.TextBox.extend('PasswordBox', function () {
 
 
 
@@ -11,4 +11,4 @@ yaxi.PasswordBox = yaxi.TextBox.extend(function () {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('PasswordBox');
+});

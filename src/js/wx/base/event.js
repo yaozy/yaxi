@@ -52,8 +52,14 @@
 
     function findControl(uuid) {
 
-        var control = controls[uuid];
-        return control ? control.findEventTarget() : null;
+        var control;
+
+        if (control = controls[uuid])
+        {
+            return control.disabled ? control.parent || null : control;
+        }
+
+        return null;
     }
     
     

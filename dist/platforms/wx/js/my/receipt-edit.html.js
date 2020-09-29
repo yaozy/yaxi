@@ -9,7 +9,12 @@ return (
 				"masklayer",
 				null
 			],
-			require("../components/header.html").call(this, $data, $model),
+			[
+				"header",
+				{
+					"text": "发票抬头"
+				}
+			],
 			[
 				"box",
 				{

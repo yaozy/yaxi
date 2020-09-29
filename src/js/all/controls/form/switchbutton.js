@@ -1,4 +1,4 @@
-yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('SwitchButton', function (Class, base) {
 
 
 
@@ -19,4 +19,4 @@ yaxi.SwitchButton = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('SwitchButton');
+});

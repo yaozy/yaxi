@@ -299,7 +299,7 @@
 
                 if (values)
                 {
-                    (model || (this[name] = new Model(this))).$load(values);
+                    (model || (this[name] = new Model(this))).$assign(values);
                 }
                 else if (model)
                 {
@@ -516,8 +516,8 @@
 
 
 
-    // 加载
-    this.$load = function (values) {
+    // 批量赋值
+    this.$assign = function (values) {
 
         if (values)
         {

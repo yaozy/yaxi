@@ -3,7 +3,7 @@ yaxi.StackBox.renderer(function (base) {
 
 
     
-    yaxi.template(this, '<div class="$class"><div class="yx-stackbox-body"></div></div>');
+    yaxi.template(this, '<div class="@class"><div class="yx-stackbox-body"></div></div>');
 
 
 

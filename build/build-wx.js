@@ -19,6 +19,9 @@ new Compressor()
         'js/wx/renderer/page/page.js',
         'js/wx/renderer/page/*.js',
     ])
+    
     .combine('\r\n\r\n\r\n\r\n')
+    .push('yaxi.classHost = null;')
+
     .output('dist/platforms/wx/yaxi/js/yaxi.js')
 

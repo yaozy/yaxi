@@ -1,4 +1,4 @@
-yaxi.Radio = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Radio', function (Class, base) {
 
 
 
@@ -41,4 +41,4 @@ yaxi.Radio = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('Radio');
+});

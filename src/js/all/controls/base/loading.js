@@ -1,4 +1,4 @@
-yaxi.Loading = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('Loading', function (Class, base) {
 
 
 
@@ -8,4 +8,4 @@ yaxi.Loading = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('Loading');
+});

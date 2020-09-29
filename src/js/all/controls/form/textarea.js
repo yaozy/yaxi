@@ -1,4 +1,4 @@
-yaxi.TextArea = yaxi.TextBox.extend(function () {
+yaxi.TextBox.extend('TextArea', function () {
 
 
     
@@ -13,4 +13,4 @@ yaxi.TextArea = yaxi.TextBox.extend(function () {
     yaxi.Control.apply(this, arguments);
 
 
-}).register('TextArea');
+});

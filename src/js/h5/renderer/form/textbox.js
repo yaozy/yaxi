@@ -2,7 +2,7 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<input type="text" class="$class" />');
+    yaxi.template(this, '<input type="text" class="@class" />');
 
 
 

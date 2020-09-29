@@ -1,4 +1,4 @@
-yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
+yaxi.Control.extend('IconButton', function (Class, base) {
 
 
     // 标记不能被继承
@@ -39,4 +39,4 @@ yaxi.IconButton = yaxi.Control.extend(function (Class, base) {
     yaxi.Control.apply(this, arguments);
 
     
-}).register('IconButton');
+});

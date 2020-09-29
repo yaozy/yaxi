@@ -62,8 +62,8 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     function createControls(parent, list, index, outputs) {
 
-        var length = list.length,
-            control;
+        var length = list.length;
+        var control;
 
         if ((index |= 0) < 0)
         {
@@ -125,10 +125,12 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if ((index |= 0) >= 0 && this.__length > index)
         {
-            value = build(controls[this.$uuid], value);
+            var control = controls[this.$uuid];
+
+            control = build(control, value);
 
             this.__last || patch(this);
-            this[index] = value;
+            this[index] = control;
         }
     }
 

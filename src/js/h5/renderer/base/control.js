@@ -35,29 +35,34 @@ yaxi.Control.renderer(function () {
 
 
 
-    this.__html_template = '<div class="$class"></div>';
+    this.__html_template = '<div class="@class"></div>';
     
 
 
-    function init_template(target, control) {
+    function createView(renderer, control) {
 
-        var view;
-        
-        div.innerHTML = target.__html_template.replace('$class', control.$class);
+        var Class = control.constructor;
+        var dom;
 
-        view = div.firstChild;
-        div.removeChild(view);
+        if (dom = Class.__dom_template)
+        {
+            return dom.cloneNode(true);
+        }
 
-        return control.constructor.__dom_template = view;
+        div.innerHTML = renderer.__html_template.replace('@class', control.__class);
+
+        dom = div.firstChild;
+        div.removeChild(dom);
+
+        return (Class.__dom_template = dom).cloneNode(true);
     }
-
 
 
 
     // 渲染控件
     this.render = function (control) {
 
-        var view = control.$view || (control.$view = (control.constructor.__dom_template || init_template(this, control)).cloneNode(true));
+        var view = control.$view || (control.$view = createView(this, control));
 
         view.id = control.uuid;
         this.patch(control, view);
@@ -82,22 +87,22 @@ yaxi.Control.renderer(function () {
 
     this.patch = function (control, view) {
 
-        var values;
+        var changes;
 
         control.__dirty = false;
 
-        if (values = control.__changes)
+        if (changes = control.__changes)
         {
             var properties = control.$properties;
             var storage = control.$storage;
-            var names = own(values);
+            var names = own(changes);
             var index = 0;
             var classes, property, name, value, any;
 
             while (name = names[index++])
             {
                 property = properties[name];
-                value = storage[name] = values[name];
+                value = storage[name] = changes[name];
 
                 switch (property && property.kind)
                 {
@@ -146,7 +151,7 @@ yaxi.Control.renderer(function () {
                     default:
                         if (any = this[name])
                         {
-                            any.call(this, control, view, values[name]);
+                            any.call(this, control, view, value);
                         }
                         break;
                 }
@@ -155,17 +160,17 @@ yaxi.Control.renderer(function () {
             // 有变化的class则合并处理
             if (classes)
             {
-                values = [];
+                names = [control.__class];
 
                 for (name in classes)
                 {
                     if (value = classes[name])
                     {
-                        values.push(value);
+                        names.push(value);
                     }
                 }
 
-                view.className = control.$class + ' ' + values.join(' ');
+                view.className = names.join(' ');
             }
 
             control.__changes = null;
