@@ -2,6 +2,10 @@ yaxi.Memo.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-memo';
+    
+
+
     this.focus = function (control) {
 
         var view;
@@ -25,7 +29,7 @@ yaxi.Memo.renderer(function (base) {
 
     
 
-    yaxi.template(this, '<span class="@class"><textarea></textarea></span>');
+    this.template('<span class="@class"><textarea></textarea></span>');
 
 
 

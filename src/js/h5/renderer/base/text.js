@@ -2,7 +2,11 @@ yaxi.Text.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<span class="@class"></span>');
+    this.className = 'yx-control yx-text';
+    
+
+
+    this.template('<span class="@class"></span>');
 
     
 

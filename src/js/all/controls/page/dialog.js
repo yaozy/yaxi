@@ -57,6 +57,8 @@ yaxi.Box.extend('Dialog', function (Class, base, yaxi) {
     
 			this.options = null;
 			this.destroy();
+			
+			this.__shrink_uuid();
 	
 			if (callback = this.__callback)
 			{

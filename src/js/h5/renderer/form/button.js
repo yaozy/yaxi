@@ -2,6 +2,10 @@ yaxi.Button.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-button';
+    
+
+
     function renderShadows(control, view) {
 
         var shadows = control.__shadows || '';

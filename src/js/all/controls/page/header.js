@@ -28,13 +28,18 @@ yaxi.Component.extend('Header', function (Class, base) {
             'box',
             {
                 layout: 'row middle',
-                theme: 'bg-standard'
+                theme: 'bg-standard line-lightest line-bottom',
+                height: '80rem',
+                paddingLeft: '20rem'
             },
             [
                 [
                     'icon',
                     {
                         icon: 'common-back',
+                        width: '80rem',
+                        height: '100%',
+                        marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
                         events: {
     

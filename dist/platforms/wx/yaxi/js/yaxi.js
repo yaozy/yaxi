@@ -105,12 +105,13 @@ Object.extend = function (name, fn, Class, force) {
         if (force || !classes[name])
         {
             // 绑定到类容器
-            yaxi.classHost && (yaxi.classHost[name] = Class);
+            if (force = yaxi.classHost)
+            {
+                force[name] = Class;
+            }
 
             classes[Class.typeName = prototype.typeName = name] = Class;
             classes[name = Class.lowerTypeName = name.toLowerCase()] = Class;
-    
-            prototype.__class += (Class.class = ' yx-' + name);
         }
         else
         {
@@ -979,7 +980,7 @@ yaxi.Event = Object.extend.call({}, function (Class) {
 
 
 
-yaxi.EventTarget = Object.extend(function (Class) {
+yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
     
     var Event = yaxi.Event;
@@ -989,7 +990,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
 
     // 注册事件
-    this.on = yaxi.on = function (type, listener) {
+    this.on = function (type, listener) {
         
         if (type && typeof listener === 'function')
         {
@@ -1022,7 +1023,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注册只执行一次的事件
-    this.once = yaxi.once = function (type, listener) {
+    this.once = function (type, listener) {
 
         if (typeof listener === 'function')
         {
@@ -1038,7 +1039,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注销事件
-    this.off = yaxi.off = function (type, listener) {
+    this.off = function (type, listener) {
         
         var events = this.__event_keys,
             items;
@@ -1087,7 +1088,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (event, detail) {
+    this.trigger = function (event, detail) {
         
         var target = this,
             events,
@@ -1149,7 +1150,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 检测是否注册了指定的事件
-    this.hasEvent = yaxi.hasEvent = function (type, listener) {
+    this.hasEvent = function (type, listener) {
 
         var events = this.__event_keys,
             items;
@@ -1175,14 +1176,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    Class.mixin = function (target) {
+    ;(Class.mixin = function (target) {
 
         target.on = prototype.on;
         target.once = prototype.once;
         target.off = prototype.off;
         target.trigger = prototype.trigger;
         target.hasEvent = prototype.hasEvent;
-    }
+
+    })(yaxi);
 
 
 });
@@ -1940,8 +1942,9 @@ yaxi.colors.load('blue', [
     // 管道编译器
     var compile = yaxi.pipe.compile;
 
+    
     // 控件对象集合
-    var controls = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls = yaxi.$controls = new Array(2 << 19);
 
 
     // 绑定的目标
@@ -3493,10 +3496,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     var create = Object.create;
 
 
-    var eventTarget = yaxi.EventTarget.prototype;
-
-
-
     // 注册的控件类集合
     var classes = yaxi.classes;
 
@@ -3767,7 +3766,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls1 = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls1 = yaxi.$controls;
 
 
     // 控件唯一id
@@ -3780,6 +3779,26 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     });
 
 
+    // 收缩uuid
+    this.__shrink_uuid = function () {
+
+        var controls = controls1;
+        var count = 0;
+
+        for (var i = uuid; i--;)
+        {
+            if (controls[i])
+            {
+                uuid -= count;
+                return;
+            }
+            
+            count++;
+        }
+    }
+
+
+
 
     var controls2 = create(null);
 
@@ -3789,7 +3808,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         return (id = controls2[id]) && controls1[id] || null;
     }
-
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
@@ -3815,12 +3833,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             controls2[value] = this.uuid;
         }
     }
-
-
-
-
-    // 类型的class
-    this.__class = 'yx-control';
 
 
 
@@ -4531,27 +4543,10 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     
-    // 绑定事件
-    this.on = eventTarget.on;
+    // 扩展事件支持
+    yaxi.EventTarget.mixin(this);
 
     
-    // 绑定只执行一次的事件
-    this.once = eventTarget.once;
-
-
-    // 注销事件
-    this.off = eventTarget.off;
-
-
-    // 触发事件
-    this.trigger = eventTarget.trigger;
-
-
-    // 检测是否注册了指定的事件
-    this.hasEvent = eventTarget.hasEvent;
-
-
-
     this.$properties.events = {
         
         convert: function (events) {
@@ -5251,7 +5246,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         shadowRoot = this.__shadowRoot = build(this, template, scope);
         shadowRoot.__shadow = true;
-        shadowRoot.__class += this.constructor.class || '';
     }
 
 
@@ -7167,6 +7161,8 @@ yaxi.Box.extend('Dialog', function (Class, base, yaxi) {
     
 			this.options = null;
 			this.destroy();
+			
+			this.__shrink_uuid();
 	
 			if (callback = this.__callback)
 			{
@@ -7420,13 +7416,18 @@ yaxi.Component.extend('Header', function (Class, base) {
             'box',
             {
                 layout: 'row middle',
-                theme: 'bg-standard'
+                theme: 'bg-standard line-lightest line-bottom',
+                height: '80rem',
+                paddingLeft: '20rem'
             },
             [
                 [
                     'icon',
                     {
                         icon: 'common-back',
+                        width: '80rem',
+                        height: '100%',
+                        marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
                         events: {
     
@@ -8148,6 +8149,51 @@ yaxi.Box.renderer(function (base) {
 
 
 
+yaxi.Component.renderer(function (base) {
+
+
+    // 全局渲染
+    this.render = function (control) {
+
+        var shadowRoot = control.__shadowRoot;
+
+        control.__dirty = false;
+
+        if (control.__changes)
+        {
+            control.$combineChanges();
+            control.__changes = null;
+        }
+
+        // 渲染shadowRoot
+        return shadowRoot.$renderer.render(shadowRoot);
+    }
+    
+
+    
+    this.patch = function (control, view, prefix) {
+
+        var shadowRoot = control.__shadowRoot;
+
+        control.__dirty = false;
+
+        if (control.__changes)
+        {
+            control.$combineChanges();
+            control.__changes = null;
+        }
+
+        // 渲染shadowRoot
+        shadowRoot.$renderer.patch(shadowRoot, view, prefix);
+    }
+
+
+
+});
+
+
+
+
 yaxi.DataBox.renderer(function (base) {
 
 
@@ -8478,6 +8524,8 @@ yaxi.Page.renderer(function (base, yaxi) {
             
                     page.options = page.__wx_page = null;
                     page.destroy();
+                    
+                    page.__shrink_uuid();
             
                     if (callback = page.__callback)
                     {

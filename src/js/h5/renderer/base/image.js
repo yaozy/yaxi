@@ -2,7 +2,11 @@ yaxi.Image.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<image class="@class"></image>');
+    this.className = 'yx-control yx-image';
+    
+
+
+    this.template('<image class="@class"></image>');
 
 
 

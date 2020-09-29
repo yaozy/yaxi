@@ -105,12 +105,13 @@ Object.extend = function (name, fn, Class, force) {
         if (force || !classes[name])
         {
             // 绑定到类容器
-            yaxi.classHost && (yaxi.classHost[name] = Class);
+            if (force = yaxi.classHost)
+            {
+                force[name] = Class;
+            }
 
             classes[Class.typeName = prototype.typeName = name] = Class;
             classes[name = Class.lowerTypeName = name.toLowerCase()] = Class;
-    
-            prototype.__class += (Class.class = ' yx-' + name);
         }
         else
         {

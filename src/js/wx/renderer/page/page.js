@@ -163,6 +163,8 @@ yaxi.Page.renderer(function (base, yaxi) {
             
                     page.options = page.__wx_page = null;
                     page.destroy();
+                    
+                    page.__shrink_uuid();
             
                     if (callback = page.__callback)
                     {

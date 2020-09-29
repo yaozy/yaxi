@@ -2,7 +2,11 @@ yaxi.CheckBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-checkbox';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-icon icon-common-unchecked"></div>'
             + '<div class="yx-checkbox-content"></div>'
         + '</div>');

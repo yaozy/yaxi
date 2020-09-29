@@ -5,10 +5,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     var create = Object.create;
 
 
-    var eventTarget = yaxi.EventTarget.prototype;
-
-
-
     // 注册的控件类集合
     var classes = yaxi.classes;
 
@@ -279,7 +275,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls1 = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls1 = yaxi.$controls;
 
 
     // 控件唯一id
@@ -292,6 +288,26 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     });
 
 
+    // 收缩uuid
+    this.__shrink_uuid = function () {
+
+        var controls = controls1;
+        var count = 0;
+
+        for (var i = uuid; i--;)
+        {
+            if (controls[i])
+            {
+                uuid -= count;
+                return;
+            }
+            
+            count++;
+        }
+    }
+
+
+
 
     var controls2 = create(null);
 
@@ -301,7 +317,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         return (id = controls2[id]) && controls1[id] || null;
     }
-
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
@@ -327,12 +342,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             controls2[value] = this.uuid;
         }
     }
-
-
-
-
-    // 类型的class
-    this.__class = 'yx-control';
 
 
 
@@ -1043,27 +1052,10 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     
-    // 绑定事件
-    this.on = eventTarget.on;
+    // 扩展事件支持
+    yaxi.EventTarget.mixin(this);
 
     
-    // 绑定只执行一次的事件
-    this.once = eventTarget.once;
-
-
-    // 注销事件
-    this.off = eventTarget.off;
-
-
-    // 触发事件
-    this.trigger = eventTarget.trigger;
-
-
-    // 检测是否注册了指定的事件
-    this.hasEvent = eventTarget.hasEvent;
-
-
-
     this.$properties.events = {
         
         convert: function (events) {

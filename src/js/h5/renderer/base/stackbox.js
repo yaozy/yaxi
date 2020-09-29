@@ -2,8 +2,11 @@ yaxi.StackBox.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-box yx-stackbox';
     
-    yaxi.template(this, '<div class="@class"><div class="yx-stackbox-body"></div></div>');
+
+    
+    this.template('<div class="@class"><div class="yx-stackbox-body"></div></div>');
 
 
 

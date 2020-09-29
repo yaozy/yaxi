@@ -22,8 +22,11 @@ yaxi.Page.renderer(function (base) {
 
 
 
-	yaxi.template(this, '<div class="@class"></div>');
 
+    this.className = 'yx-control yx-box yx-page';
+    
+
+	this.template('<div class="@class"></div>');
 
 
 
@@ -117,7 +120,9 @@ yaxi.Page.renderer(function (base) {
 
                 page.onunload(options);
                 page.options = null;
+
                 page.destroy();
+                page.__shrink_uuid();
                 
                 if (callback = page.__callback)
                 {

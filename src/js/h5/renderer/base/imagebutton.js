@@ -2,7 +2,11 @@ yaxi.ImageButton.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-imagebutton';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-imagebutton-image"></div>'
             + '<div class="yx-imagebutton-content"></div>'
         + '</div>');

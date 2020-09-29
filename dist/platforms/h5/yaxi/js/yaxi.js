@@ -105,12 +105,13 @@ Object.extend = function (name, fn, Class, force) {
         if (force || !classes[name])
         {
             // 绑定到类容器
-            yaxi.classHost && (yaxi.classHost[name] = Class);
+            if (force = yaxi.classHost)
+            {
+                force[name] = Class;
+            }
 
             classes[Class.typeName = prototype.typeName = name] = Class;
             classes[name = Class.lowerTypeName = name.toLowerCase()] = Class;
-    
-            prototype.__class += (Class.class = ' yx-' + name);
         }
         else
         {
@@ -979,7 +980,7 @@ yaxi.Event = Object.extend.call({}, function (Class) {
 
 
 
-yaxi.EventTarget = Object.extend(function (Class) {
+yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
     
     var Event = yaxi.Event;
@@ -989,7 +990,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
 
     // 注册事件
-    this.on = yaxi.on = function (type, listener) {
+    this.on = function (type, listener) {
         
         if (type && typeof listener === 'function')
         {
@@ -1022,7 +1023,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注册只执行一次的事件
-    this.once = yaxi.once = function (type, listener) {
+    this.once = function (type, listener) {
 
         if (typeof listener === 'function')
         {
@@ -1038,7 +1039,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注销事件
-    this.off = yaxi.off = function (type, listener) {
+    this.off = function (type, listener) {
         
         var events = this.__event_keys,
             items;
@@ -1087,7 +1088,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (event, detail) {
+    this.trigger = function (event, detail) {
         
         var target = this,
             events,
@@ -1149,7 +1150,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 检测是否注册了指定的事件
-    this.hasEvent = yaxi.hasEvent = function (type, listener) {
+    this.hasEvent = function (type, listener) {
 
         var events = this.__event_keys,
             items;
@@ -1175,14 +1176,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    Class.mixin = function (target) {
+    ;(Class.mixin = function (target) {
 
         target.on = prototype.on;
         target.once = prototype.once;
         target.off = prototype.off;
         target.trigger = prototype.trigger;
         target.hasEvent = prototype.hasEvent;
-    }
+
+    })(yaxi);
 
 
 });
@@ -1940,8 +1942,9 @@ yaxi.colors.load('blue', [
     // 管道编译器
     var compile = yaxi.pipe.compile;
 
+    
     // 控件对象集合
-    var controls = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls = yaxi.$controls = new Array(2 << 19);
 
 
     // 绑定的目标
@@ -3493,10 +3496,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     var create = Object.create;
 
 
-    var eventTarget = yaxi.EventTarget.prototype;
-
-
-
     // 注册的控件类集合
     var classes = yaxi.classes;
 
@@ -3767,7 +3766,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls1 = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls1 = yaxi.$controls;
 
 
     // 控件唯一id
@@ -3780,6 +3779,26 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     });
 
 
+    // 收缩uuid
+    this.__shrink_uuid = function () {
+
+        var controls = controls1;
+        var count = 0;
+
+        for (var i = uuid; i--;)
+        {
+            if (controls[i])
+            {
+                uuid -= count;
+                return;
+            }
+            
+            count++;
+        }
+    }
+
+
+
 
     var controls2 = create(null);
 
@@ -3789,7 +3808,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         return (id = controls2[id]) && controls1[id] || null;
     }
-
 
 
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
@@ -3815,12 +3833,6 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             controls2[value] = this.uuid;
         }
     }
-
-
-
-
-    // 类型的class
-    this.__class = 'yx-control';
 
 
 
@@ -4531,27 +4543,10 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     
-    // 绑定事件
-    this.on = eventTarget.on;
+    // 扩展事件支持
+    yaxi.EventTarget.mixin(this);
 
     
-    // 绑定只执行一次的事件
-    this.once = eventTarget.once;
-
-
-    // 注销事件
-    this.off = eventTarget.off;
-
-
-    // 触发事件
-    this.trigger = eventTarget.trigger;
-
-
-    // 检测是否注册了指定的事件
-    this.hasEvent = eventTarget.hasEvent;
-
-
-
     this.$properties.events = {
         
         convert: function (events) {
@@ -5251,7 +5246,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         shadowRoot = this.__shadowRoot = build(this, template, scope);
         shadowRoot.__shadow = true;
-        shadowRoot.__class += this.constructor.class || '';
     }
 
 
@@ -7167,6 +7161,8 @@ yaxi.Box.extend('Dialog', function (Class, base, yaxi) {
     
 			this.options = null;
 			this.destroy();
+			
+			this.__shrink_uuid();
 	
 			if (callback = this.__callback)
 			{
@@ -7420,13 +7416,18 @@ yaxi.Component.extend('Header', function (Class, base) {
             'box',
             {
                 layout: 'row middle',
-                theme: 'bg-standard'
+                theme: 'bg-standard line-lightest line-bottom',
+                height: '80rem',
+                paddingLeft: '20rem'
             },
             [
                 [
                     'icon',
                     {
                         icon: 'common-back',
+                        width: '80rem',
+                        height: '100%',
+                        marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
                         events: {
     
@@ -8037,22 +8038,26 @@ yaxi.Control.renderer(function () {
 
     
 
-    yaxi.template = function (target, html) {
+    this.template = function (html) {
 
-        if (target && html)
+        if (html)
         {
-            target.__html_template = html;
-            target.__dom_template = null;
+            this.__html_template = html;
+            this.__dom_template = null;
         }
     }
 
 
 
     this.__html_template = '<div class="@class"></div>';
+
+
+
+    this.className = 'yx-control';
     
 
 
-    function createView(renderer, control) {
+    this.createView = function (control) {
 
         var Class = control.constructor;
         var dom;
@@ -8062,7 +8067,7 @@ yaxi.Control.renderer(function () {
             return dom.cloneNode(true);
         }
 
-        div.innerHTML = renderer.__html_template.replace('@class', control.__class);
+        div.innerHTML = this.__html_template.replace('@class', this.className);
 
         dom = div.firstChild;
         div.removeChild(dom);
@@ -8075,12 +8080,108 @@ yaxi.Control.renderer(function () {
     // 渲染控件
     this.render = function (control) {
 
-        var view = control.$view || (control.$view = createView(this, control));
+        var view = control.$view;
+        var changes;
 
-        view.id = control.uuid;
-        this.patch(control, view);
+        if (!view)
+        {
+            view = control.$view = this.createView(control);
+            view.id = control.uuid;
+        }
+        
+        control.__dirty = false;
+
+        if (changes = control.__changes)
+        {
+            this.renderChanges(control, view, changes);
+            control.__changes = null;
+        }
 
         return view;
+    }
+
+
+    this.renderChanges = function (control, view, changes) {
+
+        var properties = control.$properties;
+        var storage = control.$storage;
+        var names = own(changes);
+        var index = 0;
+        var classes, property, name, value, any;
+
+        while (name = names[index++])
+        {
+            property = properties[name];
+            value = storage[name] = changes[name];
+
+            switch (property && property.kind)
+            {
+                case 'style': // 样式属性
+                    // 处理颜色值
+                    if (any = this[name])
+                    {
+                        value = any.call(this, control, view, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if ((property.data) & 2 === 2)
+                    {
+                        value = convertColor(value);
+                    }
+
+                    view.style[name] = value;
+                    break;
+
+                case 'class': // class属性
+                    if (any = this[name])
+                    {
+                        value = any.call(this, control, view, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if (value)
+                    {
+                        any = property.data;
+                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
+                    }
+                    else
+                    {
+                        value = '';
+                    }
+
+                    (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
+                    break;
+
+                default:
+                    if (any = this[name])
+                    {
+                        any.call(this, control, view, value);
+                    }
+                    break;
+            }
+        }
+
+        // 有变化的class则合并处理
+        if (classes)
+        {
+            names = [this.className];
+
+            for (name in classes)
+            {
+                if (value = classes[name])
+                {
+                    names.push(value);
+                }
+            }
+
+            view.className = names.join(' ');
+        }
     }
 
 
@@ -8106,86 +8207,7 @@ yaxi.Control.renderer(function () {
 
         if (changes = control.__changes)
         {
-            var properties = control.$properties;
-            var storage = control.$storage;
-            var names = own(changes);
-            var index = 0;
-            var classes, property, name, value, any;
-
-            while (name = names[index++])
-            {
-                property = properties[name];
-                value = storage[name] = changes[name];
-
-                switch (property && property.kind)
-                {
-                    case 'style': // 样式属性
-                        // 处理颜色值
-                        if (any = this[name])
-                        {
-                            value = any.call(this, control, view, value);
-
-                            if (value == null)
-                            {
-                                break;
-                            }
-                        }
-                        else if ((property.data) & 2 === 2)
-                        {
-                            value = convertColor(value);
-                        }
-
-                        view.style[name] = value;
-                        break;
-
-                    case 'class': // class属性
-                        if (any = this[name])
-                        {
-                            value = any.call(this, control, view, value);
-
-                            if (value == null)
-                            {
-                                break;
-                            }
-                        }
-                        else if (value)
-                        {
-                            any = property.data;
-                            value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
-                        }
-                        else
-                        {
-                            value = '';
-                        }
-
-                        (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
-                        break;
-
-                    default:
-                        if (any = this[name])
-                        {
-                            any.call(this, control, view, value);
-                        }
-                        break;
-                }
-            }
-
-            // 有变化的class则合并处理
-            if (classes)
-            {
-                names = [control.__class];
-
-                for (name in classes)
-                {
-                    if (value = classes[name])
-                    {
-                        names.push(value);
-                    }
-                }
-
-                view.className = names.join(' ');
-            }
-
+            this.renderChanges(control, view, changes);
             control.__changes = null;
         }
     }
@@ -8305,13 +8327,17 @@ yaxi.Box.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-box';
+    
+
+
     this.render = function (control) {
 
         var view = base.render.call(this, control);
         var children = control.__children;
 
         children.__last = null;
-        this.renderChildren(view, children);
+        this.renderChildren(this.getChildrenView(view), children);
 
         return view;
     }
@@ -8340,6 +8366,31 @@ yaxi.Box.renderer(function (base) {
 yaxi.Component.renderer(function (base) {
 
 
+
+    this.render = function (control) {
+
+        var shadowRoot = control.__shadowRoot;
+
+        // 标记已渲染, 否则无法更新patch
+        control.$view = true;
+        control.__dirty = false;
+
+        if (control.__changes)
+        {
+            control.$combineChanges();
+            control.__changes = null;
+        }
+
+        if (!shadowRoot.$view)
+        {
+            // 以当前控件为模板创建dom以免污染模板的class
+            shadowRoot.$view = this.createView(control);
+        }
+
+        // 渲染shadowRoot
+        return shadowRoot.$renderer.render(shadowRoot);
+    }
+
     
     this.patch = function (control, view) {
 
@@ -8354,7 +8405,7 @@ yaxi.Component.renderer(function (base) {
         }
 
         // 渲染shadowRoot
-        shadowRoot.$renderer.patch(shadowRoot, view);
+        shadowRoot.$renderer.patch(shadowRoot, shadowRoot.$view);
     }
 
 
@@ -8365,6 +8416,10 @@ yaxi.Component.renderer(function (base) {
 
 
 yaxi.DataBox.renderer(function (base) {
+
+
+
+    this.className = 'yx-control yx-box yx-databox';
 
 
 
@@ -8397,7 +8452,8 @@ yaxi.DataBox.renderer(function (base) {
 yaxi.Icon.renderer(function (base) {
 
 
-
+    this.className = 'yx-control yx-icon';
+    
 
 });
 
@@ -8408,7 +8464,11 @@ yaxi.IconButton.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-iconbutton';
+    
+
+
+    this.template('<div class="@class">'
             + '<div></div>'
             + '<div class="yx-iconbutton-content"></div>'
         + '</div>');
@@ -8442,7 +8502,11 @@ yaxi.Image.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<image class="@class"></image>');
+    this.className = 'yx-control yx-image';
+    
+
+
+    this.template('<image class="@class"></image>');
 
 
 
@@ -8462,7 +8526,11 @@ yaxi.ImageButton.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-imagebutton';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-imagebutton-image"></div>'
             + '<div class="yx-imagebutton-content"></div>'
         + '</div>');
@@ -8499,6 +8567,11 @@ yaxi.Line.renderer(function (base) {
     var color = yaxi.color;
 
 
+    
+    this.className = 'yx-control yx-line';
+    
+
+
     this.size = function (control, view, value) {
 
         view.style.width = value;
@@ -8519,6 +8592,11 @@ yaxi.Vline.renderer(function (base) {
 
 
     var color = yaxi.color;
+
+
+
+    this.className = 'yx-control yx-vline';
+    
 
 
     this.size = function (control, view, value) {
@@ -8543,7 +8621,12 @@ yaxi.Vline.renderer(function (base) {
 yaxi.Marquee.renderer(function (base) {
 
 
-    yaxi.template(this, '<div class="@class"><div class="yx-marquee-content"></div></div>')
+    
+    this.className = 'yx-control yx-marquee';
+    
+
+
+    this.template('<div class="@class"><div class="yx-marquee-content"></div></div>')
 
     
     this.text = function (control, view, value) {
@@ -8593,6 +8676,8 @@ yaxi.ScrollBox.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-box yx-scrollbox';
+    
 
 
 });
@@ -8604,8 +8689,11 @@ yaxi.StackBox.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-box yx-stackbox';
     
-    yaxi.template(this, '<div class="@class"><div class="yx-stackbox-body"></div></div>');
+
+    
+    this.template('<div class="@class"><div class="yx-stackbox-body"></div></div>');
 
 
 
@@ -8631,7 +8719,23 @@ yaxi.Swiper.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class"></div>');
+    this.className = 'yx-control yx-box yx-swiper';
+    
+
+    this.template('<div class="@class"></div>');
+
+
+});
+
+
+
+
+yaxi.TabBar.renderer(function (base) {
+
+
+
+    this.className = 'yx-control yx-box yx-tabbar';
+
 
 
 });
@@ -8643,7 +8747,11 @@ yaxi.Text.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<span class="@class"></span>');
+    this.className = 'yx-control yx-text';
+    
+
+
+    this.template('<span class="@class"></span>');
 
     
 
@@ -8681,6 +8789,10 @@ yaxi.Text.renderer(function (base) {
 
 yaxi.Button.renderer(function (base) {
 
+
+
+    this.className = 'yx-control yx-button';
+    
 
 
     function renderShadows(control, view) {
@@ -8726,7 +8838,11 @@ yaxi.CheckBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-checkbox';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-icon icon-common-unchecked"></div>'
             + '<div class="yx-checkbox-content"></div>'
         + '</div>');
@@ -8754,6 +8870,10 @@ yaxi.Memo.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-memo';
+    
+
+
     this.focus = function (control) {
 
         var view;
@@ -8777,7 +8897,7 @@ yaxi.Memo.renderer(function (base) {
 
     
 
-    yaxi.template(this, '<span class="@class"><textarea></textarea></span>');
+    this.template('<span class="@class"><textarea></textarea></span>');
 
 
 
@@ -8803,6 +8923,8 @@ yaxi.NumberBox.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-numberbox';
+    
 
 
 });
@@ -8814,6 +8936,8 @@ yaxi.PasswordBox.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-passwordbox';
+    
 
 
 });
@@ -8825,7 +8949,11 @@ yaxi.Radio.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-radio';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-icon icon-common-unchecked"></div>'
             + '<div class="yx-radio-content"></div>'
         + '</div>');
@@ -8855,6 +8983,8 @@ yaxi.SwitchButton.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-switchbutton';
+    
 
 
 });
@@ -8866,9 +8996,11 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<input type="text" class="@class" />');
+    this.className = 'yx-control yx-textbox';
+    
 
 
+    this.template('<input type="text" class="@class" />');
 
 
 
@@ -8953,8 +9085,11 @@ yaxi.Page.renderer(function (base) {
 
 
 
-	yaxi.template(this, '<div class="@class"></div>');
 
+    this.className = 'yx-control yx-box yx-page';
+    
+
+	this.template('<div class="@class"></div>');
 
 
 
@@ -9048,7 +9183,9 @@ yaxi.Page.renderer(function (base) {
 
                 page.onunload(options);
                 page.options = null;
+
                 page.destroy();
+                page.__shrink_uuid();
                 
                 if (callback = page.__callback)
                 {
@@ -9086,9 +9223,5 @@ yaxi.Page.renderer(function (base) {
 
     
 });
-
-
-
-
 
 yaxi.classHost = null;

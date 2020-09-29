@@ -2,7 +2,11 @@ yaxi.IconButton.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-iconbutton';
+    
+
+
+    this.template('<div class="@class">'
             + '<div></div>'
             + '<div class="yx-iconbutton-content"></div>'
         + '</div>');

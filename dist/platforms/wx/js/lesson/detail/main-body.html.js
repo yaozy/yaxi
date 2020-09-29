@@ -162,7 +162,8 @@ return (
 										"text",
 										{
 											"text": $data.activity,
-											"margin": "20rem 0"
+											"margin": "20rem 0",
+											"theme": "text-lighter"
 										}
 									]
 								]

@@ -24,22 +24,26 @@ yaxi.Control.renderer(function () {
 
     
 
-    yaxi.template = function (target, html) {
+    this.template = function (html) {
 
-        if (target && html)
+        if (html)
         {
-            target.__html_template = html;
-            target.__dom_template = null;
+            this.__html_template = html;
+            this.__dom_template = null;
         }
     }
 
 
 
     this.__html_template = '<div class="@class"></div>';
+
+
+
+    this.className = 'yx-control';
     
 
 
-    function createView(renderer, control) {
+    this.createView = function (control) {
 
         var Class = control.constructor;
         var dom;
@@ -49,7 +53,7 @@ yaxi.Control.renderer(function () {
             return dom.cloneNode(true);
         }
 
-        div.innerHTML = renderer.__html_template.replace('@class', control.__class);
+        div.innerHTML = this.__html_template.replace('@class', this.className);
 
         dom = div.firstChild;
         div.removeChild(dom);
@@ -62,12 +66,108 @@ yaxi.Control.renderer(function () {
     // 渲染控件
     this.render = function (control) {
 
-        var view = control.$view || (control.$view = createView(this, control));
+        var view = control.$view;
+        var changes;
 
-        view.id = control.uuid;
-        this.patch(control, view);
+        if (!view)
+        {
+            view = control.$view = this.createView(control);
+            view.id = control.uuid;
+        }
+        
+        control.__dirty = false;
+
+        if (changes = control.__changes)
+        {
+            this.renderChanges(control, view, changes);
+            control.__changes = null;
+        }
 
         return view;
+    }
+
+
+    this.renderChanges = function (control, view, changes) {
+
+        var properties = control.$properties;
+        var storage = control.$storage;
+        var names = own(changes);
+        var index = 0;
+        var classes, property, name, value, any;
+
+        while (name = names[index++])
+        {
+            property = properties[name];
+            value = storage[name] = changes[name];
+
+            switch (property && property.kind)
+            {
+                case 'style': // 样式属性
+                    // 处理颜色值
+                    if (any = this[name])
+                    {
+                        value = any.call(this, control, view, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if ((property.data) & 2 === 2)
+                    {
+                        value = convertColor(value);
+                    }
+
+                    view.style[name] = value;
+                    break;
+
+                case 'class': // class属性
+                    if (any = this[name])
+                    {
+                        value = any.call(this, control, view, value);
+
+                        if (value == null)
+                        {
+                            break;
+                        }
+                    }
+                    else if (value)
+                    {
+                        any = property.data;
+                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
+                    }
+                    else
+                    {
+                        value = '';
+                    }
+
+                    (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
+                    break;
+
+                default:
+                    if (any = this[name])
+                    {
+                        any.call(this, control, view, value);
+                    }
+                    break;
+            }
+        }
+
+        // 有变化的class则合并处理
+        if (classes)
+        {
+            names = [this.className];
+
+            for (name in classes)
+            {
+                if (value = classes[name])
+                {
+                    names.push(value);
+                }
+            }
+
+            view.className = names.join(' ');
+        }
     }
 
 
@@ -93,86 +193,7 @@ yaxi.Control.renderer(function () {
 
         if (changes = control.__changes)
         {
-            var properties = control.$properties;
-            var storage = control.$storage;
-            var names = own(changes);
-            var index = 0;
-            var classes, property, name, value, any;
-
-            while (name = names[index++])
-            {
-                property = properties[name];
-                value = storage[name] = changes[name];
-
-                switch (property && property.kind)
-                {
-                    case 'style': // 样式属性
-                        // 处理颜色值
-                        if (any = this[name])
-                        {
-                            value = any.call(this, control, view, value);
-
-                            if (value == null)
-                            {
-                                break;
-                            }
-                        }
-                        else if ((property.data) & 2 === 2)
-                        {
-                            value = convertColor(value);
-                        }
-
-                        view.style[name] = value;
-                        break;
-
-                    case 'class': // class属性
-                        if (any = this[name])
-                        {
-                            value = any.call(this, control, view, value);
-
-                            if (value == null)
-                            {
-                                break;
-                            }
-                        }
-                        else if (value)
-                        {
-                            any = property.data;
-                            value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
-                        }
-                        else
-                        {
-                            value = '';
-                        }
-
-                        (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
-                        break;
-
-                    default:
-                        if (any = this[name])
-                        {
-                            any.call(this, control, view, value);
-                        }
-                        break;
-                }
-            }
-
-            // 有变化的class则合并处理
-            if (classes)
-            {
-                names = [control.__class];
-
-                for (name in classes)
-                {
-                    if (value = classes[name])
-                    {
-                        names.push(value);
-                    }
-                }
-
-                view.className = names.join(' ');
-            }
-
+            this.renderChanges(control, view, changes);
             control.__changes = null;
         }
     }

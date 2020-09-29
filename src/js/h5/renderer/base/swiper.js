@@ -2,7 +2,10 @@ yaxi.Swiper.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class"></div>');
+    this.className = 'yx-control yx-box yx-swiper';
+    
+
+    this.template('<div class="@class"></div>');
 
 
 });

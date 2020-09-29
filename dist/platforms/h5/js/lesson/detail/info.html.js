@@ -65,7 +65,8 @@ return (
 											[
 												"text",
 												{
-													"text": $item.name
+													"text": $item.name,
+													"theme": "text-lighter"
 												}
 											]
 										]
@@ -113,7 +114,8 @@ return (
 							[
 								"text",
 								{
-									"text": $data.detail
+									"text": $data.detail,
+									"theme": "text-lighter"
 								}
 							]
 						]

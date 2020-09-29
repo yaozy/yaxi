@@ -153,7 +153,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         shadowRoot = this.__shadowRoot = build(this, template, scope);
         shadowRoot.__shadow = true;
-        shadowRoot.__class += this.constructor.class || '';
     }
 
 

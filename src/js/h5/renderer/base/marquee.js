@@ -1,7 +1,12 @@
 yaxi.Marquee.renderer(function (base) {
 
 
-    yaxi.template(this, '<div class="@class"><div class="yx-marquee-content"></div></div>')
+    
+    this.className = 'yx-control yx-marquee';
+    
+
+
+    this.template('<div class="@class"><div class="yx-marquee-content"></div></div>')
 
     
     this.text = function (control, view, value) {

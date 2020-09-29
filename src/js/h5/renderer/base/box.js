@@ -2,13 +2,17 @@ yaxi.Box.renderer(function (base) {
 
 
 
+    this.className = 'yx-control yx-box';
+    
+
+
     this.render = function (control) {
 
         var view = base.render.call(this, control);
         var children = control.__children;
 
         children.__last = null;
-        this.renderChildren(view, children);
+        this.renderChildren(this.getChildrenView(view), children);
 
         return view;
     }

@@ -2,9 +2,11 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<input type="text" class="@class" />');
+    this.className = 'yx-control yx-textbox';
+    
 
 
+    this.template('<input type="text" class="@class" />');
 
 
 

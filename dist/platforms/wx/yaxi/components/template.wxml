@@ -46,7 +46,7 @@
     <button 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-button{{ class }}" 
+        class="yx-control yx-button" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <template 

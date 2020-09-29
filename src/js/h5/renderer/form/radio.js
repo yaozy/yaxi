@@ -2,7 +2,11 @@ yaxi.Radio.renderer(function (base) {
 
 
 
-    yaxi.template(this, '<div class="@class">'
+    this.className = 'yx-control yx-radio';
+    
+
+
+    this.template('<div class="@class">'
             + '<div class="yx-icon icon-common-unchecked"></div>'
             + '<div class="yx-radio-content"></div>'
         + '</div>');

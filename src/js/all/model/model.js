@@ -10,8 +10,9 @@
     // 管道编译器
     var compile = yaxi.pipe.compile;
 
+    
     // 控件对象集合
-    var controls = yaxi.$controls || (yaxi.$controls = create(null));
+    var controls = yaxi.$controls = new Array(2 << 19);
 
 
     // 绑定的目标

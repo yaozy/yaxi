@@ -14,7 +14,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
     // 默认窗口标题
-    yaxi.Header.text = '华旅教育';
+    yaxi.Header.text = '华旅云创';
 
     
 

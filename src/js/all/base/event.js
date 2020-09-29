@@ -40,7 +40,7 @@ yaxi.Event = Object.extend.call({}, function (Class) {
 
 
 
-yaxi.EventTarget = Object.extend(function (Class) {
+yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
     
     var Event = yaxi.Event;
@@ -50,7 +50,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
     
 
     // 注册事件
-    this.on = yaxi.on = function (type, listener) {
+    this.on = function (type, listener) {
         
         if (type && typeof listener === 'function')
         {
@@ -83,7 +83,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注册只执行一次的事件
-    this.once = yaxi.once = function (type, listener) {
+    this.once = function (type, listener) {
 
         if (typeof listener === 'function')
         {
@@ -99,7 +99,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 注销事件
-    this.off = yaxi.off = function (type, listener) {
+    this.off = function (type, listener) {
         
         var events = this.__event_keys,
             items;
@@ -148,7 +148,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 触发事件
-    this.trigger = yaxi.trigger = function (event, detail) {
+    this.trigger = function (event, detail) {
         
         var target = this,
             events,
@@ -210,7 +210,7 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
     // 检测是否注册了指定的事件
-    this.hasEvent = yaxi.hasEvent = function (type, listener) {
+    this.hasEvent = function (type, listener) {
 
         var events = this.__event_keys,
             items;
@@ -236,14 +236,15 @@ yaxi.EventTarget = Object.extend(function (Class) {
 
 
 
-    Class.mixin = function (target) {
+    ;(Class.mixin = function (target) {
 
         target.on = prototype.on;
         target.once = prototype.once;
         target.off = prototype.off;
         target.trigger = prototype.trigger;
         target.hasEvent = prototype.hasEvent;
-    }
+
+    })(yaxi);
 
 
 });
