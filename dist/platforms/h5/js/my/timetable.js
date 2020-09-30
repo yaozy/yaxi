@@ -1,5 +1,5 @@
 const yaxi = require('../../yaxi/js/yaxi');
-const template = require('./course.html');
+const template = require('./timetable.html');
 
 
 
@@ -11,20 +11,13 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
         this.loadTemplate(template);
 
-        yaxi.http.get('my/course').json(function (data) {
+        yaxi.http.get('my/timetable').json(function (data) {
 
             this.find('>>databox').data = data;
 
         }.bind(this));
     }
 
-
-
-    this.handleOpenDetail = function (event) {
-        
-        require('../course/detail/main').open(event.source.tag);
-    }
-
-
+    
 
 });

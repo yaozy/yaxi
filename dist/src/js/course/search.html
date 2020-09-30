@@ -1,4 +1,4 @@
-<box static="true" overflow="visible" z-index="5" height="80rem">
+<box static="true" overflow="visible" z-index="5" height="90rem" padding-top="10rem">
     <masklayer b:hidden="$model.hidden" e:tap="handleClear" />
     <box layout="row" theme="bg-standard" height="80rem">
         <textbox placeholder="搜索老师、机构、课程" 
@@ -32,14 +32,15 @@
             <text theme="text-primary" b:text="$model.text" />
             <text theme="text-lighter" e:tap="handleCancel" margin-left="50rem">取消搜索</text>
         </box>
-        <databox key="search-body" e:tap="handleSuggest">
+        <databox >
             <box 
                 d:tag="$index" 
                 layout="row middle" 
                 height="80rem" 
                 line-height="80rem" 
                 theme="line-lightest line-top" 
-                padding="0 20rem">
+                padding="0 20rem"
+                e:tap="handleSuggest">
                 <text d:text="$item.before" />
                 <text theme="text-primary" b:text="$model.text" />
                 <text d:text="$item.after" />

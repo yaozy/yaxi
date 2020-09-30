@@ -1,0 +1,26 @@
+<page>
+    <header text="我的课程" />
+    <databox theme="bg-thick" flex="auto">
+        <box layout="column" theme="bg-standard" margin="10rem 0">
+            <text d:text="$item.name" theme="line-lightest line-bottom" height="80rem" line-height="80rem" padding="0 20rem" />
+            <box layout="column space-between" theme="text-lighter" height="220rem" padding="20rem" font-size="28rem">
+                <box layout="row">
+                    <text>班级:</text>
+                    <text d:text="$item.class" margin-left="10rem" />
+                </box>
+                <box layout="row">
+                    <text>讲师:</text>
+                    <text d:text="$item.teacher" margin-left="10rem" />
+                </box>
+                <box layout="row">
+                    <text>地址:</text>
+                    <text d:text="$item.address" margin-left="10rem" />
+                </box>
+                <box layout="row" >
+                    <text>时间:</text>
+                    <text d:text="$item.time" margin-left="10rem" />
+                </box>
+            </box>
+        </box>
+    </databox>
+</page>

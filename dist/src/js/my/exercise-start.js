@@ -7,9 +7,9 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
-    this.init = function (model) {
+    this.init = function (data) {
 
-        this.loadTemplate(template, {}, model);
+        this.loadTemplate(template, data);
     }
 
 

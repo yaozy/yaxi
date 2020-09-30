@@ -19,7 +19,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-course',
                     text: '课程',
-                    url: './order'
+                    url: './course'
                 },
                 {
                     icon: 'my-test',
@@ -34,7 +34,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-timetable',
                     text: '课程表',
-                    url: './order'
+                    url: './timetable'
                 }
             ]
         },

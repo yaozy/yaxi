@@ -55,7 +55,7 @@ module.exports = yaxi.Box.extend(function () {
         model.hidden = !value;
         model.text = value;
 
-        search.find('>>@search-body').data = list;
+        search.find('>>databox').data = list;
     }
 
 
@@ -106,10 +106,10 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleSuggest = function (event) {
 
-        var data = find('>>@search-body').data;
-        var item = +event.source.tag;
+        var target = event.source;
+        var item = +target.tag;
 
-        if (item >= 0 && (item = data[item]))
+        if (item >= 0 && (item = target.parent.data[item]))
         {
             raiseEvent(this, item.before + model.text + item.after);
         }

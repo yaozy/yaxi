@@ -7,7 +7,8 @@ return (
 			"static": "true",
 			"overflow": "visible",
 			"z-index": "5",
-			"height": "80rem"
+			"height": "90rem",
+			"padding-top": "10rem"
 		},
 		[
 			[
@@ -135,12 +136,7 @@ return (
 					],
 					[
 						"databox",
-						{
-							"key": "search-body",
-							"events": {
-								"tap": this.handleSuggest.bind(this)
-							}
-						},
+						null,
 						function (template, __data_list, __data_scope) {
 
 							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
@@ -159,7 +155,10 @@ return (
 											"height": "80rem",
 											"line-height": "80rem",
 											"theme": "line-lightest line-top",
-											"padding": "0 20rem"
+											"padding": "0 20rem",
+											"events": {
+												"tap": this.handleSuggest.bind(this)
+											}
 										},
 										[
 											[

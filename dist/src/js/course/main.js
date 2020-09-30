@@ -2,20 +2,21 @@ const yaxi = require('../../yaxi/js/yaxi');
 const template = require('./main.html');
 
 
+
+
 module.exports = yaxi.Box.extend(function (Class, base) {
 
     
 
-    function render(data) {
-
-        this.find('>>@main-body').data = data;
-    }
-
-
     this.init = function () {
 
         this.loadTemplate(template);
-        yaxi.http.get('course/list').json(render.bind(this));
+
+        yaxi.http.get('course/list').json(function (data) {
+
+            this.find('>>@course-box').data = data;
+
+        }.bind(this));
     }
 
 

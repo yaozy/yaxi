@@ -14,8 +14,6 @@ return (
 			[
 				"databox",
 				{
-					"data": $model,
-					"item": "$item",
 					"flex": "auto",
 					"padding": "0 20rem"
 				},

@@ -22,7 +22,7 @@ return (
 					[
 						"text",
 						{
-							"text": $model.name
+							"text": $data.name
 						}
 					],
 					[
@@ -46,7 +46,7 @@ return (
 									[
 										"text",
 										{
-											"text": $model.score
+											"text": $data.score
 										}
 									]
 								]
@@ -63,7 +63,7 @@ return (
 									[
 										"text",
 										{
-											"text": $model.time
+											"text": $data.time
 										}
 									],
 									[
@@ -85,7 +85,7 @@ return (
 									[
 										"text",
 										{
-											"text": $model.publish
+											"text": $data.publish
 										}
 									]
 								]

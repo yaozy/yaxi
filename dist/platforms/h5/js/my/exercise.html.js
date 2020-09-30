@@ -16,7 +16,6 @@ return (
 			[
 				"databox",
 				{
-					"data": $model,
 					"flex": "auto"
 				},
 				function (template, __data_list, __data_scope) {

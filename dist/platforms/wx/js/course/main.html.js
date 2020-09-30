@@ -29,7 +29,7 @@ return (
 					[
 						"databox",
 						{
-							"key": "main-body"
+							"key": "course-box"
 						},
 						function (template, __data_list, __data_scope) {
 

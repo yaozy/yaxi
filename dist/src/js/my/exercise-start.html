@@ -1,20 +1,20 @@
 <page>
     <header text="我的练习">
     <box layout="column" padding="100rem 50rem" text-align="center">
-        <text d:text="$model.name" />
+        <text d:text="$data.name" />
         <box theme="text-lightest" padding="50rem 0" line-height="60rem" font-size="28rem">
             <box>
                 <text>总分:</text>
-                <text d:text="$model.score" />
+                <text d:text="$data.score" />
             </box>
             <box>
                 <text>时长:</text>
-                <text d:text="$model.time" />
+                <text d:text="$data.time" />
                 <text>分钟</text>
             </box>
             <box>
                 <text>发布人:</text>
-                <text d:text="$model.publish" />
+                <text d:text="$data.publish" />
             </box>
         </box>
         <button e:tap="handleStart">开始练习</button>
