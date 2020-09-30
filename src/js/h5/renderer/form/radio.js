@@ -7,7 +7,7 @@ yaxi.Radio.renderer(function (base) {
 
 
     this.template('<div class="@class">'
-            + '<div class="yx-icon icon-common-unchecked"></div>'
+            + '<div class="yx-icon icon-common-radio-unchecked"></div>'
             + '<div class="yx-radio-content"></div>'
         + '</div>');
 
@@ -15,7 +15,7 @@ yaxi.Radio.renderer(function (base) {
 
     this.checked = function (control, view, value) {
 
-        view.firstChild.className = 'yx-icon icon-common-' + (value ? 'checked' : 'unchecked');
+        view.firstChild.className = 'yx-icon icon-common-radio-' + (value ? 'checked' : 'unchecked');
     }
     
     

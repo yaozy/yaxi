@@ -1,4 +1,4 @@
-yaxi.Component.extend('Header', function (Class, base) {
+yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
@@ -9,7 +9,7 @@ yaxi.Component.extend('Header', function (Class, base) {
 
     Class.allowParent = function (parent) {
 
-        if (parent && parent.isTopLevel)
+        if (parent instanceof yaxi.Page)
         {
             return true;
         }
@@ -29,7 +29,7 @@ yaxi.Component.extend('Header', function (Class, base) {
             {
                 layout: 'row middle',
                 theme: 'bg-standard line-lightest line-bottom',
-                height: '80rem',
+                height: '90rem',
                 paddingLeft: '20rem'
             },
             [
@@ -37,7 +37,7 @@ yaxi.Component.extend('Header', function (Class, base) {
                     'icon',
                     {
                         icon: 'common-back',
-                        width: '80rem',
+                        width: '90rem',
                         height: '100%',
                         marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,

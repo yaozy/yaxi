@@ -73,6 +73,10 @@ yaxi.Control.extend('Box', function (Class, base) {
             children[i].destroy();
         }
 
+
+        // 清除变更
+        children.__last = null;
+
         base.destroy.call(this);
     }
 

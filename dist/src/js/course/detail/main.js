@@ -21,7 +21,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     this.init = function (id) {
 
         this.loadTemplate(template);
-        yaxi.http.get('lesson/detail', id).json(render.bind(this));
+        yaxi.http.get('course/detail', id).json(render.bind(this));
     }
 
 

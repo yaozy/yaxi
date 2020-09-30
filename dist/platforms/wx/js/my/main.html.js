@@ -107,6 +107,7 @@ return (
 										{
 											"theme": "line-lightest line-bottom",
 											"padding-left": "50rem",
+											"height": "80rem",
 											"line-height": "80rem"
 										},
 										[

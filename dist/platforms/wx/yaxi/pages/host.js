@@ -6,7 +6,9 @@ Page({
      * 组件的属性列表
      */
     data: {
-        p: Object
+        top: Number,    // 状态栏高度
+        p: Object,      // 页面配置
+        d: Array        // 对话框集合
     },
 
 

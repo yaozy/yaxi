@@ -196,15 +196,19 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
             if (changes = this.__changes)
             {
-                if (value !== changes[name] && !(this[key] && this[key](value) === false))
+                if (value !== changes[name])
                 {
                     changes[name] = value;
+
+                    this[key] && this[key](value);
                     this.__dirty || patch(this);
                 }
             }
-            else if (value !== this.$storage[name] && !(this[key] && this[key](value) === false))
+            else if (value !== this.$storage[name])
             {
                 (this.__changes = init(this.$storage))[name] = value;
+
+                this[key] && this[key](value);
                 this.__dirty || patch(this);
             }
         }
@@ -218,10 +222,8 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         return function (value) {
 
-            if (!this[key] || this[key](value) !== false)
-            {
-                this.$storage[name] = convert ? convert.call(this, value) : value;
-            }
+            this.$storage[name] = convert ? convert.call(this, value) : value;
+            this[key] && this[key](value);
         }
     }
 
@@ -479,10 +481,10 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         get: function () {
 
-            var target = this,
-                parent;
+            var target = this;
+            var parent;
 
-            while (!target.isTopLevel && (parent = target.parent))
+            while (parent = target.parent)
             {
                 target = parent;
             }

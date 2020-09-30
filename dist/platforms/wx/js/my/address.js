@@ -59,24 +59,31 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
+
     this.handleDefault = function (event) {
 
-        var index = +event.source.parent.tag;
-
-        if (index >= 0)
+        if (!event.detail)
         {
-            for (var i = arrayModel.length; i--;)
+            return false;
+        }
+
+        for (var i = arrayModel.length; i--;)
+        {
+            if (arrayModel[i].default)
             {
-                arrayModel[i].default = i === index;
+                arrayModel[i].default = false;
+                break;
             }
         }
     }
 
-
-
+    
     this.handleAdd = function () {
 
-        require('./address-edit').open(arrayModel.create(), onclosed);
+        var model = arrayModel.create();
+
+        model.gendle = 1; 
+        require('./address-edit').open(model, onclosed);
     }
 
 

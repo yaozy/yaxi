@@ -520,7 +520,6 @@
     height: auto;
     font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
     font-size: 32rem;
-    color: @text-standard;
 }
 
 
@@ -532,13 +531,14 @@
     display: -webkit-flex;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     top: 0;
     left: 0;
-    bottom: 0;
     width: 100%;
-    height: auto;
-    background-color: @bg-standard;
+    height: 100%;
     z-index: 1;
+    background-color: @bg-standard;
+    color: @text-standard;
 }
 
 

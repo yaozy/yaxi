@@ -18,7 +18,7 @@ return (
 			[
 				"box",
 				{
-					"width": "550rem",
+					"width": "80%",
 					"absolute": "middle center",
 					"padding": "50rem",
 					"theme": "bg-standard"
@@ -27,7 +27,7 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "姓名",
+							"placeholder": "请填写姓名",
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
@@ -41,7 +41,7 @@ return (
 						{
 							"height": "80rem",
 							"layout": "row middle center",
-							"theme": "line-standard line-bottom"
+							"theme": "line-lightest line-bottom"
 						},
 						[
 							[
@@ -89,7 +89,7 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "电话",
+							"placeholder": "请填写电话",
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
@@ -101,7 +101,7 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "地址",
+							"placeholder": "请填写地址",
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {
@@ -113,7 +113,7 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "楼宇门牌",
+							"placeholder": "请填写楼宇门牌",
 							"width": "100%",
 							"text-align": "center",
 							"bindings": {

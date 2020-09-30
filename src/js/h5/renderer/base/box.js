@@ -11,7 +11,9 @@ yaxi.Box.renderer(function (base) {
         var view = base.render.call(this, control);
         var children = control.__children;
 
+        // 清除变更
         children.__last = null;
+
         this.renderChildren(this.getChildrenView(view), children);
 
         return view;

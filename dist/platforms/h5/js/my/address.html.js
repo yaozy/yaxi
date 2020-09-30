@@ -139,10 +139,11 @@ return (
 													"flex": "auto",
 													"bindings": {
 														"theme":  function () { return $item.default ? 'text-warning' : 'text-lighter' },
-														"checked":  function () { return $item.default }
+														"checked":  function () { return $item.default },
+														"onchange":  function (value) { $item.default = value; }
 													},
 													"events": {
-														"tap": this.handleDefault.bind(this)
+														"changing": this.handleDefault.bind(this)
 													}
 												}
 											],

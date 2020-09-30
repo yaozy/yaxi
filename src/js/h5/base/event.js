@@ -22,7 +22,6 @@
 	
     // 处理rem自适应
     document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
-    host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
 
 
 
@@ -47,10 +46,6 @@
 
     // 开始触摸时的控件及时间
     var touchControl, touchTime, touches;
-    
-    // dom标记
-    var flag;
-
 
 
 
@@ -60,11 +55,8 @@
 
         while (view)
         {
-            f || (f = view.getAttribute('flag'));
-
             if ((uuid = view.id) && (control = controls[uuid]))
             {
-                flag = f || '';
                 return control.disabled ? control.parent || null : control;
             }
 
@@ -81,7 +73,6 @@
         var e = new Event(event.type);
 
         e.target = touchControl;
-        e.flag = flag;
         e.changedTouches = parseTouches(event.changedTouches);
         e.touches = parseTouches(event.touches);
 
@@ -139,10 +130,7 @@
 
         if (control = findControl(event.target))
         {
-            event = new Event(event.type);
-            event.flag = flag;
-
-            return control.trigger(event);
+            return control.trigger(event.type);
         }
     }
 
@@ -283,22 +271,18 @@
 
     bind('input', function (event) {
 
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(event.target))
         {
-            value = event.target.value;
+            detail = event.target.value;
 
-            if ((fn = control.__on_input) && fn.call(control, value) === false)
+            if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
             }
 
-            event = new Event('input');
-            event.flag = flag;
-            event.value = value;
-
-            return control.trigger(event);
+            return control.trigger('input', detail);
         }
 
     }, true);
@@ -306,22 +290,18 @@
 
     bind('change', function (event) {
 
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(event.target))
         {
-            value = event.target.value;
+            detail = event.target.value;
 
-            if ((fn = control.__on_change) && fn.call(control, value) === false)
+            if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;
             }
 
-            event = new Event('change');
-            event.flag = flag;
-            event.value = value;
-
-            return control.trigger(event);
+            return control.trigger('change', detail);
         }
 
     }, true);
@@ -345,10 +325,7 @@
 
         if (control = findControl(event.target))
         {
-            event = new Event('focus');
-            event.flag = false;
-
-            return control.trigger(event);
+            return control.trigger('focus');
         }
         
     }, true);
@@ -366,10 +343,7 @@
                 fn.call(control, event.target);
             }
 
-            event = new Event('scroll');
-            event.flag = false;
-
-            return control.trigger(event);
+            return control.trigger('scroll');
         }
 
     }, true);

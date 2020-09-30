@@ -7,7 +7,7 @@ yaxi.CheckBox.renderer(function (base) {
 
 
     this.template('<div class="@class">'
-            + '<div class="yx-icon icon-common-unchecked"></div>'
+            + '<div class="yx-icon icon-common-checkbox-unchecked"></div>'
             + '<div class="yx-checkbox-content"></div>'
         + '</div>');
 
@@ -15,7 +15,7 @@ yaxi.CheckBox.renderer(function (base) {
 
     this.checked = function (control, view, value) {
 
-        view.firstChild.className = 'yx-icon icon-common-' + (value ? 'checked' : 'unchecked');
+        view.firstChild.className = 'yx-icon icon-common-checkbox-' + (value ? 'checked' : 'unchecked');
     }
     
     

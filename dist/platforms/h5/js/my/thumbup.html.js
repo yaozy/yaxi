@@ -33,7 +33,7 @@ return (
 								"box",
 								{
 									"layout": "row",
-									"tag": $item.lessonid,
+									"tag": $item.courseid,
 									"height": "160rem",
 									"margin": "20rem 0",
 									"events": {

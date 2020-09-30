@@ -10,9 +10,6 @@ yaxi.Control.extend('Radio', function (Class, base) {
 
 
 
-    this.$('name', '');
-
-
     this.$('text', '');
 
 
@@ -30,7 +27,7 @@ yaxi.Control.extend('Radio', function (Class, base) {
     this.__set_checked = function (value) {
 
         this.$push(value);
-        this.trigger('change');
+        this.trigger('change', value);
     }
 
 

@@ -395,20 +395,20 @@
   height: auto;
   font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
   font-size: 32rpx;
-  color: #212121;
 }
 .yx-page {
   position: absolute;
   display: -webkit-flex;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   top: 0;
   left: 0;
-  bottom: 0;
   width: 100%;
-  height: auto;
-  background-color: #ffffff;
+  height: 100%;
   z-index: 1;
+  background-color: #ffffff;
+  color: #212121;
 }
 .yx-absolute-left {
   position: absolute;

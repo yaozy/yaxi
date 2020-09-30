@@ -8,11 +8,6 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-    // 是否顶级控件
-    this.isTopLevel = true;
-
-
-
 	this.__find_up = function () {
 	
 		return null;
@@ -43,9 +38,9 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 	// 关闭窗口
-	this.close = function (type, data) {
+	this.close = function (type, payload) {
 
-		yaxi.closePage(type, data);
+		yaxi.closePage(type, payload);
 	}
 
 

@@ -27,7 +27,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
     this.handleOpenDetail = function (event) {
 
-        require('../lesson/detail/main').open(event.source.tag);
+        require('../course/detail/main').open(event.source.tag);
     }
 
 

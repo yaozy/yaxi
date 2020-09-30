@@ -1,5 +1,5 @@
 const yaxi = require('../../../yaxi/js/yaxi');
-const template = require('./recommend.html');
+const template = require('./section.html');
 
 
 module.exports = yaxi.DataBox.extend(function (Class, base) {
@@ -13,8 +13,9 @@ module.exports = yaxi.DataBox.extend(function (Class, base) {
 
     this.handleOpenDetail = function (event) {
         
-        require('../lesson/detail/main').open(event.source.tag);
+        require('../course/detail/main').open(event.source.tag);
     }
 
     
+
 });

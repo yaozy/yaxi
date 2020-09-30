@@ -10,7 +10,7 @@ const arrayModel = yaxi.arrayModel({
     data: [
         {
             id: 0,
-            lessonid: 0,
+            courseid: 0,
             name: '',
             image: '',
             price: 0,
@@ -82,7 +82,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleOpenDetail = function (event) {
         
-        require('../lesson/detail/main').open(event.source.tag);
+        require('../course/detail/main').open(event.source.tag);
     }
 
 

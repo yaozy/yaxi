@@ -15,7 +15,7 @@ yaxi.Control.extend('CheckBox', function (Class, base) {
     this.__set_checked = function (value) {
 
         this.$push(value);
-        this.trigger('change');
+        this.trigger('change', value);
     }
 
 
@@ -29,9 +29,11 @@ yaxi.Control.extend('CheckBox', function (Class, base) {
 
     this.__on_tap = function () {
 
-        if (this.trigger('changing') !== false)
+        var checked = !this.checked;
+
+        if (this.trigger('changing', checked) !== false)
         {
-            this.checked = !this.value;
+            this.checked = checked;
         }
     }
 

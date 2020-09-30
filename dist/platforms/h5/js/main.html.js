@@ -35,9 +35,9 @@ return (
 					[
 						"iconbutton",
 						{
-							"icon": "tabbar-lesson",
+							"icon": "tabbar-course",
 							"text": "课程",
-							"module": require('lesson/main.js'),
+							"module": require('course/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					],

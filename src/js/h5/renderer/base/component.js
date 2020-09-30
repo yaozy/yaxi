@@ -6,8 +6,6 @@ yaxi.Component.renderer(function (base) {
 
         var shadowRoot = control.__shadowRoot;
 
-        // 标记已渲染, 否则无法更新patch
-        control.$view = true;
         control.__dirty = false;
 
         if (control.__changes)
@@ -16,14 +14,8 @@ yaxi.Component.renderer(function (base) {
             control.__changes = null;
         }
 
-        if (!shadowRoot.$view)
-        {
-            // 以当前控件为模板创建dom以免污染模板的class
-            shadowRoot.$view = this.createView(control);
-        }
-
-        // 渲染shadowRoot
-        return shadowRoot.$renderer.render(shadowRoot);
+        // 渲染shadowRoot, 并把shadowRoot的$view作为当前控件的$view
+        return control.$view = shadowRoot.$renderer.render(shadowRoot, control.uuid);
     }
 
     
@@ -40,7 +32,7 @@ yaxi.Component.renderer(function (base) {
         }
 
         // 渲染shadowRoot
-        shadowRoot.$renderer.patch(shadowRoot, shadowRoot.$view);
+        shadowRoot.$renderer.patch(shadowRoot, view);
     }
 
 

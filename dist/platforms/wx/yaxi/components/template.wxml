@@ -3,7 +3,7 @@
     <text
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-text{{ class }}" 
+        class="yx-control yx-text{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         decode
         bindtouchstart="translateEvent">{{ text }}</text>
@@ -16,7 +16,7 @@
     <input
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-textbox{{ class }}"
+        class="yx-control yx-textbox{{ class || '' }}"
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         type="{{ type || 'text' }}"
         value="{{ value || '' }}"
@@ -46,7 +46,7 @@
     <button 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-button" 
+        class="yx-control yx-button{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <template 
@@ -64,7 +64,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-icon {{ class }}"
+        class="yx-control yx-icon{{ class || '' }}"
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent" />
 
@@ -76,7 +76,7 @@
     <image
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-image{{ class }}"
+        class="yx-control yx-image{{ class || '' }}"
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         src="{{ src }}"
         mode="{{ mode }}"
@@ -94,7 +94,7 @@
     <view 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-iconbutton{{ class }}" 
+        class="yx-control yx-iconbutton{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <view 
@@ -112,7 +112,7 @@
     <view 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-imagebutton{{ class }}" 
+        class="yx-control yx-imagebutton{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <image 
@@ -131,7 +131,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-checkbox{{ class }}" 
+        class="yx-control yx-checkbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
@@ -146,7 +146,7 @@
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-checkgroup{{ class }}" 
+        class="yx-control yx-box yx-checkgroup{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />
@@ -159,7 +159,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-radio{{ class }}" 
+        class="yx-control yx-radio{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
@@ -174,7 +174,7 @@
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-radiogroup{{ class }}" 
+        class="yx-control yx-box yx-radiogroup{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />
@@ -187,7 +187,7 @@
     <rich-text
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-richtext{{ class }}" 
+        class="yx-control yx-richtext{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         nodes="{{ data }}"
         bindtouchstart="translateEvent" />
@@ -200,7 +200,7 @@
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box{{ class }}" 
+        class="yx-control yx-box{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />
@@ -213,7 +213,7 @@
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-databox{{ class }}" 
+        class="yx-control yx-databox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />
@@ -227,7 +227,7 @@
     <scroll-view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-scrollbox{{ class }}" 
+        class="yx-control yx-box yx-scrollbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         scroll-y
         bindtouchstart="translateEvent">
@@ -242,7 +242,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-line{{ class }}" 
+        class="yx-control yx-line{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
         bindtouchstart="translateEvent" />
 
@@ -254,7 +254,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-vline{{ class }}" 
+        class="yx-control yx-vline{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
         bindtouchstart="translateEvent" />
 
@@ -265,7 +265,7 @@
 
     <view data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-swiper{{ class }}" 
+        class="yx-control yx-box yx-swiper{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <swiper 
@@ -306,7 +306,7 @@
     <box 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-tabbar{{ class }}" 
+        class="yx-control yx-tabbar{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         children="{{ c }}"
         bindtouchstart="translateEvent" />
@@ -319,7 +319,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-box yx-stackbox{{ class }}" 
+        class="yx-control yx-box yx-stackbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <box 
@@ -338,44 +338,11 @@
     <view 
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-masklayer{{ class }}" 
+        class="yx-control yx-masklayer{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent" />
 
 </template>
-
-
-
-<template name="Page">
-
-    <box 
-        data-id="{{ u }}"
-        class="yx-host yx-page{{ class }}" 
-        style="{{ s }}top:{{ top }};"
-        children="{{ c }}"
-        bindtouchstart="translateEvent"
-        bindtouchmove="translateEvent"
-        bindtouchcancel="translateEvent"
-        bindtouchend="translateEvent"
-        bindtouchforcechange="translateEvent">
-    </box>
-
-</template>
-
-
-
-<template name="Dialog">
-
-<box 
-    data-id="{{ u }}"
-    class="yx-host yx-dialog{{ class }}" 
-    style="{{ s }}"
-    children="{{ c }}"
-    bindtouchstart="translateEvent">
-</box>
-
-</template>
-
 
 
 
@@ -384,7 +351,7 @@
     <view
         data-id="{{ u }}"
         id="{{ u }}"
-        class="yx-control yx-marquee{{ class }}" 
+        class="yx-control yx-marquee{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
         <view data-id="{{ u }}" class="yx-marquee-content" style="animation:{{ animation || '' }}">

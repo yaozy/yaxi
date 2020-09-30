@@ -99,24 +99,32 @@ yaxi.Page.renderer(function (base) {
             page.options = options;
             page.__callback = callback;
 
+            notifyRender(renderings);
+            
 			host.appendChild(page.$renderer.render(page));
 
-			notifyRender(renderings);
+            notifyRender(rendereds);
+
 			page.onload(page.options);
 		}
 	}
 
 	
 	// 关闭当前页面
-    yaxi.closePage = function (type, data) {
+    yaxi.closePage = function (type, payload) {
 
-        var page, options, callback;
+        var page, view, options, callback;
 
         if (page = all.pop())
         {
             if (page.onunloading(options = page.options) !== false)
             {
-                host.removeChild(page.$view);
+                // 清除dom
+                if (view = page.$view)
+                {
+                    host.removeChild(view);
+                    view.textContent = '';
+                }
 
                 page.onunload(options);
                 page.options = null;
@@ -127,7 +135,7 @@ yaxi.Page.renderer(function (base) {
                 if (callback = page.__callback)
                 {
                     page.__callback = null;
-                    callback(type, data);
+                    callback(type, payload);
                 }
             }
             else
@@ -135,9 +143,10 @@ yaxi.Page.renderer(function (base) {
                 all.push(page);
             }
         }
-	}
+    }
     
     
+
 
     yaxi.__on_page_patch = function (patches) {
 

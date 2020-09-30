@@ -172,7 +172,7 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
         event.target = this;
 
-        if (detail)
+        if (detail !== void 0)
         {
             event.detail = detail;
         }

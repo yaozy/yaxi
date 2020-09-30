@@ -2,7 +2,7 @@ yaxi.DataBox.renderer(function (base) {
 
 
 
-    this.className = 'yx-control yx-box yx-databox';
+    this.className = 'yx-control yx-databox';
 
 
 
@@ -11,7 +11,9 @@ yaxi.DataBox.renderer(function (base) {
         var view = base.render.call(this, control);
         var children = control.__children;
 
+        // 清除变更
         children.__last = null;
+
         this.renderChildren(view, children);
 
         return view;
@@ -25,6 +27,6 @@ yaxi.DataBox.renderer(function (base) {
         base.patch.call(this, control, view);
     }
 
-    
+
 
 });

@@ -61,7 +61,7 @@ module.exports = yaxi.Box.extend(function () {
 
     this.handleInput = function (event) {
 
-        loadData(this, event.value);
+        loadData(this, event.detail);
     }
 
 

@@ -41,8 +41,6 @@
             (control = any.id) && (control = findControl(control)))
         {
             event = new Event(event.type, event.detail);
-            event.flag = any.flag;
-
             control.trigger(event);
         }
 
@@ -68,7 +66,6 @@
         var e = new Event(event.type);
     
         e.target = touchControl;
-        e.flag = touchFlag;
         e.changedTouches = event.changedTouches;
         e.touches = event.touches;
     
@@ -128,7 +125,6 @@
         if (control = findControl(dataset.id))
         {
             touchControl = control;
-            touchFlag = dataset.flag;
             touchTime = new Date();
             tap = true;
 
@@ -238,23 +234,18 @@
     translates.input = function (event) {
 
         var dataset = event.target.dataset;
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(dataset.id))
         {
-            value = event.detail.value;
+            detail = event.detail.value;
 
-            if ((fn = control.__on_input) && fn.call(control, value) === false)
+            if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
             }
 
-            event = new Event(event.type);
-            event.target = control;
-            event.flag = dataset.flag;
-            event.value = value;
-
-            return control.trigger(event);
+            return control.trigger('input', detail);
         }
     }
 
@@ -263,23 +254,18 @@
     translates.change = function (event) {
 
         var dataset = event.target.dataset;
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(dataset.id))
         {
-            value = event.detail.value || event.detail.current;
+            detail = event.detail.value || event.detail.current;
 
-            if ((fn = control.__on_change) && fn.call(control, value) === false)
+            if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;
             }
-            
-            event = new Event(event.type);
-            event.target = control;
-            event.flag = dataset.flag;
-            event.value = value;
 
-            return control.trigger(event);
+            return control.trigger('change', detail);
         }
     }
 

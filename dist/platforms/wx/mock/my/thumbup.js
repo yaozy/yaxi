@@ -1,7 +1,7 @@
 module.exports = [
     {
         id: 1,
-        lessonid: 4,
+        courseid: 4,
         name: 'javascript高性能程序设计',
         image: '/images/demo/demo4.jpg',
         price: 15,
@@ -9,7 +9,7 @@ module.exports = [
     },
     {
         id: 2,
-        lessonid: 5,
+        courseid: 5,
         name: 'rust编程入门',
         image: '/images/demo/demo5.jpg',
         price: 18,
@@ -17,7 +17,7 @@ module.exports = [
     },
     {
         id: 3,
-        lessonid: 2,
+        courseid: 2,
         name: '幼儿美术培训',
         image: '/images/demo/demo2.jpg',
         price: 0,
@@ -25,7 +25,7 @@ module.exports = [
     },
     {
         id: 4,
-        lessonid: 3,
+        courseid: 3,
         name: '国学启蒙',
         image: '/images/demo/demo3.jpg',
         price: 20,

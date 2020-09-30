@@ -35,22 +35,24 @@ if (typeof jiac !== 'undefined')
 
 
 
-// 默认设置类型容器为自身, 框架初始化完毕后清除
-yaxi.classHost = yaxi;
+// 设置默认类型导出对象为自身
+// 比如yaxi.Control.extend('Box' ... 会导出类为yaxi.Box
+// 框架初始化完毕后清除
+yaxi.exports = yaxi;
 
 
 
 // 对象继承实现
 Object.extend = function (name, fn, Class, force) {
 	
-    var base = this.prototype || null;
-    var prototype = Object.create(base);
-    var classes, ctor;
-
-    if (base && this.sealed)
+    if (this.sealed)
     {
         throw new Error(this.typeName + ' is sealed, can not be extended!');
     }
+
+    var base = this.prototype || null;
+    var prototype = Object.create(base);
+    var classes, ctor;
 
     if (typeof name === 'function')
     {
@@ -105,13 +107,13 @@ Object.extend = function (name, fn, Class, force) {
         if (force || !classes[name])
         {
             // 绑定到类容器
-            if (force = yaxi.classHost)
+            if (force = yaxi.exports)
             {
                 force[name] = Class;
             }
 
             classes[Class.typeName = prototype.typeName = name] = Class;
-            classes[name = Class.lowerTypeName = name.toLowerCase()] = Class;
+            classes[name = name.toLowerCase()] = Class;
         }
         else
         {

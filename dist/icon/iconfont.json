@@ -6,6 +6,20 @@
   "description": "教育软件项目",
   "glyphs": [
     {
+      "icon_id": "736605",
+      "name": "check-box-outline",
+      "font_class": "-common-checkbox-checked",
+      "unicode": "e63d",
+      "unicode_decimal": 58941
+    },
+    {
+      "icon_id": "12348183",
+      "name": "check_box_outline_blank_24px_rounded",
+      "font_class": "-common-checkbox-unchecked",
+      "unicode": "edaf",
+      "unicode_decimal": 60847
+    },
+    {
       "icon_id": "10299105",
       "name": "已完成",
       "font_class": "-common-completed",
@@ -43,7 +57,7 @@
     {
       "icon_id": "632972",
       "name": "未选中",
-      "font_class": "-common-checked",
+      "font_class": "-common-radio-checked",
       "unicode": "e604",
       "unicode_decimal": 58884
     },
@@ -162,7 +176,7 @@
     {
       "icon_id": "13546376",
       "name": "未选中",
-      "font_class": "-common-unchecked",
+      "font_class": "-common-radio-unchecked",
       "unicode": "e612",
       "unicode_decimal": 58898
     },
@@ -253,7 +267,7 @@
     {
       "icon_id": "5122094",
       "name": "课程",
-      "font_class": "-tabbar-lesson",
+      "font_class": "-tabbar-course",
       "unicode": "e60c",
       "unicode_decimal": 58892
     },

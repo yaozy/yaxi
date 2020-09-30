@@ -56,11 +56,11 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                     text: '我的订单',
                     url: './order'
                 },
-                {
-                    icon: 'my-asset',
-                    text: '我的资产',
-                    url: './order'
-                }
+                // {
+                //     icon: 'my-asset',
+                //     text: '我的资产',
+                //     url: './order'
+                // }
             ]
         },
         {

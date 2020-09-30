@@ -30,10 +30,11 @@
                 <checkbox 
                     b:theme="$item.default ? 'text-warning' : 'text-lighter'"
                     b:checked="$item.default"
+                    b:onchange="$item.default"
                     text="默认发票抬头" 
                     layout="row before" 
-                    flex="auto" 
-                    e:tap="handleDefault" />
+                    flex="auto"
+                    e:changing="handleDefault" />
                 <text padding="0 30rem" theme="text-lightest" e:tap="handleEdit">编辑</text>
                 <text padding="0 30rem" theme="text-lightest" e:tap="handleDelete">删除</text>
             </box>

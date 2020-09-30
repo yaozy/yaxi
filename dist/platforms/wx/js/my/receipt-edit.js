@@ -17,25 +17,22 @@ module.exports = yaxi.Dialog.extend(function (Class, base) {
     }
 
 
-    this.handleMan = function () {
 
-        model.gendle = 1;
+    this.handleType = function (event) {
+
+        model.type = event.target.tag;
     }
-
-
-    this.handleWoman = function () {
-
-        model.gendle = 0;
-    }
-
 
 
     this.handleOK = function () {
 
-        if (check(this, 'name', '姓名') &&
+        if (check(this, 'name', '发票抬头') &&
+            (model.type !== 1 || check(this, 'taxid', '税务识别号') && checkTaxId(this)) &&
+            (model.type !== 2 || check(this, 'bank', '开户银行')) &&
+            (model.type !== 2 || check(this, 'account', '银行帐号')) &&
             check(this, 'tel', '电话') &&
             check(this, 'address', '地址') &&
-            check(this, 'house', '楼宇门牌'))
+            check(this, 'email', '电子发票接收邮箱'))
         {
             this.close('OK', model);
         }
@@ -47,6 +44,22 @@ module.exports = yaxi.Dialog.extend(function (Class, base) {
         if (!model[name].trim())
         {
             control.find('>>@error').text = '必须输入' + text + '!';
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+
+    function checkTaxId(control) {
+
+        var text = model.taxid;
+        var length = text.length;
+
+        if (length !== 15 && length !== 18 && length !== 20)
+        {
+            control.find('>>@error').text = '税务识别号只能是15/18/20位!';
         }
         else
         {

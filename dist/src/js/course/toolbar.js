@@ -24,14 +24,14 @@ module.exports = yaxi.Box.extend(function (Class, base) {
         category: {
 
             level1s: [
-                { id: 0, text: '全部', icon: 'tabbar-lesson' },
-                { id: 1, text: 'IT', icon: 'tabbar-lesson' },
-                { id: 2, text: '设计', icon: 'tabbar-lesson' },
-                { id: 3, text: '电商', icon: 'tabbar-lesson' },
-                { id: 4, text: '职业', icon: 'tabbar-lesson' },
-                { id: 5, text: '升学', icon: 'tabbar-lesson' },
-                { id: 6, text: '兴趣', icon: 'tabbar-lesson' },
-                { id: 7, text: '语言', icon: 'tabbar-lesson' }
+                { id: 0, text: '全部', icon: 'tabbar-course' },
+                { id: 1, text: 'IT', icon: 'tabbar-course' },
+                { id: 2, text: '设计', icon: 'tabbar-course' },
+                { id: 3, text: '电商', icon: 'tabbar-course' },
+                { id: 4, text: '职业', icon: 'tabbar-course' },
+                { id: 5, text: '升学', icon: 'tabbar-course' },
+                { id: 6, text: '兴趣', icon: 'tabbar-course' },
+                { id: 7, text: '语言', icon: 'tabbar-course' }
             ],
 
             level2s: [all],

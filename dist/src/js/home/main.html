@@ -16,18 +16,18 @@
                     <icon icon="common-more" />
                 </box>
             </box>
-            <databox d:data="$item.data" item="$lesson">
-                <box layout="row" d:tag="$lesson.id" height="160rem" margin="20rem 0" e:tap="handleOpenDetail">
-                    <image d:src="$lesson.image" width="200rem" height="100%" />
+            <databox d:data="$item.data" item="$course">
+                <box layout="row" d:tag="$course.id" height="160rem" margin="20rem 0" e:tap="handleOpenDetail">
+                    <image d:src="$course.image" width="200rem" height="100%" />
                     <box width="500rem" height="100%" padding-left="20rem">
                         <box height="50rem">
-                            <text d:text="$lesson.name" />
+                            <text d:text="$course.name" />
                         </box>
                         <box theme="text-lightest" height="70rem" font-size="24rem">
-                            <text d:text="$lesson.remark" />
+                            <text d:text="$course.remark" />
                         </box>
                         <box theme="text-primary" height="40rem">
-                            <text d:text="$lesson.price > 0 ? '￥' + $lesson.price : '免费'" />
+                            <text d:text="$course.price > 0 ? '￥' + $course.price : '免费'" />
                         </box>
                     </box>
                 </box>

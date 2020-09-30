@@ -18,74 +18,37 @@ return (
 			[
 				"box",
 				{
-					"width": "550rem",
+					"width": "80%",
 					"absolute": "middle center",
 					"padding": "50rem",
 					"theme": "bg-standard"
 				},
 				[
 					[
-						"checkbox",
-						null
-					],
-					[
-						"textbox",
+						"radiogroup",
 						{
-							"placeholder": "姓名",
-							"width": "100%",
+							"height": "100rem",
+							"line-height": "100rem",
 							"text-align": "center",
 							"bindings": {
-								"value":  function () { return $model.name },
-								"onchange":  function (value) { $model.name = value; }
+								"value":  function () { return $model.type },
+								"onchange":  function (value) { $model.type = value; }
 							}
-						}
-					],
-					[
-						"box",
-						{
-							"height": "80rem",
-							"layout": "row middle center",
-							"theme": "line-standard line-bottom"
 						},
 						[
 							[
-								"icon",
+								"radio",
 								{
-									"icon": "common-man",
-									"width": "200rem",
-									"height": "80rem",
-									"line-height": "80rem",
-									"bindings": {
-										"theme":  function () { return $model.gendle ? 'text-primary' : '' }
-									},
-									"events": {
-										"tap": this.handleMan.bind(this)
-									}
+									"key": "1",
+									"text": "公司发票"
 								}
 							],
 							[
-								"text",
+								"radio",
 								{
-									"width": "60rem",
-									"text-align": "center",
-									"bindings": {
-										"text":  function () { return $model.gendle ? '男' : '女' }
-									}
-								}
-							],
-							[
-								"icon",
-								{
-									"icon": "common-woman",
-									"width": "200rem",
-									"height": "80rem",
-									"line-height": "80rem",
-									"bindings": {
-										"theme":  function () { return $model.gendle ? '' : 'text-primary' }
-									},
-									"events": {
-										"tap": this.handleWoman.bind(this)
-									}
+									"key": "2",
+									"text": "个人发票",
+									"margin-left": "20rem"
 								}
 							]
 						]
@@ -93,9 +56,55 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "电话",
+							"placeholder": "请填写发票抬头",
 							"width": "100%",
-							"text-align": "center",
+							"bindings": {
+								"value":  function () { return $model.name },
+								"onchange":  function (value) { $model.name = value; }
+							}
+						}
+					],
+					[
+						"textbox",
+						{
+							"placeholder": "请填写15/18/20位税务识别号",
+							"width": "100%",
+							"bindings": {
+								"value":  function () { return $model.taxid },
+								"onchange":  function (value) { $model.taxid = value; },
+								"hidden":  function () { return $model.type !== 1 }
+							}
+						}
+					],
+					[
+						"textbox",
+						{
+							"placeholder": "请填写开户银行",
+							"width": "100%",
+							"bindings": {
+								"value":  function () { return $model.bank },
+								"onchange":  function (value) { $model.bank = value; },
+								"hidden":  function () { return $model.type !== 2 }
+							}
+						}
+					],
+					[
+						"textbox",
+						{
+							"placeholder": "请填写银行帐号",
+							"width": "100%",
+							"bindings": {
+								"value":  function () { return $model.account },
+								"onchange":  function (value) { $model.account = value; },
+								"hidden":  function () { return $model.type !== 2 }
+							}
+						}
+					],
+					[
+						"textbox",
+						{
+							"placeholder": "请填写电话",
+							"width": "100%",
 							"bindings": {
 								"value":  function () { return $model.tel },
 								"onchange":  function (value) { $model.tel = value; }
@@ -105,9 +114,8 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "地址",
+							"placeholder": "请填写地址",
 							"width": "100%",
-							"text-align": "center",
 							"bindings": {
 								"value":  function () { return $model.address },
 								"onchange":  function (value) { $model.address = value; }
@@ -117,11 +125,10 @@ return (
 					[
 						"textbox",
 						{
-							"placeholder": "楼宇门牌",
+							"placeholder": "请填写电子发票接收邮箱",
 							"width": "100%",
-							"text-align": "center",
 							"bindings": {
-								"value":  function () { return $model.house },
+								"value":  function () { return $model.email },
 								"onchange":  function (value) { $model.house = value; }
 							}
 						}

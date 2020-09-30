@@ -35,22 +35,24 @@ if (typeof jiac !== 'undefined')
 
 
 
-// 默认设置类型容器为自身, 框架初始化完毕后清除
-yaxi.classHost = yaxi;
+// 设置默认类型导出对象为自身
+// 比如yaxi.Control.extend('Box' ... 会导出类为yaxi.Box
+// 框架初始化完毕后清除
+yaxi.exports = yaxi;
 
 
 
 // 对象继承实现
 Object.extend = function (name, fn, Class, force) {
 	
-    var base = this.prototype || null;
-    var prototype = Object.create(base);
-    var classes, ctor;
-
-    if (base && this.sealed)
+    if (this.sealed)
     {
         throw new Error(this.typeName + ' is sealed, can not be extended!');
     }
+
+    var base = this.prototype || null;
+    var prototype = Object.create(base);
+    var classes, ctor;
 
     if (typeof name === 'function')
     {
@@ -105,13 +107,13 @@ Object.extend = function (name, fn, Class, force) {
         if (force || !classes[name])
         {
             // 绑定到类容器
-            if (force = yaxi.classHost)
+            if (force = yaxi.exports)
             {
                 force[name] = Class;
             }
 
             classes[Class.typeName = prototype.typeName = name] = Class;
-            classes[name = Class.lowerTypeName = name.toLowerCase()] = Class;
+            classes[name = name.toLowerCase()] = Class;
         }
         else
         {
@@ -1112,7 +1114,7 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
         event.target = this;
 
-        if (detail)
+        if (detail !== void 0)
         {
             event.detail = detail;
         }
@@ -3687,15 +3689,19 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
             if (changes = this.__changes)
             {
-                if (value !== changes[name] && !(this[key] && this[key](value) === false))
+                if (value !== changes[name])
                 {
                     changes[name] = value;
+
+                    this[key] && this[key](value);
                     this.__dirty || patch(this);
                 }
             }
-            else if (value !== this.$storage[name] && !(this[key] && this[key](value) === false))
+            else if (value !== this.$storage[name])
             {
                 (this.__changes = init(this.$storage))[name] = value;
+
+                this[key] && this[key](value);
                 this.__dirty || patch(this);
             }
         }
@@ -3709,10 +3715,8 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         return function (value) {
 
-            if (!this[key] || this[key](value) !== false)
-            {
-                this.$storage[name] = convert ? convert.call(this, value) : value;
-            }
+            this.$storage[name] = convert ? convert.call(this, value) : value;
+            this[key] && this[key](value);
         }
     }
 
@@ -3970,10 +3974,10 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         get: function () {
 
-            var target = this,
-                parent;
+            var target = this;
+            var parent;
 
-            while (!target.isTopLevel && (parent = target.parent))
+            while (parent = target.parent)
             {
                 target = parent;
             }
@@ -5068,6 +5072,10 @@ yaxi.Control.extend('Box', function (Class, base) {
             children[i].destroy();
         }
 
+
+        // 清除变更
+        children.__last = null;
+
         base.destroy.call(this);
     }
 
@@ -5501,6 +5509,12 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
         base.destroy.call(this);
     }
 
+
+
+
+    // 输出组件创建方法
+    yaxi.component = Class.extend.bind(Class);
+    
     
 
 
@@ -6705,7 +6719,7 @@ yaxi.Control.extend('CheckBox', function (Class, base) {
     this.__set_checked = function (value) {
 
         this.$push(value);
-        this.trigger('change');
+        this.trigger('change', value);
     }
 
 
@@ -6719,9 +6733,11 @@ yaxi.Control.extend('CheckBox', function (Class, base) {
 
     this.__on_tap = function () {
 
-        if (this.trigger('changing') !== false)
+        var checked = !this.checked;
+
+        if (this.trigger('changing', checked) !== false)
         {
-            this.checked = !this.value;
+            this.checked = checked;
         }
     }
 
@@ -6891,9 +6907,6 @@ yaxi.Control.extend('Radio', function (Class, base) {
 
 
 
-    this.$('name', '');
-
-
     this.$('text', '');
 
 
@@ -6911,7 +6924,7 @@ yaxi.Control.extend('Radio', function (Class, base) {
     this.__set_checked = function (value) {
 
         this.$push(value);
-        this.trigger('change');
+        this.trigger('change', value);
     }
 
 
@@ -6931,17 +6944,79 @@ yaxi.Box.extend('RadioGroup', function (Class, base) {
 
 
 
+    this.$('name', '');
+
+
+    this.$('value', '');
+
+
+
+
+    function syncValue(children, value) {
+
+        for (var i = children.length; i--;)
+        {
+            var radio = children[i];
+
+            if (radio.key === value)
+            {
+                radio.checked = true;
+            }
+            else if (radio.checked)
+            {
+                radio.checked = false;
+            }
+        }
+    }
+
+
+    this.__set_value = function (value) {
+
+        syncValue(this.__children, value);
+        this.$push(value);
+    }
+
+
+
+    this.__load_children = function (values, scope) {
+
+        var children = this.__children;
+
+        children.load(values, scope);
+        syncValue(children, this.value);
+    }
+
+
+
     this.__on_tap = function (event) {
 
         var target = event.target;
 
-        if (target.parent === this && !target.checked && this.trigger('changing') !== false)
+        if (target.parent === this && !target.checked)
         {
             var children = this.children;
 
             for (var i = children.length; i--;)
             {
-                children[i].checked = children[i] === target;
+                if (children[i].checked)
+                {
+                    if (children[i].trigger('changing', false) === false)
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+            }
+
+            if (target.trigger('changing', true) === false)
+            {
+                return false;
+            }
+
+            if (!(this.value = target.key))
+            {
+                throw new Error('radio control must set key!');
             }
         }
     }
@@ -7035,11 +7110,6 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-    // 是否顶级控件
-    this.isTopLevel = true;
-
-
-
 	this.__find_up = function () {
 	
 		return null;
@@ -7070,9 +7140,9 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 	// 关闭窗口
-	this.close = function (type, data) {
+	this.close = function (type, payload) {
 
-		yaxi.closePage(type, data);
+		yaxi.closePage(type, payload);
 	}
 
 
@@ -7102,102 +7172,8 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-yaxi.Box.extend('Dialog', function (Class, base, yaxi) {
+yaxi.Page.extend('Dialog', function (Class, base, yaxi) {
 	
-
-
-	// 禁止作为子控件
-	Class.allowParent = function (parent) {
-
-		return parent instanceof yaxi.Page;
-	}
-
-
-
-    // 是否顶级控件
-    this.isTopLevel = true;
-
-
-
-	this.__find_up = function () {
-	
-		return null;
-	}
-
-	
-	
-	// 对话框加载前处理
-	this.onloading = function (options) {
-	}
-	
-	
-
-	// 对话框加载后处理
-	this.onload = function (options) {
-	}
-	
-
-	// 对话框关闭前处理(返回false退停止关闭窗口)
-	this.onunloading = function (options) {
-	}
-
-
-	// 对话框关闭后处理
-	this.onunload = function (options) {
-	}
-
-
-	// 关闭窗口
-	this.close = function (type, data) {
-
-		var page = yaxi.currentPage;
-		var options = this.options;
-		var callback;
-
-		if (page && this.onunloading(options) !== false)
-		{
-			this.remove();
-			this.onunload(options);
-    
-			this.options = null;
-			this.destroy();
-			
-			this.__shrink_uuid();
-	
-			if (callback = this.__callback)
-			{
-				this.__callback = null;
-				callback(type, data);
-			}
-		}
-	}
-
-
-	
-	function open(options, callback) {
-
-		var page = yaxi.currentPage;
-		var dialog = new this(options);
-        
-		if (page && dialog.onloading(options) !== false)
-		{
-			dialog.options = options;
-			dialog.__callback = callback;
-
-			page.children.push(dialog);
-			
-			dialog.onload(options);
-		}
-	}
-
-
-	this.__class_init = function (Class) {
-
-		base.__class_init.call(this, Class);
-		Class.open = open;
-	}
-
-
 	
 	
 }, function Dialog() {
@@ -7274,8 +7250,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 			content = [
 				'text', 
 				{
-					minHeight: '150rem',
-					padding: '20rem 50rem'
+					padding: '20rem 50rem 80rem'
 				},
 				content
 			];
@@ -7325,7 +7300,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 					{
 						theme: 'bg-standard line-lighter line-top',
 						absolute: 'middle center',
-						width: '80%',
+						width: '90%',
 						minHeight: '250rem',
 						maxHeight: '80%',
 						layout: 'column'
@@ -7386,7 +7361,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-yaxi.Component.extend('Header', function (Class, base) {
+yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
@@ -7397,7 +7372,7 @@ yaxi.Component.extend('Header', function (Class, base) {
 
     Class.allowParent = function (parent) {
 
-        if (parent && parent.isTopLevel)
+        if (parent instanceof yaxi.Page)
         {
             return true;
         }
@@ -7417,7 +7392,7 @@ yaxi.Component.extend('Header', function (Class, base) {
             {
                 layout: 'row middle',
                 theme: 'bg-standard line-lightest line-bottom',
-                height: '80rem',
+                height: '90rem',
                 paddingLeft: '20rem'
             },
             [
@@ -7425,7 +7400,7 @@ yaxi.Component.extend('Header', function (Class, base) {
                     'icon',
                     {
                         icon: 'common-back',
-                        width: '80rem',
+                        width: '90rem',
                         height: '100%',
                         marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
@@ -7551,7 +7526,6 @@ yaxi.Component.extend('Header', function (Class, base) {
 	
     // 处理rem自适应
     document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
-    host.style.cssText = 'width:100%;height:100%;transform-origin: 0 0;';
 
 
 
@@ -7576,10 +7550,6 @@ yaxi.Component.extend('Header', function (Class, base) {
 
     // 开始触摸时的控件及时间
     var touchControl, touchTime, touches;
-    
-    // dom标记
-    var flag;
-
 
 
 
@@ -7589,11 +7559,8 @@ yaxi.Component.extend('Header', function (Class, base) {
 
         while (view)
         {
-            f || (f = view.getAttribute('flag'));
-
             if ((uuid = view.id) && (control = controls[uuid]))
             {
-                flag = f || '';
                 return control.disabled ? control.parent || null : control;
             }
 
@@ -7610,7 +7577,6 @@ yaxi.Component.extend('Header', function (Class, base) {
         var e = new Event(event.type);
 
         e.target = touchControl;
-        e.flag = flag;
         e.changedTouches = parseTouches(event.changedTouches);
         e.touches = parseTouches(event.touches);
 
@@ -7668,10 +7634,7 @@ yaxi.Component.extend('Header', function (Class, base) {
 
         if (control = findControl(event.target))
         {
-            event = new Event(event.type);
-            event.flag = flag;
-
-            return control.trigger(event);
+            return control.trigger(event.type);
         }
     }
 
@@ -7812,22 +7775,18 @@ yaxi.Component.extend('Header', function (Class, base) {
 
     bind('input', function (event) {
 
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(event.target))
         {
-            value = event.target.value;
+            detail = event.target.value;
 
-            if ((fn = control.__on_input) && fn.call(control, value) === false)
+            if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
             }
 
-            event = new Event('input');
-            event.flag = flag;
-            event.value = value;
-
-            return control.trigger(event);
+            return control.trigger('input', detail);
         }
 
     }, true);
@@ -7835,22 +7794,18 @@ yaxi.Component.extend('Header', function (Class, base) {
 
     bind('change', function (event) {
 
-        var control, fn, value;
+        var control, fn, detail;
 
         if (control = findControl(event.target))
         {
-            value = event.target.value;
+            detail = event.target.value;
 
-            if ((fn = control.__on_change) && fn.call(control, value) === false)
+            if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;
             }
 
-            event = new Event('change');
-            event.flag = flag;
-            event.value = value;
-
-            return control.trigger(event);
+            return control.trigger('change', detail);
         }
 
     }, true);
@@ -7874,10 +7829,7 @@ yaxi.Component.extend('Header', function (Class, base) {
 
         if (control = findControl(event.target))
         {
-            event = new Event('focus');
-            event.flag = false;
-
-            return control.trigger(event);
+            return control.trigger('focus');
         }
         
     }, true);
@@ -7895,10 +7847,7 @@ yaxi.Component.extend('Header', function (Class, base) {
                 fn.call(control, event.target);
             }
 
-            event = new Event('scroll');
-            event.flag = false;
-
-            return control.trigger(event);
+            return control.trigger('scroll');
         }
 
     }, true);
@@ -8057,7 +8006,7 @@ yaxi.Control.renderer(function () {
     
 
 
-    this.createView = function (control) {
+    function createView(renderer, control) {
 
         var Class = control.constructor;
         var dom;
@@ -8067,7 +8016,7 @@ yaxi.Control.renderer(function () {
             return dom.cloneNode(true);
         }
 
-        div.innerHTML = this.__html_template.replace('@class', this.className);
+        div.innerHTML = renderer.__html_template.replace('@class', renderer.className);
 
         dom = div.firstChild;
         div.removeChild(dom);
@@ -8078,15 +8027,15 @@ yaxi.Control.renderer(function () {
 
 
     // 渲染控件
-    this.render = function (control) {
+    this.render = function (control, uuid) {
 
         var view = control.$view;
         var changes;
 
         if (!view)
         {
-            view = control.$view = this.createView(control);
-            view.id = control.uuid;
+            view = control.$view = createView(this, control);
+            view.id = uuid || control.uuid;
         }
         
         control.__dirty = false;
@@ -8336,7 +8285,9 @@ yaxi.Box.renderer(function (base) {
         var view = base.render.call(this, control);
         var children = control.__children;
 
+        // 清除变更
         children.__last = null;
+
         this.renderChildren(this.getChildrenView(view), children);
 
         return view;
@@ -8371,8 +8322,6 @@ yaxi.Component.renderer(function (base) {
 
         var shadowRoot = control.__shadowRoot;
 
-        // 标记已渲染, 否则无法更新patch
-        control.$view = true;
         control.__dirty = false;
 
         if (control.__changes)
@@ -8381,14 +8330,8 @@ yaxi.Component.renderer(function (base) {
             control.__changes = null;
         }
 
-        if (!shadowRoot.$view)
-        {
-            // 以当前控件为模板创建dom以免污染模板的class
-            shadowRoot.$view = this.createView(control);
-        }
-
-        // 渲染shadowRoot
-        return shadowRoot.$renderer.render(shadowRoot);
+        // 渲染shadowRoot, 并把shadowRoot的$view作为当前控件的$view
+        return control.$view = shadowRoot.$renderer.render(shadowRoot, control.uuid);
     }
 
     
@@ -8405,7 +8348,7 @@ yaxi.Component.renderer(function (base) {
         }
 
         // 渲染shadowRoot
-        shadowRoot.$renderer.patch(shadowRoot, shadowRoot.$view);
+        shadowRoot.$renderer.patch(shadowRoot, view);
     }
 
 
@@ -8419,7 +8362,7 @@ yaxi.DataBox.renderer(function (base) {
 
 
 
-    this.className = 'yx-control yx-box yx-databox';
+    this.className = 'yx-control yx-databox';
 
 
 
@@ -8428,7 +8371,9 @@ yaxi.DataBox.renderer(function (base) {
         var view = base.render.call(this, control);
         var children = control.__children;
 
+        // 清除变更
         children.__last = null;
+
         this.renderChildren(view, children);
 
         return view;
@@ -8442,7 +8387,7 @@ yaxi.DataBox.renderer(function (base) {
         base.patch.call(this, control, view);
     }
 
-    
+
 
 });
 
@@ -8672,6 +8617,17 @@ yaxi.Marquee.renderer(function (base) {
 
 
 
+yaxi.MaskLayer.renderer(function (base) {
+
+
+    this.className = 'yx-control yx-masklayer';
+
+
+});
+
+
+
+
 yaxi.ScrollBox.renderer(function (base) {
 
 
@@ -8843,7 +8799,7 @@ yaxi.CheckBox.renderer(function (base) {
 
 
     this.template('<div class="@class">'
-            + '<div class="yx-icon icon-common-unchecked"></div>'
+            + '<div class="yx-icon icon-common-checkbox-unchecked"></div>'
             + '<div class="yx-checkbox-content"></div>'
         + '</div>');
 
@@ -8851,7 +8807,7 @@ yaxi.CheckBox.renderer(function (base) {
 
     this.checked = function (control, view, value) {
 
-        view.firstChild.className = 'yx-icon icon-common-' + (value ? 'checked' : 'unchecked');
+        view.firstChild.className = 'yx-icon icon-common-checkbox-' + (value ? 'checked' : 'unchecked');
     }
     
     
@@ -8954,7 +8910,7 @@ yaxi.Radio.renderer(function (base) {
 
 
     this.template('<div class="@class">'
-            + '<div class="yx-icon icon-common-unchecked"></div>'
+            + '<div class="yx-icon icon-common-radio-unchecked"></div>'
             + '<div class="yx-radio-content"></div>'
         + '</div>');
 
@@ -8962,7 +8918,7 @@ yaxi.Radio.renderer(function (base) {
 
     this.checked = function (control, view, value) {
 
-        view.firstChild.className = 'yx-icon icon-common-' + (value ? 'checked' : 'unchecked');
+        view.firstChild.className = 'yx-icon icon-common-radio-' + (value ? 'checked' : 'unchecked');
     }
     
     
@@ -9162,24 +9118,32 @@ yaxi.Page.renderer(function (base) {
             page.options = options;
             page.__callback = callback;
 
+            notifyRender(renderings);
+            
 			host.appendChild(page.$renderer.render(page));
 
-			notifyRender(renderings);
+            notifyRender(rendereds);
+
 			page.onload(page.options);
 		}
 	}
 
 	
 	// 关闭当前页面
-    yaxi.closePage = function (type, data) {
+    yaxi.closePage = function (type, payload) {
 
-        var page, options, callback;
+        var page, view, options, callback;
 
         if (page = all.pop())
         {
             if (page.onunloading(options = page.options) !== false)
             {
-                host.removeChild(page.$view);
+                // 清除dom
+                if (view = page.$view)
+                {
+                    host.removeChild(view);
+                    view.textContent = '';
+                }
 
                 page.onunload(options);
                 page.options = null;
@@ -9190,7 +9154,7 @@ yaxi.Page.renderer(function (base) {
                 if (callback = page.__callback)
                 {
                     page.__callback = null;
-                    callback(type, data);
+                    callback(type, payload);
                 }
             }
             else
@@ -9198,9 +9162,10 @@ yaxi.Page.renderer(function (base) {
                 all.push(page);
             }
         }
-	}
+    }
     
     
+
 
     yaxi.__on_page_patch = function (patches) {
 
@@ -9224,4 +9189,17 @@ yaxi.Page.renderer(function (base) {
     
 });
 
-yaxi.classHost = null;
+
+
+
+yaxi.Dialog.renderer(function (base) {
+
+
+    
+    this.className = 'yx-control yx-box yx-dialog';
+
+
+
+});
+
+yaxi.exports = null;

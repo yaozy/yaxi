@@ -130,7 +130,7 @@ return (
 										"databox",
 										{
 											"data": $item.data,
-											"item": "$lesson"
+											"item": "$course"
 										},
 										function (template, __data_list, __data_scope) {
 
@@ -142,14 +142,14 @@ return (
 												// 添加作用域解决循环变量绑定变化的问题
 												(function () {
 
-												var $lesson = __data_list[$index];
+												var $course = __data_list[$index];
 
-												template($index, $lesson,
+												template($index, $course,
 													[
 														"box",
 														{
 															"layout": "row",
-															"tag": $lesson.id,
+															"tag": $course.id,
 															"height": "160rem",
 															"margin": "20rem 0",
 															"events": {
@@ -160,7 +160,7 @@ return (
 															[
 																"image",
 																{
-																	"src": $lesson.image,
+																	"src": $course.image,
 																	"width": "200rem",
 																	"height": "100%"
 																}
@@ -182,7 +182,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": $lesson.name
+																					"text": $course.name
 																				}
 																			]
 																		]
@@ -198,7 +198,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": $lesson.remark
+																					"text": $course.remark
 																				}
 																			]
 																		]
@@ -213,7 +213,7 @@ return (
 																			[
 																				"text",
 																				{
-																					"text": $lesson.price > 0 ? '￥' + $lesson.price : '免费'
+																					"text": $course.price > 0 ? '￥' + $course.price : '免费'
 																				}
 																			]
 																		]

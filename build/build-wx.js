@@ -21,7 +21,7 @@ new Compressor()
     ])
     
     .combine('\r\n\r\n\r\n\r\n')
-    .push('yaxi.classHost = null;')
+    .push('yaxi.exports = null;')
 
     .output('dist/platforms/wx/yaxi/js/yaxi.js')
 

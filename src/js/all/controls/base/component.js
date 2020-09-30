@@ -408,6 +408,12 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
         base.destroy.call(this);
     }
 
+
+
+
+    // 输出组件创建方法
+    yaxi.component = Class.extend.bind(Class);
+    
     
 
 

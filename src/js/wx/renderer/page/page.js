@@ -112,67 +112,69 @@ yaxi.Page.renderer(function (base, yaxi) {
 	// 打开指定页面
     yaxi.openPage = function (Page, options, callback) {
 
-        try
+        if (typeof options === 'function')
         {
-            if (typeof options === 'function')
-            {
-                callback = options;
-                options = null;
-            }
-            
-            var page = new Page(options);
+            callback = options;
+            options = null;
+        }
         
-            if (page.onloading(options) !== false)
+        var page = new Page(options);
+    
+        if (page.onloading(options) !== false)
+        {
+            page.options = options;
+            page.__callback = callback;
+
+            // 对话框直接嵌在当前页面内, 不创建新的微信页面
+            if (page instanceof yaxi.Dialog && all.length > 0)
+            {
+                openDialog(page, options, callback);
+            }
+            else
             {
                 all.push(page);
 
-                page.options = options;
-                page.__callback = callback;
-    
                 wx.navigateTo({
     
                     url: '../../yaxi/pages/host?uuid=' + page.uuid
                 });
             }
         }
-        catch (e)
-        {
-            console.error(e);
-            throw e;
-        }
     }
 
 
 	// 关闭当前页面
-    yaxi.closePage = function (type, data) {
+    yaxi.closePage = function (type, payload) {
 
         var page = all[all.length - 1];
+        var wxPage, data;
 
         if (page && page.onunloading(page.options) !== false)
         {
-            wx.navigateBack({
+            // 对话框
+            if (wxPage = page.__wx_dialog)
+            {
+                data = {};
+                data[wxPage] = null;
 
-                delta: 1,
+                wxPage = page.__wx_page;
+                wxPage.setData(data, function () {
 
-                complete: function () {
+                    closePage(type, payload);
+                    wxPage.__wx_index--;
+                });
+            }
+            else // 页面
+            {
+                wx.navigateBack({
 
-                    var page = all.pop();
-                    var callback;
-            
-                    page.onunload(page.options);
-            
-                    page.options = page.__wx_page = null;
-                    page.destroy();
-                    
-                    page.__shrink_uuid();
-            
-                    if (callback = page.__callback)
-                    {
-                        page.__callback = null;
-                        callback(type, data);
+                    delta: 1,
+                    complete: function () {
+
+                        closePage(type, payload);
                     }
-                }
-            });
+                });
+            }
         }
 	}
     
@@ -180,35 +182,25 @@ yaxi.Page.renderer(function (base, yaxi) {
 
     yaxi.__on_page_open = function (uuid, wxPage) {
 
-        try
-        {
-            yaxi.getSystemInfo(info => {
+        yaxi.getSystemInfo(info => {
 
-                var page = find(uuid);
-                var data;
+            var page = find(uuid);
+            var data;
 
-                notifyRender(renderings);
-    
-                page.__wx_page = wxPage;
+            notifyRender(renderings);
 
-                data = page.$renderer.render(page);
-                data.top = (info.statusBarHeight | 0) + 'px';
-                data = { p: data };
-                
-                console.log(data);
+            page.__wx_page = wxPage;
 
-                wxPage.setData(data, function () {
+            data = page.$renderer.render(page);
 
-                    notifyRender(rendereds);
-                    page.onload(page.options);
-                });
+            console.log(data);
+
+            wxPage.setData({ top: info.statusBarHeight | 0, p: data }, function () {
+
+                notifyRender(rendereds);
+                page.onload(page.options);
             });
-        }
-        catch (e)
-        {
-            console.error(e);
-            throw e;
-        }
+        });
     }
 
 
@@ -226,7 +218,7 @@ yaxi.Page.renderer(function (base, yaxi) {
             {
                 times++;
 
-                control.$renderer.patch(control, data = create(null), 'p');
+                control.$renderer.patch(control, data = create(null), control.__wx_dialog || 'p');
                 console.log(data);
 
                 page.setData(data, function () {
@@ -240,6 +232,55 @@ yaxi.Page.renderer(function (base, yaxi) {
         }
     }
 
+
+
+    function openDialog(dialog) {
+
+        var wxPage = all[all.length - 1].__wx_page;
+        var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
+        var data;
+        
+        all.push(dialog);
+
+        notifyRender(renderings);
+
+        data = {};
+        data[index = 'd[' + index + ']'] = dialog.$renderer.render(dialog);
+
+        console.log(data);
+
+        wxPage.setData(data, function () {
+
+            notifyRender(rendereds);
+            dialog.onload(dialog.options);
+        });
+
+        // 记录微信页面
+        dialog.__wx_page = wxPage;
+
+        // 标记对话框关闭数据, 关闭对话框时用
+        dialog.__wx_dialog = index;
+    }
+
+
+    function closePage(type, payload) {
+
+        var page = all.pop();
+        var callback;
+
+        page.onunload(page.options);
+
+        page.options = page.__wx_page = null;
+        page.destroy();
+        
+        page.__shrink_uuid();
+
+        if (callback = page.__callback)
+        {
+            page.__callback = null;
+            callback(type, payload);
+        }
+    }
 
 
 });

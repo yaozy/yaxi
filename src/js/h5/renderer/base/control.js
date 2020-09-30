@@ -43,7 +43,7 @@ yaxi.Control.renderer(function () {
     
 
 
-    this.createView = function (control) {
+    function createView(renderer, control) {
 
         var Class = control.constructor;
         var dom;
@@ -53,7 +53,7 @@ yaxi.Control.renderer(function () {
             return dom.cloneNode(true);
         }
 
-        div.innerHTML = this.__html_template.replace('@class', this.className);
+        div.innerHTML = renderer.__html_template.replace('@class', renderer.className);
 
         dom = div.firstChild;
         div.removeChild(dom);
@@ -64,15 +64,15 @@ yaxi.Control.renderer(function () {
 
 
     // 渲染控件
-    this.render = function (control) {
+    this.render = function (control, uuid) {
 
         var view = control.$view;
         var changes;
 
         if (!view)
         {
-            view = control.$view = this.createView(control);
-            view.id = control.uuid;
+            view = control.$view = createView(this, control);
+            view.id = uuid || control.uuid;
         }
         
         control.__dirty = false;

@@ -17,7 +17,7 @@
     </databox>
     <databox d:data="$model.data" flex="auto">
         <box b:hidden="$model.status && $item.status !== $model.status" margin-top="10rem" theme="bg-standard">
-            <box line-height="80rem" padding="0 20rem" theme="line-lightest line-bottom">
+            <box height="80rem" line-height="80rem" padding="0 20rem" theme="line-lightest line-bottom">
                 <text d:text="$item.time" />
                 <text
                     b:text="$model.categories[$item.status].text"
@@ -33,7 +33,7 @@
                     e:tap="handleDelete" />
             </box>
             <databox d:data="$item.data" item="$detail" padding="0 20rem">
-                <box d:tag="$detail.lessonid" layout="row" height="100rem" margin="20rem 0" e:tap="handleOpenDetail">
+                <box d:tag="$detail.courseid" layout="row" height="100rem" margin="20rem 0" e:tap="handleOpenDetail">
                     <image d:src="$detail.image" width="140rem" height="100%" />
                     <box width="560rem" height="100%" padding-left="20rem">
                         <box height="50rem">
@@ -52,12 +52,13 @@
                 b:tag="$index" 
                 b:hidden="$item.status < 3" 
                 icon="common-completed" 
+                theme="text-lightest"
                 absolute="right"
                 width="120rem"
                 height="120rem"
                 line-height="120rem"
                 font-size="120rem"
-                top="300rem"
+                top="280rem"
                 right="20rem" />
             <box height="80rem" line-height="80rem" theme="line-lightest line-top" padding-left="20rem">
                 <text>总价:</text>

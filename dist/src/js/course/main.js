@@ -15,14 +15,14 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     this.init = function () {
 
         this.loadTemplate(template);
-        yaxi.http.get('lesson/list').json(render.bind(this));
+        yaxi.http.get('course/list').json(render.bind(this));
     }
 
 
     
     this.handleOpenDetail = function (event) {
 
-        require('../lesson/detail/main').open(event.source.tag);
+        require('../course/detail/main').open(event.source.tag);
     }
 
 

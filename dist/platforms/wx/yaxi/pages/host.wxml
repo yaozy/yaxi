@@ -1,4 +1,35 @@
 <import src="../components/template.wxml" />
 
-<view class="yx-statusbar" style="height:{{ p.top }};" />
-<template wx:if="{{ p.t }}" is="{{ p.t }}" data="{{ ...p }}" />
+<view class="yx-statusbar" style="height:{{ top }}px;" />
+<view 
+    class="yx-host" 
+    style="top:{{ top }}px;"
+    bindtouchstart="translateEvent"
+    bindtouchmove="translateEvent"
+    bindtouchcancel="translateEvent"
+    bindtouchend="translateEvent"
+    bindtouchforcechange="translateEvent">
+    <view
+        data-id="{{ p.u }}"
+        class="yx-control yx-box yx-page{{ p.class || '' }}" 
+        style="{{ p.s || '' }}">
+        <template 
+            wx:for="{{ p.c }}"
+            wx:key="u"
+            is="{{ item.t }}"
+            data="{{ ...item }}" />
+    </view>
+    <view 
+        wx:for="{{ d }}"
+        wx:key="u"
+        wx:if="{{ item }}"
+        data-id="{{ item.u }}"
+        class="yx-control yx-box yx-dialog{{ item.class || '' }}" 
+        style="{{ item.s || '' }}">
+        <template 
+            wx:for="{{ item.c }}"
+            wx:key="u"
+            is="{{ item.t }}"
+            data="{{ ...item }}" />
+    </view>
+</view>

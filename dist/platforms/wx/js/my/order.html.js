@@ -85,6 +85,7 @@ return (
 									[
 										"box",
 										{
+											"height": "80rem",
 											"line-height": "80rem",
 											"padding": "0 20rem",
 											"theme": "line-lightest line-bottom"
@@ -147,7 +148,7 @@ return (
 													[
 														"box",
 														{
-															"tag": $detail.lessonid,
+															"tag": $detail.courseid,
 															"layout": "row",
 															"height": "100rem",
 															"margin": "20rem 0",
@@ -237,12 +238,13 @@ return (
 										"icon",
 										{
 											"icon": "common-completed",
+											"theme": "text-lightest",
 											"absolute": "right",
 											"width": "120rem",
 											"height": "120rem",
 											"line-height": "120rem",
 											"font-size": "120rem",
-											"top": "300rem",
+											"top": "280rem",
 											"right": "20rem",
 											"bindings": {
 												"tag":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
