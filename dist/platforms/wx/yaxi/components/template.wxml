@@ -134,7 +134,7 @@
         class="yx-control yx-checkbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
-        <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <view data-id="{{ u }}" class="yx-icon icon-common-checkbox-{{ checked ? 'checked' : 'unchecked' }}" />
         <text data-id="{{ u }}" class="yx-checkbox-content">{{ text || '' }}</text>
     </view>
 
@@ -162,7 +162,7 @@
         class="yx-control yx-radio{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
-        <view data-id="{{ u }}" class="yx-icon icon-common-{{ checked ? 'checked' : 'unchecked' }}" />
+        <view data-id="{{ u }}" class="yx-icon icon-common-radio-{{ checked ? 'checked' : 'unchecked' }}" />
         <text data-id="{{ u }}" class="yx-radio-content">{{ text || '' }}</text>
     </view>
 

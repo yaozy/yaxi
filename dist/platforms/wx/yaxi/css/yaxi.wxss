@@ -214,15 +214,13 @@
 .yx-textbox {
   display: inline-block;
   width: 400rpx;
-  height: 70rpx;
-  line-height: 70rpx;
-  border-style: solid;
-  border-color: #263238;
+  height: 80rpx;
+  line-height: 80rpx;
+  border: 0 solid #78909c;
   border-width: 0 0 0.5px 0;
   padding: 0 10rpx;
   outline: none;
   font-size: 32rpx;
-  color: #212121;
 }
 .yx-button {
   display: inline-flex;
