@@ -214,6 +214,32 @@
 
 
 
+    this.load = function (values) {
+
+        var list;
+
+        if (this.__length > 0)
+        {
+            this.clear(false);
+        }
+
+        if (values.length > 0)
+        {
+            list = createModels(this, values, 0);
+
+            released = true;
+            push.apply(this, list);
+            
+            for (var i = list.length; i--;)
+            {
+                list[i].__index = i;
+            }
+        }
+
+        notify(this, '__on_load', list);
+    }
+
+
     this.set = function (index, data) {
 
         var Model = this.$Model;
@@ -236,19 +262,6 @@
             notify(this, '__on_set', index, model);
         }
     }
-
-
-
-    this.load = function (values) {
-
-        if (this.__length > 0)
-        {
-            this.clear();
-        }
-
-        this.push.apply(this, values);
-    }
-
 
 
     this.push = function () {
@@ -383,10 +396,11 @@
                 destroyItem(list[i]);
             }
 
-            notify(this, '__on_clear');
+            if (arguments[0] !== false)
+            {
+                notify(this, '__on_clear');
+            }
         }
-
-        return list;
     }
 
 

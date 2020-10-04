@@ -13,7 +13,13 @@ return (
 				"box",
 				{
 					"flex": "auto"
-				}
+				},
+				[
+					[
+						"loading",
+						null
+					]
+				]
 			]
 		]
 	]

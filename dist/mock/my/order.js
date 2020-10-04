@@ -1,4 +1,4 @@
-module.exports = [
+var data = [
     {
         id: 1,
         time: '2020-09-28 15:23:56',
@@ -116,3 +116,24 @@ module.exports = [
         ]
     }
 ]
+
+
+module.exports = function (status) {
+
+    if (status > 0)
+    {
+        var list = [];
+
+        for (var i = 0, l = data.length; i < l; i++)
+        {
+            if (data[i].status === status)
+            {
+                list.push(data[i]);
+            }
+        }
+
+        return list;
+    }
+
+    return data.slice(0);
+}

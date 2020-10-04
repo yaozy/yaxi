@@ -22,7 +22,7 @@ return (
 							[
 								"text",
 								{
-									"border-left": "5rem solid @line-secondary",
+									"border-left": "5rem solid @line-primary",
 									"padding": "0 20rem"
 								},
 								"任课教师"
@@ -98,7 +98,7 @@ return (
 							[
 								"text",
 								{
-									"border-left": "5rem solid @line-secondary",
+									"border-left": "5rem solid @line-primary",
 									"padding": "0 20rem"
 								},
 								"课程内容"

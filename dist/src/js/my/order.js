@@ -88,7 +88,14 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleSwitch = function (event) {
 
-        model.status = event.target.tag;
+        var status = model.status = event.target.tag;
+
+        this.find('>>@host').showLoading();
+
+        yaxi.http.get('my/order', status).json(function (data) {
+
+            model.data = data;
+        });
     }
 
 

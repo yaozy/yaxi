@@ -29,7 +29,8 @@ return (
 					[
 						"databox",
 						{
-							"key": "course-box"
+							"key": "course-box",
+							"min-height": "100%"
 						},
 						function (template, __data_list, __data_scope) {
 
@@ -134,7 +135,8 @@ return (
 															[
 																"text",
 																{
-																	"text": $item.price > 0 ? '￥' + $item.price : '免费'
+																	"text": $item.price > 0 ? '￥' + $item.price : '免费',
+																	"theme": "text-primary"
 																}
 															]
 														]

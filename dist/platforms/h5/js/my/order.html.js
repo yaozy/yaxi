@@ -40,11 +40,11 @@ return (
 								"text",
 								{
 									"text": $item.text,
-									"tag": $index,
+									"tag": $item.status,
 									"flex": "auto",
 									"text-align": "center",
 									"bindings": {
-										"theme":  function () { return ($item && $item.$index != null ? $item.$index : $index) === $model.status ? 'text-primary' : '' }
+										"theme":  function () { return $item.status === $model.status ? 'text-primary' : '' }
 									}
 								}
 							]
@@ -60,6 +60,7 @@ return (
 				"databox",
 				{
 					"data": $model.data,
+					"key": "host",
 					"flex": "auto"
 				},
 				function (template, __data_list, __data_scope) {
@@ -76,10 +77,7 @@ return (
 								"box",
 								{
 									"margin-top": "10rem",
-									"theme": "bg-standard",
-									"bindings": {
-										"hidden":  function () { return $model.status && $item.status !== $model.status }
-									}
+									"theme": "bg-standard"
 								},
 								[
 									[
@@ -247,7 +245,6 @@ return (
 											"top": "280rem",
 											"right": "20rem",
 											"bindings": {
-												"tag":  function () { return ($item && $item.$index != null ? $item.$index : $index) },
 												"hidden":  function () { return $item.status < 3 }
 											}
 										}

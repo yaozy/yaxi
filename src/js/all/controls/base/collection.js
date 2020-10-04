@@ -225,15 +225,23 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             list = splice.apply(this, arguments);
         }
 
-        if (list.length > 0)
+        for (var i = list.length; i--;)
         {
-            for (var i = list.length; i--;)
-            {
-                list[i].parent = null;
-            }
+            list[i].parent = null;
         }
 
         return list;
+    }
+
+
+    this.remove = function (item) {
+
+        var index = this.indexOf(item);
+
+        if (index >= 0)
+        {
+            this.splice(index, 1);
+        }
     }
 
 

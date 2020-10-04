@@ -322,24 +322,7 @@
             },
             set: function (values) {
 
-                var arrayModel = this[name];
-
-                if (arrayModel)
-                {
-                    if (arrayModel.length > 0)
-                    {
-                        arrayModel.clear();
-                    }
-                }
-                else
-                {
-                    arrayModel = this[name] = new ArrayModel(this);
-                }
-
-                if (values && values.length > 0)
-                {
-                    arrayModel.push.apply(arrayModel, values);
-                }
+                (this[name] || (this[name] = new ArrayModel(this))).load(values);
             }
         };
     }
@@ -366,7 +349,7 @@
                     }
                     else if (name === 'onchange')
                     {
-                        this.__b_onchange = fn;
+                        this.__onchange = fn;
                     }
                     else // 表达式绑定
                     {

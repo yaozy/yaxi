@@ -9,14 +9,14 @@
         padding="0 20rem" 
         e:tap="handleSwitch">
         <text 
-            b:theme="$index === $model.status ? 'text-primary' : ''" 
+            b:theme="$item.status === $model.status ? 'text-primary' : ''" 
             d:text="$item.text" 
-            d:tag="$index" 
+            d:tag="$item.status" 
             flex="auto" 
             text-align="center" />
     </databox>
-    <databox d:data="$model.data" flex="auto">
-        <box b:hidden="$model.status && $item.status !== $model.status" margin-top="10rem" theme="bg-standard">
+    <databox d:data="$model.data" key="host" flex="auto">
+        <box margin-top="10rem" theme="bg-standard">
             <box height="80rem" line-height="80rem" padding="0 20rem" theme="line-lightest line-bottom">
                 <text d:text="$item.time" />
                 <text
@@ -48,8 +48,7 @@
                     </box>
                 </box>
             </databox>
-            <icon 
-                b:tag="$index" 
+            <icon
                 b:hidden="$item.status < 3" 
                 icon="common-completed" 
                 theme="text-lightest"

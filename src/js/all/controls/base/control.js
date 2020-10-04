@@ -277,7 +277,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 所有控件集合
-    var controls1 = yaxi.$controls;
+    var controls = yaxi.$controls;
 
 
     // 控件唯一id
@@ -285,7 +285,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         get: function () {
 
-            return this.__uuid || (controls1[uuid] = this, this.__uuid = uuid++);
+            return this.__uuid || (controls[uuid] = this, this.__uuid = uuid++);
         }
     });
 
@@ -293,12 +293,12 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     // 收缩uuid
     this.__shrink_uuid = function () {
 
-        var controls = controls1;
+        var list = controls;
         var count = 0;
 
         for (var i = uuid; i--;)
         {
-            if (controls[i])
+            if (list[i])
             {
                 uuid -= count;
                 return;
@@ -310,41 +310,8 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
 
-
-    var controls2 = create(null);
-
-
-    // 通过id获取控件
-    yaxi.id = function (id) {
-
-        return (id = controls2[id]) && controls1[id] || null;
-    }
-
-
     // id 控件id仅做为内部属性用, 不会同步到dom节点上
     this.$('id', '', false);
-
-
-    this.__set_id = function (value) {
-
-        var id = this.$storage.id;
-
-        if ((value = '' + value) !== id)
-        {
-            if (controls2[id])
-            {
-                throwError('id must be unique, "' + value + '" has exists!');
-            }
-
-            if (id)
-            {
-                controls2[id] = null;
-            }
-
-            controls2[value] = this.uuid;
-        }
-    }
-
 
 
     
@@ -1003,7 +970,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         var change;
 
-        if (change = this.__b_onchange)
+        if (change = this.__onchange)
         {
             change(value);
         }
@@ -1093,22 +1060,17 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     
     this.destroy = function () {
 
-        var bindings, id;
+        var bindings, uuid;
 
-        if (id = this.$storage.id)
+        if (uuid = this.__uuid)
         {
-            controls2[id] = '';
-        }
-
-        if (id = this.__uuid)
-        {
-            controls1[id] = null;
+            controls[uuid] = null;
 
             if (bindings = this.__bindings)
             {
                 for (var i = bindings.length; i--;)
                 {
-                    bindings[i--].$unbind(bindings[i], id);
+                    bindings[i--].$unbind(bindings[i], uuid);
                 }
                 
                 this.__bindings = null;
@@ -1123,7 +1085,7 @@ yaxi.Control = Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__b_onchange = this.__d_scope = null;
+        this.parent = this.__onchange = this.__scope = null;
     }
 
 

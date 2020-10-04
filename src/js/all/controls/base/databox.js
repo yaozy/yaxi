@@ -2,12 +2,14 @@
  * DataBox是一个通过数据集合(data)和模板(template)进行重复展现的容器控件
  * 不支持children属性, 但是可以通过find或query对子控件进行操作
 */
-yaxi.Control.extend('DataBox', function (Class, base) {
+yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
 
 
 
-    var build = yaxi.Control.build;
+    var Control = yaxi.Control;
+
+    var build = Control.build;
 
 
 
@@ -58,7 +60,12 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
         set: function (value) {
 
-            var template;
+            var any;
+
+            if ((any = this.__model) && any !== value)
+            {
+                unbind(this, any);
+            }
 
             if (value)
             {
@@ -71,9 +78,9 @@ yaxi.Control.extend('DataBox', function (Class, base) {
                 {
                     this.__data = value;
 
-                    if (template = this.__template)
+                    if (any = this.__template)
                     {
-                        loadData(this, value, template);
+                        loadData(this, value, any);
                     }
 
                     return;
@@ -81,9 +88,58 @@ yaxi.Control.extend('DataBox', function (Class, base) {
             }
 
             this.__data = null;
-            this.__children.clear();
+
+            if (this.__loaded)
+            {
+                showEmpty(this);
+            }
         }
     });
+
+
+
+    // 加载中配置, 取值范围: false或null或控件对象
+    // false表示不显示loading
+    // null表示显示默认的loading控件
+    // 指定控件时表示使用自定义的loading控件来展示
+    this.$('loading', null, {
+
+        change: false,
+        convert: convert('loading')
+    });
+
+
+
+    // 无数据时配置, 取值范围: false或null或控件对象
+    // false表示无数据时不显示任何信息
+    // null表示显示默认的无数据控件
+    // 指定控件时表示使用自定义的控件来展示无数据时的内容
+    this.$('empty', null, {
+
+        change: false,
+        convert: convert('empty')
+    });
+
+
+
+    function convert(text) {
+
+        return function (value) {
+
+            if (value)
+            {
+                if (value instanceof Control)
+                {
+                    return value;
+                }
+    
+                throw new Error('databox ' + text + ' can only null or false or a control!');
+            }
+            
+            return value === false ? false : null;
+        }
+    }
+
 
     
 
@@ -106,13 +162,62 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
         var data;
 
-        if ((this.template = value) && (data = this.__data))
+        if (this.template = value)
         {
-            loadData(this, data, value, scope);
+            if (data = this.__data)
+            {
+                loadData(this, data, value, scope);
+            }
+            else
+            {
+                this.showLoading();
+            }
+        }
+        
+        // 标记子项已经加载过
+        this.__loaded = true;
+    }
+
+
+
+    this.showLoading = function () {
+
+        var children = this.__children;
+        var loading = this.loading;
+
+        children.clear();
+
+        if (loading !== false)
+        {
+            children.push(loading || new yaxi.Loading());
         }
     }
 
 
+    this.closeLoading = function () {
+
+        var loading;
+
+        if (loading = this.loading || this.find('>>loading'))
+        {
+            this.__children.remove(loading);
+        }
+    }
+
+
+    function showEmpty(databox) {
+
+        var children = databox.__children;
+        var empty = databox.empty;
+
+        children.clear();
+
+        if (empty !== false)
+        {
+            children.push(empty || new yaxi.DataEmpty());
+        }
+    }
+    
 
     function loadTemplate(controls, scope, index, item, template) {
 
@@ -122,7 +227,7 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
         if (control = build(this, template, scope))
         {
-            control.__d_scope = scope;
+            control.__scope = scope;
             controls.push(control);
         }
     }
@@ -148,7 +253,7 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
         while (control)
         {
-            if (stack = control.__d_scope)
+            if (stack = control.__scope)
             {
                 return stack;
             }
@@ -162,30 +267,21 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
     function loadData(databox, data, template, scope) {
 
+        var children = databox.__children;
         var controls = createControls(databox, data, template, scope);
 
+        children.clear();
+        
         if (controls.length > 0)
         {
-            databox.__children.load(controls);
+            children.load(controls);
         }
     }
 
 
     function bind(databox, arrayModel) {
 
-        var bindings, old;
-
-        if (old = databox.__array_model)
-        {
-            if (old !== arrayModel)
-            {
-                unbind(databox, old);
-            }
-            else
-            {
-                return;
-            }
-        }
+        var bindings;
 
         if (bindings = arrayModel.__bindings)
         {
@@ -196,7 +292,7 @@ yaxi.Control.extend('DataBox', function (Class, base) {
             arrayModel.__bindings = [databox.uuid];
         }
 
-        databox.__array_model = arrayModel;
+        databox.__model = arrayModel;
     }
 
 
@@ -214,10 +310,25 @@ yaxi.Control.extend('DataBox', function (Class, base) {
             }
         }
 
-        databox.__array_model = null;
+        databox.__model = null;
     }
 
 
+
+
+    this.__on_load = function (list) {
+
+        this.__children.clear();
+
+        if (list && list.length > 0)
+        {
+            this.__on_insert(-1, list);
+        }
+        else
+        {
+            showEmpty(this);
+        }
+    }
 
 
     this.__on_set = function (index, model) {
@@ -274,8 +385,8 @@ yaxi.Control.extend('DataBox', function (Class, base) {
 
         var index;
 
-        a = a.__d_scope;
-        b = b.__d_scope;
+        a = a.__scope;
+        b = b.__scope;
 
         index = a.length - 1;
 
@@ -303,7 +414,7 @@ yaxi.Control.extend('DataBox', function (Class, base) {
             any[i].destroy();
         }
 
-        if (any = this.__array_model)
+        if (any = this.__model)
         {
             unbind(this, any);
         }
