@@ -6,9 +6,8 @@ return (
 		{
 			"static": "true",
 			"overflow": "visible",
-			"z-index": "5",
-			"height": "90rem",
-			"padding-top": "10rem"
+			"z-index": "2",
+			"height": "90rem"
 		},
 		[
 			[
@@ -27,7 +26,7 @@ return (
 				{
 					"layout": "row",
 					"theme": "bg-standard",
-					"height": "80rem"
+					"height": "90rem"
 				},
 				[
 					[

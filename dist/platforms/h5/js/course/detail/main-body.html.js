@@ -173,21 +173,20 @@ return (
 					[
 						"tabbar",
 						{
-							"full": "false",
-							"selected-index": "0",
 							"height": "80rem",
 							"line-height": "80rem",
 							"theme": "bg-standard line-lightest line-bottom",
 							"margin-top": "10rem",
-							"text-align": "center"
+							"text-align": "center",
+							"events": {
+								"change": this.handleSwitch.bind(this)
+							}
 						},
 						[
 							[
 								"text",
 								{
 									"flex": "auto",
-									"module": require('./info'),
-									"data": $data,
 									"selected-status": $data.selectedStatus
 								},
 								"详情"
@@ -196,8 +195,6 @@ return (
 								"text",
 								{
 									"flex": "auto",
-									"module": require('./section'),
-									"data": $data,
 									"selected-status": $data.selectedStatus
 								},
 								"章节"
@@ -206,8 +203,6 @@ return (
 								"text",
 								{
 									"flex": "auto",
-									"module": require('./test-paper'),
-									"data": $data,
 									"selected-status": $data.selectedStatus
 								},
 								"试卷"
@@ -216,8 +211,6 @@ return (
 								"text",
 								{
 									"flex": "auto",
-									"module": require('./comment'),
-									"data": $data,
 									"selected-status": $data.selectedStatus
 								},
 								"评论"
@@ -226,8 +219,6 @@ return (
 								"text",
 								{
 									"flex": "auto",
-									"module": require('./recommend'),
-									"data": $data,
 									"selected-status": $data.selectedStatus
 								},
 								"推荐"
@@ -235,8 +226,42 @@ return (
 						]
 					],
 					[
-						"stackbox",
-						null
+						"box",
+						{
+							"key": "host"
+						},
+						[
+							[
+								require("./info"),
+								{
+
+								}
+							],
+							[
+								require("./section"),
+								{
+
+								}
+							],
+							[
+								require("./test-paper"),
+								{
+
+								}
+							],
+							[
+								require("./comment"),
+								{
+
+								}
+							],
+							[
+								require("./recommend"),
+								{
+
+								}
+							]
+						]
 					]
 				]
 			],

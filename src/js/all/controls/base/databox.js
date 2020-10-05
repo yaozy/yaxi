@@ -429,7 +429,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
     var init;
     
-    this.$storage = Object.create(this.$defaults);
+    this.__fields = Object.create(this.$defaults);
     this.__children = new yaxi.Collection(this);
 
     if (init = this.init)

@@ -61,6 +61,27 @@ Object.extend.call(Array, function (Class, base) {
         }
 
 
+        this.findByKey = function (key) {
+
+            var children = this.__children;
+            var index = 0;
+            var control;
+
+            while (control = children[index++])
+            {
+                if (control.key === key && control.selectedIndex >= -1)
+                {
+                    return control;
+                }
+
+                if (control.__children && (control = control.findByKey(key)))
+                {
+                    return control;
+                }
+            }
+        }
+
+
         // 查找符合指定选择器规则的所有控件
         /*
          * *            任意控件选择器
@@ -246,13 +267,13 @@ Object.extend.call(Array, function (Class, base) {
         switch (rule[0])
         {
             case '@':
-                return control.$storage.key === rule[1];
+                return control.__fields.key === rule[1];
 
             case '':
                 return control instanceof (classes[rule[1]] || Boolean);
 
             case '#':
-                return control.$storage.id === rule[1];
+                return control.__fields.id === rule[1];
 
             case '[':
                 return checkProperty(control, rule);

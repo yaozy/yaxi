@@ -91,9 +91,15 @@ yaxi.Page.renderer(function (base) {
         }
 
         var page = new Page(options);
+        var last;
         
         if (page.onloading(options) !== false)
         {
+            if (last = all[all.length - 1])
+            {
+                last.onhide();
+            }
+
             all.push(page);
 
             page.options = options;
@@ -105,7 +111,8 @@ yaxi.Page.renderer(function (base) {
 
             notifyRender(rendereds);
 
-			page.onload(page.options);
+            page.onload(page.options);
+            page.onshow();
 		}
 	}
 
@@ -136,6 +143,11 @@ yaxi.Page.renderer(function (base) {
                 {
                     page.__callback = null;
                     callback(type, payload);
+                }
+
+                if (page = all[all.length - 1])
+                {
+                    page.onshow();
                 }
             }
             else

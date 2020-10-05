@@ -1,13 +1,12 @@
 const yaxi = require('../../../yaxi/js/yaxi');
-const template = require('./comment.html');
 
 
 module.exports = yaxi.Box.extend(function (Class, base) {
 
 
-    this.init = function (data) {
+    this.onload = function (data) {
 
-        this.loadTemplate(template, data);
+        this.loadTemplate(require('./comment.html'), data);
     }
 
 

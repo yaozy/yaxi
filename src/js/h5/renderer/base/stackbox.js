@@ -17,10 +17,11 @@ yaxi.StackBox.renderer(function (base) {
 
 
 
-    this.full = function (control, view, value) {
+    this.selectedIndex = function (control, view, value) {
 
-        view.firstChild.className = 'yx-stackbox-body' + (value ? ' yx-stackbox-full' : '');
+        view.firstChild.style.transform = 'translateX(-' + value + '00%)';
     }
+
 
 
 });

@@ -2,46 +2,21 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
-    // 页面容器
-    this.$('host', '', false);
-
+    // 关联容器的key
+    this.$('stackbox', '', false);
 
 
     // 获取或设置当前页索引
-    this.$('selectedIndex', -1, {
+    this.$('selectedIndex', 0, {
 
+        force: true,
         change: false,
-
         alias: 'selected-index',
 
         convert: function (value) {
 
-            value = (value |= 0) < 0 ? -1 : value;
-
-            // 第一次设置选中索引时在渲染前再处理,否则host可能没有初始化好
-            if (value >= 0)
-            {
-                yaxi.bindBeforeRender(initIndex, this, [value]);
-            }
-
-            return value;
-        },
-
-        set: function (value) {
-
-            var lastIndex = this.$storage.selectedIndex;
-
-            if ((value |= 0) < 0)
-            {
-                value = -1;
-            }
-
-            if (lastIndex !== value)
-            {
-                changeIndex(this, value, lastIndex);
-            }
+            return (value |= 0) < 0 ? -1 : value;
         }
-
     });
 
 
@@ -52,137 +27,53 @@ yaxi.Box.extend('TabBar', function (Class, base) {
         get: function () {
 
             var index = this.selectedIndex;
-            return index >= 0 && this.children[index] || null;
+            return index >= 0 && this.__children[index] || null;
         }
     });
 
 
-    // 选中的页签容器
-    this.$('selectedHost', null, {
 
-        get: function () {
+    this.__set_selectedIndex = function (value, oldValue) {
 
-            var host = this.host;
-
-            if (!host)
-            {
-                host = '<* >StackBox';
-            }
-            else if (host[0] !== '<')
-            {
-                throwError('use "<" or "<<" to begin!');
-            }
-
-            if (host = this.find(host))
-            {
-                if (host instanceof yaxi.StackBox)
-                {
-                    return host;
-                }
-
-                throwError('be a StackBox!');
-            }
-
-            return null;
-        }
-    });
-
-
-    function throwError(text) {
-
-        throw new Error('the host of TabBar must ' + text);
-    }
-
-
-
-    function initIndex(index) {
-
-        changeIndex(this, index, -1);
-    }
-
-
-    function changeIndex(tabbar, index, lastIndex) {
-
-        var children = tabbar.children;
-        var event = new yaxi.Event('changing');
-        var item;
-
-        event.lastIndex = lastIndex;
-        event.lastPage = tabbar.findPage(event.lastItem = children[lastIndex] || null);
-
-        event.index = index;
-        event.page = tabbar.findPage(event.item = children[index] || null);
-
-        if (tabbar.trigger(event) !== false)
+        if (this.__children[value])
         {
-            tabbar.$storage.selectedIndex = index;
-
-            if (item = event.lastPage)
-            {
-                item.hidden = true;
-            }
-
-            if (item = event.lastItem)
-            {
-                item.selected = false;
-            }
-
-            if (item = event.item)
-            {
-                item.selected = true;
-                checkPage(tabbar, event);
-            }
-
-            event.type = 'changed';
-            tabbar.trigger(event);
-        }
-    }
-
-
-    function checkPage(tabbar, event) {
-
-        var page = event.page;
-        var item = event.item;
-        var host;
-
-        if (!page)
-        {
-            if ((page = item.module) && (host = tabbar.selectedHost))
-            {
-                page = event.page = new page(item.data);
-                host.children.push(page);
-            }
-            else
-            {
-                return;
-            }
+            switchChange(this, value, oldValue);
         }
 
-        page.tabbar = item.uuid;
-        page.hidden = false;
+        this.trigger('change', {
+            index: value,
+            lastIndex: oldValue
+        });
     }
 
 
 
-    this.findPage = function (item) {
+    function switchChange(tabbar, index, oldIndex) {
 
-        var host;
-
-        if (item && (host = this.selectedHost))
+        var children = tabbar.__children;
+        var control = tabbar.stackbox;
+        
+        if (control = control ? tabbar.root.findByKey(control) : tabbar.parent.find('>stackbox'))
         {
-            var children = host.children;
-            var uuid = item.uuid;
+            control.selectedIndex = index;
+        }
+
+        if (control = oldIndex >= 0 && children[oldIndex])
+        {
+            control.selected = false;
+        }
     
-            for (var i = children.length; i--;)
-            {
-                if (children[i].tabbar === uuid)
-                {
-                    return children[i];
-                }
-            }
+        if (control = children[index])
+        {
+            control.selected = true;
         }
+    }
 
-        return null;
+
+    this.__load_children = function (values, scope) {
+
+        this.__children.load(values, scope);
+        switchChange(this, this.selectedIndex, -1);
     }
 
 
@@ -193,7 +84,15 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
         if (control && !control.selected)
         {
-            this.selectedIndex = this.children.indexOf(control);
+            var index = this.__children.indexOf(control);
+
+            if (index >= 0 && this.trigger('changing', { 
+                index: index, 
+                lastIndex: this.selectedIndex 
+            }) !== false)
+            {
+                this.selectedIndex = index;
+            }
         }
     }
     

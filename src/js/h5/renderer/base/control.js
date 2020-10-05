@@ -1,26 +1,10 @@
 yaxi.Control.renderer(function () {
 
 
-
-    var own = Object.getOwnPropertyNames;
-
-    var create = Object.create;
+    
 
     var div = document.createElement('div');
 
-
-    // 颜色转换函数, 把@color颜色变量转换成实际的颜色
-    var convertColor = function (translateFn, value) {
-
-        return value ? ('' + value).replace(this, translateFn) : '';
-
-    }.bind(/@([\w-]+)/g, function (_, key) {
-
-        return this[key];
-
-    }.bind(yaxi.color));
-
-    
 
     
 
@@ -62,6 +46,64 @@ yaxi.Control.renderer(function () {
     }
 
 
+    function renderChanges(renderer, control, changes, view) {
+
+        var count;
+
+        changes = control.__get_changes(changes, control.__fields);
+
+        if (count = changes[0])
+        {
+            renderer.renderClasses(control, changes[1], changes[2], count, view);
+        }
+
+        if (count = changes[3])
+        {
+            renderer.renderStyles(control,  changes[4], changes[5], count, view);
+        }
+
+        if (count = changes[6])
+        {
+            renderer.renderAttributes(control,  changes[7], changes[8], count, view);
+        }
+    }
+
+
+    this.renderClasses = function (control, properties, values, count, view) {
+
+        view.className = this.className + values.slice(0, count).join('');
+    }
+
+
+    this.renderStyles = function (control, properties, values, count, view) {
+
+        var style = view.style;
+
+        for (var i = 0; i < count; i++)
+        {
+            style[properties[i].name] = values[i];
+        }
+    }
+
+
+    this.renderAttributes = function (control, properties, values, count, view) {
+
+        var fn, name;
+
+        for (var i = 0; i < count; i++)
+        {
+            if (fn = this[name = properties[i].name])
+            {
+                fn.call(this, control, view, values[i]);
+            }
+            else if (fn !== false) // 自定义渲染为false不做任何处理
+            {
+                view[name] = values[i];
+            }
+        }
+    }
+
+
 
     // 渲染控件
     this.render = function (control, uuid) {
@@ -79,96 +121,13 @@ yaxi.Control.renderer(function () {
 
         if (changes = control.__changes)
         {
-            this.renderChanges(control, view, changes);
+            renderChanges(this, control, changes, view);
             control.__changes = null;
         }
 
         return view;
     }
 
-
-    this.renderChanges = function (control, view, changes) {
-
-        var properties = control.$properties;
-        var storage = control.$storage;
-        var names = own(changes);
-        var index = 0;
-        var classes, property, name, value, any;
-
-        while (name = names[index++])
-        {
-            property = properties[name];
-            value = storage[name] = changes[name];
-
-            switch (property && property.kind)
-            {
-                case 'style': // 样式属性
-                    // 处理颜色值
-                    if (any = this[name])
-                    {
-                        value = any.call(this, control, view, value);
-
-                        if (value == null)
-                        {
-                            break;
-                        }
-                    }
-                    else if ((property.data) & 2 === 2)
-                    {
-                        value = convertColor(value);
-                    }
-
-                    view.style[name] = value;
-                    break;
-
-                case 'class': // class属性
-                    if (any = this[name])
-                    {
-                        value = any.call(this, control, view, value);
-
-                        if (value == null)
-                        {
-                            break;
-                        }
-                    }
-                    else if (value)
-                    {
-                        any = property.data;
-                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
-                    }
-                    else
-                    {
-                        value = '';
-                    }
-
-                    (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
-                    break;
-
-                default:
-                    if (any = this[name])
-                    {
-                        any.call(this, control, view, value);
-                    }
-                    break;
-            }
-        }
-
-        // 有变化的class则合并处理
-        if (classes)
-        {
-            names = [this.className];
-
-            for (name in classes)
-            {
-                if (value = classes[name])
-                {
-                    names.push(value);
-                }
-            }
-
-            view.className = names.join(' ');
-        }
-    }
 
 
     // 全新渲染子控件(给子类用)
@@ -193,7 +152,7 @@ yaxi.Control.renderer(function () {
 
         if (changes = control.__changes)
         {
-            this.renderChanges(control, view, changes);
+            renderChanges(this, control, changes, view);
             control.__changes = null;
         }
     }

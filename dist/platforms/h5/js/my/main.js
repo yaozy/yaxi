@@ -7,6 +7,7 @@ const user = require('./user');
 module.exports = yaxi.Box.extend(function (Class, base) {
 
 
+
     var data = [
         {
             text: '我的学习',
@@ -87,7 +88,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.init = function () {
+    this.onload = function () {
 
         this.loadTemplate(template, data, user);
     }

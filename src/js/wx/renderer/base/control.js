@@ -9,6 +9,9 @@ yaxi.Control.renderer(function (base, yaxi) {
     var own = Object.getOwnPropertyNames; 
 
 
+    var replaceUnit = /rem/g;
+
+
 
     // 颜色转换函数, 把@color颜色变量转换成实际的颜色
     var convertColor = function (translateFn, value) {
@@ -31,119 +34,69 @@ yaxi.Control.renderer(function (base, yaxi) {
 
     
 
+    
+    function renderChanges(renderer, control, changes, view, prefix) {
 
-    function render(renderer, control, view, prefix, values) {
-        
-        var properties = control.$properties;
-        var names = own(values);
-        var index = 0;
-        var classes, styles, property, name, value, any;
+        var count;
 
-        while (name = names[index++])
+        changes = control.__get_changes(changes);
+
+        if (count = changes[0])
         {
-            property = properties[name];
-            value = values[name];
-
-            switch (property && property.kind)
-            {
-                case 'style': // 样式属性
-                    if (any = renderer[name])
-                    {
-                        value = any.call(renderer, control, view, prefix, value);
-
-                        if (value == null)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        switch (property.data)
-                        {
-                            case 1: // 处理单位值
-                                value = convertUnit(value);
-                                break;
-    
-                            case 2: // 处理颜色值
-                                value = convertColor(value);
-                                break;
-    
-                            case 3: // 处理单位及颜色值
-                                value = convertUnit(convertColor(value));
-                                break;
-                        }
-                    }
-
-                    (styles || (styles = control.__styles || (control.__styles = create(null))))[name] = value;
-                    break;
-
-                case 'class': // class属性
-                    if (any = renderer[name])
-                    {
-                        value = any.call(renderer, control, view, prefix, value);
-
-                        if (value == null)
-                        {
-                            break;
-                        }
-                    }
-                    else if (value)
-                    {
-                        any = property.data;
-                        value = property.type !== 'boolean' ? any + value.replace(/\s+/g, ' ' + any) : any;
-                    }
-                    else
-                    {
-                        value = '';
-                    }
-
-                    (classes || (classes = control.__classes || (control.__classes = create(null))))[name] = value;
-                    break;
-
-                default:
-                    if (property.change) // 配置了处理变更的属性才处理
-                    {
-                        if (any = renderer[name])
-                        {
-                            any.call(renderer, control, view, prefix, value);
-                        }
-                        else if (any !== false) // 自定义渲染为false不做任何处理
-                        {
-                            view[prefix + name] = value;
-                        }
-                    }
-                    break;
-            }
+            renderer.renderClasses(control, changes[1], changes[2], count, view, prefix);
         }
 
-        if (classes)
+        if (count = changes[3])
         {
-            values = [];
-
-            for (name in classes)
-            {
-                if (value = classes[name])
-                {
-                    values.push(value);
-                }
-            }
-
-            view[prefix + 'class'] = ' ' + values.join(' ');
+            renderer.renderStyles(control,  changes[4], changes[5], count, view, prefix);
         }
 
-        if (styles)
+        if (count = changes[6])
         {
-            values = [];
+            renderer.renderAttributes(control,  changes[7], changes[8], count, view, prefix);
+        }
+    }
 
-            for (name in styles)
+
+    this.renderClasses = function (control, properties, values, count, view, prefix) {
+
+        view[prefix + 'class'] = values.slice(0, count).join('');
+    }
+
+
+    this.renderStyles = function (control, properties, values, count, view, prefix) {
+
+        for (var i = 0; i < count; i++)
+        {
+            var property = properties[i];
+            var value = values[i];
+
+            if ((property.data & 1) === 1)
             {
-                if (value = styles[name])
-                {
-                    values.push(name, ':', value, ';');
-                }
+                value = value.replace(replaceUnit, 'rpx');
             }
 
-            view[prefix + 's'] = values.join('');
+            values[i] = property.name + ':' + value + ';';
+        }
+
+        view[prefix + 's'] = values.slice(0, count).join('');
+    }
+
+
+    this.renderAttributes = function (control, properties, values, count, view, prefix) {
+
+        var fn, name;
+
+        for (var i = 0; i < count; i++)
+        {
+            if (fn = this[name = properties[i].name])
+            {
+                fn.call(this, control, view, prefix, values[i]);
+            }
+            else if (fn !== false) // 自定义渲染为false不做任何处理
+            {
+                view[prefix + name] = values[i];
+            }
         }
     }
 
@@ -152,7 +105,7 @@ yaxi.Control.renderer(function (base, yaxi) {
     // 全局渲染
     this.render = function (control) {
 
-        var storage = control.$storage;
+        var fields = control.__fields;
         var view = create(null);
         var changes;
 
@@ -163,11 +116,11 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         if (changes = control.__changes)
         {
-            assign(storage, changes);
+            assign(fields, changes);
             control.__changes = null;
         }
 
-        render(this, control, view, '', storage);
+        renderChanges(this, control, fields, view, '');
 
         this.onchange.call(this, control, view, '');
         return view;
@@ -203,9 +156,9 @@ yaxi.Control.renderer(function (base, yaxi) {
 
         if (changes = control.__changes)
         {
-            assign(control.$storage, changes);
-            render(this, control, view, prefix += '.', changes);
-            
+            assign(control.__fields, changes);
+            renderChanges(this, control, changes, view, prefix += '.');
+
             this.onchange.call(this, control, view, prefix);
             control.__changes = null;
         }

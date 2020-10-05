@@ -33,6 +33,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
             return this.__length;
         },
+
         set: function (value) {
 
             if (released)
@@ -115,8 +116,8 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             this[i] = build(parent, values[i], scope);
         }
         
-        this.__last || patch(this);
         this.__length = length;
+        this.__last || patch(this);
     }
 
 

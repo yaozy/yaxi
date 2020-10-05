@@ -14,12 +14,43 @@ return (
 				{
 					"flex": "auto",
 					"full": "true"
-				}
+				},
+				[
+					[
+						require("home/main"),
+						{
+
+						}
+					],
+					[
+						require("course/main"),
+						{
+
+						}
+					],
+					[
+						require("spread/main"),
+						{
+
+						}
+					],
+					[
+						require("message/main"),
+						{
+
+						}
+					],
+					[
+						require("my/main"),
+						{
+
+						}
+					]
+				]
 			],
 			[
 				"tabbar",
 				{
-					"selected-index": "0",
 					"theme": "line-lightest line-top"
 				},
 				[
@@ -28,7 +59,6 @@ return (
 						{
 							"icon": "tabbar-home",
 							"text": "首页",
-							"module": require('home/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					],
@@ -37,7 +67,6 @@ return (
 						{
 							"icon": "tabbar-course",
 							"text": "课程",
-							"module": require('course/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					],
@@ -46,7 +75,6 @@ return (
 						{
 							"icon": "tabbar-spread",
 							"text": "推广",
-							"module": require('spread/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					],
@@ -55,7 +83,6 @@ return (
 						{
 							"icon": "tabbar-message",
 							"text": "消息",
-							"module": require('message/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					],
@@ -64,7 +91,6 @@ return (
 						{
 							"icon": "tabbar-my",
 							"text": "我的",
-							"module": require('my/main.js'),
 							"selected-status": { theme: 'text-primary' }
 						}
 					]

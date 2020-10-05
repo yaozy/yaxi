@@ -64,7 +64,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                 }
             }
 
-            return (this.__changes || this.$storage)[name];
+            return (this.__changes || this.__fields)[name];
         }
     }
 
@@ -88,9 +88,9 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                     onchange.call(this, name);
                 }
             }
-            else if (value !== this.$storage[name])
+            else if (value !== this.__fields[name])
             {
-                (this.__changes = init(this.$storage))[name] = value;
+                (this.__changes = init(this.__fields))[name] = value;
                 onchange.call(this, name);
             }
         }
@@ -421,7 +421,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
     var init;
 
-    this.$storage = Object.create(this.$defaults);
+    this.__fields = Object.create(this.$defaults);
 
     if (init = this.init)
     {

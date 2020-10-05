@@ -75,7 +75,9 @@ yaxi.impl.property = function (target) {
         // 指定了get如果需要支持set则必须自己实现
         if (options.get)
         {
+            options.change = false;
             options.convert || (options.convert = null);
+
             options.set || (options.set = function () {
 
                 var type = this.typeName;
@@ -84,7 +86,11 @@ yaxi.impl.property = function (target) {
         }
         else
         {
-            options.convert || (options.convert = cache[options.type]);
+            if (options.convert === void 0)
+            {
+                options.convert = cache[options.type];
+            }
+            
             options.get = this.__build_get(name, options);
             options.set || (options.set = this.__build_set(name, options));
         }

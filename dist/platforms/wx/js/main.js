@@ -17,6 +17,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     yaxi.Header.text = '华旅云创';
 
     
+    
 
     this.init = function () {
 
@@ -26,6 +27,29 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
             this.find('>tabbar').selectedIndex = 1;
         });
+    }
+
+
+
+    this.onshow = function () {
+
+        var control = this.find('>stackbox');
+
+        if (control && (control = control.selectedItem) && control.onshow)
+        {
+            control.onshow();
+        }
+    }
+
+
+    this.onhide = function () {
+
+        var control = this.find('>stackbox');
+
+        if (control && (control = control.selectedItem) && control.onhide)
+        {
+            control.onhide();
+        }
     }
 
 

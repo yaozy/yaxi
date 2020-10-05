@@ -27,42 +27,26 @@
                 <text d:text="$data.activity" margin="20rem 0" theme="text-lighter" />
             </box>
         </box>
-        <tabbar 
-            full="false"
-            selected-index="0" 
+        <tabbar
             height="80rem" 
             line-height="80rem" 
             theme="bg-standard line-lightest line-bottom"
             margin-top="10rem"
-            text-align="center">
-            <text 
-                flex="auto" 
-                d:module="require('./info')" 
-                d:data="$data"
-                d:selected-status="$data.selectedStatus">详情</text>
-            <text 
-                flex="auto" 
-                d:module="require('./section')" 
-                d:data="$data"
-                d:selected-status="$data.selectedStatus">章节</text>
-            <text 
-                flex="auto" 
-                d:module="require('./test-paper')" 
-                d:data="$data"
-                d:selected-status="$data.selectedStatus">试卷</text>
-            <text 
-                flex="auto" 
-                d:module="require('./comment')" 
-                d:data="$data"
-                d:selected-status="$data.selectedStatus">评论</text>
-            <text 
-                flex="auto" 
-                d:module="require('./recommend')" 
-                d:data="$data"
-                d:selected-status="$data.selectedStatus">推荐</text>
+            text-align="center"
+            e:change="handleSwitch">
+            <text flex="auto" d:selected-status="$data.selectedStatus">详情</text>
+            <text flex="auto" d:selected-status="$data.selectedStatus">章节</text>
+            <text flex="auto" d:selected-status="$data.selectedStatus">试卷</text>
+            <text flex="auto" d:selected-status="$data.selectedStatus">评论</text>
+            <text flex="auto" d:selected-status="$data.selectedStatus">推荐</text>
         </tabbar>
-        <stackbox>
-        </stackbox>
+        <box key="host">
+            <require src="./info" />
+            <require src="./section" />
+            <require src="./test-paper" />
+            <require src="./comment" />
+            <require src="./recommend" />
+        </box>
     </box>
     <button>报名学习</button>
 </box>

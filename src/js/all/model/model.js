@@ -41,7 +41,7 @@
         function Model(parent) {
 
             this.$parent = parent || null;
-            this.$storage = extend(defaults);
+            this.__fields = extend(defaults);
         }
         
         prototype.$properties = extend(null);
@@ -69,7 +69,7 @@
                 addDep(this, name, target, control);
             }
 
-            return this.$storage[name];
+            return this.__fields[name];
         }
     }
     
@@ -81,7 +81,7 @@
 
         return function (value) {
 
-            var storage = this.$storage;
+            var fields = this.__fields;
             var bindings;
 
             if (convert)
@@ -89,12 +89,12 @@
                 value = convert(value);
             }
 
-            if (value === storage[name] || (watches = this.__watches) && watches[name] && this.$notify(name, value) === false)
+            if (value === fields[name] || (watches = this.__watches) && watches[name] && this.$notify(name, value) === false)
             {
                 return this;
             }
 
-            storage[name] = value;
+            fields[name] = value;
 
             if ((bindings = this.__bindings) && (bindings = bindings[name]))
             {
@@ -505,7 +505,7 @@
 
         if (values)
         {
-            values = values.$storage || values;
+            values = values.__fields || values;
 
             for (var name in values)
             {
@@ -520,7 +520,7 @@
 
         var subkeys, sub;
 
-        this.$storage = create(this.$defaults);
+        this.__fields = create(this.$defaults);
 
         if (deep && (subkeys = this.$subkeys))
         {

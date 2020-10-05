@@ -75,7 +75,7 @@ yaxi.Control.extend('Button', function (Class, base) {
                     values[0].__shadow = true;
                 }
 
-                this.$storage.text = '';
+                this.__fields.text = '';
             }
             finally
             {
@@ -84,7 +84,7 @@ yaxi.Control.extend('Button', function (Class, base) {
         }
         else
         {
-            this.$storage.text = values = '' + values; 
+            this.__fields.text = values = '' + values; 
         }
 
         this.__shadows = values;

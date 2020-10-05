@@ -416,18 +416,22 @@
 
 <template name="StackBox">
 
-    <view
+    <swiper 
         data-id="{{ u }}"
         id="{{ u }}"
         class="yx-control yx-box yx-stackbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        bindtouchstart="translateEvent">
-        <box 
-            data-id="{{ u }}" 
-            class="yx-stackbox-body{{ full ? ' yx-stackbox-full' : '' }}"
-            children="{{ c }}"
-            bindtouchstart="translateEvent" />
-    </view>
+        current="{{ selectedIndex || 0 }}"
+        bindchange="translateEvent">
+        <swiper-item 
+            wx:for="{{ c }}"
+            wx:key="u"
+            key="index"
+            data-id="{{ item.u }}" 
+            item-id="{{ item.u }}">
+            <template is="{{ item.t }}" data="{{ ...item }}" />
+        </swiper-item>
+    </swiper>
 
 </template>
 

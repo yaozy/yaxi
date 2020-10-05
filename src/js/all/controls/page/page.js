@@ -45,6 +45,15 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
+	this.onshow = function () {
+	}
+
+
+	this.onhide = function () {
+	}
+
+
+
 	function open(options, callback) {
 
 		yaxi.openPage(this, options, callback);

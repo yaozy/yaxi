@@ -70,6 +70,9 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.init = function () {
 
+        model.status = 0;
+        model.data.clear();
+
         this.loadTemplate(template, {}, model);
 
         yaxi.http.get('my/order').json(function (data) {

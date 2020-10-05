@@ -25,6 +25,19 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     }
 
 
+    
+    this.onshow = function () {
+
+    }
+
+
+    this.onhide = function () {
+
+        //
+    }
+
+
+
     this.handleOpenDetail = function (event) {
 
         require('../course/detail/main').open(event.source.tag);

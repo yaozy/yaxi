@@ -132,8 +132,6 @@ yaxi.Page.renderer(function (base, yaxi) {
             }
             else
             {
-                all.push(page);
-
                 wx.navigateTo({
     
                     url: '../../yaxi/pages/host?uuid=' + page.uuid
@@ -184,9 +182,16 @@ yaxi.Page.renderer(function (base, yaxi) {
 
         yaxi.getSystemInfo(info => {
 
-            var page = find(uuid);
-            var data;
+            var list = all;
+            var page, data;
 
+            if (page = list[list.length - 1])
+            {
+                page.onhide();
+            }
+
+            list.push(page = find(uuid));
+            
             notifyRender(renderings);
 
             page.__wx_page = wxPage;
@@ -198,7 +203,9 @@ yaxi.Page.renderer(function (base, yaxi) {
             wxPage.setData({ top: info.statusBarHeight | 0, p: data }, function () {
 
                 notifyRender(rendereds);
+
                 page.onload(page.options);
+                page.onshow();
             });
         });
     }
@@ -238,10 +245,15 @@ yaxi.Page.renderer(function (base, yaxi) {
 
         var wxPage = all[all.length - 1].__wx_page;
         var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
-        var data;
+        var page, data;
         
-        all.push(dialog);
+        if (page = list[list.length - 1])
+        {
+            page.onhide();
+        }
 
+        all.push(dialog);
+       
         notifyRender(renderings);
 
         data = {};
@@ -252,7 +264,9 @@ yaxi.Page.renderer(function (base, yaxi) {
         wxPage.setData(data, function () {
 
             notifyRender(rendereds);
+
             dialog.onload(dialog.options);
+            dialog.onshow();
         });
 
         // 记录微信页面
@@ -279,6 +293,11 @@ yaxi.Page.renderer(function (base, yaxi) {
         {
             page.__callback = null;
             callback(type, payload);
+        }
+
+        if (page = all[all.length - 1])
+        {
+            page.onshow();
         }
     }
 

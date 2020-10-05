@@ -206,7 +206,7 @@
 
         if (data = this[index])
         {
-            model.$assign(data.$storage);
+            model.$assign(data.__fields);
         }
 
         return model;
