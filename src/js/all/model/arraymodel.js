@@ -4,20 +4,17 @@
 
     var create = Object.create;
 
-    var array = Array.prototype;
+    var A = Array;
 
-    var push = array.push;
+    var array = A.prototype;
 
-    var splice = array.splice;
-
-    var released = false;
 
 
     var base = this;
 
 
     // 所有控件集合
-    var controls;
+    var controls = yaxi.$controls;
 
 
 
@@ -43,77 +40,52 @@
     }
 
 
-    
 
-    this.__length = 0;
+    function createModels(arrayModel, list, start) {
 
+        var Model = arrayModel.$Model;
+        var parent = arrayModel.$parent;
+        var length = list.length;
+        var outputs;
 
-    // 获取数组模型长度(只读)
-    Object.defineProperty(this, 'length', {
-
-        get: function () {
-
-            return this.__length;
-        },
-        set: function (value) {
-
-            if (released)
-            {
-                this.__length = value;
-                released = false;
-            }
-            else
-            {
-                throw new Error('the length of array mode is readonly!');
-            }
-        }
-    });
-
-
-    this.indexOf = array.indexOf;
-    
-    this.lastIndexOf = array.lastIndexOf;
-
-
-    this.forEach = array.forEach;
-
-    this.map = array.map;
-
-    this.reduce = array.reduce;
-
-    this.reduceRight = array.reduceRight;
-
-
-
-
-    function createModels(arrayModel, list, index) {
-
-        var outputs = [],
-            Model = arrayModel.$Model,
-            parent = arrayModel.$parent,
-            length = list.length,
-            model,
-            data;
-
-        while (index < length)
+        if (start != null)
         {
-            data = list[index++];
+            outputs = new A(length + 2);
+            outputs[0] = start;
+            outputs[1] = 0;
+            start = 2;
+        }
+        else
+        {
+            outputs = new A(length);
+            start = 0;
+        }
 
-            if (data instanceof Model)
-            {
-                model = data;
-                model.$parent = parent;
-            }
-            else
-            {
-                model = new Model(parent);
-                model.$assign(data);    
-            }
-
-            outputs.push(model);
+        for (var i = 0; i < length; i++)
+        {
+            outputs[start + i] = createModel(parent, Model, list[i]);
         }
 
         return outputs;
+    }
+
+
+    function createModel(parent, Model, data) {
+
+        var model;
+
+        if (data instanceof Model)
+        {
+            model = data;
+            model.$parent = parent;
+        }
+        else
+        {
+            model = new Model(parent);
+            model.$assign(data);    
+        }
+
+        return model;
     }
 
 
@@ -143,14 +115,13 @@
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var databoxs = controls || (controls = yaxi.$controls);
         var bindings, databox;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                if (databox = databoxs[bindings[i]])
+                if (databox = controls[bindings[i]])
                 {
                     databox[type](arg1, arg2);
                 }
@@ -180,6 +151,80 @@
         }
 
         item.$parent = item.__bindings = null;
+    }
+
+
+
+
+    var released = false;
+
+
+    this.__length = 0;
+
+
+    // 获取数组模型长度(只读)
+    Object.defineProperty(this, 'length', {
+
+        get: function () {
+
+            return this.__length;
+        },
+
+        set: function (value) {
+
+            if (released)
+            {
+                this.__length = value;
+                released = false;
+            }
+            else
+            {
+                throw new Error('length is readonly!');
+            }
+        }
+    });
+
+
+
+    this.indexOf = function (item) {
+
+        return array.indexOf.call(this, item);
+    }
+
+    
+    this.lastIndexOf = function (item) {
+
+        return array.lastIndexOf.call(this, item);
+    }
+
+
+    this.forEach = function (fn) {
+
+        return array.forEach.apply(this, arguments);
+    }
+
+
+    this.filter = function (fn) {
+
+        return array.filter.apply(this, arguments);
+    }
+
+
+    this.map = function (fn) {
+
+        return array.map.apply(this, arguments);
+    }
+
+
+    this.reduce = function (fn, initialValue) {
+
+        return array.reduce.apply(this, arguments);
+    }
+
+
+    this.reduceRight = function (fn, initialValue) {
+
+        return array.reduceRight.apply(this, arguments);
     }
 
 
@@ -216,192 +261,169 @@
 
     this.load = function (values) {
 
-        var list;
+        var length = this.__length;
 
-        if (this.__length > 0)
+        if (length > 0)
         {
-            this.clear(false);
+            while (length--)
+            {
+                destroyItem(this[length]);
+            }
+
+            released = true;
+            array.splice.call(this, 0);
         }
 
         if (values.length > 0)
         {
-            list = createModels(this, values, 0);
+            values = createModels(this, values);
 
             released = true;
-            push.apply(this, list);
+            array.push.apply(this, values);
             
-            for (var i = list.length; i--;)
+            for (var i = values.length; i--;)
             {
-                list[i].__index = i;
+                values[i].__index = i;
             }
         }
 
-        notify(this, '__on_load', list);
+        notify(this, '__on_load', values);
     }
 
 
     this.set = function (index, data) {
 
-        var Model = this.$Model;
         var model;
 
-        if ((index |= 0) >= 0 && this[index])
+        if ((index |= 0) < 0)
         {
-            if (data instanceof Model)
-            {
-                model = data;
-                model.$parent = this.$parent;
-            }
-            else
-            {
-                model = new Model(this.$parent);
-                data && model.$assign(data);
-            }
+            index += this.__length;
+        }
 
-            this[index] = model;
+        if (model = this[index])
+        {
+            destroyItem(model);
+
+            model = this[index] = createModel(this.$parent, this.$Model, data);
             notify(this, '__on_set', index, model);
-        }
-    }
-
-
-    this.push = function () {
-
-        var length = arguments.length;
-
-        if (length > 0)
-        {
-            var list = createModels(this, arguments, 0);
-
-            released = true;
-            push.apply(this, list);
-
-            reindex(this, this.__length - length);
-            notify(this, '__on_insert', -1, list);
-        }
-
-        return this.__length;
-    }
-
-
-    this.pop = function () {
-
-        var item;
-
-        if (this.__length > 0)
-        {
-            released = true;
-
-            if (item = array.pop.call(this))
-            {
-                destroyItem(item);
-                notify(this, '__on_remove', -1, 1);
-            }
-        }
-
-        return item;
-    }
-
-
-    this.unshift = function () {
-
-        if (arguments.length > 0)
-        {
-            var list = createModels(this, arguments, 0);
-
-            released = true;
-            array.unshift.apply(this, list);
-
-            reindex(this, 0);
-            notify(this, '__on_insert', 0, list);
-        }
-
-        return this.__length;
-    }
-
-
-    this.shift = function () {
-
-        var item;
-
-        if (this.__length > 0)
-        {
-            released = true;
-
-            if (item = array.shift.call(this))
-            {
-                destroyItem(item);
-
-                notify(this, '__on_remove', 0, 1);
-                reindex(this, 0);
-            }
-        }
-
-        return item;
-    }
-
-
-    this.splice = function (index, length) {
-
-        var removed, inserted;
-
-        if ((index |= 0) < 0 && (index += this.length) < 0)
-        {
-            index = 0;
-        }
-
-        if (arguments.length > 2)
-        {
-            inserted = createModels(this, arguments, 2);
-
-            released = true;
-            removed = splice.apply(this, [index, length].concat(inserted));
         }
         else
         {
-            released = true;
-            removed = splice.apply(this, arguments);
+            return false;
         }
-        
-        if (removed.length > 0)
+    }
+
+
+    this.append = function () {
+
+        if (arguments.length > 0)
         {
-            for (var i = removed.length; i--;)
+            var index = this.__length;
+            var models, model;
+    
+            models = createModels(this, arguments);
+
+            released = true;
+            array.push.apply(this, models);
+    
+            while (model = this[index])
+            {
+                model.__index = index++;
+            }
+            
+            notify(this, '__on_insert', -1, models);
+        }
+    }
+
+
+    this.insert = function (index) {
+
+        if (arguments.length > 1)
+        {
+            var length = this.__length;
+            var values = array.slice.call(arguments, 1);
+
+            if ((index |= 0) < 0 && (index += length) < 0)
+            {
+                index = 0;
+            }
+            else if (index > length)
+            {
+                index = length;
+            }
+    
+            values = createModels(this, values, index);
+    
+            released = true;
+            array.splice.apply(this, values);
+
+            reindex(this, index);
+            notify(this, '__on_insert', index, values.slice(2));
+        }
+    }
+
+
+    this.removeAt = function (index, count) {
+
+        var length = this.__length;
+        var removed;
+
+        if ((index |= 0) < 0 && (index += length) < 0)
+        {
+            index = 0;
+        }
+        else if (index >= length)
+        {
+            return false;
+        }
+
+        released = true;
+        removed = array.splice.call(this, index, count || 1);
+        
+        if ((length = removed.length) > 0)
+        {
+            for (var i = length; i--;)
             {
                 destroyItem(removed[i]);
             }
 
-            notify(this, '__on_remove', index, removed.length);
+            reindex(this, index);
+            notify(this, '__on_removeAt', index, length);
         }
-
-        if (inserted)
+        else
         {
-            notify(this, '__on_insert', index, inserted);
+            return false;
         }
+    }
 
-        reindex(this, index);
-        return removed;
+
+    this.remove = function (item) {
+
+        var index = this.indexOf(item);
+
+        if (index >= 0)
+        {
+            this.removeAt(index, 1);
+        }
     }
 
 
     this.clear = function () {
 
-        var list;
-
         if (this.__length > 0)
         {
-            released = true;
-            list = splice.call(this, 0);
-    
-            for (var i = list.length; i--;)
+            for (var i = this.__length; i--;)
             {
-                destroyItem(list[i]);
+                destroyItem(this[i]);
             }
 
-            if (arguments[0] !== false)
-            {
-                notify(this, '__on_clear');
-            }
+            released = true;
+            array.splice.call(this, 0);
+
+            notify(this, '__on_clear');
         }
     }
+
 
 
     this.sort = function (sortFn) {
@@ -409,7 +431,7 @@
         array.sort.call(this, sortFn);
 
         reindex(this, 0);
-        notify(this, '__on_sort', 0);
+        notify(this, '__on_sort');
     }
 
 
@@ -418,7 +440,7 @@
         array.reverse.call(this);
         
         reindex(this, 0);
-        notify(this, '__on_sort', 1);
+        notify(this, '__on_reverse');
     }
 
 

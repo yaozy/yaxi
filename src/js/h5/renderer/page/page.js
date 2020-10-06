@@ -84,75 +84,66 @@ yaxi.Page.renderer(function (base) {
 	// 打开指定页面
 	yaxi.openPage = function (Page, options, callback) {
 
+        var stack = all;
+        var page;
+        
         if (typeof options === 'function')
         {
             callback = options;
             options = null;
         }
 
-        var page = new Page(options);
-        var last;
-        
-        if (page.onloading(options) !== false)
+        if (page = stack[stack.length - 1])
         {
-            if (last = all[all.length - 1])
-            {
-                last.onhide();
-            }
+            page.onhide();
+        }
 
-            all.push(page);
+        stack.push(page = new Page(options));
+        
+        page.onload(page.options = options);
+        page.__callback = callback;
+        page.onshow();
 
-            page.options = options;
-            page.__callback = callback;
+        notifyRender(renderings);
+        
+        host.appendChild(page.$renderer.render(page));
 
-            notifyRender(renderings);
-            
-			host.appendChild(page.$renderer.render(page));
-
-            notifyRender(rendereds);
-
-            page.onload(page.options);
-            page.onshow();
-		}
+        notifyRender(rendereds);
 	}
 
 	
 	// 关闭当前页面
     yaxi.closePage = function (type, payload) {
 
-        var page, view, options, callback;
+        var stack = all;
+        var page = stack[stack.length - 1];
+        var view, options, callback;
 
-        if (page = all.pop())
+        if (page.onunload(options = page.options) !== false)
         {
-            if (page.onunloading(options = page.options) !== false)
+            // 清除dom
+            if (view = page.$view)
             {
-                // 清除dom
-                if (view = page.$view)
-                {
-                    host.removeChild(view);
-                    view.textContent = '';
-                }
-
-                page.onunload(options);
-                page.options = null;
-
-                page.destroy();
-                page.__shrink_uuid();
-                
-                if (callback = page.__callback)
-                {
-                    page.__callback = null;
-                    callback(type, payload);
-                }
-
-                if (page = all[all.length - 1])
-                {
-                    page.onshow();
-                }
+                host.removeChild(view);
+                view.textContent = '';
             }
-            else
+
+            page.options = null;
+
+            page.destroy();
+            page.__shrink_uuid();
+
+            stack.pop();
+            
+            if (callback = page.__callback)
             {
-                all.push(page);
+                page.__callback = null;
+                callback(type, payload);
+            }
+
+            if (page = stack[stack.length - 1])
+            {
+                page.onshow();
             }
         }
     }

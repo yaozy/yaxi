@@ -170,11 +170,11 @@ yaxi.Control.renderer(function () {
 
             if (any = last.length > 0)
             {
-                control.destroyChildren(last);
+                any = control.destroyChildren(last);
             }
 
-            // 曾经清除过
-            if (!any || last.clear)
+            // 全部为新添加的控件
+            if (!any)
             {
                 // 先清空原控件
                 view.textContent = '';

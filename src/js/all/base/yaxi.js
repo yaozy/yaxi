@@ -10,12 +10,10 @@ var yaxi = Object.create(null);
 if (typeof module !== 'undefined')
 {
     module.exports = yaxi;
-
-    // 在有window对象时输出至全局变量
-    if (typeof window !== 'undefined')
-    {
-        window.yaxi = yaxi;
-    }
+}
+else if (typeof window !== 'undefined')
+{
+    window.yaxi = yaxi;
 }
 
 
@@ -27,11 +25,6 @@ yaxi.impl = Object.create(null);
 // 注册的类型集合
 yaxi.classes = Object.create(null);
 
-
-if (typeof jiac !== 'undefined')
-{
-    jiac.classes = yaxi.classes;
-}
 
 
 

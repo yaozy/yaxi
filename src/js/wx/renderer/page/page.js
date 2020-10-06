@@ -97,11 +97,9 @@ yaxi.Page.renderer(function (base, yaxi) {
 
         var page = new Page(options);
         var uuid = page.uuid;
-        
-        page.onloading(options);
-        page.options = options;
 
         all.push(page);
+        page.onload(page.options = options);
 
         yaxi.__on_page_open(uuid, wxPage, true);
 
@@ -112,31 +110,39 @@ yaxi.Page.renderer(function (base, yaxi) {
 	// 打开指定页面
     yaxi.openPage = function (Page, options, callback) {
 
+        var stack = all;
+        var wxPage, page;
+    
         if (typeof options === 'function')
         {
             callback = options;
             options = null;
         }
         
-        var page = new Page(options);
-    
-        if (page.onloading(options) !== false)
+        if (page = stack[stack.length - 1])
         {
-            page.options = options;
-            page.__callback = callback;
+            wxPage = page.__wx_page;
+            page.onhide();
+        }
 
-            // 对话框直接嵌在当前页面内, 不创建新的微信页面
-            if (page instanceof yaxi.Dialog && all.length > 0)
-            {
-                openDialog(page, options, callback);
-            }
-            else
-            {
-                wx.navigateTo({
-    
-                    url: '../../yaxi/pages/host?uuid=' + page.uuid
-                });
-            }
+        stack.push(page = new Page(options));
+
+        page.onload(page.options = options);
+        page.__callback = callback;
+        page.onshow();
+
+        // 对话框直接嵌在当前页面内, 不创建新的微信页面
+        if (page instanceof yaxi.Dialog && all.length > 0)
+        {
+            page.__wx_page = wxPage;
+            openDialog(page, options, callback);
+        }
+        else
+        {
+            wx.navigateTo({
+
+                url: '../../yaxi/pages/host?uuid=' + page.uuid
+            });
         }
     }
 
@@ -147,7 +153,7 @@ yaxi.Page.renderer(function (base, yaxi) {
         var page = all[all.length - 1];
         var wxPage, data;
 
-        if (page && page.onunloading(page.options) !== false)
+        if (page && page.onunload(page.options) !== false)
         {
             // 对话框
             if (wxPage = page.__wx_dialog)
@@ -182,16 +188,9 @@ yaxi.Page.renderer(function (base, yaxi) {
 
         yaxi.getSystemInfo(info => {
 
-            var list = all;
-            var page, data;
+            var page = find(uuid);
+            var data;
 
-            if (page = list[list.length - 1])
-            {
-                page.onhide();
-            }
-
-            list.push(page = find(uuid));
-            
             notifyRender(renderings);
 
             page.__wx_page = wxPage;
@@ -203,9 +202,6 @@ yaxi.Page.renderer(function (base, yaxi) {
             wxPage.setData({ top: info.statusBarHeight | 0, p: data }, function () {
 
                 notifyRender(rendereds);
-
-                page.onload(page.options);
-                page.onshow();
             });
         });
     }
@@ -243,17 +239,10 @@ yaxi.Page.renderer(function (base, yaxi) {
 
     function openDialog(dialog) {
 
-        var wxPage = all[all.length - 1].__wx_page;
+        var wxPage = dialog.__wx_page;
         var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
-        var page, data;
-        
-        if (page = list[list.length - 1])
-        {
-            page.onhide();
-        }
+        var data;
 
-        all.push(dialog);
-       
         notifyRender(renderings);
 
         data = {};
@@ -264,13 +253,7 @@ yaxi.Page.renderer(function (base, yaxi) {
         wxPage.setData(data, function () {
 
             notifyRender(rendereds);
-
-            dialog.onload(dialog.options);
-            dialog.onshow();
         });
-
-        // 记录微信页面
-        dialog.__wx_page = wxPage;
 
         // 标记对话框关闭数据, 关闭对话框时用
         dialog.__wx_dialog = index;
@@ -279,15 +262,16 @@ yaxi.Page.renderer(function (base, yaxi) {
 
     function closePage(type, payload) {
 
-        var page = all.pop();
+        var stack = all;
+        var page = stack[stack.length - 1];
         var callback;
-
-        page.onunload(page.options);
 
         page.options = page.__wx_page = null;
         page.destroy();
-        
+
         page.__shrink_uuid();
+        
+        stack.pop();
 
         if (callback = page.__callback)
         {
@@ -295,7 +279,7 @@ yaxi.Page.renderer(function (base, yaxi) {
             callback(type, payload);
         }
 
-        if (page = all[all.length - 1])
+        if (page = stack[stack.length - 1])
         {
             page.onshow();
         }

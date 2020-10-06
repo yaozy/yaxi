@@ -2494,20 +2494,17 @@ yaxi.colors.load('blue', [
 
     var create = Object.create;
 
-    var array = Array.prototype;
+    var A = Array;
 
-    var push = array.push;
+    var array = A.prototype;
 
-    var splice = array.splice;
-
-    var released = false;
 
 
     var base = this;
 
 
     // 所有控件集合
-    var controls;
+    var controls = yaxi.$controls;
 
 
 
@@ -2533,77 +2530,52 @@ yaxi.colors.load('blue', [
     }
 
 
-    
 
-    this.__length = 0;
+    function createModels(arrayModel, list, start) {
 
+        var Model = arrayModel.$Model;
+        var parent = arrayModel.$parent;
+        var length = list.length;
+        var outputs;
 
-    // 获取数组模型长度(只读)
-    Object.defineProperty(this, 'length', {
-
-        get: function () {
-
-            return this.__length;
-        },
-        set: function (value) {
-
-            if (released)
-            {
-                this.__length = value;
-                released = false;
-            }
-            else
-            {
-                throw new Error('the length of array mode is readonly!');
-            }
-        }
-    });
-
-
-    this.indexOf = array.indexOf;
-    
-    this.lastIndexOf = array.lastIndexOf;
-
-
-    this.forEach = array.forEach;
-
-    this.map = array.map;
-
-    this.reduce = array.reduce;
-
-    this.reduceRight = array.reduceRight;
-
-
-
-
-    function createModels(arrayModel, list, index) {
-
-        var outputs = [],
-            Model = arrayModel.$Model,
-            parent = arrayModel.$parent,
-            length = list.length,
-            model,
-            data;
-
-        while (index < length)
+        if (start != null)
         {
-            data = list[index++];
+            outputs = new A(length + 2);
+            outputs[0] = start;
+            outputs[1] = 0;
+            start = 2;
+        }
+        else
+        {
+            outputs = new A(length);
+            start = 0;
+        }
 
-            if (data instanceof Model)
-            {
-                model = data;
-                model.$parent = parent;
-            }
-            else
-            {
-                model = new Model(parent);
-                model.$assign(data);    
-            }
-
-            outputs.push(model);
+        for (var i = 0; i < length; i++)
+        {
+            outputs[start + i] = createModel(parent, Model, list[i]);
         }
 
         return outputs;
+    }
+
+
+    function createModel(parent, Model, data) {
+
+        var model;
+
+        if (data instanceof Model)
+        {
+            model = data;
+            model.$parent = parent;
+        }
+        else
+        {
+            model = new Model(parent);
+            model.$assign(data);    
+        }
+
+        return model;
     }
 
 
@@ -2633,14 +2605,13 @@ yaxi.colors.load('blue', [
 
     function notify(arrayModel, type, arg1, arg2) {
 
-        var databoxs = controls || (controls = yaxi.$controls);
         var bindings, databox;
 
         if (bindings = arrayModel.__bindings)
         {
             for (var i = 0, l = bindings.length; i < l; i++)
             {
-                if (databox = databoxs[bindings[i]])
+                if (databox = controls[bindings[i]])
                 {
                     databox[type](arg1, arg2);
                 }
@@ -2670,6 +2641,80 @@ yaxi.colors.load('blue', [
         }
 
         item.$parent = item.__bindings = null;
+    }
+
+
+
+
+    var released = false;
+
+
+    this.__length = 0;
+
+
+    // 获取数组模型长度(只读)
+    Object.defineProperty(this, 'length', {
+
+        get: function () {
+
+            return this.__length;
+        },
+
+        set: function (value) {
+
+            if (released)
+            {
+                this.__length = value;
+                released = false;
+            }
+            else
+            {
+                throw new Error('length is readonly!');
+            }
+        }
+    });
+
+
+
+    this.indexOf = function (item) {
+
+        return array.indexOf.call(this, item);
+    }
+
+    
+    this.lastIndexOf = function (item) {
+
+        return array.lastIndexOf.call(this, item);
+    }
+
+
+    this.forEach = function (fn) {
+
+        return array.forEach.apply(this, arguments);
+    }
+
+
+    this.filter = function (fn) {
+
+        return array.filter.apply(this, arguments);
+    }
+
+
+    this.map = function (fn) {
+
+        return array.map.apply(this, arguments);
+    }
+
+
+    this.reduce = function (fn, initialValue) {
+
+        return array.reduce.apply(this, arguments);
+    }
+
+
+    this.reduceRight = function (fn, initialValue) {
+
+        return array.reduceRight.apply(this, arguments);
     }
 
 
@@ -2706,192 +2751,169 @@ yaxi.colors.load('blue', [
 
     this.load = function (values) {
 
-        var list;
+        var length = this.__length;
 
-        if (this.__length > 0)
+        if (length > 0)
         {
-            this.clear(false);
+            while (length--)
+            {
+                destroyItem(this[length]);
+            }
+
+            released = true;
+            array.splice.call(this, 0);
         }
 
         if (values.length > 0)
         {
-            list = createModels(this, values, 0);
+            values = createModels(this, values);
 
             released = true;
-            push.apply(this, list);
+            array.push.apply(this, values);
             
-            for (var i = list.length; i--;)
+            for (var i = values.length; i--;)
             {
-                list[i].__index = i;
+                values[i].__index = i;
             }
         }
 
-        notify(this, '__on_load', list);
+        notify(this, '__on_load', values);
     }
 
 
     this.set = function (index, data) {
 
-        var Model = this.$Model;
         var model;
 
-        if ((index |= 0) >= 0 && this[index])
+        if ((index |= 0) < 0)
         {
-            if (data instanceof Model)
-            {
-                model = data;
-                model.$parent = this.$parent;
-            }
-            else
-            {
-                model = new Model(this.$parent);
-                data && model.$assign(data);
-            }
+            index += this.__length;
+        }
 
-            this[index] = model;
+        if (model = this[index])
+        {
+            destroyItem(model);
+
+            model = this[index] = createModel(this.$parent, this.$Model, data);
             notify(this, '__on_set', index, model);
-        }
-    }
-
-
-    this.push = function () {
-
-        var length = arguments.length;
-
-        if (length > 0)
-        {
-            var list = createModels(this, arguments, 0);
-
-            released = true;
-            push.apply(this, list);
-
-            reindex(this, this.__length - length);
-            notify(this, '__on_insert', -1, list);
-        }
-
-        return this.__length;
-    }
-
-
-    this.pop = function () {
-
-        var item;
-
-        if (this.__length > 0)
-        {
-            released = true;
-
-            if (item = array.pop.call(this))
-            {
-                destroyItem(item);
-                notify(this, '__on_remove', -1, 1);
-            }
-        }
-
-        return item;
-    }
-
-
-    this.unshift = function () {
-
-        if (arguments.length > 0)
-        {
-            var list = createModels(this, arguments, 0);
-
-            released = true;
-            array.unshift.apply(this, list);
-
-            reindex(this, 0);
-            notify(this, '__on_insert', 0, list);
-        }
-
-        return this.__length;
-    }
-
-
-    this.shift = function () {
-
-        var item;
-
-        if (this.__length > 0)
-        {
-            released = true;
-
-            if (item = array.shift.call(this))
-            {
-                destroyItem(item);
-
-                notify(this, '__on_remove', 0, 1);
-                reindex(this, 0);
-            }
-        }
-
-        return item;
-    }
-
-
-    this.splice = function (index, length) {
-
-        var removed, inserted;
-
-        if ((index |= 0) < 0 && (index += this.length) < 0)
-        {
-            index = 0;
-        }
-
-        if (arguments.length > 2)
-        {
-            inserted = createModels(this, arguments, 2);
-
-            released = true;
-            removed = splice.apply(this, [index, length].concat(inserted));
         }
         else
         {
-            released = true;
-            removed = splice.apply(this, arguments);
+            return false;
         }
-        
-        if (removed.length > 0)
+    }
+
+
+    this.append = function () {
+
+        if (arguments.length > 0)
         {
-            for (var i = removed.length; i--;)
+            var index = this.__length;
+            var models, model;
+    
+            models = createModels(this, arguments);
+
+            released = true;
+            array.push.apply(this, models);
+    
+            while (model = this[index])
+            {
+                model.__index = index++;
+            }
+            
+            notify(this, '__on_insert', -1, models);
+        }
+    }
+
+
+    this.insert = function (index) {
+
+        if (arguments.length > 1)
+        {
+            var length = this.__length;
+            var values = array.slice.call(arguments, 1);
+
+            if ((index |= 0) < 0 && (index += length) < 0)
+            {
+                index = 0;
+            }
+            else if (index > length)
+            {
+                index = length;
+            }
+    
+            values = createModels(this, values, index);
+    
+            released = true;
+            array.splice.apply(this, values);
+
+            reindex(this, index);
+            notify(this, '__on_insert', index, values.slice(2));
+        }
+    }
+
+
+    this.removeAt = function (index, count) {
+
+        var length = this.__length;
+        var removed;
+
+        if ((index |= 0) < 0 && (index += length) < 0)
+        {
+            index = 0;
+        }
+        else if (index >= length)
+        {
+            return false;
+        }
+
+        released = true;
+        removed = array.splice.call(this, index, count || 1);
+        
+        if ((length = removed.length) > 0)
+        {
+            for (var i = length; i--;)
             {
                 destroyItem(removed[i]);
             }
 
-            notify(this, '__on_remove', index, removed.length);
+            reindex(this, index);
+            notify(this, '__on_removeAt', index, length);
         }
-
-        if (inserted)
+        else
         {
-            notify(this, '__on_insert', index, inserted);
+            return false;
         }
+    }
 
-        reindex(this, index);
-        return removed;
+
+    this.remove = function (item) {
+
+        var index = this.indexOf(item);
+
+        if (index >= 0)
+        {
+            this.removeAt(index, 1);
+        }
     }
 
 
     this.clear = function () {
 
-        var list;
-
         if (this.__length > 0)
         {
-            released = true;
-            list = splice.call(this, 0);
-    
-            for (var i = list.length; i--;)
+            for (var i = this.__length; i--;)
             {
-                destroyItem(list[i]);
+                destroyItem(this[i]);
             }
 
-            if (arguments[0] !== false)
-            {
-                notify(this, '__on_clear');
-            }
+            released = true;
+            array.splice.call(this, 0);
+
+            notify(this, '__on_clear');
         }
     }
+
 
 
     this.sort = function (sortFn) {
@@ -2899,7 +2921,7 @@ yaxi.colors.load('blue', [
         array.sort.call(this, sortFn);
 
         reindex(this, 0);
-        notify(this, '__on_sort', 0);
+        notify(this, '__on_sort');
     }
 
 
@@ -2908,7 +2930,7 @@ yaxi.colors.load('blue', [
         array.reverse.call(this);
         
         reindex(this, 0);
-        notify(this, '__on_sort', 1);
+        notify(this, '__on_reverse');
     }
 
 
@@ -4793,13 +4815,9 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
     
-    var array = Array.prototype;
+    var A = Array;
 
-    var push = array.push;
-
-    var slice = array.slice;
-
-    var splice = array.splice;
+    var array = A.prototype;
 
 
     var $patch = yaxi.patch;
@@ -4843,7 +4861,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
     function patch(target) {
 
-        target.__last = slice.call(target, 0);
+        target.__last = array.slice.call(target, 0);
 
         if (target = controls[target.$uuid])
         {
@@ -4852,24 +4870,14 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
     }
 
 
-    function createControls(parent, list, index, outputs) {
+    function createControls(parent, list, index, offset) {
 
         var length = list.length;
-        var control;
-
-        if ((index |= 0) < 0)
-        {
-            index = 0;
-        }
-
-        outputs || (outputs = []);
+        var outputs = new A(length + offset);
 
         while (index < length)
         {
-            if (control = build(parent, list[index++]))
-            {
-                outputs.push(control);
-            }
+            outputs[index + offset] = build(parent, list[index++]);
         }
 
         return outputs;
@@ -4889,6 +4897,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
     this.reduce = array.reduce;
 
     this.reduceRight = array.reduceRight;
+
 
 
 
@@ -4914,115 +4923,95 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
 
     this.set = function (index, value) {
+        
+        var control;
 
-        if ((index |= 0) >= 0 && this.__length > index)
+        if ((index |= 0) < 0)
         {
-            var control = controls[this.$uuid];
+            index += this.__length;
+        }
 
-            control = build(control, value);
+        if (control = this[index])
+        {
+            control.destroy();
+            control = build(controls[this.$uuid], value);
 
             this.__last || patch(this);
             this[index] = control;
         }
+        else
+        {
+            return false;
+        }
     }
 
 
-    this.push = function () {
+    this.append = function () {
 
         if (arguments.length > 0)
         {
-            var list = createControls(controls[this.$uuid], arguments, 0, []);
+            var list = createControls(controls[this.$uuid], arguments, 0, 0);
 
             this.__last || patch(this);
 
             released = true;
-            return push.apply(this, list);
+            array.push.apply(this, list);
         }
-
-        return this.__length;
     }
 
 
-    this.pop = function () {
+    this.insert = function (index) {
 
-        var control;
-
-        if (this.__length > 0)
+        if (arguments.length > 1)
         {
-            this.__last || patch(this);
+            var length = this.__length;
 
-            released = true;
-
-            if (control = array.pop.call(this))
+            if ((index |= 0) < 0 && (index += length) < 0)
             {
-                control.parent = null;
+                index = 0;
             }
-        }
-
-        return control;
-    }
-
-
-    this.unshift = function () {
-
-        if (arguments.length > 0)
-        {
-            var list = createControls(controls[this.$uuid], arguments, 0, []);
-
-            this.__last || patch(this);
-
-            released = true;
-            return array.unshift.apply(this, list);
-        }
-
-        return this.__length;
-    }
-
-
-    this.shift = function () {
-
-        var control;
-
-        if (this.__length > 0)
-        {
-            this.__last || patch(this);
-
-            released = true;
-
-            if (control = array.shift.call(this))
+            else if (index > length)
             {
-                control.parent = null;
+                index = length;
             }
-        }
 
-        return control;
+            this.__last || patch(this);
+
+            list = createControls(controls[this.$uuid], arguments, 1, 2);
+            list[0] = index;
+            list[1] = 0;
+
+            released = true;
+            array.push.apply(this, list);
+        }
     }
 
 
-    this.splice = function (index, length) {
+    this.removeAt = function (index, count) {
 
-        var list;
+        var length = this.__length;
+        var removed;
+
+        if ((index |= 0) < 0 && (index += length) < 0)
+        {
+            index = 0;
+        }
+        else if (index >= length)
+        {
+            return false;
+        }
 
         this.__last || patch(this);
 
         released = true;
+        removed = array.splice.call(this, index, count || 1);
 
-        if (arguments.length > 2)
+        for (var i = removed.length; i--;)
         {
-            list = createControls(controls[this.$uuid], arguments, 2, [index, length]);
-            list = splice.apply(this, list);
-        }
-        else
-        {
-            list = splice.apply(this, arguments);
+            removed[i].parent = null;
         }
 
-        for (var i = list.length; i--;)
-        {
-            list[i].parent = null;
-        }
-
-        return list;
+        return removed;
     }
 
 
@@ -5032,7 +5021,7 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
 
         if (index >= 0)
         {
-            this.splice(index, 1);
+            this.removeAt(index, 1);
         }
     }
 
@@ -5047,15 +5036,13 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             this.__last.clear = true;
 
             released = true;
-            list = splice.call(this, 0)
+            list = array.splice.call(this, 0)
 
             for (var i = list.length; i--;)
             {
                 list[i].parent = null;
             }
         }
-
-        return list || [];
     }
 
 
@@ -5066,8 +5053,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             this.__last || patch(this);
             array.sort.call(this, sortby);
         }
-
-        return this;
     }
 
 
@@ -5079,8 +5064,6 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             this.__last || patch(this);
             array.reverse.call(this);
         }
-
-        return this;
     }
 
 
@@ -5101,6 +5084,15 @@ yaxi.Collection = Object.extend.call({}, function (Class) {
             controls.unshift(index, 0);
             controls.splice.apply(this, controls);
         }
+    }
+
+
+    this.__set = function (index, control) {
+
+        this.__last || patch(this);
+
+        this[index].destroy();
+        this[index] = control;
     }
 
 
@@ -5843,7 +5835,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (loading !== false)
         {
-            children.push(loading || new yaxi.Loading());
+            children.append(loading || new yaxi.Loading());
         }
     }
 
@@ -5868,7 +5860,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (empty !== false)
         {
-            children.push(empty || new yaxi.DataEmpty());
+            children.append(empty || new yaxi.DataEmpty());
         }
     }
     
@@ -5972,11 +5964,19 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
     this.__on_load = function (list) {
 
-        this.__children.clear();
-
-        if (list && list.length > 0)
+        var template;
+        
+        if (list.length > 0 && (template = this.__template))
         {
-            this.__on_insert(-1, list);
+            var children = this.__children;
+
+            if (children.__length > 0)
+            {
+                children.clear();
+            }
+
+            list = createControls(this, list, template);
+            this.__children.__insert(-1, list);
         }
         else
         {
@@ -5995,7 +5995,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
             if (controls.length > 0)
             {
-                this.__children.set(index, controls[0]);
+                this.__children.__set(index, controls[0]);
             }
         }
     }
@@ -6008,18 +6008,14 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
         if (template = this.__template)
         {
             list = createControls(this, list, template);
-
-            if (list.length > 0)
-            {
-                this.__children.__insert(index, list);
-            }
+            this.__children.__insert(index, list);
         }
     }
 
 
-    this.__on_remove = function (index, length) {
+    this.__on_removeAt = function (index, length) {
 
-        this.__children.splice(index, length);
+        this.__children.removeAt(index, length);
     }
 
 
@@ -6032,6 +6028,12 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
     this.__on_sort = function () {
 
         this.__children.sort(sort);
+    }
+
+    
+    this.__on_reverse = function () {
+
+        this.__children.reverse();
     }
 
 
@@ -6049,8 +6051,6 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
-
-
 
 
 

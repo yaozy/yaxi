@@ -608,7 +608,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
     style('padding-bottom', 1, 1);
 
-    style('padding-left', 1);
+    style('padding-left', 1, 1);
 
 
 
@@ -1213,7 +1213,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
     this.destroyChildren = function (children) {
 
-        var control;
+        var control, flag;
 
         for (var i = children.length; i--;)
         {
@@ -1222,7 +1222,14 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             {
                 control.destroy();
             }
+            else
+            {
+                // 标记有未移除的控件
+                flag = true;
+            }
         }
+
+        return flag;
     }
 
 

@@ -1,3 +1,4 @@
+const yaxi = require('../../../yaxi/js/yaxi');
 const template = require('./main-body.html');
 
 

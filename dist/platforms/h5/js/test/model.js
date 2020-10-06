@@ -28,7 +28,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     for (var i = 1; i < 100; i++)
     {
-        arrayModel.push({
+        arrayModel.append({
             name: 'name' + id++,
             value: Math.random(),
 
@@ -50,7 +50,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleAppend = function () {
 
-        arrayModel.push({
+        arrayModel.append({
             name: 'name' + id++,
             value: Math.random()
         })
@@ -68,7 +68,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleRemove = function () {
 
-        arrayModel.shift();
+        arrayModel.removeAt(0);
     }
 
 

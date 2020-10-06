@@ -15,7 +15,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
         var children = this.find('>>@host').children;
 
-        children.push([
+        children.append([
             yaxi.Text,
             {
                 text: new Date()
@@ -28,7 +28,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.handleRemove = function () {
 
-        this.find('>>@host').children.pop();
+        this.find('>>@host').children.removeAt(0);
     }
 
 

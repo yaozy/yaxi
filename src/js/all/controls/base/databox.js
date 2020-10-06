@@ -189,7 +189,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (loading !== false)
         {
-            children.push(loading || new yaxi.Loading());
+            children.append(loading || new yaxi.Loading());
         }
     }
 
@@ -214,7 +214,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (empty !== false)
         {
-            children.push(empty || new yaxi.DataEmpty());
+            children.append(empty || new yaxi.DataEmpty());
         }
     }
     
@@ -318,11 +318,19 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
     this.__on_load = function (list) {
 
-        this.__children.clear();
-
-        if (list && list.length > 0)
+        var template;
+        
+        if (list.length > 0 && (template = this.__template))
         {
-            this.__on_insert(-1, list);
+            var children = this.__children;
+
+            if (children.__length > 0)
+            {
+                children.clear();
+            }
+
+            list = createControls(this, list, template);
+            this.__children.__insert(-1, list);
         }
         else
         {
@@ -341,7 +349,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
             if (controls.length > 0)
             {
-                this.__children.set(index, controls[0]);
+                this.__children.__set(index, controls[0]);
             }
         }
     }
@@ -354,18 +362,14 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
         if (template = this.__template)
         {
             list = createControls(this, list, template);
-
-            if (list.length > 0)
-            {
-                this.__children.__insert(index, list);
-            }
+            this.__children.__insert(index, list);
         }
     }
 
 
-    this.__on_remove = function (index, length) {
+    this.__on_removeAt = function (index, length) {
 
-        this.__children.splice(index, length);
+        this.__children.removeAt(index, length);
     }
 
 
@@ -378,6 +382,12 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
     this.__on_sort = function () {
 
         this.__children.sort(sort);
+    }
+
+    
+    this.__on_reverse = function () {
+
+        this.__children.reverse();
     }
 
 
@@ -395,8 +405,6 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         return a > b ? 1 : (a < b ? -1 : 0);
     }
-
-
 
 
 

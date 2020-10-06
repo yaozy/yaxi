@@ -15,41 +15,31 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 	
 	
-	// 页面加载前处理
-	this.onloading = function (options) {
-	}
-	
-	
-
-	// 页面加载后处理
+	// 页面加载处理
 	this.onload = function (options) {
 	}
 	
 
-
-	// 页面卸载前处理(返回false退停止关闭窗口)
-	this.onunloading = function (options) {
-	}
-
-
-	// 页面卸载后处理
-	this.onunload = function (options) {
-	}
-
-
-	// 关闭窗口
-	this.close = function (type, payload) {
-
-		yaxi.closePage(type, payload);
-	}
-
-
-
+	// 页面显示处理
 	this.onshow = function () {
 	}
 
 
+	// 页面隐藏处理
 	this.onhide = function () {
+	}
+
+
+	// 页面卸载处理
+	this.onunload = function (options) {
+	}
+
+
+
+	// 关闭页面
+	this.close = function (type, payload) {
+
+		yaxi.closePage(type, payload);
 	}
 
 

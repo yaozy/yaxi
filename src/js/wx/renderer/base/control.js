@@ -6,31 +6,8 @@ yaxi.Control.renderer(function (base, yaxi) {
 
     var assign = Object.assign;
 
-    var own = Object.getOwnPropertyNames; 
-
 
     var replaceUnit = /rem/g;
-
-
-
-    // 颜色转换函数, 把@color颜色变量转换成实际的颜色
-    var convertColor = function (translateFn, value) {
-
-        return value ? ('' + value).replace(this, translateFn) : '';
-
-    }.bind(/@([\w-]+)/g, function (_, key) {
-
-        return this[key];
-
-    }.bind(yaxi.color));
-
-
-    // 单位转换函数, 把rem转换成rpx
-    var convertUnit = function (value) {
-
-        return value.replace(this, 'rpx');
-
-    }.bind(/rem/g);
 
     
 
@@ -131,18 +108,19 @@ yaxi.Control.renderer(function (base, yaxi) {
     this.renderChildren = function (view, prefix, children) {
 
         var length = children.length;
+        var list;
         
         if (length > 0)
         {
-            var list = new Array(length);
+            list = new Array(length);
 
             for (var i = 0; i < length; i++)
             {
                 list[i] = children[i].$renderer.render(children[i]);
             }
-            
-            return view[prefix + 'c'] = list;
         }
+
+        view[prefix + 'c'] = list || [];
     }
 
 
@@ -178,11 +156,11 @@ yaxi.Control.renderer(function (base, yaxi) {
 
             if (any = last.length > 0)
             {
-                control.destroyChildren(last);
+                any = control.destroyChildren(last);
             }
 
-            // 曾经清除过
-            if (!any || last.clear)
+            // 全部为新添加的控件
+            if (!any)
             {
                 this.renderChildren(view, prefix, children);
             }
@@ -228,7 +206,7 @@ yaxi.Control.renderer(function (base, yaxi) {
             list[i] = children[i].$renderer.render(children[i]);
         }
 
-        view[prefix + 'c'] = view.children = list;
+        view[prefix + 'c'] = list;
     }
 
 
