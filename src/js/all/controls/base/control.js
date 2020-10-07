@@ -981,7 +981,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
                 default:
                     any = cache[6]++;
-                    cache[7][any] = property;
+                    cache[7][any] = property || name;
                     cache[8][any] = value;
                     break;
             }

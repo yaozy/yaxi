@@ -88,11 +88,14 @@ yaxi.Control.renderer(function () {
 
     this.renderAttributes = function (control, properties, values, count, view) {
 
-        var fn, name;
+        var property, fn, name;
 
         for (var i = 0; i < count; i++)
         {
-            if (fn = this[name = properties[i].name])
+            property = properties[i];
+            name = property.name || property;
+
+            if (fn = this[name])
             {
                 fn.call(this, control, view, values[i]);
             }

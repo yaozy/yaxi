@@ -84,19 +84,20 @@
 
         var touch1 = touches;
         var touch2 = event.changedTouches;
-        var e = touchEvent(event);
+
+        event = touchEvent(event);
 
         if (touch1 && (touch1 = touch1[0]) && touch2 && (touch2 = touch2[0]))
         {
-            var x = touch2.clientX - touch1.clientX;
-            var y = touch2.clientY - touch1.clientY;
+            var x = touch2.pageX - touch1.pageX;
+            var y = touch2.pageY - touch1.pageY;
 
-            e.distanceX = x;
-            e.distanceY = y;
-            e.move = x < -10 || x > 10 || y < -10 || y > 10;
+            event.distanceX = x;
+            event.distanceY = y;
+            event.move = x < -10 || x > 10 || y < -10 || y > 10;
         }
 
-        return e;
+        return event;
     }
 
 

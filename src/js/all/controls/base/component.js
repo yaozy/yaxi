@@ -259,27 +259,26 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
     this.$combineChanges = function () {
 
-        var changes;
+        var fields = this.__fields;
+        var changes = this.__changes;
+        var shadowRoot = this.__shadowRoot;
+        var properties = this.$properties;
+        var names = own(changes);
+        var index = 0;
+        var name, values;
 
-        if (changes = this.__changes)
+        while (name = names[index++])
         {
-            var shadowRoot = this.__shadowRoot;
-            var properties = this.$properties;
-            var names = own(changes);
-            var index = 0;
-            var name, values;
+            fields[name] = changes[name];
 
-            while (name = names[index++])
+            switch (properties[name].kind)
             {
-                switch (properties[name].kind)
-                {
-                    // 从以下三类属性同步到shadowRoot上, 其它属性不处理
-                    case 'class':
-                    case 'style':
-                    case 'attribute':
-                        (values || (values = shadowRoot.__changes || (shadowRoot.__changes = create(null))))[name] = changes[name];
-                        break;
-                }
+                // 从以下三类属性同步到shadowRoot上, 其它属性不处理
+                case 'class':
+                case 'style':
+                case 'attribute':
+                    (values || (values = shadowRoot.__changes || (shadowRoot.__changes = create(null))))[name] = changes[name];
+                    break;
             }
         }
     }

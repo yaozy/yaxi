@@ -125,86 +125,93 @@
   width: 80rpx;
   height: 80rpx;
   transform: translate(-50%, -50%);
+  color: #9e9e9e;
+  font-family: "iconfont" !important;
+  font-size: 20rpx;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-.yx-loading-box {
+.yx-loading-dot {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
-.yx-loading-dot {
+.yx-loading-dot::before {
+  display: block;
+  width: 20%;
+  height: 20%;
   margin: 0 auto;
-  width: 15%;
-  height: 15%;
-  background-color: #616161;
-  border-radius: 100%;
+  color: inherit;
+  font-size: inherit;
   animation: yx-loading 1.2s infinite ease-in-out both;
 }
-.yx-loading-box2 {
+.yx-loading-dot2 {
   transform: rotate(30deg);
 }
-.yx-loading-box3 {
+.yx-loading-dot3 {
   transform: rotate(60deg);
 }
-.yx-loading-box4 {
+.yx-loading-dot4 {
   transform: rotate(90deg);
 }
-.yx-loading-box5 {
+.yx-loading-dot5 {
   transform: rotate(120deg);
 }
-.yx-loading-box6 {
+.yx-loading-dot6 {
   transform: rotate(150deg);
 }
-.yx-loading-box7 {
+.yx-loading-dot7 {
   transform: rotate(180deg);
 }
-.yx-loading-box8 {
+.yx-loading-dot8 {
   transform: rotate(210deg);
 }
-.yx-loading-box9 {
+.yx-loading-dot9 {
   transform: rotate(240deg);
 }
-.yx-loading-box10 {
+.yx-loading-dot10 {
   transform: rotate(270deg);
 }
-.yx-loading-box11 {
+.yx-loading-dot11 {
   transform: rotate(300deg);
 }
-.yx-loading-box12 {
+.yx-loading-dot12 {
   transform: rotate(330deg);
 }
-.yx-loading-dot2 {
+.yx-loading-dot2::before {
   animation-delay: -1.1s;
 }
-.yx-loading-dot3 {
+.yx-loading-dot3::before {
   animation-delay: -1s;
 }
-.yx-loading-dot4 {
+.yx-loading-dot4::before {
   animation-delay: -0.9s;
 }
-.yx-loading-dot5 {
+.yx-loading-dot5::before {
   animation-delay: -0.8s;
 }
-.yx-loading-dot6 {
+.yx-loading-dot6::before {
   animation-delay: -0.7s;
 }
-.yx-loading-dot7 {
+.yx-loading-dot7::before {
   animation-delay: -0.6s;
 }
-.yx-loading-dot8 {
+.yx-loading-dot8::before {
   animation-delay: -0.5s;
 }
-.yx-loading-dot9 {
+.yx-loading-dot9::before {
   animation-delay: -0.4s;
 }
-.yx-loading-dot10 {
+.yx-loading-dot10::before {
   animation-delay: -0.3s;
 }
-.yx-loading-dot11 {
+.yx-loading-dot11::before {
   animation-delay: -0.2s;
 }
-.yx-loading-dot12 {
+.yx-loading-dot12::before {
   animation-delay: -0.1s;
 }
 @keyframes yx-loading {

@@ -6,6 +6,34 @@
   "description": "教育软件项目",
   "glyphs": [
     {
+      "icon_id": "11891834",
+      "name": "complete",
+      "font_class": "-common-done",
+      "unicode": "e677",
+      "unicode_decimal": 58999
+    },
+    {
+      "icon_id": "17548275",
+      "name": "下拉",
+      "font_class": "-common-release",
+      "unicode": "edb0",
+      "unicode_decimal": 60848
+    },
+    {
+      "icon_id": "2019066",
+      "name": "下拉",
+      "font_class": "-common-pulldown",
+      "unicode": "e7ab",
+      "unicode_decimal": 59307
+    },
+    {
+      "icon_id": "586863",
+      "name": "dot",
+      "font_class": "-common-dot",
+      "unicode": "e711",
+      "unicode_decimal": 59153
+    },
+    {
       "icon_id": "2423300",
       "name": "无数据",
       "font_class": "-common-nodata",
@@ -29,7 +57,7 @@
     {
       "icon_id": "10299105",
       "name": "已完成",
-      "font_class": "-common-completed",
+      "font_class": "-my-order-completed",
       "unicode": "e600",
       "unicode_decimal": 58880
     },

@@ -28,12 +28,13 @@ module.exports = yaxi.Box.extend(function (Class, base) {
     
     this.onshow = function () {
 
+        this.find('>>swiper').autoplay = true;
     }
 
 
     this.onhide = function () {
 
-        //
+        this.find('>>swiper').autoplay = false;
     }
 
 

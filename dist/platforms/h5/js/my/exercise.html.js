@@ -34,9 +34,8 @@ return (
 									"tag": $index,
 									"theme": "bg-standard",
 									"layout": "row",
-									"height": "150rem",
-									"margin-top": "10rem",
-									"padding": "20rem 0",
+									"margin": "10rem 0",
+									"padding": "40rem 0",
 									"events": {
 										"tap": this.handleStart.bind(this)
 									}
@@ -47,8 +46,6 @@ return (
 										{
 											"icon": "my-exercise",
 											"width": "120rem",
-											"height": "100%",
-											"line-height": "",
 											"font-size": "80rem"
 										}
 									],
@@ -57,16 +54,14 @@ return (
 										{
 											"layout": "column",
 											"flex": "auto",
-											"height": "100%",
-											"padding-left": "20rem"
+											"height": "100%"
 										},
 										[
 											[
 												"text",
 												{
 													"text": $item.name,
-													"height": "70rem",
-													"line-height": "35rem"
+													"height": "60rem"
 												}
 											],
 											[
@@ -74,7 +69,7 @@ return (
 												{
 													"layout": "row middle",
 													"theme": "text-lightest",
-													"height": "40rem",
+													"height": "30rem",
 													"font-size": "28rem"
 												},
 												[

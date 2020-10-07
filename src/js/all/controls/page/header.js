@@ -45,7 +45,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
     
                             tap: function handleClose() {
     
-                                self.root.close('Back');
+                                this.root.close('Back');
                                 return false;
                             }
                         }

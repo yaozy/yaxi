@@ -20,55 +20,74 @@ return (
 					[
 						"box",
 						{
-							"height": "200rem",
-							"padding": "40rem 20rem"
+							"theme": "bg-standard",
+							"layout": "row",
+							"margin": "30rem 0",
+							"padding": "20rem 0"
 						},
 						[
 							[
-								"box",
+								"icon",
 								{
-									"height": "70rem"
-								},
-								[
-									[
-										"text",
-										{
-											"text": $item.name
-										}
-									]
-								]
+									"icon": "my-exercise",
+									"width": "120rem",
+									"font-size": "80rem"
+								}
 							],
 							[
 								"box",
 								{
-									"height": "50rem",
-									"theme": "text-lighter",
-									"font-size": "28rem"
+									"layout": "column",
+									"flex": "auto",
+									"height": "100%"
 								},
 								[
 									[
 										"text",
-										null,
-										"时间:"
-									],
-									[
-										"text",
 										{
-											"text": $item.time
+											"text": $item.name,
+											"height": "60rem"
 										}
 									],
 									[
-										"text",
+										"box",
 										{
-											"margin-left": "30rem"
+											"layout": "row middle",
+											"theme": "text-lightest",
+											"height": "30rem",
+											"font-size": "28rem"
 										},
-										"分数:"
-									],
-									[
-										"text",
-										{
-											"text": $item.score
-										}
+										[
+											[
+												"text",
+												null,
+												"总分:"
+											],
+											[
+												"text",
+												{
+													"text": $item.score
+												}
+											],
+											[
+												"text",
+												{
+													"margin-left": "50rem"
+												},
+												"时长:"
+											],
+											[
+												"text",
+												{
+													"text": $item.time
+												}
+											],
+											[
+												"text",
+												null,
+												"分钟"
+											]
+										]
 									]
 								]
 							]

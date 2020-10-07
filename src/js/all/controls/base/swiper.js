@@ -3,7 +3,7 @@ yaxi.Box.extend('Swiper', function (Class, base) {
 
 
     // 是否自动切换
-    this.$('autoplay', true, false);
+    this.$('autoplay', true);
 
 
     // 当前所在滑块的 index
@@ -11,11 +11,11 @@ yaxi.Box.extend('Swiper', function (Class, base) {
 
 
     // 自动切换时间间隔
-    this.$('interval', 5000, false);
+    this.$('interval', 5000);
 
 
     // 滑动动画时长
-    this.$('duration', 500, false);
+    this.$('duration', 500);
 
 
 

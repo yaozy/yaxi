@@ -34,7 +34,7 @@ return (
 						{
 							"data": $data.teachers,
 							"layout": "row",
-							"padding": "10rem 20rem"
+							"padding": "20rem"
 						},
 						function (template, __data_list, __data_scope) {
 
@@ -108,7 +108,7 @@ return (
 					[
 						"box",
 						{
-							"padding": "20rem"
+							"padding": "40rem 20rem"
 						},
 						[
 							[

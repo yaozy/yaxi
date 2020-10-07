@@ -6,7 +6,7 @@ return (
 		{
 			"data": $data.recommends,
 			"theme": "bg-standard",
-			"padding": "20rem"
+			"padding": "0 20rem"
 		},
 		function (template, __data_list, __data_scope) {
 
@@ -24,7 +24,7 @@ return (
 							"layout": "row",
 							"tag": $item.id,
 							"height": "160rem",
-							"margin-bottom": "20rem",
+							"margin": "30rem 0",
 							"events": {
 								"tap": this.handleOpenDetail.bind(this)
 							}

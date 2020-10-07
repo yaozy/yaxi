@@ -17,25 +17,25 @@ return (
 					[
 						"image",
 						{
-							"src": "/images/splash-screen.jpg"
+							"src": "/images/demo/demo1.jpg"
 						}
 					],
 					[
 						"image",
 						{
-							"src": "/images/splash-screen.jpg"
+							"src": "/images/demo/demo2.jpg"
 						}
 					],
 					[
 						"image",
 						{
-							"src": "/images/splash-screen.jpg"
+							"src": "/images/demo/demo3.jpg"
 						}
 					],
 					[
 						"image",
 						{
-							"src": "/images/splash-screen.jpg"
+							"src": "/images/demo/demo4.jpg"
 						}
 					]
 				]
@@ -46,6 +46,28 @@ return (
 					"theme": "bg-standard",
 					"text": $data.marquee
 				}
+			],
+			[
+				"scrollbox",
+				{
+					"height": "200rem"
+				},
+				[
+					[
+						"pulldown",
+						null
+					],
+					[
+						"databox",
+						{
+							"min-height": "100%"
+						}
+					],
+					[
+						"pullup",
+						null
+					]
+				]
 			],
 			[
 				"databox",
@@ -77,9 +99,8 @@ return (
 									[
 										"box",
 										{
-											"layout": "row",
-											"height": "70rem",
-											"line-height": "80rem"
+											"layout": "row middle",
+											"margin-top": "20rem"
 										},
 										[
 											[
@@ -101,9 +122,8 @@ return (
 											[
 												"box",
 												{
-													"layout": "row",
-													"absolute": "middle right",
-													"margin-top": "10rem",
+													"absolute": "right",
+													"layout": "row middle",
 													"theme": "text-lightest",
 													"font-size": "28rem",
 													"events": {
@@ -113,7 +133,9 @@ return (
 												[
 													[
 														"text",
-														null,
+														{
+															"margin-top": "-5rem"
+														},
 														"查看更多"
 													],
 													[
@@ -130,7 +152,8 @@ return (
 										"databox",
 										{
 											"data": $item.data,
-											"item": "$course"
+											"item": "$course",
+											"margin-top": "20rem"
 										},
 										function (template, __data_list, __data_scope) {
 
@@ -151,7 +174,7 @@ return (
 															"layout": "row",
 															"tag": $course.id,
 															"height": "160rem",
-															"margin": "20rem 0",
+															"margin-bottom": "30rem",
 															"events": {
 																"tap": this.handleOpenDetail.bind(this)
 															}

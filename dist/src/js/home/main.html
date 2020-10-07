@@ -1,23 +1,30 @@
 <box theme="bg-thick" layout="column">
     <swiper flex-shrink="0">
-        <image src="/images/splash-screen.jpg" />
-        <image src="/images/splash-screen.jpg" />
-        <image src="/images/splash-screen.jpg" />
-        <image src="/images/splash-screen.jpg" />
+        <image src="/images/demo/demo1.jpg" />
+        <image src="/images/demo/demo2.jpg" />
+        <image src="/images/demo/demo3.jpg" />
+        <image src="/images/demo/demo4.jpg" />
     </swiper>
     <marquee theme="bg-standard" d:text="$data.marquee" />
+    <scrollbox height="200rem">
+        <pulldown />
+        <databox min-height="100%">
+
+        </databox>
+        <pullup />
+    </scrollbox>
     <databox key="host" flex="auto" min-height="200rem" margin-top="10rem">
         <box d:key="$item.id" theme="bg-standard" margin-bottom="10rem" padding="0 20rem">
-            <box layout="row" height="70rem" line-height="80rem">
+            <box layout="row middle" margin-top="20rem">
                 <icon theme="text-light" d:icon="$item.icon" font-size="50rem" />
                 <text theme="text-light" d:text="$item.text" font-size="30rem" />
-                <box layout="row" absolute="middle right" margin-top="10rem" theme="text-lightest" font-size="28rem" e:tap="handleMore">
-                    <text>查看更多</text>
+                <box absolute="right" layout="row middle" theme="text-lightest" font-size="28rem" e:tap="handleMore">
+                    <text margin-top="-5rem">查看更多</text>
                     <icon icon="common-more" />
                 </box>
             </box>
-            <databox d:data="$item.data" item="$course">
-                <box layout="row" d:tag="$course.id" height="160rem" margin="20rem 0" e:tap="handleOpenDetail">
+            <databox d:data="$item.data" item="$course" margin-top="20rem">
+                <box layout="row" d:tag="$course.id" height="160rem" margin-bottom="30rem" e:tap="handleOpenDetail">
                     <image d:src="$course.image" width="200rem" height="100%" />
                     <box width="500rem" height="100%" padding-left="20rem">
                         <box height="50rem">

@@ -12,28 +12,14 @@ yaxi.Loading.renderer(function (base) {
 
             for (var i = 1; i < 13; i++)
             {
-                list.push('<div class="yx-loading-box yx-loading-box' + i + '"><div class="yx-loading-dot yx-loading-dot' + i + '"></div></div>');
+                list.push('<div class="yx-loading-dot yx-loading-dot' + i + ' icon-common-dot"></div>');
             }
 
             return list.join('');
 
         })() +
+
         '</div>');
-
-
-
-    this.color = function (control, view, value) {
-
-        view = view.firstChild;
-
-        while (view)
-        {
-            view.firstChild.style.backgroundColor = value;
-            view = view.nextSibling;
-        }
-
-        return null;
-    }
 
 
 });

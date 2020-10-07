@@ -17,7 +17,9 @@ return (
 				[
 					[
 						"loading",
-						null
+						{
+							"center": "true"
+						}
 					]
 				]
 			]

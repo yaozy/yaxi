@@ -270,77 +270,18 @@
         class="yx-control yx-loading{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         bindtouchstart="translateEvent">
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box1">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot1" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box2">
-            <view data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot2" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box3">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot3" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box4">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot4" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box5">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot5" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box6">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot6" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box7">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot7" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box8">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot8" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box9">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot9" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box10">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot10" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box11">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot11" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
-        <view data-id="{{ u }}" class="yx-loading-box yx-loading-box12">
-            <view 
-                data-id="{{ u }}" 
-                class="yx-loading-dot yx-loading-dot12" 
-                style="{{ color ? 'color:' + color + ';' : '' }}" />
-        </view>
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot1 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot2 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot3 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot4 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot5 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot6 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot7 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot8 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot9 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot10 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot11 icon-common-dot" />
+        <view data-id="{{ u }}" class="yx-loading-dot yx-loading-dot12 icon-common-dot" />
     </view>
 
 </template>
@@ -373,8 +314,7 @@
             class="yx-swiper-host"
             current="{{ current || 0 }}"
             circular="{{ true }}"
-            previous-margin="{{ before }}"
-            next-margin="{{ after }}"
+            autoplay="{{ autoplay !== false }}"
             bindchange="translateEvent">
             <swiper-item 
                 wx:for="{{ c }}"

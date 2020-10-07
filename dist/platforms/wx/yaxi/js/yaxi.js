@@ -5655,9 +5655,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
 
 
-    var Control = yaxi.Control;
-
-    var build = Control.build;
+    var build = yaxi.Control.build;
 
 
 
@@ -5753,7 +5751,7 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
     this.$('loading', null, {
 
         change: false,
-        convert: convert('loading')
+        convert: convert
     });
 
 
@@ -5765,27 +5763,14 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
     this.$('empty', null, {
 
         change: false,
-        convert: convert('empty')
+        convert: convert
     });
 
 
 
-    function convert(text) {
+    function convert(value) {
 
-        return function (value) {
-
-            if (value)
-            {
-                if (value instanceof Control)
-                {
-                    return value;
-                }
-    
-                throw new Error('databox ' + text + ' can only null or false or a control!');
-            }
-            
-            return value === false ? false : null;
-        }
+        return value ? value : (value === false ? false : null);
     }
 
 
@@ -5837,7 +5822,8 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (loading !== false)
         {
-            children.append(loading || new yaxi.Loading());
+            loading = loading ? build(this, loading) : new yaxi.Loading();
+            children.append(this.__loading = loading);
         }
     }
 
@@ -5846,9 +5832,10 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         var loading;
 
-        if (loading = this.loading || this.find('>>loading'))
+        if (loading = this.__loading)
         {
             this.__children.remove(loading);
+            this.__loading = null;
         }
     }
 
@@ -5862,7 +5849,8 @@ yaxi.Control.extend('DataBox', function (Class, base, yaxi) {
 
         if (empty !== false)
         {
-            children.append(empty || new yaxi.DataEmpty());
+            empty = empty ? build(this, empty) : new yaxi.DataEmpty();
+            children.append(empty);
         }
     }
     
@@ -6588,7 +6576,7 @@ yaxi.Box.extend('Swiper', function (Class, base) {
 
 
     // 是否自动切换
-    this.$('autoplay', true, false);
+    this.$('autoplay', true);
 
 
     // 当前所在滑块的 index
@@ -6596,11 +6584,11 @@ yaxi.Box.extend('Swiper', function (Class, base) {
 
 
     // 自动切换时间间隔
-    this.$('interval', 5000, false);
+    this.$('interval', 5000);
 
 
     // 滑动动画时长
-    this.$('duration', 500, false);
+    this.$('duration', 500);
 
 
 

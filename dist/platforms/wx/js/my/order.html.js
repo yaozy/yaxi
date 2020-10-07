@@ -235,7 +235,7 @@ return (
 									[
 										"icon",
 										{
-											"icon": "common-completed",
+											"icon": "my-order-completed",
 											"theme": "text-lightest",
 											"absolute": "right",
 											"width": "120rem",

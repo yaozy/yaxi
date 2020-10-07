@@ -48,7 +48,7 @@ return (
 											"layout": "row",
 											"tag": $item.id,
 											"height": "160rem",
-											"margin": "20rem 0",
+											"margin": "30rem 0",
 											"events": {
 												"tap": this.handleOpenDetail.bind(this)
 											}

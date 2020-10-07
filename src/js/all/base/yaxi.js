@@ -10,6 +10,12 @@ var yaxi = Object.create(null);
 if (typeof module !== 'undefined')
 {
     module.exports = yaxi;
+
+    // 调试用
+    if (typeof window !== 'undefined')
+    {
+        window.global = yaxi;
+    }
 }
 else if (typeof window !== 'undefined')
 {
