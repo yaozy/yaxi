@@ -1,4 +1,4 @@
-yaxi.ScrollBox.renderer(function (base) {
+yaxi.ScrollBox.renderer(function (base, thisControl) {
 
 
 
@@ -8,24 +8,26 @@ yaxi.ScrollBox.renderer(function (base) {
 
 
 
-    this.scrollTop = function (control) {
+    thisControl.scrollTo = function (top) {
 
-        return control.$view.scrollTop;
+        var view;
+
+        if (view = this.$view)
+        {
+            view.scrollTop = top | 0;
+        }
     }
 
 
-    this.scrollHeight = function (control) {
+    thisControl.scrollIntoView = function (childControl) {
 
-        return control.$view.scrollHeight;
+        var view, dom;
+
+        if ((view = this.$view) && (dom = childControl && childControl.$view))
+        {
+            view.scrollIntoView(dom);
+        }
     }
-
-
-    this.maxTop = function (control) {
-
-        var view = control.$view;
-        return view.scrollHeight - view.offsetHeight;
-    }
-
 
 
 });

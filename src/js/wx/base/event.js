@@ -24,21 +24,20 @@
     var tapTime = new Date();
 
     // 开始触摸时的控件及时间
-    var touchControl, touchTime, touchFlag, touches;
+    var touchControl, touchTime, touches;
 
     
 
 
     wx.translateEvent = function (event) {
-
+        
         var control, any;
 
         if (any = translates[event.type])
         {
             any(event);
         }
-        else if (any !== false && (any = event.target.dataset) &&
-            (control = any.id) && (control = findControl(control)))
+        else if (any !== false && (control = findControl(event.target.dataset.id)))
         {
             event = new Event(event.type, event.detail);
             control.trigger(event);
@@ -112,7 +111,7 @@
     
     translates.touchstart = function (event) {
             
-        var control, dataset;
+        var control;
 
         // 阻止冒泡事件(触摸没有弹起时不处理)
         if (touchControl)
@@ -120,9 +119,7 @@
             return;
         }
 
-        dataset = event.target.dataset;
-
-        if (control = findControl(dataset.id))
+        if (control = findControl(event.target.dataset.id))
         {
             touchControl = control;
             touchTime = new Date();
@@ -143,7 +140,7 @@
     translates.touchmove = function (event) {
         
         var control;
-    
+
         if (control = touchControl)
         {
             event = touchEvent(event);
@@ -233,10 +230,9 @@
 
     translates.input = function (event) {
 
-        var dataset = event.target.dataset;
         var control, fn, detail;
 
-        if (control = findControl(dataset.id))
+        if (control = findControl(event.target.dataset.id))
         {
             detail = event.detail.value;
 
@@ -253,10 +249,9 @@
 
     translates.change = function (event) {
 
-        var dataset = event.target.dataset;
         var control, fn, detail;
 
-        if (control = findControl(dataset.id))
+        if (control = findControl(event.target.dataset.id))
         {
             detail = event.detail.value || event.detail.current;
 
@@ -266,6 +261,25 @@
             }
 
             return control.trigger('change', detail);
+        }
+    }
+
+
+
+    translates.scroll = function (event) {
+
+        var control, detail;
+
+        if (control = findControl(event.target.dataset.id))
+        {
+            detail = event.detail;
+
+            control.scrollTop = detail.scrollTop;
+            control.scrollLeft = detail.scrollLeft;
+            control.scrollWidth = detail.scrollWidth;
+            control.scrollHeight = detail.scrollHeight;
+
+            return control.trigger('scroll');
         }
     }
 

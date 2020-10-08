@@ -4795,7 +4795,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             base = base.$renderer;
         }
         
-        fn.call(prototype.$renderer, base || null, yaxi);
+        fn.call(prototype.$renderer, base || null, prototype, yaxi);
     }
 
 
@@ -5247,16 +5247,16 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         return function () {
 
-            var target, observes, any;
+            var target, observes, list;
 
             if (target = yx.__bindingTarget)
             {
                 // 添加观察对象
                 if (observes = this.__observes)
                 {
-                    if (any = observes[name])
+                    if (list = observes[name])
                     {
-                        any.push(target);
+                        list.push(target);
                     }
                     else
                     {
@@ -5282,33 +5282,24 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                 }
             }
 
-            return (this.__changes || this.__fields)[name];
+            return this.__fields[name];
         }
     }
 
 
     this.__build_set = function (name, options) {
 
-        var init = create;
         var convert = options.convert;
 
         return function (value) {
 
-            var changes;
+            var fields = this.__fields;
 
             value = convert ? convert.call(this, value) : value;
 
-            if (changes = this.__changes)
+            if (value !== fields[name])
             {
-                if (value !== changes[name])
-                {
-                    changes[name] = value;
-                    onchange.call(this, name);
-                }
-            }
-            else if (value !== this.__fields[name])
-            {
-                (this.__changes = init(this.__fields))[name] = value;
+                fields[name] = value;
                 onchange.call(this, name);
             }
         }
@@ -6746,56 +6737,53 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
 
 
 
-    var pulldown, y, top, maxTop, maxHeight, timer;
+    var pulldown, start, switchHeight;
 
 
 
-    // 下拉刷新高度
-    this.$('pulldown', '');
+    // 下拉刷新高度为多少rem时变换状态
+    this.$('pulldownHeight', 80, false);
 
 
 
-    function check(scrollbox, renderer, pulldown, pageY) {
 
-        if (y < 0)
+    this.scrollTop = 0;
+    
+
+    this.scrollLeft = 0;
+    
+
+    this.scrollWidth = 0;
+    
+    
+    this.scrollHeight = 0;
+
+    
+
+    this.scrollTo = function (top) {
+
+        this.$set('scrollTo', top | 0);
+    }
+
+
+    this.scrollIntoView = function (childControl) {
+
+        if (childControl)
         {
-            y = pageY;
-            pulldown.status = 1;
-        }
-        else
-        {
-            pulldown.height = (pageY - y) + 'px';
-
-            if (timer)
-            {
-                clearTimeout(timer);
-            }
-
-            timer = setTimeout(function () {
-
-                var height = renderer.scrollHeight(scrollbox);
-
-                if (height > maxHeight)
-                {
-                    maxHeight = height;
-                }
-                else
-                {
-                    pulldown.status = 2;
-                }
-
-            }, 10);
+            this.$set('scrollIntoView', childControl.uuid);
         }
     }
 
 
 
-    this.__on_touchstart = function () {
 
-        y = maxTop = maxHeight = -1;
+    this.__on_touchstart = function () {
 
         if ((pulldown = this.__children[0]) && (pulldown instanceof yaxi.Pulldown))
         {
+            start = -1;
+            switchHeight = this.pulldownHeight * yaxi.remRadio | 0;
+
             pulldown.transition = '';
             pulldown.height = 0;
         }
@@ -6803,36 +6791,43 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
         {
             pulldown = null;
         }
-
-        maxTop = this.$renderer.maxTop(this);
     }
 
 
     this.__on_touchmove = function (event) {
 
-        var touches = event.changedTouches;
         var touch;
 
-        if (touches && (touch = touches[0]))
+        if (pulldown && (touch = event.changedTouches) && (touch = touch[0]))
         {
-            var renderer = this.$renderer;
-            
-            top = renderer.scrollTop(this);
-
-            if (top <= 0)
+            if (this.scrollTop <= 0)
             {
-                if (pulldown)
+                var y = touch.pageY | 0;
+
+                if (start < 0 || start >= y)
                 {
-                    check(this, renderer, pulldown, touch.pageY);
+                    start = y;
+
+                    pulldown.height = 0;
+                    pulldown.status = 1;
+                }
+                else
+                {
+                    y -= start;
+
+                    pulldown.status = y < switchHeight ? 1 : 2;
+                    pulldown.height = y + 'px';
                 }
             }
             else
             {
-                y = -1;
+                start = -1;
+                pulldown.status = 1;
             }
         }
-    }
 
+        console.log(this.scrollTop, this.scrollHeight);
+    }
 
 
     this.__on_touchend = function () {
@@ -6842,16 +6837,18 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
             pulldown.release();
             pulldown = null;
         }
-        
-        if (top + 20 >= maxTop)
-        {
-            var children = this.__children;
-            var pullup = children[children.length - 1];
+    }
 
-            if (pullup && pullup instanceof yaxi.Pullup)
-            {
-                pullup.start();
-            }
+
+
+    this.__on_pullup = function () {
+
+        var children = this.__children;
+        var pullup = children[children.length - 1];
+
+        if (pullup && pullup instanceof yaxi.Pullup)
+        {
+            pullup.start();
         }
     }
 
@@ -8197,7 +8194,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
 	
 	
     // 处理rem自适应
-    document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
+    document.documentElement.style.fontSize = (yaxi.remRadio = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
 
 
 
@@ -8511,19 +8508,21 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
     bind('scroll', function (event) {
 
-        var control, fn;
+        var target = event.target;
+        var control;
 
-        if (control = findControl(event.target))
+        if (control = findControl(target))
         {
-            if (fn = control.__on_scroll)
-            {
-                fn.call(control, event.target);
-            }
+            control.scrollTop = target.scrollTop;
+            control.scrollLeft = target.scrollLeft;
+            control.scrollWidth = target.scrollWidth;
+            control.scrollHeight = target.scrollHeight;
 
             return control.trigger('scroll');
         }
 
     }, true);
+
 
 
     
@@ -8634,7 +8633,7 @@ yaxi.__ajax_send = function (options) {
 
 
 
-yaxi.Control.renderer(function () {
+yaxi.Control.renderer(function (base, thisControl) {
 
 
     
@@ -8748,19 +8747,25 @@ yaxi.Control.renderer(function () {
     this.render = function (control, uuid) {
 
         var view = control.$view;
-        var changes;
+        var any;
 
         if (!view)
         {
             view = control.$view = createView(this, control);
             view.id = uuid || control.uuid;
+
+            if (any = control.__on_mount)
+            {
+                control.__on_mount = null;
+                any.call(control, view);
+            }
         }
         
         control.__dirty = false;
 
-        if (changes = control.__changes)
+        if (any = control.__changes)
         {
-            renderChanges(this, control, changes, view);
+            renderChanges(this, control, any, view);
             control.__changes = null;
         }
 
@@ -8899,6 +8904,48 @@ yaxi.Control.renderer(function () {
         }
     }
 
+
+
+
+    
+    thisControl.boundingClientRect = function (callback) {
+
+        var view;
+
+        if (callback)
+        {
+            if (view = this.$view)
+            {
+                boundingClientRect(view, callback);
+            }
+            else
+            {
+                control.__on_mount = function (view) {
+
+                    setTimeout(function () {
+
+                        boundingClientRect(view, callback);
+
+                    }, 0);
+                }
+            }
+        }
+    }
+
+
+    function boundingClientRect(view, callback) {
+
+        var rect = view.getBoundingClientRect();
+
+        callback({
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            right: rect.right,
+            bottom: rect.bottom
+        });
+    }
 
     
 });
@@ -9316,7 +9363,7 @@ yaxi.MaskLayer.renderer(function (base) {
 
 
 
-yaxi.ScrollBox.renderer(function (base) {
+yaxi.ScrollBox.renderer(function (base, thisControl) {
 
 
 
@@ -9326,24 +9373,26 @@ yaxi.ScrollBox.renderer(function (base) {
 
 
 
-    this.scrollTop = function (control) {
+    thisControl.scrollTo = function (top) {
 
-        return control.$view.scrollTop;
+        var view;
+
+        if (view = this.$view)
+        {
+            view.scrollTop = top | 0;
+        }
     }
 
 
-    this.scrollHeight = function (control) {
+    thisControl.scrollIntoView = function (childControl) {
 
-        return control.$view.scrollHeight;
+        var view, dom;
+
+        if ((view = this.$view) && (dom = childControl && childControl.$view))
+        {
+            view.scrollIntoView(dom);
+        }
     }
-
-
-    this.maxTop = function (control) {
-
-        var view = control.$view;
-        return view.scrollHeight - view.offsetHeight;
-    }
-
 
 
 });
@@ -9728,7 +9777,7 @@ yaxi.TextBox.renderer(function (base) {
 
 
 
-yaxi.Page.renderer(function (base) {
+yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
 
 
@@ -9738,14 +9787,6 @@ yaxi.Page.renderer(function (base) {
 	// 页面栈
     var all = [];
     
-
-
-    // 渲染前处理集合
-    var renderings = [];
-
-    // 渲染后处理集合
-	var rendereds = [];
-	
 
 
 	var host = yaxi.__view_host;
@@ -9758,35 +9799,6 @@ yaxi.Page.renderer(function (base) {
 
 	this.template('<div class="@class"></div>');
 
-
-
-    // 通知渲染
-    function notifyRender(list) {
-
-        var index = 0;
-        var fn;
-
-        while (fn = list[index++])
-        {
-            fn.apply(list[index++], list[index++]);
-        }
-
-        list.length = 0;
-    }
-
-
-    // 注册渲染前事件
-    yaxi.bindBeforeRender = function (fn, control, args) {
-
-        renderings.push(fn, control, args);
-    }
-
-
-    // 注册渲染后事件
-    yaxi.bindAfterRender = function (fn, control, args) {
-
-        rendereds.push(fn, control, args);
-    }
 
 
 	
@@ -9833,12 +9845,8 @@ yaxi.Page.renderer(function (base) {
         page.onload(page.options = options);
         page.__callback = callback;
         page.onshow();
-
-        notifyRender(renderings);
         
         host.appendChild(page.$renderer.render(page));
-
-        notifyRender(rendereds);
 	}
 
 	
@@ -9886,8 +9894,6 @@ yaxi.Page.renderer(function (base) {
         var index = 0;
         var control, view;
 
-        notifyRender(renderings);
-
         while (control = patches[index++])
         {
             if (view = control.$view)
@@ -9895,9 +9901,8 @@ yaxi.Page.renderer(function (base) {
                 control.$renderer.patch(control, view);
             }
         }
-
-        notifyRender(rendereds);
     }
+    
 
 
     

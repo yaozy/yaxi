@@ -1,4 +1,4 @@
-yaxi.Page.renderer(function (base) {
+yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
 
 
@@ -8,14 +8,6 @@ yaxi.Page.renderer(function (base) {
 	// 页面栈
     var all = [];
     
-
-
-    // 渲染前处理集合
-    var renderings = [];
-
-    // 渲染后处理集合
-	var rendereds = [];
-	
 
 
 	var host = yaxi.__view_host;
@@ -28,35 +20,6 @@ yaxi.Page.renderer(function (base) {
 
 	this.template('<div class="@class"></div>');
 
-
-
-    // 通知渲染
-    function notifyRender(list) {
-
-        var index = 0;
-        var fn;
-
-        while (fn = list[index++])
-        {
-            fn.apply(list[index++], list[index++]);
-        }
-
-        list.length = 0;
-    }
-
-
-    // 注册渲染前事件
-    yaxi.bindBeforeRender = function (fn, control, args) {
-
-        renderings.push(fn, control, args);
-    }
-
-
-    // 注册渲染后事件
-    yaxi.bindAfterRender = function (fn, control, args) {
-
-        rendereds.push(fn, control, args);
-    }
 
 
 	
@@ -103,12 +66,8 @@ yaxi.Page.renderer(function (base) {
         page.onload(page.options = options);
         page.__callback = callback;
         page.onshow();
-
-        notifyRender(renderings);
         
         host.appendChild(page.$renderer.render(page));
-
-        notifyRender(rendereds);
 	}
 
 	
@@ -156,8 +115,6 @@ yaxi.Page.renderer(function (base) {
         var index = 0;
         var control, view;
 
-        notifyRender(renderings);
-
         while (control = patches[index++])
         {
             if (view = control.$view)
@@ -165,9 +122,8 @@ yaxi.Page.renderer(function (base) {
                 control.$renderer.patch(control, view);
             }
         }
-
-        notifyRender(rendereds);
     }
+    
 
 
     

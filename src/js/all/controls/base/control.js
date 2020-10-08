@@ -507,8 +507,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     this.$('absolute', '', {
 
         kind: 'class',
-        data: 'yx-absolute-',
-        layout: false
+        data: 'yx-absolute-'
     });
 
 
@@ -517,8 +516,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     this.$('static', false, {
 
         kind: 'class',
-        data: 'yx-static',
-        layout: false
+        data: 'yx-static'
     });
 
 
@@ -526,16 +524,16 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
     var style = function (name, layout, data) {
 
-        this.$(name, '', {
-
-            alias: name.replace(/-(\w)/g, function (_, x) {
+        var key = name.replace(/-(\w)/g, function (_, x) {
         
-                return x.toUpperCase();
-            }),
+            return x.toUpperCase();
+        });
 
+        this.$(key, '', {
+            alias: name,
             kind: 'style',
             data: data | 0,
-            layout: layout
+            layout: !!layout
         });
 
     }.bind(this);
@@ -1257,7 +1255,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             base = base.$renderer;
         }
         
-        fn.call(prototype.$renderer, base || null, yaxi);
+        fn.call(prototype.$renderer, base || null, prototype, yaxi);
     }
 
 

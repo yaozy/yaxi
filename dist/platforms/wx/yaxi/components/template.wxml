@@ -230,8 +230,16 @@
         class="yx-control yx-box yx-scrollbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
         scroll-y
-        bindtouchstart="translateEvent">
-        <box data-id="{{ u }}" class="{{ layout }}" children="{{ c }}" bindtouchstart="translateEvent" />
+        scroll-top="{{ scrollTop || 1 }}"
+        scroll-into-view="{{ scrollIntoView }}"
+        bindscroll="translateEvent">
+        <box
+            data-id="{{ u }}" 
+            class="{{ layout }}"
+            style="{{ style }}min-height:100%;"
+            children="{{ c }}" 
+            bindtouchstart="translateEvent"
+            bindtouchmove="translateEvent" />
     </scroll-view>
 
 </template>
@@ -314,7 +322,6 @@
             class="yx-swiper-host"
             current="{{ current || 0 }}"
             circular="{{ true }}"
-            autoplay="{{ autoplay !== false }}"
             bindchange="translateEvent">
             <swiper-item 
                 wx:for="{{ c }}"

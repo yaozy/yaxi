@@ -1,4 +1,4 @@
-yaxi.Control.renderer(function () {
+yaxi.Control.renderer(function (base, thisControl) {
 
 
     
@@ -112,19 +112,25 @@ yaxi.Control.renderer(function () {
     this.render = function (control, uuid) {
 
         var view = control.$view;
-        var changes;
+        var any;
 
         if (!view)
         {
             view = control.$view = createView(this, control);
             view.id = uuid || control.uuid;
+
+            if (any = control.__on_mount)
+            {
+                control.__on_mount = null;
+                any.call(control, view);
+            }
         }
         
         control.__dirty = false;
 
-        if (changes = control.__changes)
+        if (any = control.__changes)
         {
-            renderChanges(this, control, changes, view);
+            renderChanges(this, control, any, view);
             control.__changes = null;
         }
 
@@ -263,6 +269,48 @@ yaxi.Control.renderer(function () {
         }
     }
 
+
+
+
+    
+    thisControl.boundingClientRect = function (callback) {
+
+        var view;
+
+        if (callback)
+        {
+            if (view = this.$view)
+            {
+                boundingClientRect(view, callback);
+            }
+            else
+            {
+                control.__on_mount = function (view) {
+
+                    setTimeout(function () {
+
+                        boundingClientRect(view, callback);
+
+                    }, 0);
+                }
+            }
+        }
+    }
+
+
+    function boundingClientRect(view, callback) {
+
+        var rect = view.getBoundingClientRect();
+
+        callback({
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            right: rect.right,
+            bottom: rect.bottom
+        });
+    }
 
     
 });

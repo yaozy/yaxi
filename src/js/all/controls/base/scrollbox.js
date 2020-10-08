@@ -2,56 +2,53 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
 
 
 
-    var pulldown, y, top, maxTop, maxHeight, timer;
+    var pulldown, start, switchHeight;
 
 
 
-    // 下拉刷新高度
-    this.$('pulldown', '');
+    // 下拉刷新高度为多少rem时变换状态
+    this.$('pulldownHeight', 80, false);
 
 
 
-    function check(scrollbox, renderer, pulldown, pageY) {
 
-        if (y < 0)
+    this.scrollTop = 0;
+    
+
+    this.scrollLeft = 0;
+    
+
+    this.scrollWidth = 0;
+    
+    
+    this.scrollHeight = 0;
+
+    
+
+    this.scrollTo = function (top) {
+
+        this.$set('scrollTo', top | 0);
+    }
+
+
+    this.scrollIntoView = function (childControl) {
+
+        if (childControl)
         {
-            y = pageY;
-            pulldown.status = 1;
-        }
-        else
-        {
-            pulldown.height = (pageY - y) + 'px';
-
-            if (timer)
-            {
-                clearTimeout(timer);
-            }
-
-            timer = setTimeout(function () {
-
-                var height = renderer.scrollHeight(scrollbox);
-
-                if (height > maxHeight)
-                {
-                    maxHeight = height;
-                }
-                else
-                {
-                    pulldown.status = 2;
-                }
-
-            }, 10);
+            this.$set('scrollIntoView', childControl.uuid);
         }
     }
 
 
 
-    this.__on_touchstart = function () {
 
-        y = maxTop = maxHeight = -1;
+    this.__on_touchstart = function () {
 
         if ((pulldown = this.__children[0]) && (pulldown instanceof yaxi.Pulldown))
         {
+            start = -1;
+            switchHeight = this.pulldownHeight * yaxi.remRatio | 0;
+
             pulldown.transition = '';
             pulldown.height = 0;
         }
@@ -59,36 +56,42 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
         {
             pulldown = null;
         }
-
-        maxTop = this.$renderer.maxTop(this);
     }
 
-
+    
     this.__on_touchmove = function (event) {
 
-        var touches = event.changedTouches;
         var touch;
 
-        if (touches && (touch = touches[0]))
+        if (pulldown && (touch = event.changedTouches) && (touch = touch[0]))
         {
-            var renderer = this.$renderer;
-            
-            top = renderer.scrollTop(this);
-
-            if (top <= 0)
+            var status, height;
+console.log(this.scrollTop)
+            if (this.scrollTop <= 0)
             {
-                if (pulldown)
+                var y = touch.pageY | 0;
+
+                if (start < 0 || start >= y)
                 {
-                    check(this, renderer, pulldown, touch.pageY);
+                    start = y;
+                }
+                else
+                {
+                    y -= start;
+
+                    status = y < switchHeight ? 1 : 2;
+                    height = y + 'px';
                 }
             }
             else
             {
-                y = -1;
+                start = -1;
             }
+
+            pulldown.status = status || 1;
+            pulldown.height = height || '0px';
         }
     }
-
 
 
     this.__on_touchend = function () {
@@ -98,16 +101,18 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
             pulldown.release();
             pulldown = null;
         }
-        
-        if (top + 20 >= maxTop)
-        {
-            var children = this.__children;
-            var pullup = children[children.length - 1];
+    }
 
-            if (pullup && pullup instanceof yaxi.Pullup)
-            {
-                pullup.start();
-            }
+
+
+    this.__on_pullup = function () {
+
+        var children = this.__children;
+        var pullup = children[children.length - 1];
+
+        if (pullup && pullup instanceof yaxi.Pullup)
+        {
+            pullup.start();
         }
     }
 

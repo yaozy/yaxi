@@ -159,19 +159,23 @@
 
 
 .yx-loading {
-    position: absolute;
+    position: relative;
     display: inline-block;
-    top: 50%;
-    left: 50%;
     width: 80rem;
     height: 80rem;
-    transform: translate(-50%, -50%);
     color: @text-lightest;
     font-family: "iconfont" !important;
     font-size: 20rem;
     font-style: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+.yx-loading-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .yx-loading-dot {
@@ -340,6 +344,7 @@
 .yx-scrollbox {
     overflow: auto;
 }
+
 
 
 

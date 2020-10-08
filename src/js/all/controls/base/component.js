@@ -29,16 +29,16 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         return function () {
 
-            var target, observes, any;
+            var target, observes, list;
 
             if (target = yx.__bindingTarget)
             {
                 // 添加观察对象
                 if (observes = this.__observes)
                 {
-                    if (any = observes[name])
+                    if (list = observes[name])
                     {
-                        any.push(target);
+                        list.push(target);
                     }
                     else
                     {
@@ -64,33 +64,24 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                 }
             }
 
-            return (this.__changes || this.__fields)[name];
+            return this.__fields[name];
         }
     }
 
 
     this.__build_set = function (name, options) {
 
-        var init = create;
         var convert = options.convert;
 
         return function (value) {
 
-            var changes;
+            var fields = this.__fields;
 
             value = convert ? convert.call(this, value) : value;
 
-            if (changes = this.__changes)
+            if (value !== fields[name])
             {
-                if (value !== changes[name])
-                {
-                    changes[name] = value;
-                    onchange.call(this, name);
-                }
-            }
-            else if (value !== this.__fields[name])
-            {
-                (this.__changes = init(this.__fields))[name] = value;
+                fields[name] = value;
                 onchange.call(this, name);
             }
         }

@@ -1,4 +1,4 @@
-yaxi.Page.renderer(function (base, yaxi) {
+yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
 
 
@@ -8,18 +8,9 @@ yaxi.Page.renderer(function (base, yaxi) {
 
 
 
-
 	// 页面栈
     var all = [];
     
-
-
-    // 渲染前处理集合
-    var renderings = [];
-
-    // 渲染后处理集合
-    var rendereds = [];
-
 
 
 
@@ -38,35 +29,6 @@ yaxi.Page.renderer(function (base, yaxi) {
         throw new Error('can not find uuid ' + uuid + ' of page!');
     }
 
-
-
-    // 通知渲染
-    function notifyRender(list) {
-
-        var index = 0;
-        var fn;
-
-        while (fn = list[index++])
-        {
-            fn.apply(list[index++], list[index++]);
-        }
-
-        list.length = 0;
-    }
-
-
-    // 注册渲染前事件
-    yaxi.bindBeforeRender = function (fn, control, args) {
-
-        renderings.push(fn, control, args);
-    }
-
-
-    // 注册渲染后事件
-    yaxi.bindAfterRender = function (fn, control, args) {
-
-        rendereds.push(fn, control, args);
-    }
 
 
 	
@@ -191,18 +153,14 @@ yaxi.Page.renderer(function (base, yaxi) {
             var page = find(uuid);
             var data;
 
-            notifyRender(renderings);
-
+            yaxi.remRatio = 1 / info.pixelRatio;
             page.__wx_page = wxPage;
 
             data = page.$renderer.render(page);
 
             console.log(data);
 
-            wxPage.setData({ top: info.statusBarHeight | 0, p: data }, function () {
-
-                notifyRender(rendereds);
-            });
+            wxPage.setData({ top: info.statusBarHeight | 0, p: data });
         });
     }
 
@@ -210,27 +168,16 @@ yaxi.Page.renderer(function (base, yaxi) {
     yaxi.__on_page_patch = function (patches) {
 
         var index = 0;
-        var times = 0;
         var control, page, data;
-
-        notifyRender(renderings);
 
         while (control = patches[index++])
         {
             if (page = control.__wx_page)
             {
-                times++;
-
                 control.$renderer.patch(control, data = create(null), control.__wx_dialog || 'p');
                 console.log(data);
 
-                page.setData(data, function () {
-
-                    if (--times <= 0)
-                    {
-                        notifyRender(rendereds);
-                    }
-                });
+                page.setData(data);
             }
         }
     }
@@ -243,17 +190,12 @@ yaxi.Page.renderer(function (base, yaxi) {
         var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
         var data;
 
-        notifyRender(renderings);
-
         data = {};
         data[index = 'd[' + index + ']'] = dialog.$renderer.render(dialog);
 
         console.log(data);
 
-        wxPage.setData(data, function () {
-
-            notifyRender(rendereds);
-        });
+        wxPage.setData(data);
 
         // 标记对话框关闭数据, 关闭对话框时用
         dialog.__wx_dialog = index;

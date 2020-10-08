@@ -127,7 +127,7 @@ yaxi.component('Pulldown', function (Class, base) {
         {
             case 1:
                 this.transition = 'height 600ms ease';
-                this.height = 0;
+                this.height = '0px';
                 break;
 
             case 2:

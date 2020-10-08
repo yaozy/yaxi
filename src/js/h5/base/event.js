@@ -21,7 +21,7 @@
 	
 	
     // 处理rem自适应
-    document.documentElement.style.fontSize = (yaxi.rem = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
+    document.documentElement.style.fontSize = (yaxi.remRatio = (window.innerWidth * 10000 / 750 | 0) / 10000) + 'px';
 
 
 
@@ -335,19 +335,21 @@
 
     bind('scroll', function (event) {
 
-        var control, fn;
+        var target = event.target;
+        var control;
 
-        if (control = findControl(event.target))
+        if (control = findControl(target))
         {
-            if (fn = control.__on_scroll)
-            {
-                fn.call(control, event.target);
-            }
+            control.scrollTop = target.scrollTop;
+            control.scrollLeft = target.scrollLeft;
+            control.scrollWidth = target.scrollWidth;
+            control.scrollHeight = target.scrollHeight;
 
             return control.trigger('scroll');
         }
 
     }, true);
+
 
 
     

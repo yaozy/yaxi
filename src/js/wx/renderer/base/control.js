@@ -1,4 +1,4 @@
-yaxi.Control.renderer(function (base, yaxi) {
+yaxi.Control.renderer(function (base, thisControl) {
 
 
 
@@ -9,7 +9,7 @@ yaxi.Control.renderer(function (base, yaxi) {
 
     var replaceUnit = /rem/g;
 
-    
+
 
     
     function renderChanges(renderer, control, changes, view, prefix) {
@@ -35,7 +35,29 @@ yaxi.Control.renderer(function (base, yaxi) {
     }
 
 
+
     this.renderClasses = function (control, properties, values, count, view, prefix) {
+
+        view[prefix + 'class'] = values.slice(0, count).join('');
+    }
+
+
+    this.renderSplit1 = function (control, properties, values, count, view, prefix) {
+
+        var index = 0;
+        var property;
+
+        while (property = properties[index])
+        {
+            if (property.name === 'layout')
+            {
+                view[prefix + 'layout'] = values[index];
+                values[index] = '';
+                break;
+            }
+
+            index++;
+        }
 
         view[prefix + 'class'] = values.slice(0, count).join('');
     }
@@ -53,11 +75,42 @@ yaxi.Control.renderer(function (base, yaxi) {
                 value = value.replace(replaceUnit, 'rpx');
             }
 
-            values[i] = property.name + ':' + value + ';';
+            values[i] = property.alias + ':' + value + ';';
         }
 
         view[prefix + 's'] = values.slice(0, count).join('');
     }
+
+
+    this.renderSplit2 = function (control, properties, values, count, view, prefix) {
+
+        var layout = '';
+
+        for (var i = 0; i < count; i++)
+        {
+            var property = properties[i];
+            var value = values[i];
+
+            if ((property.data & 1) === 1)
+            {
+                value = value.replace(replaceUnit, 'rpx');
+            }
+
+            value = property.alias + ':' + value + ';';
+
+            if (property.layout)
+            {
+                layout += value;
+                value = '';
+            }
+
+            values[i] = value;
+        }
+
+        view[prefix + 's'] = values.slice(0, count).join('');
+        view[prefix + 'style'] = layout;
+    }
+
 
 
     this.renderAttributes = function (control, properties, values, count, view, prefix) {
@@ -236,6 +289,25 @@ yaxi.Control.renderer(function (base, yaxi) {
 
 
     this.onchange = function (control, view, prefix) {
+    }
+
+
+
+    
+    thisControl.boundingClientRect = function (callback) {
+
+        callback && wx.createSelectorQuery().select('#' + this.uuid).boundingClientRect(function (rect) {
+
+            callback({
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+                right: rect.right,
+                bottom: rect.bottom
+            })
+
+        }).exec();
     }
 
     
