@@ -48,28 +48,6 @@ return (
 				}
 			],
 			[
-				"scrollbox",
-				{
-					"height": "200rem"
-				},
-				[
-					[
-						"pulldown",
-						null
-					],
-					[
-						"databox",
-						{
-							"min-height": "100%"
-						}
-					],
-					[
-						"pullup",
-						null
-					]
-				]
-			],
-			[
 				"databox",
 				{
 					"key": "host",

@@ -10,6 +10,10 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
     this.$('pulldownHeight', 80, false);
 
 
+    // 上拉刷新高度为多少rem时触发刷新动作
+    this.$('pullupHeight', 20, false);
+
+
 
 
     this.scrollTop = 0;
@@ -66,7 +70,7 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
         if (pulldown && (touch = event.changedTouches) && (touch = touch[0]))
         {
             var status, height;
-console.log(this.scrollTop)
+
             if (this.scrollTop <= 0)
             {
                 var y = touch.pageY | 0;
@@ -88,7 +92,7 @@ console.log(this.scrollTop)
                 start = -1;
             }
 
-            pulldown.status = status || 1;
+            pulldown.status = status || 0;
             pulldown.height = height || '0px';
         }
     }
@@ -96,23 +100,33 @@ console.log(this.scrollTop)
 
     this.__on_touchend = function () {
 
-        if (pulldown)
+        var control;
+
+        if (control = pulldown)
         {
-            pulldown.release();
             pulldown = null;
+
+            if (control.status > 0)
+            {
+                control.release();
+                return;
+            }
         }
-    }
-
-
-
-    this.__on_pullup = function () {
 
         var children = this.__children;
-        var pullup = children[children.length - 1];
 
-        if (pullup && pullup instanceof yaxi.Pullup)
+        // 最后一个是上拉刷新控件
+        if ((control = children[children.length - 1]) && control instanceof yaxi.Pullup)
         {
-            pullup.start();
+            var height = this.pullupHeight * yaxi.remRatio; 
+
+            yaxi.boundingClientRects([this, control], function (rect1, rect2) {
+
+                if (rect2.top + height < rect1.height)
+                {
+                    control.start();
+                }
+            });
         }
     }
 

@@ -24,6 +24,7 @@ Page({
         {
             yaxi.openMainPage(require('../../js/main'), options, this);
         }
+
     },
 
 

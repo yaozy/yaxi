@@ -87,13 +87,13 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
         if (typeof listener === 'function')
         {
-            var callback = function (event) {
+            var callbackFn = function (event) {
 
                 listener.call(this, event);
-                this.off(type, callback);
+                this.off(type, callbackFn);
             }
 
-            this.on(type, callback);
+            this.on(type, callbackFn);
         }
     }
 

@@ -24,7 +24,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             hidden: function () {
                             
-                                return self.status !== 2;
+                                return !self.status;
                             }
                         }
                     }
@@ -44,7 +44,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status !== 1;
+                                        return self.status;
                                     }
                                 }
                             }
@@ -58,7 +58,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             text: function () {
 
-                                return self.status === 1 ? self.loadingText : self.doneText;
+                                return self.status ? self.doneText : self.loadingText;
                             }
                         }
                     }
@@ -71,9 +71,8 @@ yaxi.component('Pullup', function (Class, base) {
 
 
     // 下拉状态
-    // 0    等待状态
-    // 1    加载中
-    // 2    加载完成
+    // 0    加载中
+    // 1    加载完成
     this.$('status', 0);
 
 
@@ -97,16 +96,14 @@ yaxi.component('Pullup', function (Class, base) {
 
     this.start = function () {
 
-        this.status = 1;
+        this.status = 0;
         this.trigger('refresh');
-
-        alert('refresh')
     }
 
 
-    this.done = function (completed) {
+    this.done = function () {
 
-        this.status = completed ? 2 : 0;
+        this.status = 1;
     }
 
 

@@ -15,7 +15,7 @@ module.exports = yaxi.Box.extend(function (Class, base) {
                 {
                     icon: 'my-class',
                     text: '班级',
-                    url: './order'
+                    url: './class'
                 },
                 {
                     icon: 'my-course',

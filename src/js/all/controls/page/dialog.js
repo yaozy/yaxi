@@ -154,11 +154,11 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-	Class.delete = function (text, callback) {
+	Class.delete = function (text, callbackFn) {
 
 		if (typeof text === 'function')
 		{
-			callback = text;
+			callbackFn = text;
 			text = '';
 		}
 
@@ -167,7 +167,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 			title: '确认删除',
 			content: '确认要删除' + (text || '') + '?'
 
-		}, callback);
+		}, callbackFn);
 	}
 
 

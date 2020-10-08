@@ -930,7 +930,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     
 
     // 获取变更数据
-    this.__get_changes = function (changes, fields) {
+    this.__get_changes = function (changes) {
 
         var properties = this.$properties;
         var names = own(changes || (changes = this.__changes));
@@ -945,7 +945,6 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         {
             property = properties[name];
             value = changes[name];
-            fields && (fields[name] = value);
 
             switch (property && property.kind)
             {
@@ -1158,6 +1157,35 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
 
+    // 查询多个控件的渲染坐标
+    yaxi.boundingClientRects = function (controls, callbackFn) {
+
+        if (controls && controls.length > 0 && callbackFn)
+        {
+            var count = controls.length;
+            var index = 0;
+            var control;
+
+            while (control = controls[index])
+            {
+                controls[index].boundingClientRect(function (controls, index) {
+                    
+                    return function (rect) {
+
+                        controls[index] = rect;
+
+                        if (!--count)
+                        {
+                            callbackFn.apply(this, controls);
+                        }
+                    }
+
+                }(controls, index++));
+            }
+        }
+    }
+
+
 
     this.remove = function () {
 
@@ -1174,6 +1202,27 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             }
 
             children.splice(index, 1);
+        }
+    }
+
+
+
+    // 模型销毁时调用此方法解除绑定关系
+    this.__unbind = function (model) {
+
+        var bindings;
+
+        if (bindings = this.__bindings)
+        {
+            for (var i = bindings.length; i--;)
+            {
+                if (bindings[i] === model)
+                {
+                    bindings.splice(i - 1, 2);
+                }
+
+                i--;
+            }
         }
     }
 
@@ -1205,7 +1254,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__onchange = this.__scope = null;
+        this.parent = this.__onchange = this.__scope = this.__po = null;
     }
 
 

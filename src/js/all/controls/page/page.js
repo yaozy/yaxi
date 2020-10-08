@@ -44,9 +44,9 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-	function open(options, callback) {
+	function open(options, callbackFn) {
 
-		yaxi.openPage(this, options, callback);
+		yaxi.openPage(this, options, callbackFn);
 	}
 
 

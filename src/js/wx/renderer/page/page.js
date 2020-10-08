@@ -70,34 +70,34 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
     
 
 	// 打开指定页面
-    yaxi.openPage = function (Page, options, callback) {
+    yaxi.openPage = function (Page, options, callbackFn) {
 
         var stack = all;
         var wxPage, page;
     
         if (typeof options === 'function')
         {
-            callback = options;
+            callbackFn = options;
             options = null;
         }
         
         if (page = stack[stack.length - 1])
         {
-            wxPage = page.__wx_page;
+            wxPage = page.__po;
             page.onhide();
         }
 
         stack.push(page = new Page(options));
 
         page.onload(page.options = options);
-        page.__callback = callback;
+        page.__cb = callbackFn;
         page.onshow();
 
         // 对话框直接嵌在当前页面内, 不创建新的微信页面
         if (page instanceof yaxi.Dialog && all.length > 0)
         {
-            page.__wx_page = wxPage;
-            openDialog(page, options, callback);
+            page.__po = wxPage;
+            openDialog(page, options, callbackFn);
         }
         else
         {
@@ -118,16 +118,16 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         if (page && page.onunload(page.options) !== false)
         {
             // 对话框
-            if (wxPage = page.__wx_dialog)
+            if (wxPage = page.__pod)
             {
                 data = {};
                 data[wxPage] = null;
 
-                wxPage = page.__wx_page;
+                wxPage = page.__po;
                 wxPage.setData(data, function () {
 
                     closePage(type, payload);
-                    wxPage.__wx_index--;
+                    wxPage.__poi--;
                 });
             }
             else // 页面
@@ -154,7 +154,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
             var data;
 
             yaxi.remRatio = 1 / info.pixelRatio;
-            page.__wx_page = wxPage;
+            page.__po = wxPage;
 
             data = page.$renderer.render(page);
 
@@ -172,9 +172,9 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         while (control = patches[index++])
         {
-            if (page = control.__wx_page)
+            if (page = control.__po)
             {
-                control.$renderer.patch(control, data = create(null), control.__wx_dialog || 'p');
+                control.$renderer.patch(control, data = create(null), control.__pod || 'p');
                 console.log(data);
 
                 page.setData(data);
@@ -186,8 +186,8 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
     function openDialog(dialog) {
 
-        var wxPage = dialog.__wx_page;
-        var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
+        var wxPage = dialog.__po;
+        var index = ++wxPage.__poi || (wxPage.__poi = 0);
         var data;
 
         data = {};
@@ -198,7 +198,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         wxPage.setData(data);
 
         // 标记对话框关闭数据, 关闭对话框时用
-        dialog.__wx_dialog = index;
+        dialog.__pod = index;
     }
 
 
@@ -206,19 +206,19 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         var stack = all;
         var page = stack[stack.length - 1];
-        var callback;
+        var callbackFn;
 
-        page.options = page.__wx_page = null;
+        page.options = page.__po = null;
         page.destroy();
 
         page.__shrink_uuid();
         
         stack.pop();
 
-        if (callback = page.__callback)
+        if (callbackFn = page.__cb)
         {
-            page.__callback = null;
-            callback(type, payload);
+            page.__cb = null;
+            callbackFn(type, payload);
         }
 
         if (page = stack[stack.length - 1])

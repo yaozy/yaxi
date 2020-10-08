@@ -42,21 +42,20 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    this.renderSplit1 = function (control, properties, values, count, view, prefix) {
+    this.renderSplitClasses = function (control, properties, values, count, view, prefix) {
 
-        var index = 0;
         var property;
 
-        while (property = properties[index])
+        for (var i = 0; i < count; i++)
         {
+            var property = properties[i];
+
             if (property.name === 'layout')
             {
-                view[prefix + 'layout'] = values[index];
-                values[index] = '';
+                view[prefix + 'layout'] = values[i];
+                values[i] = '';
                 break;
             }
-
-            index++;
         }
 
         view[prefix + 'class'] = values.slice(0, count).join('');
@@ -82,7 +81,7 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    this.renderSplit2 = function (control, properties, values, count, view, prefix) {
+    this.renderSplitStyles = function (control, properties, values, count, view, prefix) {
 
         var layout = '';
 
@@ -140,7 +139,7 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         var fields = control.__fields;
         var view = create(null);
-        var changes;
+        var changes, count;
 
         control.__dirty = false;
 
@@ -153,7 +152,22 @@ yaxi.Control.renderer(function (base, thisControl) {
             control.__changes = null;
         }
 
-        renderChanges(this, control, fields, view, '');
+        changes = control.__get_changes(fields);
+
+        if (count = changes[0])
+        {
+            this.renderClasses(control, changes[1], changes[2], count, view, '');
+        }
+
+        if (count = changes[3])
+        {
+            this.renderStyles(control,  changes[4], changes[5], count, view, '');
+        }
+
+        if (count = changes[6])
+        {
+            this.renderAttributes(control,  changes[7], changes[8], count, view, '');
+        }
 
         this.onchange.call(this, control, view, '');
         return view;
@@ -190,8 +204,34 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         if (changes = control.__changes)
         {
-            assign(control.__fields, changes);
-            renderChanges(this, control, changes, view, prefix += '.');
+            var fields = control.__fields;
+            var count;
+
+            assign(fields, changes);
+            changes = control.__get_changes(changes);
+
+            prefix += '.';
+
+            if (count = changes[6])
+            {
+                this.renderAttributes(control,  changes[7], changes[8], count, view, prefix);
+            }
+
+            // 如果class和样式有变化需要重新渲染
+            if (changes[0] > 0 || changes[3] > 0)
+            {
+                fields = control.__get_changes(fields);
+
+                if (changes[0] > 0 && (count = fields[0]))
+                {
+                    this.renderClasses(control, fields[1], fields[2], count, view, prefix);
+                }
+        
+                if (changes[3] > 0 && (count = fields[3]))
+                {
+                    this.renderStyles(control,  fields[4], fields[5], count, view, prefix);
+                }
+            }
 
             this.onchange.call(this, control, view, prefix);
             control.__changes = null;
@@ -294,20 +334,35 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
     
-    thisControl.boundingClientRect = function (callback) {
+    thisControl.boundingClientRect = function (callbackFn) {
 
-        callback && wx.createSelectorQuery().select('#' + this.uuid).boundingClientRect(function (rect) {
+        var parent, uuid, po;
 
-            callback({
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                height: rect.height,
-                right: rect.right,
-                bottom: rect.bottom
-            })
+        if (callbackFn && (uuid = (this.__shadowRoot || this).__uuid))
+        {
+            parent = this;
 
-        }).exec();
+            while (parent = parent.parent)
+            {
+                if (po = parent.__po)
+                {
+                    break;
+                }
+            }
+
+            (po || wx).createSelectorQuery().select('#id-' + uuid).boundingClientRect(function (rect) {
+
+                callbackFn({
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    right: rect.right,
+                    bottom: rect.bottom
+                })
+    
+            }).exec();
+        }
     }
 
     

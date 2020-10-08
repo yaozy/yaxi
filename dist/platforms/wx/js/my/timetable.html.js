@@ -63,14 +63,15 @@ return (
 												[
 													[
 														"text",
-														null,
+														{
+															"width": "120rem"
+														},
 														"班级:"
 													],
 													[
 														"text",
 														{
-															"text": $item.class,
-															"margin-left": "10rem"
+															"text": $item.class
 														}
 													]
 												]
@@ -83,14 +84,15 @@ return (
 												[
 													[
 														"text",
-														null,
+														{
+															"width": "120rem"
+														},
 														"讲师:"
 													],
 													[
 														"text",
 														{
-															"text": $item.teacher,
-															"margin-left": "10rem"
+															"text": $item.teacher
 														}
 													]
 												]
@@ -103,14 +105,15 @@ return (
 												[
 													[
 														"text",
-														null,
+														{
+															"width": "120rem"
+														},
 														"地址:"
 													],
 													[
 														"text",
 														{
-															"text": $item.address,
-															"margin-left": "10rem"
+															"text": $item.address
 														}
 													]
 												]
@@ -123,14 +126,15 @@ return (
 												[
 													[
 														"text",
-														null,
+														{
+															"width": "120rem"
+														},
 														"时间:"
 													],
 													[
 														"text",
 														{
-															"text": $item.time,
-															"margin-left": "10rem"
+															"text": $item.time
 														}
 													]
 												]

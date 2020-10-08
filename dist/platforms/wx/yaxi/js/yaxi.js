@@ -362,21 +362,21 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 (function (buffer) {
 
 
-    buffer.fromString = function (value, callback) {
+    buffer.fromString = function (value, callbackFn) {
 
         var data = new Blob([value], { type: 'text/plain' });
         var file = new FileReader();
 
         file.onload = function () {
             
-            callback(this.result);
+            callbackFn(this.result);
         }
 
         file.readAsArrayBuffer(data);
     }
 
 
-    buffer.toString = function (buffer, callback) {
+    buffer.toString = function (buffer, callbackFn) {
 
         var reader = new FileReader();
         
@@ -384,7 +384,7 @@ Function.prototype.bind || (Function.prototype.bind = function (context) {
 
         reader.onload = function () {
 
-            callback(this.result)
+            callbackFn(this.result)
         };
 
         reader.readAsText(buffer, 'utf-8');
@@ -1034,13 +1034,13 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
         if (typeof listener === 'function')
         {
-            var callback = function (event) {
+            var callbackFn = function (event) {
 
                 listener.call(this, event);
-                this.off(type, callback);
+                this.off(type, callbackFn);
             }
 
-            this.on(type, callback);
+            this.on(type, callbackFn);
         }
     }
 
@@ -4468,7 +4468,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     
 
     // 获取变更数据
-    this.__get_changes = function (changes, fields) {
+    this.__get_changes = function (changes) {
 
         var properties = this.$properties;
         var names = own(changes || (changes = this.__changes));
@@ -4483,7 +4483,6 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         {
             property = properties[name];
             value = changes[name];
-            fields && (fields[name] = value);
 
             switch (property && property.kind)
             {
@@ -4696,6 +4695,35 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
 
+    // 查询多个控件的渲染坐标
+    yaxi.boundingClientRects = function (controls, callbackFn) {
+
+        if (controls && controls.length > 0 && callbackFn)
+        {
+            var count = controls.length;
+            var index = 0;
+            var control;
+
+            while (control = controls[index])
+            {
+                controls[index].boundingClientRect(function (controls, index) {
+                    
+                    return function (rect) {
+
+                        controls[index] = rect;
+
+                        if (!--count)
+                        {
+                            callbackFn.apply(this, controls);
+                        }
+                    }
+
+                }(controls, index++));
+            }
+        }
+    }
+
+
 
     this.remove = function () {
 
@@ -4743,7 +4771,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__onchange = this.__scope = null;
+        this.parent = this.__onchange = this.__scope = this.__po = null;
     }
 
 
@@ -6614,7 +6642,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             hidden: function () {
                             
-                                return self.status !== 2;
+                                return self.status;
                             }
                         }
                     }
@@ -6634,7 +6662,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status !== 1;
+                                        return !self.status;
                                     }
                                 }
                             }
@@ -6648,7 +6676,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             text: function () {
 
-                                return self.status === 1 ? self.loadingText : self.doneText;
+                                return self.status ? self.doneText : self.loadingText;
                             }
                         }
                     }
@@ -6661,10 +6689,9 @@ yaxi.component('Pullup', function (Class, base) {
 
 
     // 下拉状态
-    // 0    等待状态
-    // 1    加载中
-    // 2    加载完成
-    this.$('status', 0);
+    // 0    加载中
+    // 1    加载完成
+    this.$('status', 1);
 
 
     
@@ -6687,16 +6714,14 @@ yaxi.component('Pullup', function (Class, base) {
 
     this.start = function () {
 
-        this.status = 1;
+        this.status = 0;
         this.trigger('refresh');
-
-        alert('refresh')
     }
 
 
-    this.done = function (completed) {
+    this.done = function () {
 
-        this.status = completed ? 2 : 0;
+        this.status = 1;
     }
 
 
@@ -6741,6 +6766,10 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
 
     // 下拉刷新高度为多少rem时变换状态
     this.$('pulldownHeight', 80, false);
+
+
+    // 上拉刷新高度为多少rem时触发刷新动作
+    this.$('pullupHeight', 20, false);
 
 
 
@@ -6799,7 +6828,7 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
         if (pulldown && (touch = event.changedTouches) && (touch = touch[0]))
         {
             var status, height;
-console.log(this.scrollTop)
+
             if (this.scrollTop <= 0)
             {
                 var y = touch.pageY | 0;
@@ -6821,7 +6850,7 @@ console.log(this.scrollTop)
                 start = -1;
             }
 
-            pulldown.status = status || 1;
+            pulldown.status = status || 0;
             pulldown.height = height || '0px';
         }
     }
@@ -6829,23 +6858,33 @@ console.log(this.scrollTop)
 
     this.__on_touchend = function () {
 
-        if (pulldown)
+        var control;
+
+        if (control = pulldown)
         {
-            pulldown.release();
             pulldown = null;
+
+            if (control.status > 0)
+            {
+                control.release();
+                return;
+            }
         }
-    }
-
-
-
-    this.__on_pullup = function () {
 
         var children = this.__children;
-        var pullup = children[children.length - 1];
 
-        if (pullup && pullup instanceof yaxi.Pullup)
+        // 最后一个是上拉刷新控件
+        if ((control = children[children.length - 1]) && control instanceof yaxi.Pullup)
         {
-            pullup.start();
+            var height = this.pullupHeight * yaxi.remRatio; 
+
+            yaxi.boundingClientRects([this, control], function (rect1, rect2) {
+
+                if (rect2.top + height < rect1.height)
+                {
+                    control.start();
+                }
+            });
         }
     }
 
@@ -7813,9 +7852,9 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-	function open(options, callback) {
+	function open(options, callbackFn) {
 
-		yaxi.openPage(this, options, callback);
+		yaxi.openPage(this, options, callbackFn);
 	}
 
 
@@ -7994,11 +8033,11 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-	Class.delete = function (text, callback) {
+	Class.delete = function (text, callbackFn) {
 
 		if (typeof text === 'function')
 		{
-			callback = text;
+			callbackFn = text;
 			text = '';
 		}
 
@@ -8007,7 +8046,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 			title: '确认删除',
 			content: '确认要删除' + (text || '') + '?'
 
-		}, callback);
+		}, callbackFn);
 	}
 
 
@@ -8135,11 +8174,11 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
     // 获取系统信息
-    yaxi.getSystemInfo = function (callback) {
+    yaxi.getSystemInfo = function (callbackFn) {
 
-        callback && wx.getSystemInfo({
+        callbackFn && wx.getSystemInfo({
 
-            success: callback
+            success: callbackFn
         });
     }
 
@@ -8488,21 +8527,20 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    this.renderSplit1 = function (control, properties, values, count, view, prefix) {
+    this.renderSplitClasses = function (control, properties, values, count, view, prefix) {
 
-        var index = 0;
         var property;
 
-        while (property = properties[index])
+        for (var i = 0; i < count; i++)
         {
+            var property = properties[i];
+
             if (property.name === 'layout')
             {
-                view[prefix + 'layout'] = values[index];
-                values[index] = '';
+                view[prefix + 'layout'] = values[i];
+                values[i] = '';
                 break;
             }
-
-            index++;
         }
 
         view[prefix + 'class'] = values.slice(0, count).join('');
@@ -8528,7 +8566,7 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    this.renderSplit2 = function (control, properties, values, count, view, prefix) {
+    this.renderSplitStyles = function (control, properties, values, count, view, prefix) {
 
         var layout = '';
 
@@ -8586,7 +8624,7 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         var fields = control.__fields;
         var view = create(null);
-        var changes;
+        var changes, count;
 
         control.__dirty = false;
 
@@ -8599,7 +8637,22 @@ yaxi.Control.renderer(function (base, thisControl) {
             control.__changes = null;
         }
 
-        renderChanges(this, control, fields, view, '');
+        changes = control.__get_changes(fields);
+
+        if (count = changes[0])
+        {
+            this.renderClasses(control, changes[1], changes[2], count, view, '');
+        }
+
+        if (count = changes[3])
+        {
+            this.renderStyles(control,  changes[4], changes[5], count, view, '');
+        }
+
+        if (count = changes[6])
+        {
+            this.renderAttributes(control,  changes[7], changes[8], count, view, '');
+        }
 
         this.onchange.call(this, control, view, '');
         return view;
@@ -8636,8 +8689,34 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         if (changes = control.__changes)
         {
-            assign(control.__fields, changes);
-            renderChanges(this, control, changes, view, prefix += '.');
+            var fields = control.__fields;
+            var count;
+
+            assign(fields, changes);
+            changes = control.__get_changes(changes);
+
+            prefix += '.';
+
+            if (count = changes[6])
+            {
+                this.renderAttributes(control,  changes[7], changes[8], count, view, prefix);
+            }
+
+            // 如果class和样式有变化需要重新渲染
+            if (changes[0] > 0 || changes[3] > 0)
+            {
+                fields = control.__get_changes(fields);
+
+                if (changes[0] > 0 && (count = fields[0]))
+                {
+                    this.renderClasses(control, fields[1], fields[2], count, view, prefix);
+                }
+        
+                if (changes[3] > 0 && (count = fields[3]))
+                {
+                    this.renderStyles(control,  fields[4], fields[5], count, view, prefix);
+                }
+            }
 
             this.onchange.call(this, control, view, prefix);
             control.__changes = null;
@@ -8740,20 +8819,35 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
     
-    thisControl.boundingClientRect = function (callback) {
+    thisControl.boundingClientRect = function (callbackFn) {
 
-        callback && wx.createSelectorQuery().select('#' + this.uuid).boundingClientRect(function (rect) {
+        var parent, uuid, po;
 
-            callback({
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                height: rect.height,
-                right: rect.right,
-                bottom: rect.bottom
-            })
+        if (callbackFn && (uuid = (this.__shadowRoot || this).__uuid))
+        {
+            parent = this;
 
-        }).exec();
+            while (parent = parent.parent)
+            {
+                if (po = parent.__po)
+                {
+                    break;
+                }
+            }
+
+            (po || wx).createSelectorQuery().select('#id-' + uuid).boundingClientRect(function (rect) {
+
+                callbackFn({
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    right: rect.right,
+                    bottom: rect.bottom
+                })
+    
+            }).exec();
+        }
     }
 
     
@@ -8963,14 +9057,11 @@ yaxi.ScrollBox.renderer(function (base) {
 
   
     // 分开渲染layout类的class
-    this.renderClasses = function () {
-
-        this.renderSplit1.apply(this, arguments);
-    }
+    this.renderClasses = this.renderSplitClasses;
 
 
     // 分开渲染容器类的样式
-    this.renderStyles = this.renderSplit2;
+    this.renderStyles = this.renderSplitStyles;
     
 
 });
@@ -9111,34 +9202,34 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
     
 
 	// 打开指定页面
-    yaxi.openPage = function (Page, options, callback) {
+    yaxi.openPage = function (Page, options, callbackFn) {
 
         var stack = all;
         var wxPage, page;
     
         if (typeof options === 'function')
         {
-            callback = options;
+            callbackFn = options;
             options = null;
         }
         
         if (page = stack[stack.length - 1])
         {
-            wxPage = page.__wx_page;
+            wxPage = page.__po;
             page.onhide();
         }
 
         stack.push(page = new Page(options));
 
         page.onload(page.options = options);
-        page.__callback = callback;
+        page.__cb = callbackFn;
         page.onshow();
 
         // 对话框直接嵌在当前页面内, 不创建新的微信页面
         if (page instanceof yaxi.Dialog && all.length > 0)
         {
-            page.__wx_page = wxPage;
-            openDialog(page, options, callback);
+            page.__po = wxPage;
+            openDialog(page, options, callbackFn);
         }
         else
         {
@@ -9159,16 +9250,16 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         if (page && page.onunload(page.options) !== false)
         {
             // 对话框
-            if (wxPage = page.__wx_dialog)
+            if (wxPage = page.__pod)
             {
                 data = {};
                 data[wxPage] = null;
 
-                wxPage = page.__wx_page;
+                wxPage = page.__po;
                 wxPage.setData(data, function () {
 
                     closePage(type, payload);
-                    wxPage.__wx_index--;
+                    wxPage.__poi--;
                 });
             }
             else // 页面
@@ -9195,7 +9286,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
             var data;
 
             yaxi.remRatio = 1 / info.pixelRatio;
-            page.__wx_page = wxPage;
+            page.__po = wxPage;
 
             data = page.$renderer.render(page);
 
@@ -9213,9 +9304,9 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         while (control = patches[index++])
         {
-            if (page = control.__wx_page)
+            if (page = control.__po)
             {
-                control.$renderer.patch(control, data = create(null), control.__wx_dialog || 'p');
+                control.$renderer.patch(control, data = create(null), control.__pod || 'p');
                 console.log(data);
 
                 page.setData(data);
@@ -9227,8 +9318,8 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
     function openDialog(dialog) {
 
-        var wxPage = dialog.__wx_page;
-        var index = ++wxPage.__wx_index || (wxPage.__wx_index = 0);
+        var wxPage = dialog.__po;
+        var index = ++wxPage.__poi || (wxPage.__poi = 0);
         var data;
 
         data = {};
@@ -9239,7 +9330,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         wxPage.setData(data);
 
         // 标记对话框关闭数据, 关闭对话框时用
-        dialog.__wx_dialog = index;
+        dialog.__pod = index;
     }
 
 
@@ -9247,19 +9338,19 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         var stack = all;
         var page = stack[stack.length - 1];
-        var callback;
+        var callbackFn;
 
-        page.options = page.__wx_page = null;
+        page.options = page.__po = null;
         page.destroy();
 
         page.__shrink_uuid();
         
         stack.pop();
 
-        if (callback = page.__callback)
+        if (callbackFn = page.__cb)
         {
-            page.__callback = null;
-            callback(type, payload);
+            page.__cb = null;
+            callbackFn(type, payload);
         }
 
         if (page = stack[stack.length - 1])

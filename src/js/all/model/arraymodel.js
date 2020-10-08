@@ -130,13 +130,13 @@
     }
 
 
-    function destroyItem(item) {
+    function destroyItem(model) {
 
-        var bindings;
+        var bindings, control;
 
-        if (bindings = item.__bindings)
+        if (bindings = model.__bindings)
         {
-            item.__bindings = null;
+            model.__bindings = null;
 
             for (var name in bindings)
             {
@@ -144,13 +144,15 @@
 
                 for (var i = list.length; i--;)
                 {
-                    // 清除绑定关联的模型
-                    list[i].model = null;
+                    if (control = controls[list[i].control])
+                    {
+                        control.__unbind(model);
+                    }
                 }
             }
         }
 
-        item.$parent = item.__bindings = null;
+        model.$parent = null;
     }
 
 

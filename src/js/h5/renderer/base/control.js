@@ -2,6 +2,7 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
     
+    var assign = Object.assign;
 
     var div = document.createElement('div');
 
@@ -50,7 +51,7 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         var count;
 
-        changes = control.__get_changes(changes, control.__fields);
+        changes = control.__get_changes(changes);
 
         if (count = changes[0])
         {
@@ -130,7 +131,9 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         if (any = control.__changes)
         {
+            assign(control.__fields, any);
             renderChanges(this, control, any, view);
+
             control.__changes = null;
         }
 
@@ -161,7 +164,9 @@ yaxi.Control.renderer(function (base, thisControl) {
 
         if (changes = control.__changes)
         {
+            assign(control.__fields, changes);
             renderChanges(this, control, changes, view);
+            
             control.__changes = null;
         }
     }
@@ -273,15 +278,15 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
     
-    thisControl.boundingClientRect = function (callback) {
+    thisControl.boundingClientRect = function (callbackFn) {
 
         var view;
 
-        if (callback)
+        if (callbackFn)
         {
             if (view = this.$view)
             {
-                boundingClientRect(view, callback);
+                boundingClientRect(view, callbackFn);
             }
             else
             {
@@ -289,7 +294,7 @@ yaxi.Control.renderer(function (base, thisControl) {
 
                     setTimeout(function () {
 
-                        boundingClientRect(view, callback);
+                        boundingClientRect(view, callbackFn);
 
                     }, 0);
                 }
@@ -298,11 +303,11 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    function boundingClientRect(view, callback) {
+    function boundingClientRect(view, callbackFn) {
 
         var rect = view.getBoundingClientRect();
 
-        callback({
+        callbackFn({
             left: rect.left,
             top: rect.top,
             width: rect.width,

@@ -1,4 +1,6 @@
-const translateEvent = require('../js/yaxi').wx.translateEvent;
+const yaxi = require('../js/yaxi');
+const controls = yaxi.$controls;
+const translateEvent = yaxi.wx.translateEvent;
 
 
 // 本程序最低要支持的版本: 2.2.3
@@ -31,6 +33,14 @@ Component({
   methods: {
     
     translateEvent: translateEvent
+  },
+
+  lifetimes: {
+    attached: function () {
+
+      // 输出对象至yaxi控件体系以解决自定义组件无法获取boundingClientRect的问题
+      controls[this.dataset.id].__po = this;
+    }
   }
 
 

@@ -15,14 +15,14 @@
 
 
     // 获取系统信息
-    yaxi.getSystemInfo = function (callback) {
+    yaxi.getSystemInfo = function (callbackFn) {
 
         var w = window;
         var n = navigator;
         var s = screen;
         var o = w.orientation;
 
-        callback && callback({
+        callbackFn && callbackFn({
             deviceOrientation: o == 180 || o == 0 ? 'portrait' : 'landscape',
             language: n.language,
             pixelRatio: w.devicePixelRatio,

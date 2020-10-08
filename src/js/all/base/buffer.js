@@ -2,21 +2,21 @@
 (function (buffer) {
 
 
-    buffer.fromString = function (value, callback) {
+    buffer.fromString = function (value, callbackFn) {
 
         var data = new Blob([value], { type: 'text/plain' });
         var file = new FileReader();
 
         file.onload = function () {
             
-            callback(this.result);
+            callbackFn(this.result);
         }
 
         file.readAsArrayBuffer(data);
     }
 
 
-    buffer.toString = function (buffer, callback) {
+    buffer.toString = function (buffer, callbackFn) {
 
         var reader = new FileReader();
         
@@ -24,7 +24,7 @@
 
         reader.onload = function () {
 
-            callback(this.result)
+            callbackFn(this.result)
         };
 
         reader.readAsText(buffer, 'utf-8');

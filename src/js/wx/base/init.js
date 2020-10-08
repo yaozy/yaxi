@@ -11,11 +11,11 @@
 
 
     // 获取系统信息
-    yaxi.getSystemInfo = function (callback) {
+    yaxi.getSystemInfo = function (callbackFn) {
 
-        callback && wx.getSystemInfo({
+        callbackFn && wx.getSystemInfo({
 
-            success: callback
+            success: callbackFn
         });
     }
 
