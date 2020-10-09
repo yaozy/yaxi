@@ -45,6 +45,31 @@ module.exports = yaxi.Box.extend(function (Class, base) {
         }
     }
 
+
+
+    this.handleFavorite = function (event) {
+
+        var source = event.source;
+
+        if (source.theme !== 'text-primary')
+        {
+            source.theme = 'text-primary';
+            yaxi.MessageBox.info('收藏成功!');
+        }
+    }
+
+
+    this.handleThumbup = function (event) {
+        
+        var source = event.source;
+
+        if (source.theme !== 'text-primary')
+        {
+            source.theme = 'text-primary';
+            yaxi.MessageBox.info('点赞成功!');
+        }
+    }
+
     
 
 });

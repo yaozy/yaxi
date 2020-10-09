@@ -33,3 +33,4 @@
             data="{{ ...item }}" />
     </view>
 </view>
+<view class="iphone-x" />

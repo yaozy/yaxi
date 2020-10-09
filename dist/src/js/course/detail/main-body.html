@@ -48,5 +48,9 @@
             <require src="./recommend" />
         </box>
     </box>
-    <button>报名学习</button>
+    <box layout="row middle" theme="bg-standard" height="90rem">
+        <icon icon="common-favorite" d:theme="$data.favorite ? 'text-primary' : ''" width="120rem" height="100%" e:tap="handleFavorite" />
+        <button flex="auto">报名学习</button>
+        <icon icon="common-thumbup" d:theme="$data.favorite ? 'text-primary' : ''" width="120rem" height="100%" e:tap="handleThumbup" />
+    </box>
 </box>

@@ -7,6 +7,7 @@ Page({
      */
     data: {
         top: Number,    // 状态栏高度
+        footer: Number, // iphoneX底部高度
         p: Object,      // 页面配置
         d: Array        // 对话框集合
     },
@@ -25,6 +26,9 @@ Page({
             yaxi.openMainPage(require('../../js/main'), options, this);
         }
 
+        var info = wx.getSystemInfoSync();
+
+        console.log(info)
     },
 
 

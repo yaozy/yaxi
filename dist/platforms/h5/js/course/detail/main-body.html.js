@@ -266,9 +266,45 @@ return (
 				]
 			],
 			[
-				"button",
-				null,
-				"报名学习"
+				"box",
+				{
+					"layout": "row middle",
+					"theme": "bg-standard",
+					"height": "90rem"
+				},
+				[
+					[
+						"icon",
+						{
+							"icon": "common-favorite",
+							"theme": $data.favorite ? 'text-primary' : '',
+							"width": "120rem",
+							"height": "100%",
+							"events": {
+								"tap": this.handleFavorite.bind(this)
+							}
+						}
+					],
+					[
+						"button",
+						{
+							"flex": "auto"
+						},
+						"报名学习"
+					],
+					[
+						"icon",
+						{
+							"icon": "common-thumbup",
+							"theme": $data.favorite ? 'text-primary' : '',
+							"width": "120rem",
+							"height": "100%",
+							"events": {
+								"tap": this.handleThumbup.bind(this)
+							}
+						}
+					]
+				]
 			]
 		]
 	]

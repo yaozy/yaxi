@@ -47,32 +47,32 @@ yaxi.Control.renderer(function (base, thisControl) {
     }
 
 
-    function renderChanges(renderer, control, changes, view) {
-
-        var count;
-
-        changes = control.__get_changes(changes);
-
-        if (count = changes[0])
-        {
-            renderer.renderClasses(control, changes[1], changes[2], count, view);
-        }
-
-        if (count = changes[3])
-        {
-            renderer.renderStyles(control,  changes[4], changes[5], count, view);
-        }
-
-        if (count = changes[6])
-        {
-            renderer.renderAttributes(control,  changes[7], changes[8], count, view);
-        }
-    }
 
 
     this.renderClasses = function (control, properties, values, count, view) {
 
         view.className = this.className + values.slice(0, count).join('');
+    }
+
+
+    this.renderSplitClasses = function (control, properties, values, count, view) {
+
+        var property, layout;
+
+        for (var i = 0; i < count; i++)
+        {
+            var property = properties[i];
+
+            if (property.name === 'layout')
+            {
+                layout = values[i];
+                values[i] = '';
+                break;
+            }
+        }
+
+        view.className = this.className + values.slice(0, count).join('');
+        return layout || '';
     }
 
 
@@ -83,6 +83,20 @@ yaxi.Control.renderer(function (base, thisControl) {
         for (var i = 0; i < count; i++)
         {
             style[properties[i].name] = values[i];
+        }
+    }
+
+
+    this.renderSplitStyles = function (control, properties, values, count, view, layoutView) {
+
+        var style1 = view.style;
+        var style2 = layoutView.style;
+        var property;
+
+        for (var i = 0; i < count; i++)
+        {
+            property = properties[i];
+            (property.layout ? style1 : style2)[properties[i].name] = values[i];
         }
     }
 
@@ -113,7 +127,7 @@ yaxi.Control.renderer(function (base, thisControl) {
     this.render = function (control, uuid) {
 
         var view = control.$view;
-        var any;
+        var fields, changes, any;
 
         if (!view)
         {
@@ -129,10 +143,26 @@ yaxi.Control.renderer(function (base, thisControl) {
         
         control.__dirty = false;
 
-        if (any = control.__changes)
+        if (changes = control.__changes)
         {
-            assign(control.__fields, any);
-            renderChanges(this, control, any, view);
+            assign(fields = control.__fields, changes);
+
+            changes = control.__get_changes(fields);
+
+            if (any = changes[0])
+            {
+                this.renderClasses(control, changes[1], changes[2], any, view);
+            }
+
+            if (any = changes[3])
+            {
+                this.renderStyles(control,  changes[4], changes[5], any, view);
+            }
+
+            if (any = changes[6])
+            {
+                this.renderAttributes(control,  changes[7], changes[8], any, view);
+            }
 
             control.__changes = null;
         }
@@ -158,14 +188,36 @@ yaxi.Control.renderer(function (base, thisControl) {
 
     this.patch = function (control, view) {
 
-        var changes;
+        var fields, changes, count;
 
         control.__dirty = false;
 
         if (changes = control.__changes)
         {
-            assign(control.__fields, changes);
-            renderChanges(this, control, changes, view);
+            assign(fields = control.__fields, changes);
+
+            changes = control.__get_changes(changes);
+
+            if (count = changes[6])
+            {
+                this.renderAttributes(control,  changes[7], changes[8], count, view);
+            }
+
+            // 如果class和样式有变化需要重新渲染
+            if (changes[0] > 0 || changes[3] > 0)
+            {
+                fields = control.__get_changes(fields);
+
+                if (changes[0] > 0 && (count = fields[0]))
+                {
+                    this.renderClasses(control, fields[1], fields[2], count, view);
+                }
+        
+                if (changes[3] > 0 && (count = fields[3]))
+                {
+                    this.renderStyles(control,  fields[4], fields[5], count, view);
+                }
+            }
             
             control.__changes = null;
         }

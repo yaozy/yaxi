@@ -198,16 +198,13 @@ yaxi.Control.renderer(function (base, thisControl) {
     // 增量渲染
     this.patch = function (control, view, prefix) {
 
-        var changes;
+        var fields, changes, count;
 
         control.__dirty = false;
 
         if (changes = control.__changes)
         {
-            var fields = control.__fields;
-            var count;
-
-            assign(fields, changes);
+            assign(fields = control.__fields, changes);
             changes = control.__get_changes(changes);
 
             prefix += '.';

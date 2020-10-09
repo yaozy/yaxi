@@ -1,2 +1,9 @@
 @import '../../icon/iconfont.wxss';
 @import '../css/yaxi.wxss';
+
+
+.iphone-x {
+  height: 0;
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
+}
