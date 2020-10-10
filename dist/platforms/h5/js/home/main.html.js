@@ -5,14 +5,13 @@ return (
 		"box",
 		{
 			"theme": "bg-thick",
-			"layout": "column"
+			"layout": "column",
+			"overflow": "hidden"
 		},
 		[
 			[
 				"swiper",
-				{
-					"flex-shrink": "0"
-				},
+				null,
 				[
 					[
 						"image",
@@ -52,7 +51,6 @@ return (
 				{
 					"key": "host",
 					"flex": "auto",
-					"min-height": "200rem",
 					"margin-top": "10rem"
 				},
 				function (template, __data_list, __data_scope) {

@@ -2,8 +2,14 @@
 @import '../css/yaxi.wxss';
 
 
+.yx-host {
+  bottom: 0;
+  bottom: constant(safe-area-inset-bottom);
+  bottom: env(safe-area-inset-bottom);
+}
+
 .iphone-x {
-  height: 0;
+  display: block;
   height: constant(safe-area-inset-bottom);
   height: env(safe-area-inset-bottom);
 }

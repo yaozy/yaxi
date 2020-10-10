@@ -2619,13 +2619,13 @@ yaxi.colors.load('blue', [
     }
 
 
-    function destroyItem(item) {
+    function destroyItem(model) {
 
-        var bindings;
+        var bindings, control;
 
-        if (bindings = item.__bindings)
+        if (bindings = model.__bindings)
         {
-            item.__bindings = null;
+            model.__bindings = null;
 
             for (var name in bindings)
             {
@@ -2633,13 +2633,15 @@ yaxi.colors.load('blue', [
 
                 for (var i = list.length; i--;)
                 {
-                    // 清除绑定关联的模型
-                    list[i].model = null;
+                    if (control = controls[list[i].control])
+                    {
+                        control.__unbind(model);
+                    }
                 }
             }
         }
 
-        item.$parent = item.__bindings = null;
+        model.$parent = null;
     }
 
 
@@ -4743,6 +4745,27 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         }
     }
 
+
+
+    // 模型销毁时调用此方法解除绑定关系
+    this.__unbind = function (model) {
+
+        var bindings;
+
+        if (bindings = this.__bindings)
+        {
+            for (var i = bindings.length; i--;)
+            {
+                if (bindings[i] === model)
+                {
+                    bindings.splice(i - 1, 2);
+                }
+
+                i--;
+            }
+        }
+    }
+
     
     this.destroy = function () {
 
@@ -6642,7 +6665,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             hidden: function () {
                             
-                                return self.status;
+                                return !self.status;
                             }
                         }
                     }
@@ -6662,7 +6685,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return !self.status;
+                                        return self.status;
                                     }
                                 }
                             }
@@ -6691,7 +6714,7 @@ yaxi.component('Pullup', function (Class, base) {
     // 下拉状态
     // 0    加载中
     // 1    加载完成
-    this.$('status', 1);
+    this.$('status', 0);
 
 
     
@@ -8683,16 +8706,13 @@ yaxi.Control.renderer(function (base, thisControl) {
     // 增量渲染
     this.patch = function (control, view, prefix) {
 
-        var changes;
+        var fields, changes, count;
 
         control.__dirty = false;
 
         if (changes = control.__changes)
         {
-            var fields = control.__fields;
-            var count;
-
-            assign(fields, changes);
+            assign(fields = control.__fields, changes);
             changes = control.__get_changes(changes);
 
             prefix += '.';
