@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -55,7 +55,7 @@ return (
 										"theme":  function () { return $model.gendle ? 'text-primary' : '' }
 									},
 									"events": {
-										"tap": this.handleMan.bind(this)
+										"tap": $this.handleMan.bind($this)
 									}
 								}
 							],
@@ -80,7 +80,7 @@ return (
 										"theme":  function () { return $model.gendle ? '' : 'text-primary' }
 									},
 									"events": {
-										"tap": this.handleWoman.bind(this)
+										"tap": $this.handleWoman.bind($this)
 									}
 								}
 							]
@@ -136,7 +136,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": this.handleOK.bind(this)
+								"tap": $this.handleOK.bind($this)
 							}
 						},
 						"确认"

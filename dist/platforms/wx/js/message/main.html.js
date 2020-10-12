@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[

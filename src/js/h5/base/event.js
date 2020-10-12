@@ -147,7 +147,8 @@
                 return false;
             }
 
-            control = control.parent;
+            // 插槽控件也要向真正的父控件冒泡
+            control = control.__slot || control.parent;
         }
     }
 

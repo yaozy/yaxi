@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -18,7 +18,7 @@ return (
 						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
-						"tap": this.handleClose.bind(this)
+						"tap": $this.handleClose.bind($this)
 					}
 				}
 			],
@@ -31,7 +31,7 @@ return (
 					"line-height": "80rem",
 					"text-align": "center",
 					"events": {
-						"tap": this.handleSwitch.bind(this)
+						"tap": $this.handleSwitch.bind($this)
 					}
 				},
 				[
@@ -90,17 +90,16 @@ return (
 						{
 							"data": $model.sort.data,
 							"events": {
-								"tap": this.handleSort.bind(this)
+								"tap": $this.handleSort.bind($this)
 							}
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -139,11 +138,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					]
 				]
 			],
@@ -165,17 +164,16 @@ return (
 							"theme": "bg-thicker",
 							"width": "25%",
 							"events": {
-								"tap": this.handleCategoryLevel1.bind(this)
+								"tap": $this.handleCategoryLevel1.bind($this)
 							}
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -195,11 +193,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					],
 					[
 						"databox",
@@ -208,17 +206,16 @@ return (
 							"theme": "bg-thick",
 							"width": "35%",
 							"events": {
-								"tap": this.handleCategoryLevel2.bind(this)
+								"tap": $this.handleCategoryLevel2.bind($this)
 							}
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -237,11 +234,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					],
 					[
 						"databox",
@@ -249,17 +246,16 @@ return (
 							"data": $model.category.level3s,
 							"width": "40%",
 							"events": {
-								"tap": this.handleCategoryLevel3.bind(this)
+								"tap": $this.handleCategoryLevel3.bind($this)
 							}
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -278,11 +274,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					]
 				]
 			],
@@ -305,14 +301,13 @@ return (
 							"theme": "line-lightest line-top",
 							"font-size": "28rem"
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -347,20 +342,19 @@ return (
 														"key":  function () { return ($item && $item.$index != null ? $item.$index : $index) }
 													},
 													"events": {
-														"tap": this.handleChangeFilter.bind(this)
+														"tap": $this.handleChangeFilter.bind($this)
 													}
 												},
-												function (template, __data_list, __data_scope) {
+												function (template, data, scope) {
 
-													var $index = __data_scope[0];
-													var $item = __data_scope[1];
+													var $index = scope[0];
+													var $item = scope[1];
 
-													for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+													for (var $index = 0, length = data.length; $index < length; $index++)
 													{
 														// 添加作用域解决循环变量绑定变化的问题
-														(function () {
+														(function ($index, $item) {
 
-														var $item = __data_list[$index];
 
 														template($index, $item,
 															[
@@ -381,21 +375,21 @@ return (
 															]
 														);
 
-														}).call(this);
+														})($index, data[$index]);
 													}
 
 													// end function
-												}.bind(this)
+												}
 											]
 										]
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					],
 					[
 						"box",
@@ -411,7 +405,7 @@ return (
 									"theme": "text-primary",
 									"padding": "0 30rem",
 									"events": {
-										"tap": this.handleClearFilter.bind(this)
+										"tap": $this.handleClearFilter.bind($this)
 									}
 								},
 								"清空筛选"
@@ -424,7 +418,7 @@ return (
 									"absolute": "middle right",
 									"right": "30rem",
 									"events": {
-										"tap": this.handleFilter.bind(this)
+										"tap": $this.handleFilter.bind($this)
 									}
 								},
 								"确定"

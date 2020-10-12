@@ -22,12 +22,12 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    // 是否自动切换
-    this.$('autoplay', false, {
+    // 是否循环
+    this.$('circular', false);
 
-        force: true,
-        change: false
-    });
+
+    // 是否自动切换
+    this.$('autoplay', false);
 
 
     // 自动切换时间间隔(毫秒)
@@ -45,45 +45,13 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    this.__set_autoplay = function (value) {
-
-        var interval;
-
-        clearTimeout(this.__auto);
-
-        if (value && (interval = this.interval) > 0)
-        {
-            this.__auto = setTimeout(autoplay.bind(this), interval);
-        }
-    }
-
-
-    function autoplay(interval) {
-
-        var index = this.selectedIndex + 1;
-        var interval = this.interval;
-
-        if (index >= this.__children.length)
-        {
-            index = 0;
-        }
-
-        this.selectedIndex = index;
-
-        if (interval > 0)
-        {
-            this.__auto = setTimeout(autoplay.bind(this), interval);
-        }
-    }
-
-
     
     // 滑动状态
     var state = {
         start: -1,      // 开始位置, 如果小于0则表示不滑动
         index: 0,       // 当前子项索引
         last: 0,        // 最后子项数
-        move: 0,       // 是否已经滑动
+        move: 0,        // 是否已经滑动
         width: 0,       // 容器宽度
         change: 0,      // 子项索引是否已变化
         capture: 0,     // 是否已捕获事件
@@ -156,7 +124,12 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var s = state;
 
-        clearTimeout(this.__auto);
+        // 先禁止自动播放
+        if (this.autoplay)
+        {
+            this.__autoplay = true;
+            this.autoplay = false;
+        }
 
         if (!s.capture)
         {
@@ -256,9 +229,44 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         state.capture = 0;
 
-        if (this.autoplay)
+        if (this.__autoplay)
         {
-            this.__set_autoplay(true);
+            this.__autoplay = false;
+            this.autoplay = true;
+        }
+    }
+
+
+
+    // 切换autoplay默认实现
+    this.__do_autoplay = function (value) {
+
+        var interval;
+
+        clearTimeout(this.__time);
+
+        if (value && (interval = this.interval) > 0)
+        {
+            this.__time = setTimeout(autoplay.bind(this), interval);
+        }
+    }
+
+
+    function autoplay(interval) {
+
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
+
+        if (index >= this.__children.length)
+        {
+            index = 0;
+        }
+
+        this.selectedIndex = index;
+
+        if (interval > 0)
+        {
+            this.__time = setTimeout(autoplay.bind(this), interval);
         }
     }
 

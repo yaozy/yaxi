@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -85,14 +85,13 @@ return (
 					"data": $data,
 					"overflow": "hidden"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -127,20 +126,19 @@ return (
 											"overflow": "hidden",
 											"padding": "20rem 50rem",
 											"events": {
-												"tap": this.handleOpen.bind(this)
+												"tap": $this.handleOpen.bind($this)
 											}
 										},
-										function (template, __data_list, __data_scope) {
+										function (template, data, scope) {
 
-											var $index = __data_scope[0];
-											var $item = __data_scope[1];
+											var $index = scope[0];
+											var $item = scope[1];
 
-											for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+											for (var $index = 0, length = data.length; $index < length; $index++)
 											{
 												// 添加作用域解决循环变量绑定变化的问题
-												(function () {
+												(function ($index, $subitem) {
 
-												var $subitem = __data_list[$index];
 
 												template($index, $subitem,
 													[
@@ -158,21 +156,21 @@ return (
 													]
 												);
 
-												}).call(this);
+												})($index, data[$index]);
 											}
 
 											// end function
-										}.bind(this)
+										}
 									]
 								]
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

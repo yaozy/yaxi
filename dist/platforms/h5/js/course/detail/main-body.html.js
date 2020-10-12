@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -278,7 +278,7 @@ return (
 							"width": "120rem",
 							"height": "100%",
 							"events": {
-								"tap": this.handleFavorite.bind(this)
+								"tap": $this.handleFavorite.bind($this)
 							}
 						}
 					],
@@ -297,7 +297,7 @@ return (
 							"width": "120rem",
 							"height": "100%",
 							"events": {
-								"tap": this.handleThumbup.bind(this)
+								"tap": $this.handleThumbup.bind($this)
 							}
 						}
 					]

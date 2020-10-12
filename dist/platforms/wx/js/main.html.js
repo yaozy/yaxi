@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -13,10 +13,10 @@ return (
 				"slidebox",
 				{
 					"flex": "auto",
-					"slide": "true",
+					"circular": "true",
 					"events": {
-						"transition": this.handleTransition.bind(this),
-						"change": this.handleChange.bind(this)
+						"transition": $this.handleTransition.bind($this),
+						"change": $this.handleChange.bind($this)
 					}
 				},
 				[

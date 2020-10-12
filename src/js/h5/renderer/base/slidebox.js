@@ -28,6 +28,16 @@ yaxi.SlideBox.renderer(function (base, thisControl, yaxi) {
 
 
 
+    this.circular = false;
+
+
+    this.autoplay = function (control, view, value) {
+
+        control.__do_autoplay(value);
+    }
+
+
+
 
     thisControl.__start = function () {
 

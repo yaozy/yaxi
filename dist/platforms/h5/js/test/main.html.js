@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -15,7 +15,7 @@ return (
 				"box",
 				{
 					"events": {
-						"tap": this.handleTap.bind(this)
+						"tap": $this.handleTap.bind($this)
 					}
 				},
 				[

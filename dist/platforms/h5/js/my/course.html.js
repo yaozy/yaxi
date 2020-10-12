@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -17,14 +17,13 @@ return (
 					"flex": "auto",
 					"padding": "0 20rem"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -35,7 +34,7 @@ return (
 									"height": "160rem",
 									"margin": "30rem 0",
 									"events": {
-										"tap": this.handleOpenDetail.bind(this)
+										"tap": $this.handleOpenDetail.bind($this)
 									}
 								},
 								[
@@ -79,17 +78,16 @@ return (
 													"line-height": "40rem",
 													"font-size": "24rem"
 												},
-												function (template, __data_list, __data_scope) {
+												function (template, data, scope) {
 
-													var $index = __data_scope[0];
-													var $item = __data_scope[1];
+													var $index = scope[0];
+													var $item = scope[1];
 
-													for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+													for (var $index = 0, length = data.length; $index < length; $index++)
 													{
 														// 添加作用域解决循环变量绑定变化的问题
-														(function () {
+														(function ($index, $remark) {
 
-														var $remark = __data_list[$index];
 
 														template($index, $remark,
 															[
@@ -104,11 +102,11 @@ return (
 															]
 														);
 
-														}).call(this);
+														})($index, data[$index]);
 													}
 
 													// end function
-												}.bind(this)
+												}
 											],
 											[
 												"box",
@@ -131,11 +129,11 @@ return (
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

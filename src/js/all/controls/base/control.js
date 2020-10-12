@@ -113,13 +113,15 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             // 本来就是控件
             if (options instanceof Class)
             {
-                // 插槽控件不处理, 插槽控件的父控件直接指向component组件对象
-                if (options.__slot)
+                control = options;
+
+                // 插槽控件的父控件直接指向component组件对象
+                if (control.__slot)
                 {
-                    return options;
+                    control.__slot = parent;
+                    return control;
                 }
 
-                control = options;
                 checkParent(control.constructor, parent);
 
                 if (control.parent && control.parent !== parent)
@@ -128,7 +130,6 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
                 }
 
                 control.parent = parent;
-
                 return control;
             }
 
@@ -1078,7 +1079,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
     this.loadTemplate = function (template, data, model) {
 
-        this.__load(template.call(this, data, model));
+        this.__load(template(this, data, model));
     }
     
 
@@ -1202,11 +1203,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         if (parent && (children = parent.__children) && (index = children.indexOf(this)) >= 0)
         {
             // 插槽控件被移除后就不再是插槽控件了
-            if (this.__slot)
-            {
-                this.__slot = false;
-            }
-
+            this.__slot = null;
             children.splice(index, 1);
         }
     }
@@ -1260,7 +1257,8 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__onchange = this.__scope = this.__po = null;
+        this.parent = this.__scope = this.__slot = 
+        this.__onchange = this.__po = null;
     }
 
 

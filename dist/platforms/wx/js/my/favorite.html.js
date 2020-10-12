@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -17,14 +17,13 @@ return (
 					"flex": "auto",
 					"padding": "0 20rem"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -35,7 +34,7 @@ return (
 									"height": "160rem",
 									"margin": "30rem 0",
 									"events": {
-										"tap": this.handleOpenDetail.bind(this)
+										"tap": $this.handleOpenDetail.bind($this)
 									}
 								},
 								[
@@ -112,11 +111,11 @@ return (
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -23,17 +23,16 @@ return (
 					"theme": "bg-standard line-lightest line-bottom",
 					"padding": "0 20rem",
 					"events": {
-						"tap": this.handleSwitch.bind(this)
+						"tap": $this.handleSwitch.bind($this)
 					}
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -50,11 +49,11 @@ return (
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			],
 			[
 				"databox",
@@ -63,14 +62,13 @@ return (
 					"key": "host",
 					"flex": "auto"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -117,7 +115,7 @@ return (
 														"hidden":  function () { return $item.status < 3 }
 													},
 													"events": {
-														"tap": this.handleDelete.bind(this)
+														"tap": $this.handleDelete.bind($this)
 													}
 												}
 											]
@@ -130,17 +128,16 @@ return (
 											"item": "$detail",
 											"padding": "0 20rem"
 										},
-										function (template, __data_list, __data_scope) {
+										function (template, data, scope) {
 
-											var $index = __data_scope[0];
-											var $item = __data_scope[1];
+											var $index = scope[0];
+											var $item = scope[1];
 
-											for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+											for (var $index = 0, length = data.length; $index < length; $index++)
 											{
 												// 添加作用域解决循环变量绑定变化的问题
-												(function () {
+												(function ($index, $detail) {
 
-												var $detail = __data_list[$index];
 
 												template($index, $detail,
 													[
@@ -151,7 +148,7 @@ return (
 															"height": "100rem",
 															"margin": "20rem 0",
 															"events": {
-																"tap": this.handleOpenDetail.bind(this)
+																"tap": $this.handleOpenDetail.bind($this)
 															}
 														},
 														[
@@ -226,11 +223,11 @@ return (
 													]
 												);
 
-												}).call(this);
+												})($index, data[$index]);
 											}
 
 											// end function
-										}.bind(this)
+										}
 									],
 									[
 										"icon",
@@ -301,11 +298,11 @@ return (
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

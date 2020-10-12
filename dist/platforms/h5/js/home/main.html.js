@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -9,11 +9,8 @@ return (
 		},
 		[
 			[
-				"slidebox",
-				{
-					"autoplay": "true",
-					"duration": "500"
-				},
+				"swiper",
+				null,
 				[
 					[
 						"image",
@@ -54,14 +51,13 @@ return (
 					"key": "host",
 					"margin-top": "10rem"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -104,7 +100,7 @@ return (
 													"theme": "text-lightest",
 													"font-size": "28rem",
 													"events": {
-														"tap": this.handleMore.bind(this)
+														"tap": $this.handleMore.bind($this)
 													}
 												},
 												[
@@ -132,17 +128,16 @@ return (
 											"item": "$course",
 											"margin-top": "20rem"
 										},
-										function (template, __data_list, __data_scope) {
+										function (template, data, scope) {
 
-											var $index = __data_scope[0];
-											var $item = __data_scope[1];
+											var $index = scope[0];
+											var $item = scope[1];
 
-											for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+											for (var $index = 0, length = data.length; $index < length; $index++)
 											{
 												// 添加作用域解决循环变量绑定变化的问题
-												(function () {
+												(function ($index, $course) {
 
-												var $course = __data_list[$index];
 
 												template($index, $course,
 													[
@@ -153,7 +148,7 @@ return (
 															"height": "160rem",
 															"margin-bottom": "30rem",
 															"events": {
-																"tap": this.handleOpenDetail.bind(this)
+																"tap": $this.handleOpenDetail.bind($this)
 															}
 														},
 														[
@@ -224,21 +219,21 @@ return (
 													]
 												);
 
-												}).call(this);
+												})($index, data[$index]);
 											}
 
 											// end function
-										}.bind(this)
+										}
 									]
 								]
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -32,7 +32,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": this.handleAppend.bind(this)
+								"tap": $this.handleAppend.bind($this)
 							}
 						},
 						"append"
@@ -42,7 +42,7 @@ return (
 						{
 							"margin-top": "10rem",
 							"events": {
-								"tap": this.handleRemove.bind(this)
+								"tap": $this.handleRemove.bind($this)
 							}
 						},
 						"remove last"

@@ -10,7 +10,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
     this.template = function () {
 
-        var self = this;
+        var $this = this;
 
         return [
             'box',
@@ -30,12 +30,12 @@ yaxi.component('Pulldown', function (Class, base) {
 
                             hidden: function () {
                             
-                                return self.status === 3;
+                                return $this.status === 3;
                             },
 
                             icon: function () {
 
-                                return 'common-' + statusIcons[self.status];
+                                return 'common-' + statusIcons[$this.status];
                             }
                         }
                     }
@@ -55,7 +55,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status !== 3;
+                                        return $this.status !== 3;
                                     }
                                 }
                             }
@@ -69,7 +69,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
                             text: function () {
 
-                                return self[statusText[self.status] + 'Text'];
+                                return $this[statusText[$this.status] + 'Text'];
                             }
                         }
                     }

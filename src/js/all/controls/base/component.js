@@ -220,7 +220,10 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                     }
                 }
 
-                return outputs;
+                if (outputs.length > 0)
+                {
+                    return outputs;
+                }
             }
         }
         
@@ -386,6 +389,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
+
     this.destroy = function () {
 
         var root;
@@ -398,7 +402,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         base.destroy.call(this);
     }
-
 
 
 

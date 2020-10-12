@@ -4,7 +4,7 @@ yaxi.component('Pullup', function (Class, base) {
 
     this.template = function () {
 
-        var self = this;
+        var $this = this;
 
         return [
             'box',
@@ -24,7 +24,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             hidden: function () {
                             
-                                return !self.status;
+                                return !$this.status;
                             }
                         }
                     }
@@ -44,7 +44,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status;
+                                        return $this.status;
                                     }
                                 }
                             }
@@ -58,7 +58,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             text: function () {
 
-                                return self.status ? self.doneText : self.loadingText;
+                                return $this.status ? $this.doneText : $this.loadingText;
                             }
                         }
                     }

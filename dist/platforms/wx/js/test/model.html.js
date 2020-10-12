@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -30,7 +30,7 @@ return (
 								{
 									"flex": "auto",
 									"events": {
-										"tap": this.handleAppend.bind(this)
+										"tap": $this.handleAppend.bind($this)
 									}
 								},
 								"Append"
@@ -40,7 +40,7 @@ return (
 								{
 									"flex": "auto",
 									"events": {
-										"tap": this.handleReplace.bind(this)
+										"tap": $this.handleReplace.bind($this)
 									}
 								},
 								"Replace"
@@ -50,7 +50,7 @@ return (
 								{
 									"flex": "auto",
 									"events": {
-										"tap": this.handleRemove.bind(this)
+										"tap": $this.handleRemove.bind($this)
 									}
 								},
 								"Remove"
@@ -60,7 +60,7 @@ return (
 								{
 									"flex": "auto",
 									"events": {
-										"tap": this.handleReorder.bind(this)
+										"tap": $this.handleReorder.bind($this)
 									}
 								},
 								"Reorder"
@@ -73,14 +73,13 @@ return (
 							"data": $model,
 							"flex": "auto"
 						},
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -151,17 +150,16 @@ return (
 															"item": "$subitem",
 															"index": "$subindex"
 														},
-														function (template, __data_list, __data_scope) {
+														function (template, data, scope) {
 
-															var $index = __data_scope[0];
-															var $item = __data_scope[1];
+															var $index = scope[0];
+															var $item = scope[1];
 
-															for (var $subindex = 0, __data_length = __data_list.length; $subindex < __data_length; $subindex++)
+															for (var $subindex = 0, length = data.length; $subindex < length; $subindex++)
 															{
 																// 添加作用域解决循环变量绑定变化的问题
-																(function () {
+																(function ($subindex, $subitem) {
 
-																var $subitem = __data_list[$subindex];
 
 																template($subindex, $subitem,
 																	[
@@ -174,11 +172,11 @@ return (
 																	]
 																);
 
-																}).call(this);
+																})($subindex, data[$subindex]);
 															}
 
 															// end function
-														}.bind(this)
+														}
 													]
 												]
 											]
@@ -186,11 +184,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					]
 				]
 			]

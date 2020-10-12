@@ -19,11 +19,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
-
     this.template = function () {
 
-        var self = this;
-
+        var $this = this;
+        
         return [
             'box',
             {
@@ -42,10 +41,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
                         marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
                         events: {
-    
-                            tap: function handleClose() {
-    
-                                this.root.close('Back');
+
+                            tap: function () {
+
+                                $this.root.close('Back');
                                 return false;
                             }
                         }
@@ -59,10 +58,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
                             'text',
                             {
                                 bindings: {
-    
+
                                     text: function () {
-    
-                                        return self.text || Class.text || '';
+
+                                        return $this.text || Class.text || '';
                                     }
                                 }
                             }

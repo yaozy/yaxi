@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -17,7 +17,7 @@ return (
 					"text-align": "center",
 					"line-height": "100rem",
 					"events": {
-						"tap": this.handleAdd.bind(this)
+						"tap": $this.handleAdd.bind($this)
 					}
 				},
 				[
@@ -40,14 +40,13 @@ return (
 					"theme": "bg-thick",
 					"flex": "auto"
 				},
-				function (template, __data_list, __data_scope) {
+				function (template, data, scope) {
 
-					for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+					for (var $index = 0, length = data.length; $index < length; $index++)
 					{
 						// 添加作用域解决循环变量绑定变化的问题
-						(function () {
+						(function ($index, $item) {
 
-						var $item = __data_list[$index];
 
 						template($index, $item,
 							[
@@ -179,7 +178,7 @@ return (
 														"onchange":  function (value) { $item.default = value; }
 													},
 													"events": {
-														"changing": this.handleDefault.bind(this)
+														"changing": $this.handleDefault.bind($this)
 													}
 												}
 											],
@@ -189,7 +188,7 @@ return (
 													"padding": "0 30rem",
 													"theme": "text-lightest",
 													"events": {
-														"tap": this.handleEdit.bind(this)
+														"tap": $this.handleEdit.bind($this)
 													}
 												},
 												"编辑"
@@ -200,7 +199,7 @@ return (
 													"padding": "0 30rem",
 													"theme": "text-lightest",
 													"events": {
-														"tap": this.handleDelete.bind(this)
+														"tap": $this.handleDelete.bind($this)
 													}
 												},
 												"删除"
@@ -211,11 +210,11 @@ return (
 							]
 						);
 
-						}).call(this);
+						})($index, data[$index]);
 					}
 
 					// end function
-				}.bind(this)
+				}
 			]
 		]
 	]

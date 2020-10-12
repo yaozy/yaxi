@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -17,7 +17,7 @@ return (
 						"hidden":  function () { return $model.hidden }
 					},
 					"events": {
-						"tap": this.handleClear.bind(this)
+						"tap": $this.handleClear.bind($this)
 					}
 				}
 			],
@@ -45,8 +45,8 @@ return (
 								"value":  function () { return $model.text }
 							},
 							"events": {
-								"input": this.handleInput.bind(this),
-								"focus": this.handleFocus.bind(this)
+								"input": $this.handleInput.bind($this),
+								"focus": $this.handleFocus.bind($this)
 							}
 						}
 					],
@@ -72,7 +72,7 @@ return (
 								"hidden":  function () { return $model.hidden }
 							},
 							"events": {
-								"tap": this.handleClear.bind(this)
+								"tap": $this.handleClear.bind($this)
 							}
 						},
 						"清除"
@@ -96,7 +96,7 @@ return (
 							"line-height": "80rem",
 							"padding": "0 20rem",
 							"events": {
-								"tap": this.handleSearch.bind(this)
+								"tap": $this.handleSearch.bind($this)
 							}
 						},
 						[
@@ -126,7 +126,7 @@ return (
 									"theme": "text-lighter",
 									"margin-left": "50rem",
 									"events": {
-										"tap": this.handleCancel.bind(this)
+										"tap": $this.handleCancel.bind($this)
 									}
 								},
 								"取消搜索"
@@ -136,14 +136,13 @@ return (
 					[
 						"databox",
 						null,
-						function (template, __data_list, __data_scope) {
+						function (template, data, scope) {
 
-							for (var $index = 0, __data_length = __data_list.length; $index < __data_length; $index++)
+							for (var $index = 0, length = data.length; $index < length; $index++)
 							{
 								// 添加作用域解决循环变量绑定变化的问题
-								(function () {
+								(function ($index, $item) {
 
-								var $item = __data_list[$index];
 
 								template($index, $item,
 									[
@@ -156,7 +155,7 @@ return (
 											"theme": "line-lightest line-top",
 											"padding": "0 20rem",
 											"events": {
-												"tap": this.handleSuggest.bind(this)
+												"tap": $this.handleSuggest.bind($this)
 											}
 										},
 										[
@@ -185,11 +184,11 @@ return (
 									]
 								);
 
-								}).call(this);
+								})($index, data[$index]);
 							}
 
 							// end function
-						}.bind(this)
+						}
 					]
 				]
 			]

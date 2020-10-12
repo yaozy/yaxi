@@ -1,4 +1,4 @@
-module.exports = function ($data, $model) {
+module.exports = function ($this, $data, $model) {
 
 return (
 	[
@@ -96,7 +96,7 @@ return (
 						"button",
 						{
 							"events": {
-								"tap": this.handleStart.bind(this)
+								"tap": $this.handleStart.bind($this)
 							}
 						},
 						"开始考试"

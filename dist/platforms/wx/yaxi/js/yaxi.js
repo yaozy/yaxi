@@ -3658,13 +3658,15 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
             // 本来就是控件
             if (options instanceof Class)
             {
-                // 插槽控件不处理, 插槽控件的父控件直接指向component组件对象
-                if (options.__slot)
+                control = options;
+
+                // 插槽控件的父控件直接指向component组件对象
+                if (control.__slot)
                 {
-                    return options;
+                    control.__slot = parent;
+                    return control;
                 }
 
-                control = options;
                 checkParent(control.constructor, parent);
 
                 if (control.parent && control.parent !== parent)
@@ -3673,7 +3675,6 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
                 }
 
                 control.parent = parent;
-
                 return control;
             }
 
@@ -4623,7 +4624,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
     this.loadTemplate = function (template, data, model) {
 
-        this.__load(template.call(this, data, model));
+        this.__load(template(this, data, model));
     }
     
 
@@ -4747,11 +4748,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         if (parent && (children = parent.__children) && (index = children.indexOf(this)) >= 0)
         {
             // 插槽控件被移除后就不再是插槽控件了
-            if (this.__slot)
-            {
-                this.__slot = false;
-            }
-
+            this.__slot = null;
             children.splice(index, 1);
         }
     }
@@ -4805,7 +4802,8 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         this.$view = null;
         this.ondestroy && this.ondestroy();
 
-        this.parent = this.__onchange = this.__scope = this.__po = null;
+        this.parent = this.__scope = this.__slot = 
+        this.__onchange = this.__po = null;
     }
 
 
@@ -5623,7 +5621,10 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
                     }
                 }
 
-                return outputs;
+                if (outputs.length > 0)
+                {
+                    return outputs;
+                }
             }
         }
         
@@ -5789,6 +5790,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
+
     this.destroy = function () {
 
         var root;
@@ -5801,7 +5803,6 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
         base.destroy.call(this);
     }
-
 
 
 
@@ -6566,53 +6567,6 @@ yaxi.Control.extend('MaskLayer', function (Class, base) {
 
 
 
-yaxi.component('Pagination', function (Class, base) {
-
-
-    // 分页模式
-    // dot      点
-    // number   数字
-    this.$('mode', 'dot');
-
-
-    // 数量
-    this.$('count', 0);
-
-
-
-    this.__set_mode = function (value) {
-
-    }
-
-
-    this.__set_count = function (value) {
-
-    }
-
-
-
-    function render_dot(count) {
-
-    }
-
-
-    function render_number(count) {
-
-    }
-
-
-
-}, function Pagination() {
-
-
-    yaxi.Control.apply(this, arguments);
-
-
-});
-
-
-
-
 yaxi.component('Pulldown', function (Class, base) {
 
 
@@ -6625,7 +6579,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
     this.template = function () {
 
-        var self = this;
+        var $this = this;
 
         return [
             'box',
@@ -6645,12 +6599,12 @@ yaxi.component('Pulldown', function (Class, base) {
 
                             hidden: function () {
                             
-                                return self.status === 3;
+                                return $this.status === 3;
                             },
 
                             icon: function () {
 
-                                return 'common-' + statusIcons[self.status];
+                                return 'common-' + statusIcons[$this.status];
                             }
                         }
                     }
@@ -6670,7 +6624,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status !== 3;
+                                        return $this.status !== 3;
                                     }
                                 }
                             }
@@ -6684,7 +6638,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
                             text: function () {
 
-                                return self[statusText[self.status] + 'Text'];
+                                return $this[statusText[$this.status] + 'Text'];
                             }
                         }
                     }
@@ -6782,7 +6736,7 @@ yaxi.component('Pullup', function (Class, base) {
 
     this.template = function () {
 
-        var self = this;
+        var $this = this;
 
         return [
             'box',
@@ -6802,7 +6756,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             hidden: function () {
                             
-                                return !self.status;
+                                return !$this.status;
                             }
                         }
                     }
@@ -6822,7 +6776,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                                     hidden: function () {
                                     
-                                        return self.status;
+                                        return $this.status;
                                     }
                                 }
                             }
@@ -6836,7 +6790,7 @@ yaxi.component('Pullup', function (Class, base) {
 
                             text: function () {
 
-                                return self.status ? self.doneText : self.loadingText;
+                                return $this.status ? $this.doneText : $this.loadingText;
                             }
                         }
                     }
@@ -7085,12 +7039,12 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    // 是否自动切换
-    this.$('autoplay', false, {
+    // 是否循环
+    this.$('circular', false);
 
-        force: true,
-        change: false
-    });
+
+    // 是否自动切换
+    this.$('autoplay', false);
 
 
     // 自动切换时间间隔(毫秒)
@@ -7108,45 +7062,13 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    this.__set_autoplay = function (value) {
-
-        var interval;
-
-        clearTimeout(this.__auto);
-
-        if (value && (interval = this.interval) > 0)
-        {
-            this.__auto = setTimeout(autoplay.bind(this), interval);
-        }
-    }
-
-
-    function autoplay(interval) {
-
-        var index = this.selectedIndex + 1;
-        var interval = this.interval;
-
-        if (index >= this.__children.length)
-        {
-            index = 0;
-        }
-
-        this.selectedIndex = index;
-
-        if (interval > 0)
-        {
-            this.__auto = setTimeout(autoplay.bind(this), interval);
-        }
-    }
-
-
     
     // 滑动状态
     var state = {
         start: -1,      // 开始位置, 如果小于0则表示不滑动
         index: 0,       // 当前子项索引
         last: 0,        // 最后子项数
-        move: 0,       // 是否已经滑动
+        move: 0,        // 是否已经滑动
         width: 0,       // 容器宽度
         change: 0,      // 子项索引是否已变化
         capture: 0,     // 是否已捕获事件
@@ -7219,8 +7141,12 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var s = state;
 
-        clearTimeout(this.__auto);
-
+        if (this.autoplay)
+        {
+            this.__autoplay = true;
+            this.autoplay = false;
+        }
+        
         if (!s.capture)
         {
             var start = -1;
@@ -7319,9 +7245,44 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         state.capture = 0;
 
-        if (this.autoplay)
+        if (this.__autoplay)
         {
-            this.__set_autoplay(true);
+            this.__autoplay = false;
+            this.autoplay = true;
+        }
+    }
+
+
+
+    // 切换autoplay默认实现
+    this.__do_autoplay = function (value) {
+
+        var interval;
+
+        clearTimeout(this.__time);
+
+        if (value && (interval = this.interval) > 0)
+        {
+            this.__time = setTimeout(autoplay.bind(this), interval);
+        }
+    }
+
+
+    function autoplay(interval) {
+
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
+
+        if (index >= this.__children.length)
+        {
+            index = 0;
+        }
+
+        this.selectedIndex = index;
+
+        if (interval > 0)
+        {
+            this.__time = setTimeout(autoplay.bind(this), interval);
         }
     }
 
@@ -7374,6 +7335,112 @@ yaxi.Box.extend('StackBox', function (Class, base) {
 
 
     yaxi.Box.apply(this, arguments);
+
+
+});
+
+
+
+
+yaxi.component('Swiper', function (Class, base) {
+
+
+    this.template = function () {
+
+        var $this = this;
+
+        return [
+            'box',
+            {
+                height: '300rem'
+            },
+            [
+                [
+                    'slidebox',
+                    {
+                        bindings: {
+                            circular: function () { return $this.circular },
+                            autoplay: function () { return $this.autoplay },
+                            interval: function () { return $this.interval },
+                            duration: function () { return $this.duration },
+                            selectedIndex: function () { return $this.current },
+                            onchange: function (value) { $this.current = value; }
+                        }
+                    },
+                    [
+                        ['slot']
+                    ]
+                ],
+                [
+                    'slot',
+                    {
+                        name: 'dots'
+                    },
+                    [
+                        [
+                            'databox',
+                            {
+                                absolute: 'center bottom',
+                                bottom: '30rem',
+                                width: 'auto'
+                            },
+                            function (template, data) {
+
+                                for (var $index = 0, length = data.length; $index < length; $index++)
+                                {
+                                    template($index, $item,
+                                        [
+                                            "control",
+                                            {
+                                                width: '10rem',
+                                                height: '10rem',
+                                                borderRadius: '10rem',
+                                                bindings: {
+                                                    theme: function (index) {
+
+                                                        return this.current === index ? 'bg-primary' : 'bg-thick';
+
+                                                    }.bind($this, $index)
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }
+                            }
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+    }
+
+
+
+    // 是否循环
+    this.$('circular', true);
+
+
+    // 是否自动切换
+    this.$('autoplay', true);
+
+
+    // 自动切换时间间隔(毫秒)
+    this.$('interval', 5000);
+
+
+    // 过渡动画时长(毫秒), 0表示没有过渡动画
+    this.$('duration', 500, {
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
+    
+
+    // 当前项
+    this.$('current', 0);
 
 
 });
@@ -8479,11 +8546,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
-
     this.template = function () {
 
-        var self = this;
-
+        var $this = this;
+        
         return [
             'box',
             {
@@ -8502,10 +8568,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
                         marginLeft: '-20rem',
                         hidden: yaxi.currentPages.length < 1,
                         events: {
-    
-                            tap: function handleClose() {
-    
-                                this.root.close('Back');
+
+                            tap: function () {
+
+                                $this.root.close('Back');
                                 return false;
                             }
                         }
@@ -8519,10 +8585,10 @@ yaxi.component('Header', function (Class, base, yaxi) {
                             'text',
                             {
                                 bindings: {
-    
+
                                     text: function () {
-    
-                                        return self.text || Class.text || '';
+
+                                        return $this.text || Class.text || '';
                                     }
                                 }
                             }
@@ -8686,8 +8752,9 @@ yaxi.component('Header', function (Class, base, yaxi) {
             {
                 return false;
             }
-    
-            control = control.parent;
+            
+            // 插槽控件也要向真正的父控件冒泡
+            control = control.__slot || control.parent;
         }
     }
     
