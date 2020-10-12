@@ -7086,17 +7086,58 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
     // 是否自动切换
-    this.$('autoplay', true, false);
+    this.$('autoplay', false, {
+
+        force: true,
+        change: false
+    });
 
 
-    // 自动切换时间间隔
+    // 自动切换时间间隔(毫秒)
     this.$('interval', 5000, false);
 
 
-    // 滑动动画时长
-    this.$('duration', 500, false);
+    // 过渡动画时长(毫秒), 0表示没有过渡动画
+    this.$('duration', 0, {
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
 
 
+
+    this.__set_autoplay = function (value) {
+
+        var interval;
+
+        clearTimeout(this.__auto);
+
+        if (value && (interval = this.interval) > 0)
+        {
+            this.__auto = setTimeout(autoplay.bind(this), interval);
+        }
+    }
+
+
+    function autoplay(interval) {
+
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
+
+        if (index >= this.__children.length)
+        {
+            index = 0;
+        }
+
+        this.selectedIndex = index;
+
+        if (interval > 0)
+        {
+            this.__auto = setTimeout(autoplay.bind(this), interval);
+        }
+    }
 
 
     
@@ -7177,6 +7218,8 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     this.__on_touchstart = function (event) {
 
         var s = state;
+
+        clearTimeout(this.__auto);
 
         if (!s.capture)
         {
@@ -7260,7 +7303,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var s = state;
 
-        s.capture = 0;
+        this.__on_touchcancel();
 
         if (s.move)
         {
@@ -7275,6 +7318,11 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     this.__on_touchcancel = function () {
 
         state.capture = 0;
+
+        if (this.autoplay)
+        {
+            this.__set_autoplay(true);
+        }
     }
 
 

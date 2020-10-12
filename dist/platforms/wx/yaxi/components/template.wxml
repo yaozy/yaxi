@@ -321,7 +321,9 @@
         id="id-{{ u }}"
         class="yx-control yx-box yx-slidebox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        circular="true"
         current="{{ selectedIndex || 0 }}"
+        duration="{{ duration || 0 }}"
         next-margin="0"
         bindtouchstart="translateEvent"
         bindchange="translateEvent">

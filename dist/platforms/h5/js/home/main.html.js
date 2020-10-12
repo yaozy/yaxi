@@ -11,7 +11,8 @@ return (
 			[
 				"slidebox",
 				{
-					"autoplay": "true"
+					"autoplay": "true",
+					"duration": "500"
 				},
 				[
 					[

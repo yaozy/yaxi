@@ -7093,12 +7093,18 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     });
 
 
-    // 自动切换时间间隔
+    // 自动切换时间间隔(毫秒)
     this.$('interval', 5000, false);
 
 
-    // 滑动动画时长
-    this.$('duration', 500, false);
+    // 过渡动画时长(毫秒), 0表示没有过渡动画
+    this.$('duration', 0, {
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
 
 
 
@@ -7213,6 +7219,8 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var s = state;
 
+        clearTimeout(this.__auto);
+
         if (!s.capture)
         {
             var start = -1;
@@ -7295,7 +7303,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var s = state;
 
-        s.capture = 0;
+        this.__on_touchcancel();
 
         if (s.move)
         {
@@ -7310,6 +7318,11 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     this.__on_touchcancel = function () {
 
         state.capture = 0;
+
+        if (this.autoplay)
+        {
+            this.__set_autoplay(true);
+        }
     }
 
 
