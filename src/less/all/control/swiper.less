@@ -1,34 +1,24 @@
 .yx-swiper {
+    position: relative;
+    overflow: hidden;
     height: 300rem;
 }
 
-.yx-swiper-host,
-.yx-swiper-item>.yx-control {
+.yx-swiper-body {
+    position: absolute;
+    overflow: visible;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
 
-.yx-swiper-dots {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 30rem;
-    height: 20rem;
-    line-height: 20rem;
-    text-align: center;
-}
-
-.yx-swiper-dot {
-    display: inline-block;
-    width: 12rem;
-    height: 12rem;
-    border-radius: 12rem;
-    margin: 0 8rem;
-    background-color: @bg-light;
-    opacity: .3;
-}
-
-.yx-swiper-active-dot {
-    background-color: @bg-primary;
-    opacity: .8;
+.yx-swiper-body>.yx-control {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
 }

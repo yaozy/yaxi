@@ -288,19 +288,15 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 直接设置属性值
-    this.$set = function (name, value) {
+    this.$set = function (name, value, force) {
 
         var fields, changes;
 
         if (changes = this.__changes)
         {
-            if (value !== changes[name])
-            {
-                changes[name] = value;
-                this.__dirty || patch(this);
-            }
+            changes[name] = value;
         }
-        else if (value !== (fields = this.__fields)[name])
+        else if ((fields = this.__fields) && (force || value !== fields[name]))
         {
             (this.__changes = create(fields))[name] = value;
             this.__dirty || patch(this);
@@ -944,6 +940,12 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         while (name = names[index++])
         {
             property = properties[name];
+
+            if (!property.change)
+            {
+                continue;
+            }
+            
             value = changes[name];
 
             switch (property && property.kind)

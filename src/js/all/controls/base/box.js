@@ -63,6 +63,54 @@ yaxi.Control.extend('Box', function (Class, base) {
     yaxi.impl.query.call(this);
     
 
+
+    // 不支持layout实现, 给子类用
+    this.__no_layout = function () {
+
+        this.$('layout', {
+
+            get: nolayout,
+            set: nolayout
+        });
+    
+        function nolayout() {
+    
+            throw new Error('StackBox control doesn\'t supports layout!');
+        }
+    }
+
+
+
+    // 查找关联控件, 给子类(TabBar, StackBox, SlideBox)用
+    this.__find_related = function (related) {
+
+        var control;
+
+        if (related)
+        {
+            if (control = this.root.findByKey(related))
+            {
+                if (control.$properties.selectedIndex)
+                {
+                    return control;
+                }
+
+                throw new Error('related "' + related + '" has no selectedIndex property!');
+            }
+        }
+        else if (related = this.parent.__children) // 否则在同层找有selectedIndex属性的控件
+        {
+            for (var i = related.length; i--;)
+            {
+                if ((control = related[i]) && control.$properties.selectedIndex && control !== this)
+                {
+                    return control;
+                }
+            }
+        }
+    }
+
+
     
     this.destroy = function () {
 

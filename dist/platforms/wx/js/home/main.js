@@ -7,13 +7,6 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
 
 
-    function render(data) {
-
-        this.find('>>@host').data = data;
-    }
-
-
-
     this.init = function () {
 
         this.loadTemplate(template, {
@@ -21,32 +14,24 @@ module.exports = yaxi.Box.extend(function (Class, base) {
             marquee: '滚动文字 滚动文字 滚动文字 滚动文字'
         });
 
-        yaxi.http.get('home').json(render.bind(this));
+        yaxi.http.get('home').json(function (data) {
+
+            this.find('>@host').data = data;
+
+        }.bind(this));
     }
 
 
     
     this.onshow = function () {
 
-        var swiper = this.find('>>swiper');
-
-        setTimeout(function () {
-
-            swiper.autoplay = true;
-
-        }, 100);
+        this.find('>>slidebox').autoplay = true;
     }
 
 
     this.onhide = function () {
         
-        var swiper = this.find('>>swiper');
-
-        setTimeout(function () {
-
-            swiper.autoplay = false;
-            
-        }, 100);
+        this.find('>>slidebox').autoplay = false;
     }
 
 

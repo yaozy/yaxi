@@ -12,7 +12,11 @@ return (
 			[
 				"stackbox",
 				{
-					"flex": "auto"
+					"flex": "auto",
+					"slide": "true",
+					"events": {
+						"slide": this.handleSlide.bind(this)
+					}
 				},
 				[
 					[

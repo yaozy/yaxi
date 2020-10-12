@@ -2,8 +2,9 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
-    // 关联容器的key
-    this.$('stackbox', '', false);
+    // 关联控件的key
+    this.$('related', '', false);
+
 
 
     // 获取或设置当前页索引
@@ -51,9 +52,9 @@ yaxi.Box.extend('TabBar', function (Class, base) {
     function switchChange(tabbar, index, oldIndex) {
 
         var children = tabbar.__children;
-        var control = tabbar.stackbox;
+        var control;
         
-        if (control = control ? tabbar.root.findByKey(control) : tabbar.parent.find('>stackbox'))
+        if (control = tabbar.__find_related(tabbar.related))
         {
             control.selectedIndex = index;
         }

@@ -5,13 +5,14 @@ return (
 		"box",
 		{
 			"theme": "bg-thick",
-			"layout": "column",
-			"overflow": "hidden"
+			"layout": "column"
 		},
 		[
 			[
-				"swiper",
-				null,
+				"slidebox",
+				{
+					"slide": "true"
+				},
 				[
 					[
 						"image",
@@ -50,7 +51,6 @@ return (
 				"databox",
 				{
 					"key": "host",
-					"flex": "auto",
 					"margin-top": "10rem"
 				},
 				function (template, __data_list, __data_scope) {

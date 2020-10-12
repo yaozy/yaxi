@@ -31,9 +31,27 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
+    this.handleSlide = function (event) {
+
+        var children = this.find('>tabbar').children;
+        var detail = event.detail;
+        var control;
+        
+        if (control = children[detail.index])
+        {
+            control.selected = true;
+        }
+
+        if (control = children[detail.oldIndex])
+        {
+            control.selected = false;
+        }
+    }
+
+
     this.onshow = function () {
 
-        var control = this.find('>stackbox');
+        var control = this.find('>slidebox');
 
         if (control && (control = control.selectedItem) && control.onshow)
         {
@@ -44,7 +62,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
     this.onhide = function () {
 
-        var control = this.find('>stackbox');
+        var control = this.find('>slidebox');
 
         if (control && (control = control.selectedItem) && control.onhide)
         {

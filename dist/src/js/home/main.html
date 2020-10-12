@@ -1,12 +1,12 @@
-<box theme="bg-thick" layout="column" overflow="hidden">
-    <swiper>
+<box theme="bg-thick" layout="column">
+    <slidebox slide="true">
         <image src="/images/demo/demo1.jpg" />
         <image src="/images/demo/demo2.jpg" />
         <image src="/images/demo/demo3.jpg" />
         <image src="/images/demo/demo4.jpg" />
-    </swiper>
+    </slidebox>
     <marquee theme="bg-standard" d:text="$data.marquee" />
-    <databox key="host" flex="auto" margin-top="10rem">
+    <databox key="host" margin-top="10rem">
         <box d:key="$item.id" theme="bg-standard" margin-bottom="10rem" padding="0 20rem">
             <box layout="row middle" margin-top="20rem">
                 <icon theme="text-light" d:icon="$item.icon" font-size="50rem" />

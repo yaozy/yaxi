@@ -1,9 +1,10 @@
-.yx-stackbox {
+.yx-slidebox {
     position: relative;
     overflow: hidden;
+    height: 300rem;
 }
 
-.yx-stackbox-body {
+.yx-slidebox-body {
     position: absolute;
     overflow: visible;
     top: 0;
@@ -16,8 +17,14 @@
     flex-wrap: nowrap;
 }
 
-.yx-stackbox-body>.yx-control {
+.yx-slidebox-body>.yx-control {
     overflow: auto;
     width: 100%;
     height: 100%;
+}
+
+
+.yx-noscroll .yx-box,
+.yx-noscroll .yx-stackbox-body {
+    overflow: hidden !important;
 }

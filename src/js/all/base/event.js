@@ -148,7 +148,7 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
 
     // 触发事件
-    this.trigger = function (event, detail) {
+    this.trigger = function (event, detail, bubble) {
         
         var target = this,
             events,
@@ -195,6 +195,11 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
                         return !event.defaultPrevented;
                     }
                 }
+            }
+
+            if (bubble === false)
+            {
+                break;
             }
 
             // 影子控件再向上冒泡时要修改target为容器控件

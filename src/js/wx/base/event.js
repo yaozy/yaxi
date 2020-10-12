@@ -72,7 +72,7 @@
     }
     
     
-    function touchendEvent(event) {
+    function touchToEvent(event) {
 
         var touch1 = event.changedTouches;
         var touch2 = touches;
@@ -143,7 +143,7 @@
 
         if (control = touchControl)
         {
-            event = touchEvent(event);
+            event = touchToEvent(event);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -160,7 +160,7 @@
     
         if (control = touchControl)
         {
-            event = touchendEvent(event);
+            event = touchToEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchend', event) === false || 

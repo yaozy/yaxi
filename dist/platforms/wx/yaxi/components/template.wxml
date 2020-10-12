@@ -245,6 +245,24 @@
 </template>
 
 
+<template name="SlideBox">
+
+    <view 
+        data-id="{{ u }}"
+        id="id-{{ u }}"
+        class="yx-control yx-slidebox{{ class || '' }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        bindtouchstart="translateEvent">
+        <box
+            data-id="{{ u }}" 
+            class="yx-slidebox-body{{ noscroll }}"
+            style="{{ selectedIndex || slide }}"
+            children="{{ c }}" />
+    </view>
+
+</template>
+
+
 <template name="Line">
 
     <view

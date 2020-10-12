@@ -2,33 +2,25 @@ yaxi.Box.extend('StackBox', function (Class, base) {
 
 
 
-    this.$('layout', {
-
-        get: nolayout,
-        set: nolayout
-    });
-
-
-    function nolayout() {
-
-        throw new Error('StackBox control doesn\'t supports layout!');
-    }
+    // 不支持layout属性
+    this.__no_layout();
 
 
 
-    // 关联TabBar的key
-    this.$('tabar', '', false);
+    // 联动控件的key
+    this.$('related', '', false);
+
 
 
     // 获取或设置当前页索引
-    this.$('selectedIndex', -1, {
+    this.$('selectedIndex', 0, {
 
         force: true,
         alias: 'selected-index',
 
         convert: function (value) {
 
-            return (value |= 0) < 0 ? -1 : value;
+            return (value |= 0) < 0 ? 0 : value;
         }
     });
 
@@ -62,7 +54,7 @@ yaxi.Box.extend('StackBox', function (Class, base) {
         var children = stackbox.__children;
         var control;
 
-        if (control = (control = stackbox.tabbar) && stackbox.root.findByKey(control))
+        if (control = stackbox.__find_related(stackbox.related))
         {
             control.selectedIndex = index;
         }

@@ -142,6 +142,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
             parseSlots(this, template[2], options[2]);
         }
 
+        // 使用shadow的方式管理组件内部控件的目的是为了隔离
         shadowRoot = this.__shadowRoot = build(this, template, scope);
         shadowRoot.__shadow = true;
     }

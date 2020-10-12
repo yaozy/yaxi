@@ -1095,7 +1095,7 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
 
 
     // 触发事件
-    this.trigger = function (event, detail) {
+    this.trigger = function (event, detail, bubble) {
         
         var target = this,
             events,
@@ -1142,6 +1142,11 @@ yaxi.EventTarget = Object.extend(function (Class, base, yaxi) {
                         return !event.defaultPrevented;
                     }
                 }
+            }
+
+            if (bubble === false)
+            {
+                break;
             }
 
             // 影子控件再向上冒泡时要修改target为容器控件
@@ -3828,19 +3833,15 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 直接设置属性值
-    this.$set = function (name, value) {
+    this.$set = function (name, value, force) {
 
         var fields, changes;
 
         if (changes = this.__changes)
         {
-            if (value !== changes[name])
-            {
-                changes[name] = value;
-                this.__dirty || patch(this);
-            }
+            changes[name] = value;
         }
-        else if (value !== (fields = this.__fields)[name])
+        else if ((fields = this.__fields) && (force || value !== fields[name]))
         {
             (this.__changes = create(fields))[name] = value;
             this.__dirty || patch(this);
@@ -5227,6 +5228,54 @@ yaxi.Control.extend('Box', function (Class, base) {
     // 扩展查询实现
     yaxi.impl.query.call(this);
     
+
+
+    // 不支持layout实现, 给子类用
+    this.__no_layout = function () {
+
+        this.$('layout', {
+
+            get: nolayout,
+            set: nolayout
+        });
+    
+        function nolayout() {
+    
+            throw new Error('StackBox control doesn\'t supports layout!');
+        }
+    }
+
+
+
+    // 查找关联控件, 给子类(TabBar, StackBox, SlideBox)用
+    this.__find_related = function (related) {
+
+        var control;
+
+        if (related)
+        {
+            if (control = this.root.findByKey(related))
+            {
+                if (control.$properties.selectedIndex)
+                {
+                    return control;
+                }
+
+                throw new Error('related "' + related + '" has no selectedIndex property!');
+            }
+        }
+        else if (related = this.parent.__children) // 否则在同层找有selectedIndex属性的控件
+        {
+            for (var i = related.length; i--;)
+            {
+                if ((control = related[i]) && control.$properties.selectedIndex && control !== this)
+                {
+                    return control;
+                }
+            }
+        }
+    }
+
 
     
     this.destroy = function () {
@@ -6924,37 +6973,312 @@ yaxi.Box.extend('ScrollBox', function (Class, base, yaxi) {
 
 
 
-yaxi.Box.extend('StackBox', function (Class, base) {
+yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    this.$('layout', {
-
-        get: nolayout,
-        set: nolayout
-    });
-
-
-    function nolayout() {
-
-        throw new Error('StackBox control doesn\'t supports layout!');
-    }
-
+    // 滑动状态
+    var state = {
+        start: -1,      // 开始位置, 如果小于0则表示不滑动
+        slide: 0,       // 是否已经滑动
+        index: 0,       // 当前子项索引
+        last: 0,        // 最后子项数
+        width: 0,       // 容器宽度
+        change: 0,      // 子项索引是否已变化
+        capture: 0      // 是否已捕获事件
+    };
 
 
-    // 关联TabBar的key
-    this.$('tabar', '', false);
+
+
+    // 不支持layout属性
+    this.__no_layout();
+
+
+
+    // 联动控件的key
+    this.$('related', '', false);
 
 
     // 获取或设置当前页索引
-    this.$('selectedIndex', -1, {
+    this.$('selectedIndex', 0, {
 
         force: true,
         alias: 'selected-index',
 
         convert: function (value) {
 
-            return (value |= 0) < 0 ? -1 : value;
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
+
+
+
+    // 是否支持滑动
+    this.$('slide', false, false);
+
+
+    // 是否自动切换
+    this.$('autoplay', true, false);
+
+
+    // 自动切换时间间隔
+    this.$('interval', 5000, false);
+
+
+    // 滑动动画时长
+    this.$('duration', 500, false);
+
+
+
+
+    this.__load_children = function (values, scope) {
+
+        this.__children.load(values, scope);
+        switchChange(this, this.selectedIndex, -1);
+    }
+
+
+    this.__set_selectedIndex = function (value, oldValue) {
+
+        if (this.__children[value])
+        {
+            switchChange(this, value, oldValue); 
+            this.trigger('change', { index: value, lastIndex: oldValue });
+        }
+    }
+
+
+    function switchChange(slidebox, index, oldIndex) {
+
+        var children = slidebox.__children;
+        var control;
+
+        if (control = slidebox.__find_related(slidebox.related))
+        {
+            control.selectedIndex = index;
+        }
+
+        if (control = oldIndex >= 0 && children[oldIndex])
+        {
+            control.onhide && control.onhide();
+        }
+    
+        if (control = children[index])
+        {
+            if (!control.__shown)
+            {
+                control.__shown = true;
+                control.onload && control.onload();
+            }
+
+            control.onshow && control.onshow();
+        }
+    }
+
+
+
+    function touchX(event) {
+
+        var touch = event.changedTouches;
+        return touch && (touch = touch[0]) ? touch.pageX | 0 : -1;
+    }
+
+
+    this.__on_touchstart = function (event) {
+
+        var s = state;
+
+        if (!s.capture)
+        {
+            var start = -1;
+            var last = this.__children.length - 1;
+    
+            if (last >= 0 && this.slide)
+            {
+                s.slide = false;
+                s.last = last;
+    
+                (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
+        
+                    if ((s.width = rect.width) <= 0)
+                    {
+                        start = -1;
+                    }
+                });
+            }
+    
+            s.start = start;
+            s.capture = 1;
+        }
+    }
+
+
+    function checkSlide(slidebox, state, event) {
+
+        var x = event.distanceX;
+        var y = event.distanceY;
+        var delta;
+
+        if (x < 0)
+        {
+            x = -x;
+        }
+
+        if (y < 0)
+        {
+            y = -y;
+        }
+
+        // 横向滑动的距离更多则启动滑动功能
+        if ((delta = x - y) >= 4)
+        {
+            state.slide = true;
+            state.index = slidebox.selectedIndex;
+
+            slidebox.$renderer.start(slidebox);
+        }
+        else if (delta <= -4) // 纵向滚动则不再滑动
+        {
+            return false;
+        }
+    }
+
+
+    this.__on_touchmove = function (event) {
+
+        var s = state;
+
+        if (s.start >= 0)
+        {
+            if (!s.slide && checkSlide(this, s, event) === false)
+            {
+                s.start = -1;
+                return;
+            }
+
+            var index = s.index;
+            var distance = touchX(event) - s.start;
+            var size = s.width / 3 | 0;
+            var change = 0;
+
+            if (distance < -size)
+            {
+                if (index < s.last)
+                {
+                    change = 1;
+
+                    this.trigger('slide', {
+                        index: index + 1,
+                        oldIndex: index
+                    }, false);
+                }
+            }
+            else if (distance > size)
+            {
+                if (index > 0)
+                {
+                    change = -1;
+
+                    this.trigger('slide', {
+                        index: index - 1,
+                        oldIndex: index
+                    }, false);
+                }
+            }
+            else
+            {
+                if (change = s.change)
+                {
+                    this.trigger('slide', {
+                        index: index,
+                        oldIndex: index + change
+                    }, false);
+                }
+
+                change = 0;
+            }
+
+            if (index > 0)
+            {
+                distance += -index * s.width;
+            }
+
+            s.change = change;
+            this.$renderer.slide(this, distance);
+
+            event.stop();
+            return false;
+        }
+    }
+
+
+    this.__on_touchend = function (event) {
+
+        var s = state;
+
+        s.capture = 0;
+
+        if (s.slide)
+        {
+            if (s.change)
+            {
+                this.selectedIndex += s.change;
+            }
+            else
+            {
+                this.$set('selectedIndex', s.index, true);
+            }
+
+            this.$renderer.stop(this);
+
+            event.stop();
+            return false;
+        }
+    }
+
+
+    this.__on_touchcancel = function () {
+
+        s.capture = 0;
+    }
+
+
+
+}, function SlideBox() {
+
+
+    yaxi.Box.apply(this, arguments);
+
+
+});
+
+
+
+
+yaxi.Box.extend('StackBox', function (Class, base) {
+
+
+
+    // 不支持layout属性
+    this.__no_layout();
+
+
+
+    // 联动控件的key
+    this.$('related', '', false);
+
+
+
+    // 获取或设置当前页索引
+    this.$('selectedIndex', 0, {
+
+        force: true,
+        alias: 'selected-index',
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
         }
     });
 
@@ -6988,7 +7312,7 @@ yaxi.Box.extend('StackBox', function (Class, base) {
         var children = stackbox.__children;
         var control;
 
-        if (control = (control = stackbox.tabbar) && stackbox.root.findByKey(control))
+        if (control = stackbox.__find_related(stackbox.related))
         {
             control.selectedIndex = index;
         }
@@ -7034,35 +7358,136 @@ yaxi.Box.extend('Swiper', function (Class, base) {
 
 
 
+    var start, distance, width;
+
+
+
     // 是否自动切换
-    this.$('autoplay', true);
+    this.$('autoplay', true, false);
 
 
     // 当前所在滑块的 index
-    this.$('current', 0);
+    this.$('current', 0, {
+        
+        change: false,
+        convert: function (value) {
+
+            return (value |= 0) >= 0 ? value : 0;
+        }
+    });
 
 
     // 自动切换时间间隔
-    this.$('interval', 5000);
+    this.$('interval', 5000, false);
 
 
     // 滑动动画时长
-    this.$('duration', 500);
+    this.$('duration', 500, false);
 
 
 
-    // 前边距, 可用于露出前一项的一小部分, 接受px和rem值
-    this.$('before', '');
+
+    this.__load_children = function (values, scope) {
+
+        var current = this.current;
+
+        this.__children.load(values, scope);
+
+        if (current > 0)
+        {
+            this.__set_current(current);
+        }
+    }
 
 
-    // 后边距, 可用于露出后一项的一小部分, 接受px和rem值
-    this.$('after', '');
+    this.__set_current = function (value) {
+
+        var length = this.__children.length;
+
+        if (length > 0)
+        {
+            if (value >= length)
+            {
+                value = length - 1;
+            }
+
+            this.$renderer.current(this, value);
+        }
+    }
 
 
 
-    this.__on_change = function (value) {
+    function touchX(event) {
 
-        this.current = value;
+        var touch = event.changedTouches;
+        return touch && (touch = touch[0]) ? touch.pageX : -1;
+    }
+
+
+
+    this.__on_touchstart = function (event) {
+
+        this.$renderer.offset(this, -1);
+
+        (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
+
+            width = rect.width;
+        });
+    }
+
+
+    this.__on_touchmove = function (event) {
+
+        var x;
+
+        if (start >= 0 && width > 0 && (x = touchX(event)) >= 0)
+        {
+            var current = this.current;
+            var value = distance = x - start;
+
+            if (current > 0)
+            {
+                value += -current * width;
+            }
+    
+            this.$renderer.offset(this, value);
+
+            event.stop();
+            return false;
+        }
+    }
+
+
+    this.__on_touchend = function (event) {
+
+        if (start >= 0 && width > 0)
+        {
+            var current = this.current;
+            var change = distance / yaxi.remRatio;
+
+            if (change < -50)
+            {
+                if (current < this.__children.length - 1)
+                {
+                    this.current++;
+                }
+            }
+            else if (change < 50)
+            {
+                if (current > 0)
+                {
+                    this.current--;
+                }
+            }
+            
+            if (current === this.current)
+            {
+                this.__set_current(current);
+            }
+            
+            event.stop();
+            return false;
+        }
     }
 
 
@@ -7080,8 +7505,9 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
-    // 关联容器的key
-    this.$('stackbox', '', false);
+    // 关联控件的key
+    this.$('related', '', false);
+
 
 
     // 获取或设置当前页索引
@@ -7129,9 +7555,9 @@ yaxi.Box.extend('TabBar', function (Class, base) {
     function switchChange(tabbar, index, oldIndex) {
 
         var children = tabbar.__children;
-        var control = tabbar.stackbox;
+        var control;
         
-        if (control = control ? tabbar.root.findByKey(control) : tabbar.parent.find('>stackbox'))
+        if (control = tabbar.__find_related(tabbar.related))
         {
             control.selectedIndex = index;
         }
@@ -8312,7 +8738,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
     }
 
 
-    function touchendEvent(event) {
+    function touchToEvent(event) {
 
         var touch1 = touches;
         var touch2 = event.changedTouches;
@@ -8414,7 +8840,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
         if (control = touchControl)
         {
-            event = touchEvent(event);
+            event = touchToEvent(event);
 
             if (call(control, '__on_touchmove', event) === false || 
                 control.trigger(event) === false)
@@ -8437,7 +8863,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
         if (control = touchControl)
         {
-            event = touchendEvent(event);
+            event = touchToEvent(event);
             touchControl = null;
 
             if (call(control, '__on_touchend', event) === false || 
@@ -9516,6 +9942,61 @@ yaxi.ScrollBox.renderer(function (base, thisControl) {
 
 
 
+yaxi.SlideBox.renderer(function (base) {
+
+
+
+    this.className = 'yx-control yx-box yx-slidebox';
+    
+
+
+    this.template('<div class="@class"><div class="yx-slidebox-body"></div></div>');
+
+
+
+    this.getChildrenView = function (view) {
+
+        return view.firstChild;
+    }
+
+
+
+    this.selectedIndex = function (control, view, value) {
+
+        var duration = control.duration;
+        var style = view.firstChild.style;
+
+        style.transition = duration ? 'transform ' + duration + 'ms ease' : '';
+        style.transform = 'translateX(-' + value + '00%)';
+    }
+
+
+    this.start = function (control) {
+
+        var view = control.$view.firstChild;
+
+        view.style.transition = '';
+        view.className = 'yx-slidebox-body yx-noscroll';
+    }
+
+    
+    this.slide = function (control, value) {
+
+        control.$view.firstChild.style.transform = 'translateX(' + value + 'px)';
+    }
+
+
+    this.stop = function (control) {
+
+        control.$view.firstChild.className = 'yx-slidebox-body';
+    }
+
+
+});
+
+
+
+
 yaxi.StackBox.renderer(function (base) {
 
 
@@ -9554,7 +10035,39 @@ yaxi.Swiper.renderer(function (base) {
     this.className = 'yx-control yx-box yx-swiper';
     
 
-    this.template('<div class="@class"></div>');
+    this.template('<div class="@class"><div class="yx-swiper-body"></div></div>');
+
+
+
+    this.getChildrenView = function (view) {
+
+        return view.firstChild;
+    }
+
+
+
+    this.current = function (control, value) {
+
+        var style = control.$view.firstChild.style;
+
+        style.transition = 'transform 500ms ease';
+        style.transform = 'translateX(-' + value + '00%)';
+    }
+
+
+    this.offset = function (control, value) {
+
+        var style = control.$view.firstChild.style;
+
+        if (value >= 0)
+        {
+            style.transform = 'translateX(' + value + 'px)';
+        }
+        else
+        {
+            style.transition = '';
+        }
+    }
 
 
 });
