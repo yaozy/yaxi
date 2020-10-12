@@ -1,4 +1,4 @@
-yaxi.SlideBox.renderer(function (base) {
+yaxi.SlideBox.renderer(function (base, thisControl, yaxi) {
 
 
 
@@ -27,24 +27,37 @@ yaxi.SlideBox.renderer(function (base) {
     }
 
 
-    this.start = function (control) {
 
-        var view = control.$view.firstChild;
+
+    thisControl.__start = function () {
+
+        var view = this.$view.firstChild;
 
         view.style.transition = '';
         view.className = 'yx-slidebox-body yx-noscroll';
     }
 
-    
-    this.slide = function (control, value) {
 
-        control.$view.firstChild.style.transform = 'translateX(' + value + 'px)';
+    thisControl.__move = function (distance) {
+
+        this.$view.firstChild.style.transform = 'translateX(' + distance + 'px)';
     }
 
 
-    this.stop = function (control) {
+    thisControl.__stop = function (change) {
 
-        control.$view.firstChild.className = 'yx-slidebox-body';
+        var view = this.$view;
+
+        if (change)
+        {
+            this.selectedIndex += change;
+        }
+        else
+        {
+            this.$renderer.selectedIndex(this, view, this.selectedIndex);
+        }
+
+        view.firstChild.className = 'yx-slidebox-body';
     }
 
 

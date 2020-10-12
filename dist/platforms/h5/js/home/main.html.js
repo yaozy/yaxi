@@ -11,7 +11,7 @@ return (
 			[
 				"slidebox",
 				{
-					"slide": "true"
+					"autoplay": "true"
 				},
 				[
 					[

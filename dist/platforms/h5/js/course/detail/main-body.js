@@ -19,34 +19,6 @@ module.exports = yaxi.Box.extend(function (Class, base) {
 
 
 
-    this.handleSwitch = function (event) {
-
-        var control;
-
-        if (control = this.find('>>@host'))
-        {
-            var children = control.children;
-
-            if (control = children[event.detail.lastIndex])
-            {
-                control.hidden = true;
-            }
-
-            if (control = children[event.detail.index])
-            {
-                control.hidden = false;
-
-                if (!control.loaded)
-                {
-                    control.onload(this.data);
-                    control.loaded = true;
-                }
-            }
-        }
-    }
-
-
-
     this.handleFavorite = function (event) {
 
         var source = event.source;

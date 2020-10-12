@@ -11,29 +11,6 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
 
-    
-    function renderChanges(renderer, control, changes, view, prefix) {
-
-        var count;
-
-        changes = control.__get_changes(changes);
-
-        if (count = changes[0])
-        {
-            renderer.renderClasses(control, changes[1], changes[2], count, view, prefix);
-        }
-
-        if (count = changes[3])
-        {
-            renderer.renderStyles(control,  changes[4], changes[5], count, view, prefix);
-        }
-
-        if (count = changes[6])
-        {
-            renderer.renderAttributes(control,  changes[7], changes[8], count, view, prefix);
-        }
-    }
-
 
 
     this.renderClasses = function (control, properties, values, count, view, prefix) {
@@ -152,7 +129,7 @@ yaxi.Control.renderer(function (base, thisControl) {
             control.__changes = null;
         }
 
-        changes = control.__get_changes(fields);
+        changes = control.__get_changes(fields, true);
 
         if (count = changes[0])
         {
@@ -205,7 +182,7 @@ yaxi.Control.renderer(function (base, thisControl) {
         if (changes = control.__changes)
         {
             assign(fields = control.__fields, changes);
-            changes = control.__get_changes(changes);
+            changes = control.__get_changes(changes, true);
 
             prefix += '.';
 
@@ -217,7 +194,7 @@ yaxi.Control.renderer(function (base, thisControl) {
             // 如果class和样式有变化需要重新渲染
             if (changes[0] > 0 || changes[3] > 0)
             {
-                fields = control.__get_changes(fields);
+                fields = control.__get_changes(fields, true);
 
                 if (changes[0] > 0 && (count = fields[0]))
                 {
@@ -326,6 +303,49 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
     this.onchange = function (control, view, prefix) {
+    }
+
+
+    // 局部渲染
+    this.renderPart = function (control, name, value) {
+
+        var key = '';
+        var data;
+
+        while (data = control.parent)
+        {
+            var children = data.__children;
+
+            for (var i = children.length; i--;)
+            {
+                if (children[i] === control)
+                {
+                    key = 'c[' + i + '].' + key;
+                    break;
+                }
+            }
+
+            control = data;
+        }
+
+        data = {};
+
+        if (value == null)
+        {
+            value = name;
+
+            for (name in value)
+            {
+                data['p.' + key + name] = value[name];
+            }
+        }
+        else
+        {
+            data['p.' + key + name] = value;
+        }
+
+        console.log(data);
+        control.__po.setData(data);
     }
 
 

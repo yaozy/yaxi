@@ -195,6 +195,44 @@
 </template>
 
 
+<template name="Line">
+
+<view
+    data-id="{{ u }}"
+    id="id-{{ u }}"
+    class="yx-control yx-line{{ class || '' }}" 
+    style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
+    bindtouchstart="translateEvent" />
+
+</template>
+
+
+<template name="Vline">
+
+<view
+    data-id="{{ u }}"
+    id="id-{{ u }}"
+    class="yx-control yx-vline{{ class || '' }}" 
+    style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
+    bindtouchstart="translateEvent" />
+
+</template>
+
+
+<template name="MaskLayer">
+
+<view 
+    data-id="{{ u }}"
+    id="id-{{ u }}"
+    class="yx-control yx-masklayer{{ class || '' }}" 
+    style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+    bindtouchstart="translateEvent" />
+
+</template>
+
+
+
+
 <template name="Box">
 
     <box 
@@ -221,7 +259,6 @@
 </template>
 
 
-
 <template name="ScrollBox">
 
     <scroll-view
@@ -245,46 +282,76 @@
 </template>
 
 
-<template name="SlideBox">
+<template name="SwitchBox">
+
+<box 
+    data-id="{{ u }}"
+    id="id-{{ u }}"
+    class="yx-control yx-box yx-switchbox{{ class || '' }}" 
+    style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+    children="{{ c }}"
+    bindchange="translateEvent" />
+
+</template>
+
+
+<template name="StackBox">
 
     <view 
         data-id="{{ u }}"
         id="id-{{ u }}"
-        class="yx-control yx-slidebox{{ class || '' }}" 
+        class="yx-control yx-box yx-stackbox{{ class || '' }}" 
         style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        bindtouchstart="translateEvent">
-        <box
-            data-id="{{ u }}" 
-            class="yx-slidebox-body{{ noscroll }}"
-            style="{{ selectedIndex || slide }}"
+        current="{{ selectedIndex || 0 }}"
+        bindchange="translateEvent">
+        <box 
+            data-id="{{ u }}"
+            class="yx-stackbox-body"
+            style="{{ duration !== 0 ? 'transition:transform ' + (duration || 500) + 'ms ease;' : '' }}transform:translateX(-{{ selectedIndex }}00%);"
             children="{{ c }}" />
     </view>
 
 </template>
 
 
-<template name="Line">
+<template name="SlideBox">
 
-    <view
+    <swiper 
         data-id="{{ u }}"
         id="id-{{ u }}"
-        class="yx-control yx-line{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
-        bindtouchstart="translateEvent" />
+        class="yx-control yx-box yx-slidebox{{ class || '' }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        current="{{ selectedIndex || 0 }}"
+        next-margin="0"
+        bindtouchstart="translateEvent"
+        bindchange="translateEvent">
+        <swiper-item 
+            wx:for="{{ c }}"
+            wx:key="u"
+            key="index"
+            data-id="{{ u }}" 
+            item-id="id-{{ item.u }}"
+            class="yx-slidebox-body"
+            bindtouchmove="translateEvent">
+            <template is="{{ item.t }}" data="{{ ...item }}" />
+        </swiper-item>
+    </swiper>
 
 </template>
 
 
-<template name="Vline">
+<template name="TabBar">
 
-    <view
+    <box 
         data-id="{{ u }}"
         id="id-{{ u }}"
-        class="yx-control yx-vline{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}{{ color ? 'background-color:' + color + ';' : '' }}{{ size ? 'width:' + size + ';' : '' }}"
+        class="yx-control yx-tabbar{{ class || '' }}" 
+        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
+        children="{{ c }}"
         bindtouchstart="translateEvent" />
 
 </template>
+
 
 
 
@@ -326,90 +393,6 @@
     </view>
 
 </template>
-
-
-<template name="Swiper">
-
-    <view data-id="{{ u }}"
-        id="id-{{ u }}"
-        class="yx-control yx-box yx-swiper{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        bindtouchstart="translateEvent">
-        <swiper 
-            data-id="{{ u }}"
-            class="yx-swiper-host"
-            current="{{ current || 0 }}"
-            circular="{{ true }}"
-            bindchange="translateEvent">
-            <swiper-item 
-                wx:for="{{ c }}"
-                wx:key="u"
-                key="index"
-                data-id="{{ item.u }}" 
-                item-id="id-{{ item.u }}"
-                class="yx-swiper-item">
-                <template is="{{ item.t }}" data="{{ ...item }}" />
-            </swiper-item>
-        </swiper>
-        <view class="yx-swiper-dots" wx:if="{{ dots !== false }}">
-            <view 
-                wx:for="{{ c }}"
-                wx:key="u"
-                key="index"
-                data-id="{{ u }}" 
-                data-flag="{{ index }}" 
-                class="yx-swiper-dot{{ (current || 0) === index ? ' yx-swiper-active-dot' : ''}}"
-                style="{{ ((current || 0) === index ? activeDotStyle : dotStyle) || '' }}" />
-        </view>
-    </view>
-
-</template>
-
-
-<template name="TabBar">
-
-    <box 
-        data-id="{{ u }}"
-        id="id-{{ u }}"
-        class="yx-control yx-tabbar{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        children="{{ c }}"
-        bindtouchstart="translateEvent" />
-
-</template>
-
-
-<template name="StackBox">
-
-    <view 
-        data-id="{{ u }}"
-        id="id-{{ u }}"
-        class="yx-control yx-box yx-stackbox{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        current="{{ selectedIndex || 0 }}"
-        bindchange="translateEvent">
-        <box 
-            data-id="{{ u }}"
-            class="yx-stackbox-body"
-            style="transform:translateX(-{{ selectedIndex }}00%);"
-            children="{{ c }}" />
-    </view>
-
-</template>
-
-
-
-<template name="MaskLayer">
-
-    <view 
-        data-id="{{ u }}"
-        id="id-{{ u }}"
-        class="yx-control yx-masklayer{{ class || '' }}" 
-        style="{{ s || '' }}{{ hidden ? 'display:none;' : '' }}"
-        bindtouchstart="translateEvent" />
-
-</template>
-
 
 
 <template name="Marquee">

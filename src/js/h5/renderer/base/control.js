@@ -132,7 +132,7 @@ yaxi.Control.renderer(function (base, thisControl) {
         if (!view)
         {
             view = control.$view = createView(this, control);
-            view.id = uuid || control.uuid;
+            view.id = 'id-' + (uuid || control.uuid);
 
             if (any = control.__on_mount)
             {

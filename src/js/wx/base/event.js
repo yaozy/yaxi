@@ -74,21 +74,22 @@
     
     function touchToEvent(event) {
 
-        var touch1 = event.changedTouches;
-        var touch2 = touches;
-        var e = touchEvent(event);
+        var touch1 = touches;
+        var touch2 = event.changedTouches;
+
+        event = touchEvent(event);
 
         if (touch1 && (touch1 = touch1[0]) && touch2 && (touch2 = touch2[0]))
         {
-            var x = touch2.clientX - touch1.clientX;
-            var y = touch2.clientY - touch1.clientY;
+            var x = touch2.pageX - touch1.pageX;
+            var y = touch2.pageY - touch1.pageY;
 
-            e.distanceX = x;
-            e.distanceY = y;
-            e.move = x < -10 || x > 10 || y < -10 || y > 10;
+            event.distanceX = x;
+            event.distanceY = y;
+            event.move = x < -10 || x > 10 || y < -10 || y > 10;
         }
 
-        return e;
+        return event;
     }
 
     
@@ -236,6 +237,7 @@
         {
             detail = event.detail.value;
 
+            // 不冒泡
             if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
@@ -255,6 +257,7 @@
         {
             detail = event.detail.value || event.detail.current;
 
+            // 不冒泡
             if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;
@@ -282,6 +285,7 @@
             return control.trigger('scroll');
         }
     }
+
 
 
     

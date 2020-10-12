@@ -155,12 +155,19 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
             yaxi.remRatio = 1 / info.pixelRatio;
             page.__po = wxPage;
+            
 
             data = page.$renderer.render(page);
+            data = { top: 0, p: data };
+
+            if (!page.full)
+            {
+                data.top = info.statusBarHeight || 0;
+            }
 
             console.log(data);
 
-            wxPage.setData({ top: info.statusBarHeight | 0, p: data });
+            wxPage.setData(data);
         });
     }
 

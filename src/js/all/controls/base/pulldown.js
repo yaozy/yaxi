@@ -132,7 +132,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
             case 2:
                 this.status = 3;
-                this.trigger('refresh');
+                this.trigger('pulldown');
                 break;
         }
     }

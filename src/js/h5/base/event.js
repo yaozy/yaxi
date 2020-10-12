@@ -55,7 +55,7 @@
 
         while (view)
         {
-            if ((uuid = view.id) && (control = controls[uuid]))
+            if ((uuid = view.id) && (control = controls[uuid.substring(3)]))
             {
                 return control.disabled ? control.parent || null : control;
             }
@@ -278,6 +278,7 @@
         {
             detail = event.target.value;
 
+            // 不冒泡
             if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
@@ -297,6 +298,7 @@
         {
             detail = event.target.value;
 
+            // 不冒泡
             if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;

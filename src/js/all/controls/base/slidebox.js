@@ -2,49 +2,32 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    // 滑动状态
-    var state = {
-        start: -1,      // 开始位置, 如果小于0则表示不滑动
-        slide: 0,       // 是否已经滑动
-        index: 0,       // 当前子项索引
-        last: 0,        // 最后子项数
-        width: 0,       // 容器宽度
-        change: 0,      // 子项索引是否已变化
-        capture: 0      // 是否已捕获事件
-    };
 
+    Class.allowParent = function (parent) {
 
-
-
-    // 不支持layout属性
-    this.__no_layout();
-
-
-
-    // 联动控件的key
-    this.$('related', '', false);
-
-
-    // 获取或设置当前页索引
-    this.$('selectedIndex', 0, {
-
-        force: true,
-        alias: 'selected-index',
-
-        convert: function (value) {
-
-            return (value |= 0) < 0 ? 0 : value;
+        if (parent instanceof Class)
+        {
+            throw new Error('slidebox cannot be added to slidebox!');
         }
-    });
+
+        return true;
+    }
 
 
 
-    // 是否支持滑动
-    this.$('slide', false, false);
+
+    // 扩展切换容器接口
+    yaxi.impl.switchbox.call(this);
+
+
 
 
     // 是否自动切换
-    this.$('autoplay', true, false);
+    this.$('autoplay', false, {
+
+        force: true,
+        change: false
+    });
 
 
     // 自动切换时间间隔
@@ -56,51 +39,50 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
+    this.__set_autoplay = function (value) {
 
-    this.__load_children = function (values, scope) {
+        var interval;
 
-        this.__children.load(values, scope);
-        switchChange(this, this.selectedIndex, -1);
-    }
+        clearTimeout(this.__auto);
 
-
-    this.__set_selectedIndex = function (value, oldValue) {
-
-        if (this.__children[value])
+        if (value && (interval = this.interval) > 0)
         {
-            switchChange(this, value, oldValue); 
-            this.trigger('change', { index: value, lastIndex: oldValue });
+            this.__auto = setTimeout(autoplay.bind(this), interval);
         }
     }
 
 
-    function switchChange(slidebox, index, oldIndex) {
+    function autoplay(interval) {
 
-        var children = slidebox.__children;
-        var control;
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
 
-        if (control = slidebox.__find_related(slidebox.related))
+        if (index >= this.__children.length)
         {
-            control.selectedIndex = index;
+            index = 0;
         }
 
-        if (control = oldIndex >= 0 && children[oldIndex])
+        this.selectedIndex = index;
+
+        if (interval > 0)
         {
-            control.onhide && control.onhide();
+            this.__auto = setTimeout(autoplay.bind(this), interval);
         }
+    }
+
+
     
-        if (control = children[index])
-        {
-            if (!control.__shown)
-            {
-                control.__shown = true;
-                control.onload && control.onload();
-            }
-
-            control.onshow && control.onshow();
-        }
-    }
-
+    // 滑动状态
+    var state = {
+        start: -1,      // 开始位置, 如果小于0则表示不滑动
+        index: 0,       // 当前子项索引
+        last: 0,        // 最后子项数
+        move: 0,       // 是否已经滑动
+        width: 0,       // 容器宽度
+        change: 0,      // 子项索引是否已变化
+        capture: 0,     // 是否已捕获事件
+        time: 0         // 按下时间
+    };
 
 
     function touchX(event) {
@@ -110,36 +92,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     }
 
 
-    this.__on_touchstart = function (event) {
-
-        var s = state;
-
-        if (!s.capture)
-        {
-            var start = -1;
-            var last = this.__children.length - 1;
-    
-            if (last >= 0 && this.slide)
-            {
-                s.slide = false;
-                s.last = last;
-    
-                (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
-        
-                    if ((s.width = rect.width) <= 0)
-                    {
-                        start = -1;
-                    }
-                });
-            }
-    
-            s.start = start;
-            s.capture = 1;
-        }
-    }
-
-
-    function checkSlide(slidebox, state, event) {
+    function checkMove(slidebox, state, event) {
 
         var x = event.distanceX;
         var y = event.distanceY;
@@ -158,14 +111,67 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
         // 横向滑动的距离更多则启动滑动功能
         if ((delta = x - y) >= 4)
         {
-            state.slide = true;
+            state.move = 1;
             state.index = slidebox.selectedIndex;
 
-            slidebox.$renderer.start(slidebox);
+            slidebox.__start();
         }
         else if (delta <= -4) // 纵向滚动则不再滑动
         {
             return false;
+        }
+    }
+
+
+    function checkChange(state, event) {
+
+        // 500ms只要移动了小段距离就算换页
+        if (new Date() - state.time < 500)
+        {
+            var x = event.distanceX;
+            var size = 100 * yaxi.remRatio;
+    
+            if (x  < -size)
+            {
+                if (state.index < state.last)
+                {
+                    return 1;
+                }
+            }
+            else if (x > size && state.index > 0)
+            {
+                return -1;
+            }
+        }
+    }
+
+
+    this.__on_touchstart = function (event) {
+
+        var s = state;
+
+        if (!s.capture)
+        {
+            var start = -1;
+            var last = this.__children.length - 1;
+    
+            if (last >= 0)
+            {
+                s.move = 0;
+                s.last = last;
+    
+                (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
+        
+                    if ((s.width = rect.width) <= 0)
+                    {
+                        start = -1;
+                    }
+                });
+            }
+    
+            s.start = start;
+            s.time = new Date();
+            s.capture = 1;
         }
     }
 
@@ -176,7 +182,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         if (s.start >= 0)
         {
-            if (!s.slide && checkSlide(this, s, event) === false)
+            if (!s.move && checkMove(this, s, event) === false)
             {
                 s.start = -1;
                 return;
@@ -184,44 +190,29 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
             var index = s.index;
             var distance = touchX(event) - s.start;
-            var size = s.width / 3 | 0;
-            var change = 0;
+            var size = s.width >> 1;
+            var change = s.change;
 
             if (distance < -size)
             {
-                if (index < s.last)
+                if (!change && index < s.last)
                 {
-                    change = 1;
-
-                    this.trigger('slide', {
-                        index: index + 1,
-                        oldIndex: index
-                    }, false);
+                    s.change = 1;
+                    this.trigger('transition', index + 1, false);
                 }
             }
             else if (distance > size)
             {
-                if (index > 0)
+                if (!change && index > 0)
                 {
-                    change = -1;
-
-                    this.trigger('slide', {
-                        index: index - 1,
-                        oldIndex: index
-                    }, false);
+                    s.change = -1;
+                    this.trigger('transition', index - 1, false);
                 }
             }
-            else
+            else if (change)
             {
-                if (change = s.change)
-                {
-                    this.trigger('slide', {
-                        index: index,
-                        oldIndex: index + change
-                    }, false);
-                }
-
-                change = 0;
+                s.change = 0;
+                this.trigger('transition', index, false);
             }
 
             if (index > 0)
@@ -229,8 +220,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
                 distance += -index * s.width;
             }
 
-            s.change = change;
-            this.$renderer.slide(this, distance);
+            this.__move(distance);
 
             event.stop();
             return false;
@@ -244,18 +234,9 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         s.capture = 0;
 
-        if (s.slide)
+        if (s.move)
         {
-            if (s.change)
-            {
-                this.selectedIndex += s.change;
-            }
-            else
-            {
-                this.$set('selectedIndex', s.index, true);
-            }
-
-            this.$renderer.stop(this);
+            this.__stop(s.change || checkChange(s, event));
 
             event.stop();
             return false;
@@ -265,8 +246,27 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
     this.__on_touchcancel = function () {
 
-        s.capture = 0;
+        state.capture = 0;
     }
+
+
+
+    // 小程序在拖动结束时直接从change事件获取当前索引
+    this.__on_change = function (index) {
+
+        this.selectedIndex = index;
+        return false;
+    }
+
+
+
+    this.__start = this.__move = function () {
+    }
+    
+    
+    this.__stop = function (change) {
+    }
+
 
 
 

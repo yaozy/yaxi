@@ -177,10 +177,7 @@ return (
 							"line-height": "80rem",
 							"theme": "bg-standard line-lightest line-bottom",
 							"margin-top": "10rem",
-							"text-align": "center",
-							"events": {
-								"change": this.handleSwitch.bind(this)
-							}
+							"text-align": "center"
 						},
 						[
 							[
@@ -226,7 +223,7 @@ return (
 						]
 					],
 					[
-						"box",
+						"switchbox",
 						{
 							"key": "host"
 						},
@@ -234,31 +231,31 @@ return (
 							[
 								require("./info"),
 								{
-
+									"tag": $data
 								}
 							],
 							[
 								require("./section"),
 								{
-
+									"tag": $data
 								}
 							],
 							[
 								require("./test-paper"),
 								{
-
+									"tag": $data
 								}
 							],
 							[
 								require("./comment"),
 								{
-
+									"tag": $data
 								}
 							],
 							[
 								require("./recommend"),
 								{
-
+									"tag": $data
 								}
 							]
 						]

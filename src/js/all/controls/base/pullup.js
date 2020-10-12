@@ -97,7 +97,7 @@ yaxi.component('Pullup', function (Class, base) {
     this.start = function () {
 
         this.status = 0;
-        this.trigger('refresh');
+        this.trigger('pullup');
     }
 
 

@@ -21,5 +21,4 @@ yaxi.Box.renderer(function (base) {
     }
 
 
-
 });

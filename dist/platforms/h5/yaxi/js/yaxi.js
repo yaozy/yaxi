@@ -3907,10 +3907,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 是否隐藏
-    this.$('hidden', false, {
-
-        kind: 'attribute'
-    });
+    this.$('hidden', false);
 
 
     // 是否选中
@@ -4471,7 +4468,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     
 
     // 获取变更数据
-    this.__get_changes = function (changes) {
+    this.__get_changes = function (changes, noproperty) {
 
         var properties = this.$properties;
         var names = own(changes || (changes = this.__changes));
@@ -4484,44 +4481,57 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         while (name = names[index++])
         {
-            property = properties[name];
             value = changes[name];
 
-            switch (property && property.kind)
+            if (property = properties[name])
             {
-                case 'class': // class属性
-                    if (value)
-                    {
-                        any = ' ' + property.data;
-                        value = property.type === 'string' ? any + value.replace(replaceClass, any) : any;
-                    }
-                    else
-                    {
-                        value = '';
-                    }
+                if (!property.change)
+                {
+                    continue;
+                }
 
-                    any = cache[0]++;
-                    cache[1][any] = property;
-                    cache[2][any] = value;
-                    break;
+                switch (property.kind)
+                {
+                    case 'class': // class属性
+                        if (value)
+                        {
+                            any = ' ' + property.data;
+                            value = property.type === 'string' ? any + value.replace(replaceClass, any) : any;
+                        }
+                        else
+                        {
+                            value = '';
+                        }
 
-                case 'style': // 样式属性
-                    // 处理颜色值
-                    if ((property.data) & 2 === 2)
-                    {
-                        value = convertColor(value);
-                    }
+                        any = cache[0]++;
+                        cache[1][any] = property;
+                        cache[2][any] = value;
+                        break;
 
-                    any = cache[3]++;
-                    cache[4][any] = property;
-                    cache[5][any] = value;
-                    break;
+                    case 'style': // 样式属性
+                        // 处理颜色值
+                        if ((property.data) & 2 === 2)
+                        {
+                            value = convertColor(value);
+                        }
 
-                default:
-                    any = cache[6]++;
-                    cache[7][any] = property || name;
-                    cache[8][any] = value;
-                    break;
+                        any = cache[3]++;
+                        cache[4][any] = property;
+                        cache[5][any] = value;
+                        break;
+
+                    default:
+                        any = cache[6]++;
+                        cache[7][any] = property;
+                        cache[8][any] = value;
+                        break;
+                }
+            }
+            else if (noproperty)
+            {
+                any = cache[6]++;
+                cache[7][any] = name;
+                cache[8][any] = value;
             }
         }
 
@@ -5218,6 +5228,7 @@ yaxi.Control.extend('Box', function (Class, base) {
     };
 
 
+
     this.__load_children = function (values, scope) {
 
         this.__children.load(values, scope);
@@ -5228,22 +5239,6 @@ yaxi.Control.extend('Box', function (Class, base) {
     // 扩展查询实现
     yaxi.impl.query.call(this);
     
-
-
-    // 不支持layout实现, 给子类用
-    this.__no_layout = function () {
-
-        this.$('layout', {
-
-            get: nolayout,
-            set: nolayout
-        });
-    
-        function nolayout() {
-    
-            throw new Error('StackBox control doesn\'t supports layout!');
-        }
-    }
 
 
 
@@ -5309,6 +5304,98 @@ yaxi.Control.extend('Box', function (Class, base) {
     }
 
 });
+
+
+
+
+// 单页切换控件接口
+yaxi.impl.switchbox = function () {
+
+
+
+    // 不支持layout属性
+    this.$('layout', {
+
+        get: nolayout,
+        set: nolayout
+    });
+
+    function nolayout() {
+
+        throw new Error('StackBox control doesn\'t supports layout!');
+    }
+
+
+
+    // 获取或设置当前页索引
+    this.$('selectedIndex', 0, {
+
+        force: true,
+        alias: 'selected-index',
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
+
+
+
+    // 选中的页头
+    this.$('selectedItem', null, {
+
+        get: function () {
+
+            var index = this.selectedIndex | 0;
+            return index >= 0 && this.__children[index] || null;
+        }
+    });
+
+
+
+    this.__load_children = function (values, scope) {
+
+        this.__children.load(values, scope);
+        this.__switch(this, this.selectedIndex, -1);
+    }
+
+
+    this.__set_selectedIndex = function (value, oldValue) {
+
+        if (this.__children[value])
+        {
+            this.__switch(this, value, oldValue); 
+
+            // change事件不冒泡
+            this.trigger('change', value, false);
+        }
+    }
+
+
+    this.__switch = function (switchbox, index, oldIndex) {
+
+        var children = switchbox.__children;
+        var control;
+
+        if (control = oldIndex >= 0 && children[oldIndex])
+        {
+            control.onhide && control.onhide();
+        }
+    
+        if (control = children[index])
+        {
+            if (!control.__shown)
+            {
+                control.__shown = true;
+                control.onload && control.onload();
+            }
+
+            control.onshow && control.onshow();
+        }
+    }
+
+
+}
 
 
 
@@ -5458,6 +5545,7 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
             parseSlots(this, template[2], options[2]);
         }
 
+        // 使用shadow的方式管理组件内部控件的目的是为了隔离
         shadowRoot = this.__shadowRoot = build(this, template, scope);
         shadowRoot.__shadow = true;
     }
@@ -6659,7 +6747,7 @@ yaxi.component('Pulldown', function (Class, base) {
 
             case 2:
                 this.status = 3;
-                this.trigger('refresh');
+                this.trigger('pulldown');
                 break;
         }
     }
@@ -6787,7 +6875,7 @@ yaxi.component('Pullup', function (Class, base) {
     this.start = function () {
 
         this.status = 0;
-        this.trigger('refresh');
+        this.trigger('pullup');
     }
 
 
@@ -6977,49 +7065,32 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    // 滑动状态
-    var state = {
-        start: -1,      // 开始位置, 如果小于0则表示不滑动
-        slide: 0,       // 是否已经滑动
-        index: 0,       // 当前子项索引
-        last: 0,        // 最后子项数
-        width: 0,       // 容器宽度
-        change: 0,      // 子项索引是否已变化
-        capture: 0      // 是否已捕获事件
-    };
 
+    Class.allowParent = function (parent) {
 
-
-
-    // 不支持layout属性
-    this.__no_layout();
-
-
-
-    // 联动控件的key
-    this.$('related', '', false);
-
-
-    // 获取或设置当前页索引
-    this.$('selectedIndex', 0, {
-
-        force: true,
-        alias: 'selected-index',
-
-        convert: function (value) {
-
-            return (value |= 0) < 0 ? 0 : value;
+        if (parent instanceof Class)
+        {
+            throw new Error('slidebox cannot be added to slidebox!');
         }
-    });
+
+        return true;
+    }
 
 
 
-    // 是否支持滑动
-    this.$('slide', false, false);
+
+    // 扩展切换容器接口
+    yaxi.impl.switchbox.call(this);
+
+
 
 
     // 是否自动切换
-    this.$('autoplay', true, false);
+    this.$('autoplay', false, {
+
+        force: true,
+        change: false
+    });
 
 
     // 自动切换时间间隔
@@ -7031,51 +7102,50 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
+    this.__set_autoplay = function (value) {
 
-    this.__load_children = function (values, scope) {
+        var interval;
 
-        this.__children.load(values, scope);
-        switchChange(this, this.selectedIndex, -1);
-    }
+        clearTimeout(this.__auto);
 
-
-    this.__set_selectedIndex = function (value, oldValue) {
-
-        if (this.__children[value])
+        if (value && (interval = this.interval) > 0)
         {
-            switchChange(this, value, oldValue); 
-            this.trigger('change', { index: value, lastIndex: oldValue });
+            this.__auto = setTimeout(autoplay.bind(this), interval);
         }
     }
 
 
-    function switchChange(slidebox, index, oldIndex) {
+    function autoplay(interval) {
 
-        var children = slidebox.__children;
-        var control;
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
 
-        if (control = slidebox.__find_related(slidebox.related))
+        if (index >= this.__children.length)
         {
-            control.selectedIndex = index;
+            index = 0;
         }
 
-        if (control = oldIndex >= 0 && children[oldIndex])
+        this.selectedIndex = index;
+
+        if (interval > 0)
         {
-            control.onhide && control.onhide();
+            this.__auto = setTimeout(autoplay.bind(this), interval);
         }
+    }
+
+
     
-        if (control = children[index])
-        {
-            if (!control.__shown)
-            {
-                control.__shown = true;
-                control.onload && control.onload();
-            }
-
-            control.onshow && control.onshow();
-        }
-    }
-
+    // 滑动状态
+    var state = {
+        start: -1,      // 开始位置, 如果小于0则表示不滑动
+        index: 0,       // 当前子项索引
+        last: 0,        // 最后子项数
+        move: 0,       // 是否已经滑动
+        width: 0,       // 容器宽度
+        change: 0,      // 子项索引是否已变化
+        capture: 0,     // 是否已捕获事件
+        time: 0         // 按下时间
+    };
 
 
     function touchX(event) {
@@ -7085,36 +7155,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     }
 
 
-    this.__on_touchstart = function (event) {
-
-        var s = state;
-
-        if (!s.capture)
-        {
-            var start = -1;
-            var last = this.__children.length - 1;
-    
-            if (last >= 0 && this.slide)
-            {
-                s.slide = false;
-                s.last = last;
-    
-                (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
-        
-                    if ((s.width = rect.width) <= 0)
-                    {
-                        start = -1;
-                    }
-                });
-            }
-    
-            s.start = start;
-            s.capture = 1;
-        }
-    }
-
-
-    function checkSlide(slidebox, state, event) {
+    function checkMove(slidebox, state, event) {
 
         var x = event.distanceX;
         var y = event.distanceY;
@@ -7133,14 +7174,67 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
         // 横向滑动的距离更多则启动滑动功能
         if ((delta = x - y) >= 4)
         {
-            state.slide = true;
+            state.move = 1;
             state.index = slidebox.selectedIndex;
 
-            slidebox.$renderer.start(slidebox);
+            slidebox.__start();
         }
         else if (delta <= -4) // 纵向滚动则不再滑动
         {
             return false;
+        }
+    }
+
+
+    function checkChange(state, event) {
+
+        // 500ms只要移动了小段距离就算换页
+        if (new Date() - state.time < 500)
+        {
+            var x = event.distanceX;
+            var size = 100 * yaxi.remRatio;
+    
+            if (x  < -size)
+            {
+                if (state.index < state.last)
+                {
+                    return 1;
+                }
+            }
+            else if (x > size && state.index > 0)
+            {
+                return -1;
+            }
+        }
+    }
+
+
+    this.__on_touchstart = function (event) {
+
+        var s = state;
+
+        if (!s.capture)
+        {
+            var start = -1;
+            var last = this.__children.length - 1;
+    
+            if (last >= 0)
+            {
+                s.move = 0;
+                s.last = last;
+    
+                (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
+        
+                    if ((s.width = rect.width) <= 0)
+                    {
+                        start = -1;
+                    }
+                });
+            }
+    
+            s.start = start;
+            s.time = new Date();
+            s.capture = 1;
         }
     }
 
@@ -7151,7 +7245,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         if (s.start >= 0)
         {
-            if (!s.slide && checkSlide(this, s, event) === false)
+            if (!s.move && checkMove(this, s, event) === false)
             {
                 s.start = -1;
                 return;
@@ -7159,44 +7253,29 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
             var index = s.index;
             var distance = touchX(event) - s.start;
-            var size = s.width / 3 | 0;
-            var change = 0;
+            var size = s.width >> 1;
+            var change = s.change;
 
             if (distance < -size)
             {
-                if (index < s.last)
+                if (!change && index < s.last)
                 {
-                    change = 1;
-
-                    this.trigger('slide', {
-                        index: index + 1,
-                        oldIndex: index
-                    }, false);
+                    s.change = 1;
+                    this.trigger('transition', index + 1, false);
                 }
             }
             else if (distance > size)
             {
-                if (index > 0)
+                if (!change && index > 0)
                 {
-                    change = -1;
-
-                    this.trigger('slide', {
-                        index: index - 1,
-                        oldIndex: index
-                    }, false);
+                    s.change = -1;
+                    this.trigger('transition', index - 1, false);
                 }
             }
-            else
+            else if (change)
             {
-                if (change = s.change)
-                {
-                    this.trigger('slide', {
-                        index: index,
-                        oldIndex: index + change
-                    }, false);
-                }
-
-                change = 0;
+                s.change = 0;
+                this.trigger('transition', index, false);
             }
 
             if (index > 0)
@@ -7204,8 +7283,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
                 distance += -index * s.width;
             }
 
-            s.change = change;
-            this.$renderer.slide(this, distance);
+            this.__move(distance);
 
             event.stop();
             return false;
@@ -7219,18 +7297,9 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         s.capture = 0;
 
-        if (s.slide)
+        if (s.move)
         {
-            if (s.change)
-            {
-                this.selectedIndex += s.change;
-            }
-            else
-            {
-                this.$set('selectedIndex', s.index, true);
-            }
-
-            this.$renderer.stop(this);
+            this.__stop(s.change || checkChange(s, event));
 
             event.stop();
             return false;
@@ -7240,8 +7309,27 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
     this.__on_touchcancel = function () {
 
-        s.capture = 0;
+        state.capture = 0;
     }
+
+
+
+    // 小程序在拖动结束时直接从change事件获取当前索引
+    this.__on_change = function (index) {
+
+        this.selectedIndex = index;
+        return false;
+    }
+
+
+
+    this.__start = this.__move = function () {
+    }
+    
+    
+    this.__stop = function (change) {
+    }
+
 
 
 
@@ -7260,86 +7348,12 @@ yaxi.Box.extend('StackBox', function (Class, base) {
 
 
 
-    // 不支持layout属性
-    this.__no_layout();
+    // 动画时长
+    this.$('duration', 500);
 
 
-
-    // 联动控件的key
-    this.$('related', '', false);
-
-
-
-    // 获取或设置当前页索引
-    this.$('selectedIndex', 0, {
-
-        force: true,
-        alias: 'selected-index',
-
-        convert: function (value) {
-
-            return (value |= 0) < 0 ? 0 : value;
-        }
-    });
-
-
-
-    // 选中的页头
-    this.$('selectedItem', null, {
-
-        get: function () {
-
-            var index = this.selectedIndex | 0;
-            return index >= 0 && this.__children[index] || null;
-        }
-    });
-
-
-
-    this.__set_selectedIndex = function (value, oldValue) {
-
-        if (this.__children[value])
-        {
-            switchChange(this, value, oldValue);
-        }
-
-        this.trigger('change', { index: value, lastIndex: oldValue });
-    }
-    
-
-    function switchChange(stackbox, index, oldIndex) {
-
-        var children = stackbox.__children;
-        var control;
-
-        if (control = stackbox.__find_related(stackbox.related))
-        {
-            control.selectedIndex = index;
-        }
-
-        if (control = oldIndex >= 0 && children[oldIndex])
-        {
-            control.onhide && control.onhide();
-        }
-    
-        if (control = children[index])
-        {
-            if (!control.__shown)
-            {
-                control.__shown = true;
-                control.onload && control.onload();
-            }
-
-            control.onshow && control.onshow();
-        }
-    }
-
-
-    this.__load_children = function (values, scope) {
-
-        this.__children.load(values, scope);
-        switchChange(this, this.selectedIndex, -1);
-    }
+    // 扩展切换容器接口
+    yaxi.impl.switchbox.call(this);
 
 
 
@@ -7354,147 +7368,47 @@ yaxi.Box.extend('StackBox', function (Class, base) {
 
 
 
-yaxi.Box.extend('Swiper', function (Class, base) {
+yaxi.Box.extend('SwitchBox', function (Class, base, yaxi) {
 
 
 
-    var start, distance, width;
-
-
-
-    // 是否自动切换
-    this.$('autoplay', true, false);
-
-
-    // 当前所在滑块的 index
-    this.$('current', 0, {
-        
-        change: false,
-        convert: function (value) {
-
-            return (value |= 0) >= 0 ? value : 0;
-        }
-    });
-
-
-    // 自动切换时间间隔
-    this.$('interval', 5000, false);
-
-
-    // 滑动动画时长
-    this.$('duration', 500, false);
+    // 扩展切换容器接口
+    yaxi.impl.switchbox.call(this);
 
 
 
 
-    this.__load_children = function (values, scope) {
+    this.__switch = function (switchbox, index, oldIndex) {
 
-        var current = this.current;
+        var children = switchbox.__children;
+        var control;
 
-        this.__children.load(values, scope);
-
-        if (current > 0)
+        if (control = oldIndex >= 0 && children[oldIndex])
         {
-            this.__set_current(current);
+            control.onhide && control.onhide();
+            control.hidden = true;
         }
-    }
-
-
-    this.__set_current = function (value) {
-
-        var length = this.__children.length;
-
-        if (length > 0)
-        {
-            if (value >= length)
-            {
-                value = length - 1;
-            }
-
-            this.$renderer.current(this, value);
-        }
-    }
-
-
-
-    function touchX(event) {
-
-        var touch = event.changedTouches;
-        return touch && (touch = touch[0]) ? touch.pageX : -1;
-    }
-
-
-
-    this.__on_touchstart = function (event) {
-
-        this.$renderer.offset(this, -1);
-
-        (start = touchX(event)) >= 0 && this.boundingClientRect(function (rect) {
-
-            width = rect.width;
-        });
-    }
-
-
-    this.__on_touchmove = function (event) {
-
-        var x;
-
-        if (start >= 0 && width > 0 && (x = touchX(event)) >= 0)
-        {
-            var current = this.current;
-            var value = distance = x - start;
-
-            if (current > 0)
-            {
-                value += -current * width;
-            }
     
-            this.$renderer.offset(this, value);
-
-            event.stop();
-            return false;
-        }
-    }
-
-
-    this.__on_touchend = function (event) {
-
-        if (start >= 0 && width > 0)
+        if (control = children[index])
         {
-            var current = this.current;
-            var change = distance / yaxi.remRatio;
+            if (!control.__shown)
+            {
+                control.__shown = true;
+                control.onload && control.onload();
+            }
 
-            if (change < -50)
-            {
-                if (current < this.__children.length - 1)
-                {
-                    this.current++;
-                }
-            }
-            else if (change < 50)
-            {
-                if (current > 0)
-                {
-                    this.current--;
-                }
-            }
-            
-            if (current === this.current)
-            {
-                this.__set_current(current);
-            }
-            
-            event.stop();
-            return false;
+            control.onshow && control.onshow();
+            control.hidden = false;
         }
     }
 
 
 
-}, function Swiper() {
+}, function SwitchBox() {
+
 
     yaxi.Box.apply(this, arguments);
+
 
 });
 
@@ -7537,36 +7451,19 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
-    this.__set_selectedIndex = function (value, oldValue) {
+    this.changeSelected = function (index) {
 
-        if (this.__children[value])
-        {
-            switchChange(this, value, oldValue);
-        }
-
-        this.trigger('change', {
-            index: value,
-            lastIndex: oldValue
-        });
-    }
-
-
-
-    function switchChange(tabbar, index, oldIndex) {
-
-        var children = tabbar.__children;
+        var children = this.__children;
         var control;
-        
-        if (control = tabbar.__find_related(tabbar.related))
+
+        for (var i = children.length; i--;)
         {
-            control.selectedIndex = index;
+            if (i !== index && (control = children[i]) && control.selected)
+            {
+                control.selected = false;
+            }
         }
 
-        if (control = oldIndex >= 0 && children[oldIndex])
-        {
-            control.selected = false;
-        }
-    
         if (control = children[index])
         {
             control.selected = true;
@@ -7574,10 +7471,36 @@ yaxi.Box.extend('TabBar', function (Class, base) {
     }
 
 
+
+    this.__set_selectedIndex = function (value, oldValue) {
+
+        if (this.__children[value])
+        {
+            switchChange(this, value);
+        }
+
+        this.trigger('change', value, false);
+    }
+
+
+
+    function switchChange(tabbar, index) {
+
+        var control;
+        
+        if (control = tabbar.__find_related(tabbar.related))
+        {
+            control.selectedIndex = index;
+        }
+
+        tabbar.changeSelected(index);
+    }
+
+
     this.__load_children = function (values, scope) {
 
         this.__children.load(values, scope);
-        switchChange(this, this.selectedIndex, -1);
+        switchChange(this, this.selectedIndex);
     }
 
 
@@ -8270,6 +8193,13 @@ yaxi.Box.extend('Page', function (Class, base) {
 		return null;
 	}
 
+
+
+	// 是否全屏显示
+	// 对于微信小程序等平台, 可设置此值使用全面屏
+	// 注: 此值生效后不可修改
+	this.$('full', false, false);
+
 	
 	
 	// 页面加载处理
@@ -8713,7 +8643,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
         while (view)
         {
-            if ((uuid = view.id) && (control = controls[uuid]))
+            if ((uuid = view.id) && (control = controls[uuid.substring(3)]))
             {
                 return control.disabled ? control.parent || null : control;
             }
@@ -8936,6 +8866,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
         {
             detail = event.target.value;
 
+            // 不冒泡
             if ((fn = control.__on_input) && fn.call(control, detail) === false)
             {
                 return false;
@@ -8955,6 +8886,7 @@ yaxi.component('Header', function (Class, base, yaxi) {
         {
             detail = event.target.value;
 
+            // 不冒泡
             if ((fn = control.__on_change) && fn.call(control, detail) === false)
             {
                 return false;
@@ -9252,7 +9184,7 @@ yaxi.Control.renderer(function (base, thisControl) {
         if (!view)
         {
             view = control.$view = createView(this, control);
-            view.id = uuid || control.uuid;
+            view.id = 'id-' + (uuid || control.uuid);
 
             if (any = control.__on_mount)
             {
@@ -9942,7 +9874,7 @@ yaxi.ScrollBox.renderer(function (base, thisControl) {
 
 
 
-yaxi.SlideBox.renderer(function (base) {
+yaxi.SlideBox.renderer(function (base, thisControl, yaxi) {
 
 
 
@@ -9971,24 +9903,37 @@ yaxi.SlideBox.renderer(function (base) {
     }
 
 
-    this.start = function (control) {
 
-        var view = control.$view.firstChild;
+
+    thisControl.__start = function () {
+
+        var view = this.$view.firstChild;
 
         view.style.transition = '';
         view.className = 'yx-slidebox-body yx-noscroll';
     }
 
-    
-    this.slide = function (control, value) {
 
-        control.$view.firstChild.style.transform = 'translateX(' + value + 'px)';
+    thisControl.__move = function (distance) {
+
+        this.$view.firstChild.style.transform = 'translateX(' + distance + 'px)';
     }
 
 
-    this.stop = function (control) {
+    thisControl.__stop = function (change) {
 
-        control.$view.firstChild.className = 'yx-slidebox-body';
+        var view = this.$view;
+
+        if (change)
+        {
+            this.selectedIndex += change;
+        }
+        else
+        {
+            this.$renderer.selectedIndex(this, view, this.selectedIndex);
+        }
+
+        view.firstChild.className = 'yx-slidebox-body';
     }
 
 
@@ -10008,6 +9953,7 @@ yaxi.StackBox.renderer(function (base) {
     this.template('<div class="@class"><div class="yx-stackbox-body"></div></div>');
 
 
+    
 
     this.getChildrenView = function (view) {
 
@@ -10018,56 +9964,17 @@ yaxi.StackBox.renderer(function (base) {
 
     this.selectedIndex = function (control, view, value) {
 
-        view.firstChild.style.transform = 'translateX(-' + value + '00%)';
-    }
+        var duration = control.duration;
+        var style = view.firstChild.style;
 
-
-
-});
-
-
-
-
-yaxi.Swiper.renderer(function (base) {
-
-
-
-    this.className = 'yx-control yx-box yx-swiper';
-    
-
-    this.template('<div class="@class"><div class="yx-swiper-body"></div></div>');
-
-
-
-    this.getChildrenView = function (view) {
-
-        return view.firstChild;
-    }
-
-
-
-    this.current = function (control, value) {
-
-        var style = control.$view.firstChild.style;
-
-        style.transition = 'transform 500ms ease';
+        style.transition = duration ? 'transform ' + duration + 'ms ease' : '';
         style.transform = 'translateX(-' + value + '00%)';
     }
 
 
-    this.offset = function (control, value) {
+    
+    this.duration = false;
 
-        var style = control.$view.firstChild.style;
-
-        if (value >= 0)
-        {
-            style.transform = 'translateX(' + value + 'px)';
-        }
-        else
-        {
-            style.transition = '';
-        }
-    }
 
 
 });

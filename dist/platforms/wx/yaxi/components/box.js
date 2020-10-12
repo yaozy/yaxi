@@ -18,6 +18,7 @@ Component({
    * 组件的属性列表
    */
   properties: {
+    data: Object,
     children: Array
   },
 
@@ -36,6 +37,7 @@ Component({
   },
 
   lifetimes: {
+
     attached: function () {
 
       // 输出对象至yaxi控件体系以解决自定义组件无法获取boundingClientRect的问题

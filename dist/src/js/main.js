@@ -31,22 +31,17 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
 
 
-    this.handleSlide = function (event) {
+    this.handleTransition = function (event) {
 
-        var children = this.find('>tabbar').children;
-        var detail = event.detail;
-        var control;
-        
-        if (control = children[detail.index])
-        {
-            control.selected = true;
-        }
-
-        if (control = children[detail.oldIndex])
-        {
-            control.selected = false;
-        }
+        this.find('>tabbar').changeSelected(event.detail);
     }
+
+
+    this.handleChange = function (event) {
+
+        this.find('>tabbar').selectedIndex = event.detail;
+    }
+
 
 
     this.onshow = function () {

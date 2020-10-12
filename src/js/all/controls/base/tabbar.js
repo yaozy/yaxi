@@ -34,36 +34,19 @@ yaxi.Box.extend('TabBar', function (Class, base) {
 
 
 
-    this.__set_selectedIndex = function (value, oldValue) {
+    this.changeSelected = function (index) {
 
-        if (this.__children[value])
-        {
-            switchChange(this, value, oldValue);
-        }
-
-        this.trigger('change', {
-            index: value,
-            lastIndex: oldValue
-        });
-    }
-
-
-
-    function switchChange(tabbar, index, oldIndex) {
-
-        var children = tabbar.__children;
+        var children = this.__children;
         var control;
-        
-        if (control = tabbar.__find_related(tabbar.related))
+
+        for (var i = children.length; i--;)
         {
-            control.selectedIndex = index;
+            if (i !== index && (control = children[i]) && control.selected)
+            {
+                control.selected = false;
+            }
         }
 
-        if (control = oldIndex >= 0 && children[oldIndex])
-        {
-            control.selected = false;
-        }
-    
         if (control = children[index])
         {
             control.selected = true;
@@ -71,10 +54,36 @@ yaxi.Box.extend('TabBar', function (Class, base) {
     }
 
 
+
+    this.__set_selectedIndex = function (value, oldValue) {
+
+        if (this.__children[value])
+        {
+            switchChange(this, value);
+        }
+
+        this.trigger('change', value, false);
+    }
+
+
+
+    function switchChange(tabbar, index) {
+
+        var control;
+        
+        if (control = tabbar.__find_related(tabbar.related))
+        {
+            control.selectedIndex = index;
+        }
+
+        tabbar.changeSelected(index);
+    }
+
+
     this.__load_children = function (values, scope) {
 
         this.__children.load(values, scope);
-        switchChange(this, this.selectedIndex, -1);
+        switchChange(this, this.selectedIndex);
     }
 
 

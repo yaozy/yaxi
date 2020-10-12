@@ -9,6 +9,7 @@ yaxi.StackBox.renderer(function (base) {
     this.template('<div class="@class"><div class="yx-stackbox-body"></div></div>');
 
 
+    
 
     this.getChildrenView = function (view) {
 
@@ -19,8 +20,16 @@ yaxi.StackBox.renderer(function (base) {
 
     this.selectedIndex = function (control, view, value) {
 
-        view.firstChild.style.transform = 'translateX(-' + value + '00%)';
+        var duration = control.duration;
+        var style = view.firstChild.style;
+
+        style.transition = duration ? 'transform ' + duration + 'ms ease' : '';
+        style.transform = 'translateX(-' + value + '00%)';
     }
+
+
+    
+    this.duration = false;
 
 
 

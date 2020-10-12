@@ -6,9 +6,9 @@ module.exports = yaxi.DataBox.extend(function (Class, base) {
 
 
 
-    this.onload = function (data) {
+    this.onload = function () {
 
-        this.loadTemplate(require('./section.html'), data);
+        this.loadTemplate(require('./section.html'), this.tag);
     }
 
 

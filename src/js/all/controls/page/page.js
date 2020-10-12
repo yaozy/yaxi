@@ -13,6 +13,13 @@ yaxi.Box.extend('Page', function (Class, base) {
 		return null;
 	}
 
+
+
+	// 是否全屏显示
+	// 对于微信小程序等平台, 可设置此值使用全面屏
+	// 注: 此值生效后不可修改
+	this.$('full', false, false);
+
 	
 	
 	// 页面加载处理

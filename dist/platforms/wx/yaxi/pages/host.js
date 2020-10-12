@@ -25,10 +25,6 @@ Page({
         {
             yaxi.openMainPage(require('../../js/main'), options, this);
         }
-
-        var info = wx.getSystemInfoSync();
-
-        console.log(info)
     },
 
 

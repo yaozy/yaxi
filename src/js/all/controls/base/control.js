@@ -362,10 +362,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
 
     // 是否隐藏
-    this.$('hidden', false, {
-
-        kind: 'attribute'
-    });
+    this.$('hidden', false);
 
 
     // 是否选中
@@ -926,7 +923,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     
 
     // 获取变更数据
-    this.__get_changes = function (changes) {
+    this.__get_changes = function (changes, noproperty) {
 
         var properties = this.$properties;
         var names = own(changes || (changes = this.__changes));
@@ -939,50 +936,57 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         while (name = names[index++])
         {
-            property = properties[name];
-
-            if (!property.change)
-            {
-                continue;
-            }
-            
             value = changes[name];
 
-            switch (property && property.kind)
+            if (property = properties[name])
             {
-                case 'class': // class属性
-                    if (value)
-                    {
-                        any = ' ' + property.data;
-                        value = property.type === 'string' ? any + value.replace(replaceClass, any) : any;
-                    }
-                    else
-                    {
-                        value = '';
-                    }
+                if (!property.change)
+                {
+                    continue;
+                }
 
-                    any = cache[0]++;
-                    cache[1][any] = property;
-                    cache[2][any] = value;
-                    break;
+                switch (property.kind)
+                {
+                    case 'class': // class属性
+                        if (value)
+                        {
+                            any = ' ' + property.data;
+                            value = property.type === 'string' ? any + value.replace(replaceClass, any) : any;
+                        }
+                        else
+                        {
+                            value = '';
+                        }
 
-                case 'style': // 样式属性
-                    // 处理颜色值
-                    if ((property.data) & 2 === 2)
-                    {
-                        value = convertColor(value);
-                    }
+                        any = cache[0]++;
+                        cache[1][any] = property;
+                        cache[2][any] = value;
+                        break;
 
-                    any = cache[3]++;
-                    cache[4][any] = property;
-                    cache[5][any] = value;
-                    break;
+                    case 'style': // 样式属性
+                        // 处理颜色值
+                        if ((property.data) & 2 === 2)
+                        {
+                            value = convertColor(value);
+                        }
 
-                default:
-                    any = cache[6]++;
-                    cache[7][any] = property || name;
-                    cache[8][any] = value;
-                    break;
+                        any = cache[3]++;
+                        cache[4][any] = property;
+                        cache[5][any] = value;
+                        break;
+
+                    default:
+                        any = cache[6]++;
+                        cache[7][any] = property;
+                        cache[8][any] = value;
+                        break;
+                }
+            }
+            else if (noproperty)
+            {
+                any = cache[6]++;
+                cache[7][any] = name;
+                cache[8][any] = value;
             }
         }
 
