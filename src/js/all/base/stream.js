@@ -4,7 +4,7 @@ yaxi.Stream = Object.extend(function (Class) {
 
     Class.fromPromise = function (promise) {
 
-        var instance = new Class();
+        var instance = new this();
 
         if (typeof promise === 'function')
         {
@@ -27,7 +27,7 @@ yaxi.Stream = Object.extend(function (Class) {
 
     Class.interval = function (period) {
 
-        var instance = new Class();
+        var instance = new this();
         var value = 0;
 
         function interval() {
@@ -48,7 +48,7 @@ yaxi.Stream = Object.extend(function (Class) {
 
     Class.all = function () {
 
-        var instance = new Class(),
+        var instance = new this(),
             cache = [],
             index = 0,
             length = 0,
@@ -81,6 +81,25 @@ yaxi.Stream = Object.extend(function (Class) {
         return instance;
     }
 
+
+    
+    Class.resolve = function (fn) {
+
+        var stream = new this();
+
+        if (fn)
+        {
+            fn(this)
+        }
+        else
+        {
+            stream.__cache = [void 0];
+        }
+    
+        return stream;
+    }
+
+    
 
 
     this.registry = function (fn) {
@@ -337,18 +356,6 @@ yaxi.Stream = Object.extend(function (Class) {
         });
     }
 
+
     
-}, function Stream(value) {
- 
-    if (arguments.length > 0)
-    {
-        if (typeof value === 'function')
-        {
-            value(this);
-        }
-        else
-        {
-            this.__cache = [value];
-        }
-    }
-});
+}, function Stream() { });
