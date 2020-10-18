@@ -154,7 +154,6 @@ yaxi.impl.switchbox = function () {
     // 获取或设置当前页索引
     this.$('selectedIndex', 0, {
 
-        force: true,
         alias: 'selected-index',
 
         convert: function (value) {
@@ -179,20 +178,140 @@ yaxi.impl.switchbox = function () {
 
     this.__load_children = function (values, scope) {
 
-        this.__children.load(values, scope);
-        this.__switch(this, this.selectedIndex, -1);
+        var children = this.__children;
+        var index = this.selectedIndex;
+
+        children.load(values, scope);
+        
+        if (children[index])
+        {
+            this.__set_selectedIndex(index, -1);
+        }
     }
 
 
     this.__set_selectedIndex = function (value, oldValue) {
 
-        if (this.__children[value])
-        {
-            this.__switch(this, value, oldValue); 
+        // 坐标变换
+        this.__transform(value);
 
-            // change事件不冒泡
-            this.trigger('change', value, false);
+        // 切换页面
+        this.__switch(this, value, oldValue); 
+
+        // change事件不冒泡
+        this.trigger('change', value, false);
+    }
+
+
+
+    function transform(children, index, last) {
+
+        var transition = this.duration;
+        var circular = this.circular !== false;
+        var control, after;
+
+        transition = transition > 0 ? 'transform ' + transition + 'ms ' + (this.easingfn || 'ease') : '';
+    
+        for (var i = 0; i <= last; i++)
+        {
+            if (i !== index && (control = children[i]))
+            {
+                // 显示位置: 默认小于当前页的放前面, 大于当前面的放后面
+                after = i < index ? 0 : 1;
+
+                // 如果是第一页
+                // if (i === 0)
+                // {
+                //     // 当前为最后一页且循环显示则把第一页放到后面
+                //     if (circular && index === last)
+                //     {
+                //         // 标记移动过
+                //         control.__move = 1;
+                //         after = 1;
+                //     }
+                // }
+                // else if (i === last) // 如果是最后一页
+                // {
+                //     // 当前为第一页且循环显示则把最后一页放到前面
+                //     if (circular && index === 0)
+                //     {
+                //         // 标记移动过
+                //         control.__move = 1;
+                //         after = 0;
+                //     }
+                // }
+
+                // 上一页设置过渡效果
+                control.transition = i === this.__last ? transition : '';
+                control.transform = after ? '' : 'translateX(-100%)';
+            }
         }
+
+        changeCurrent(children, index, transition);
+    }
+
+
+    function changeCurrent(children, index, transition) {
+
+        var control;
+        
+        // 当前页
+        if (control = children[index])
+        {
+            control.__move = 0;
+            control.transform = 'translateX(0)';
+            control.transition = transition || '';
+        }
+    }
+
+
+    // 使用变换对位置进行处理
+    this.__transform = function (index) {
+
+        var children = this.__children;
+        var last = children.length - 1;
+
+        if (last > 0)
+        {
+            var style = 'translateX(-100%)';
+            var control;
+
+            // 如果最后一页曾经放到前面需要先还原
+            if (index !== last && (control = children[last]) && control.__move)
+            {
+                style = '';
+            }
+            // 如果第一页曾经放到后面需要先还原
+            else if (index !== 0 && (control = children[0]) && control.__move)
+            {
+                style = 'translateX(0)';
+            }
+            else
+            {
+                // 不需要还原变换则直接进行变换处理
+                transform.call(this, children, index, last);
+                control = 0;
+            }
+
+            if (control)
+            {
+                control.__move = 0;
+                control.transition = '';
+                control.transform = style;
+
+                // 立即更新补丁
+                yaxi.patch.update();
+
+                // 需要还原变换则延时处理
+                setTimeout(transform.bind(this, children, index, last), 1000);
+            }
+        }
+        else
+        {
+            changeCurrent(children, index);
+        }
+
+        this.__last = index;
     }
 
 

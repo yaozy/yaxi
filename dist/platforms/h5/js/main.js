@@ -37,12 +37,6 @@ module.exports = yaxi.Page.extend(function (Class, base) {
     }
 
 
-    this.handleChange = function (event) {
-
-        this.find('>tabbar').selectedIndex = event.detail;
-    }
-
-
 
     this.onshow = function () {
 

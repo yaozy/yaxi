@@ -35,4 +35,8 @@ yaxi.Box.renderer(function (base) {
 
 
 
+    this.selectedIndex = this.duration = false;
+
+
+
 });

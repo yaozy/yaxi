@@ -10,13 +10,12 @@ return (
 				null
 			],
 			[
-				"slidebox",
+				"stackbox",
 				{
 					"flex": "auto",
 					"circular": "true",
 					"events": {
-						"transition": $this.handleTransition.bind($this),
-						"change": $this.handleChange.bind($this)
+						"transition": $this.handleTransition.bind($this)
 					}
 				},
 				[

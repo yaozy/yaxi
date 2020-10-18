@@ -350,72 +350,35 @@
 
 .yx-slidebox {
     position: relative;
-    overflow: hidden;
     height: 300rem;
 }
 
-.yx-slidebox-body {
+.yx-slidebox>.yx-control {
     position: absolute;
-    overflow: visible;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
+    transform: translateX(100%);
+    width: 100% !important;
+    height: 100% !important;
 }
 
-.yx-slidebox-body>.yx-control {
-    overflow: auto;
-    width: 100%;
-    height: 100%;
-}
-
-
-.yx-noscroll .yx-box,
-.yx-noscroll .yx-slidebox-body {
-    overflow: hidden !important;
-}
 
 
 
 .yx-stackbox {
     position: relative;
-    overflow: hidden;
 }
 
-.yx-stackbox-body {
+.yx-stackbox>.yx-control {
     position: absolute;
-    overflow: visible;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.yx-stackbox-body>.yx-control {
-    overflow: auto;
-    width: 100%;
-    height: 100%;
+    transform: translateX(100%);
+    width: 100% !important;
+    height: 100% !important;
 }
 
 
 
-
-.yx-switchbox {
-    position: relative;
-    overflow: hidden;
-}
 
 .yx-switchbox>.yx-control {
-    overflow: auto;
-    width: 100%;
+    width: 100% !important;
 }
 
 
@@ -1046,4 +1009,10 @@
 .yx-theme-line-all {
     border-style: solid;
     border-width: .5px;
+}
+
+
+
+.yx-noscroll * {
+    overflow: hidden !important;
 }

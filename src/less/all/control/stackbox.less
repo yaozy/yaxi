@@ -1,23 +1,10 @@
 .yx-stackbox {
     position: relative;
-    overflow: hidden;
 }
 
-.yx-stackbox-body {
+.yx-stackbox>.yx-control {
     position: absolute;
-    overflow: visible;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.yx-stackbox-body>.yx-control {
-    overflow: auto;
-    width: 100%;
-    height: 100%;
+    transform: translateX(100%);
+    width: 100% !important;
+    height: 100% !important;
 }

@@ -2,40 +2,12 @@ yaxi.SlideBox.renderer(function (base, thisControl, yaxi) {
 
 
 
+    var width = 0;
+
+
+
     this.className = 'yx-control yx-box yx-slidebox';
     
-
-
-    this.template('<div class="@class"><div class="yx-slidebox-body"></div></div>');
-
-
-
-    this.getChildrenView = function (view) {
-
-        return view.firstChild;
-    }
-
-
-
-    this.selectedIndex = function (control, view, value) {
-
-        var duration = control.duration;
-        var style = view.firstChild.style;
-
-        style.transition = duration ? 'transform ' + duration + 'ms ease' : '';
-        style.transform = 'translateX(-' + value + '00%)';
-    }
-
-
-
-    this.circular = false;
-
-
-    this.autoplay = function (control, view, value) {
-
-        control.__do_autoplay(value);
-    }
-
 
 
 
@@ -43,31 +15,26 @@ yaxi.SlideBox.renderer(function (base, thisControl, yaxi) {
 
         var view = this.$view.firstChild;
 
-        view.style.transition = '';
-        view.className = 'yx-slidebox-body yx-noscroll';
+        width = view ? view.offsetWidth : 0;
+        document.body.classList.add('yx-noscroll');
     }
 
 
     thisControl.__move = function (distance) {
 
-        this.$view.firstChild.style.transform = 'translateX(' + distance + 'px)';
+        var indexes = this.__indexes;
+        var children = this.__children;
+
+        for (var i = indexes.length; i--;)
+        {
+            children[indexes[i]].$view.style.transform = 'translateX(' + ((i + 1) * width + distance) + 'px)';
+        }
     }
 
 
-    thisControl.__stop = function (change) {
+    thisControl.__stop = function () {
 
-        var view = this.$view;
-
-        if (change)
-        {
-            this.selectedIndex += change;
-        }
-        else
-        {
-            this.$renderer.selectedIndex(this, view, this.selectedIndex);
-        }
-
-        view.firstChild.className = 'yx-slidebox-body';
+        document.body.classList.remove('yx-noscroll');
     }
 
 

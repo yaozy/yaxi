@@ -307,7 +307,6 @@ yaxi.Control.renderer(function (base, thisControl) {
 
 
 
-
     this.hidden = function (control, view, value) {
 
         view.style.display = value ? 'none' : '';

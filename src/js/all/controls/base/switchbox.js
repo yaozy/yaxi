@@ -7,6 +7,11 @@ yaxi.Box.extend('SwitchBox', function (Class, base, yaxi) {
 
 
 
+    // 重载取消坐标变换处理
+    this.__transform = function () {
+    }
+
+
 
     this.__switch = function (switchbox, index, oldIndex) {
 

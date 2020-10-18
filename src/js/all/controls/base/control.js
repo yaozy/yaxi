@@ -40,7 +40,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         control.__dirty = true;
 
-        while (parent = control.parent)
+        while (parent = control.__slot || control.parent)
         {
             if (parent.__dirty)
             {
@@ -74,6 +74,9 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
     }
 
 
+    patch.update = update;
+
+
 
     // 检查父控件
     function checkParent(Class, parent) {
@@ -87,7 +90,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
         if (check = Class.allowParent)
         {
-            if (check !== true && !check(parent || (parent = yaxi.Box.prototype)))
+            if (check !== true && !check.call(this, parent || (parent = yaxi.Box.prototype)))
             {
                 throwError(Class.typeName + ' can not be a sub type of ' + parent.typeName + '!');
             }
@@ -966,7 +969,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
 
                     case 'style': // 样式属性
                         // 处理颜色值
-                        if ((property.data) & 2 === 2)
+                        if ((property.data & 2) === 2)
                         {
                             value = convertColor(value);
                         }
@@ -1049,7 +1052,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
                     {
                         if (property.change) // 需要处理变化
                         {
-                            (changes || (changes = this.__changes = create(this.__fields)))[name] = value;
+                            (changes || (changes = this.__changes || (this.__changes = create(this.__fields))))[name] = value;
                         }
                         else
                         {

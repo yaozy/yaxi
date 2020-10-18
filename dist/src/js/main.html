@@ -1,12 +1,12 @@
 <page>
     <header />
-    <slidebox flex="auto" circular="true" e:transition="handleTransition" e:change="handleChange">
+    <stackbox flex="auto" circular="true" e:transition="handleTransition">
         <require src="home/main" />
         <require src="course/main" />
         <require src="spread/main" />
         <require src="message/main" />
         <require src="my/main" />
-    </slidebox>
+    </stackbox>
     <tabbar theme="line-lightest line-top">
         <iconbutton icon="tabbar-home" text="首页" d:selected-status="{ theme: 'text-primary' }" />
         <iconbutton icon="tabbar-course" text="课程" d:selected-status="{ theme: 'text-primary' }" />

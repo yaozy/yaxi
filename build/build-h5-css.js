@@ -13,14 +13,15 @@ new Compressor()
 
 
 new Compressor()
-    .load('src/less/all', [
-        'base/scrollbar.less',
-        'control/(control|box).less',
-        'control/*.less',
-        'form/textbox.less',
-        'form/*.less',
-        'page/*.less',
-        'after/*.less'
+    .load('src/less', [
+        'all/base/scrollbar.less',
+        'all/control/(control|box).less',
+        'all/control/*.less',
+        'all/form/textbox.less',
+        'all/form/*.less',
+        'all/page/*.less',
+        'all/after/*.less',
+        'h5/noscroll.less'
     ])
     .combine('\n\n\n\n')
     .output('dist/platforms/h5/yaxi/less/yaxi.less');

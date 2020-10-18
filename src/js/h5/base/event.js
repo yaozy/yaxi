@@ -51,7 +51,7 @@
 
     function findControl(view) {
 
-        var control, uuid, f;
+        var control, uuid;
 
         while (view)
         {

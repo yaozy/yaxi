@@ -7,11 +7,40 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         if (parent instanceof Class)
         {
-            throw new Error('slidebox cannot be added to slidebox!');
+            throw new Error(this.typeName.toLowerCase() + ' cannot be added to slidebox!');
         }
 
         return true;
     }
+
+
+
+    // 是否自动切换
+    this.$('autoplay', false, false);
+
+
+    // 自动切换时间间隔(毫秒)
+    this.$('interval', 5000, false);
+
+
+    // 是否循环
+    this.$('circular', true, false);
+
+
+    // 过渡动画时长(毫秒), 0表示没有过渡动画
+    this.$('duration', 0, {
+
+        change: false,
+
+        convert: function (value) {
+
+            return (value |= 0) < 0 ? 0 : value;
+        }
+    });
+
+
+    // 过渡动画类型
+    this.$('easingfn', '', false);
 
 
 
@@ -21,28 +50,125 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
+    this.__load_children = function (values, scope) {
 
-    // 是否循环
-    this.$('circular', false);
+        this.__children.load(values, scope);
+        this.__set_selectedIndex(this.selectedIndex, -1);
 
-
-    // 是否自动切换
-    this.$('autoplay', false);
-
-
-    // 自动切换时间间隔(毫秒)
-    this.$('interval', 5000, false);
+        this.autoplay && this.__set_autoplay(true);
+    }
 
 
-    // 过渡动画时长(毫秒), 0表示没有过渡动画
-    this.$('duration', 0, {
 
-        convert: function (value) {
+    this.__set_selectedIndex = function (index, oldIndex) {
 
-            return (value |= 0) < 0 ? 0 : value;
+        var indexes = this.__indexes;
+        var children = this.__children;
+        var length = children.length;
+
+        if (length > 1)
+        {
+            var previous = index - 1;
+            var next = index + 1;
+            var control;
+
+            // 循环播放要特殊处理
+            if (this.circular)
+            {
+                // 最后一页
+                if (next >= length)
+                {
+                    // 把第一页移到下一页的位置
+                    next = 0;
+                }
+                else if (previous < 0) // 第一页
+                {
+                    // 把最后一页移到上一页的位置
+                    previous = length - 1;
+                }
+            }
+
+            // 清除原来的动画和变换
+            for (var i = indexes.length; i--;)
+            {
+                var item = indexes[i];
+
+                if (item !== previous && item !== index && item !== next)
+                {
+                    children[item].transform = children[i].transition = '';
+                }
+            }
+
+            // 上一页
+            if (control = children[previous])
+            {
+                control.$set('transform', 'translateX(100%)', true);
+            }
+
+            // 下一页
+            if (control = children[next])
+            {
+                control.$set('transform', 'translateX(300%)', true);
+            }
+
+            indexes[0] = previous;
+            indexes[1] = index;
+            indexes[2] = next;
         }
-    });
+        else if (length > 0)
+        {
+            indexes[0] = indexes[2] = -1;
+            indexes[1] = index;
+        }
+        
+        // 当前页
+        if (control = children[index])
+        {
+            control.$set('transform', 'translateX(200%)', true);
+        }
 
+        // 切换页面
+        this.__switch(this, index, oldIndex); 
+
+        // change事件不冒泡
+        this.trigger('change', index, false);
+    }
+
+
+    // 切换autoplay默认实现
+    this.__set_autoplay = function (value) {
+
+        var any;
+
+        if (any = this.__time)
+        {
+            clearTimeout(any);
+        }
+
+        if (value && (any = this.interval) > 0)
+        {
+            // this.__time = setTimeout(autoplay.bind(this), any);
+        }
+    }
+
+
+    function autoplay(interval) {
+
+        var index = this.selectedIndex + 1;
+        var interval = this.interval;
+
+        if (index >= this.__children.length)
+        {
+            index = 0;
+        }
+
+        this.selectedIndex = index;
+
+        if (interval > 0)
+        {
+            this.__time = setTimeout(autoplay.bind(this), interval);
+        }
+    }
 
 
     
@@ -70,7 +196,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
         var x = event.distanceX;
         var y = event.distanceY;
-        var delta;
+        var any;
 
         if (x < 0)
         {
@@ -83,14 +209,17 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
         }
 
         // 横向滑动的距离更多则启动滑动功能
-        if ((delta = x - y) >= 4)
+        if ((any = x - y) >= 4)
         {
             state.move = 1;
             state.index = slidebox.selectedIndex;
 
-            slidebox.__start();
+            if (any = slidebox.__start)
+            {
+                any.call(slidebox);
+            }
         }
-        else if (delta <= -4) // 纵向滚动则不再滑动
+        else if (any <= -4) // 纵向滚动则不再滑动
         {
             return false;
         }
@@ -102,17 +231,18 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
         // 500ms只要移动了小段距离就算换页
         if (new Date() - state.time < 500)
         {
+            var index = state.index;
             var x = event.distanceX;
             var size = 100 * yaxi.remRatio;
     
             if (x  < -size)
             {
-                if (state.index < state.last)
+                if (index < state.last)
                 {
                     return 1;
                 }
             }
-            else if (x > size && state.index > 0)
+            else if (x > size && index > 0)
             {
                 return -1;
             }
@@ -169,6 +299,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
                 return;
             }
 
+            var circular = this.circular;
             var index = s.index;
             var distance = touchX(event) - s.start;
             var size = s.width >> 1;
@@ -176,7 +307,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
             if (distance < -size)
             {
-                if (!change && index < s.last)
+                if (!change && (circular || index < s.last))
                 {
                     s.change = 1;
                     this.trigger('transition', index + 1, false);
@@ -184,7 +315,7 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
             }
             else if (distance > size)
             {
-                if (!change && index > 0)
+                if (!change && (circular || index > 0))
                 {
                     s.change = -1;
                     this.trigger('transition', index - 1, false);
@@ -196,12 +327,10 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
                 this.trigger('transition', index, false);
             }
 
-            if (index > 0)
+            if (change = this.__move)
             {
-                distance += -index * s.width;
+                change.call(this, distance);
             }
-
-            this.__move(distance);
 
             event.stop();
             return false;
@@ -209,64 +338,40 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
     }
 
 
-    this.__on_touchend = function (event) {
+    this.__on_touchend = this.__on_touchcancel = function (event) {
 
         var s = state;
 
-        this.__on_touchcancel();
+        s.capture = 0;
 
         if (s.move)
         {
-            this.__stop(s.change || checkChange(s, event));
+            var index = s.index;
+            var change;
+
+            // 已经拖过一半则直接变更索引
+            if (change = s.change)
+            {
+                this.selectedIndex = index + change;
+            }
+            else if (event.type === 'touchend' && (change = checkChange(s, event))) // 快速停止且移动了1/3也变更索引
+            {
+                this.selectedIndex = index + change;
+                this.trigger('transition', this.selectedIndex, false);
+            }
+            else // 否则退回原样
+            {
+                this.__transform(this.__indexes, index);    // 坐标变换
+                this.trigger('transition', index, false);   // 触发过渡事件
+            }
+
+            if (change = this.__stop)
+            {
+                change.call(this);
+            }
 
             event.stop();
             return false;
-        }
-    }
-
-
-    this.__on_touchcancel = function () {
-
-        state.capture = 0;
-
-        if (this.__autoplay)
-        {
-            this.__autoplay = false;
-            this.autoplay = true;
-        }
-    }
-
-
-
-    // 切换autoplay默认实现
-    this.__do_autoplay = function (value) {
-
-        var interval;
-
-        clearTimeout(this.__time);
-
-        if (value && (interval = this.interval) > 0)
-        {
-            this.__time = setTimeout(autoplay.bind(this), interval);
-        }
-    }
-
-
-    function autoplay(interval) {
-
-        var index = this.selectedIndex + 1;
-        var interval = this.interval;
-
-        if (index >= this.__children.length)
-        {
-            index = 0;
-        }
-
-        this.selectedIndex = index;
-
-        if (interval > 0)
-        {
-            this.__time = setTimeout(autoplay.bind(this), interval);
         }
     }
 
@@ -281,19 +386,11 @@ yaxi.Box.extend('SlideBox', function (Class, base) {
 
 
 
-    this.__start = this.__move = function () {
-    }
-    
-    
-    this.__stop = function (change) {
-    }
-
-
-
 
 }, function SlideBox() {
 
 
+    this.__indexes = [0, 0, 0];
     yaxi.Box.apply(this, arguments);
 
 
