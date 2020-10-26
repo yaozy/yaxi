@@ -1,6 +1,5 @@
-yaxi.__ajax_send = function (options) {
+yaxi.__ajax_send = function (stream, options) {
 
-    var stream = new yaxi.Stream();
     var ajax = new XMLHttpRequest();
     var timeout, any;
     
@@ -79,7 +78,5 @@ yaxi.__ajax_send = function (options) {
     }, options.timeout);
 
     ajax.send(options.data);
-
-    return stream;
 }
 

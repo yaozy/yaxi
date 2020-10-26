@@ -1,117 +1,181 @@
-yaxi.http = Object.extend.call({}, function (Class) {
+;(function (http) {
+
+
+
+    // 全局请求拦截
+    var beforeHandlers = [];
+
+    // 全局响应拦截
+    var afterHandlers = [];
 
 
 
     // 默认超时时间
-    Class.timeout = 10000;
+    http.timeout = 10000;
+
+
+    // 注册或注销全局请求拦截
+    http.before = function (handler, remove) {
+
+        if (typeof handler !== 'function')
+        {
+            throw 'http request must be a function!';
+        }
+
+        if (remove)
+        {
+            for (var i = beforeHandlers.length; i--;)
+            {
+                if (beforeHandlers[i] === handler)
+                {
+                    beforeHandlers.splice(i, 1);
+                }
+            }
+        }
+        else
+        {
+            beforeHandlers.push(handler);
+        }
+    }
+
+
+    // 注册或注销全局响应拦截
+    http.after = function (handler, remove) {
+
+        if (typeof handler !== 'function')
+        {
+            throw 'http response must be a function!';
+        }
+
+        if (remove)
+        {
+            for (var i = afterHandlers.length; i--;)
+            {
+                if (afterHandlers[i] === handler)
+                {
+                    afterHandlers.splice(i, 1);
+                }
+            }
+        }
+        else
+        {
+            afterHandlers.push(handler);
+        }
+    }
 
 
 
-    function ajax_mock(method, url, data) {
+    function parseAfterHandlers(value) {
 
-        var stream = new yaxi.Stream();
-    
+        var list = afterHandlers;
+
+        for (var i = 0, l = list.length; i < l; i++)
+        {
+            value = list[i](value);
+        }
+
+        return value;
+    }
+
+
+
+    function ajax_mock(stream, options) {
+
         setTimeout(function () {
     
             try
             {
-                var response = require('../../mock/' + url);
+                var response = require('../../mock/' + options.url);
     
                 if (typeof response === 'function')
                 {
-                    stream.resolve(response(data));
+                    stream.resolve(response(options.data, options));
                 }
                 else
                 {
                     stream.resolve(response);
                 }
             }
-            catch (e)
+            catch (err)
             {
-                console.error(e);
-                stream.reject(url + '\n' + e);
+                console.error(err);
+                stream.reject(options.url + '\n' + err);
             }
     
         }, 500);
-
-        return stream;
     }
     
 
     function encodeData(data) {
 
-        if (!data)
+        if (data)
         {
-            return '';
-        }
+            var list = [];
+            var encode = encodeURIComponent;
+            var value, any;
 
-        var list = [],
-            encode = encodeURIComponent,
-            value,
-            any;
-
-        for (var name in data)
-        {
-            value = data[name];
-            name = encode(name);
-
-            if (value === null)
+            for (var name in data)
             {
-                list.push(name, '=null', '&');
-                continue;
-            }
+                value = data[name];
+                name = encode(name);
 
-            switch (typeof value)
-            {
-                case 'undefined':
-                    list.push(name, '=&');
-                    break;
+                if (value === null)
+                {
+                    list.push(name, '=null', '&');
+                    continue;
+                }
 
-                case 'boolean':
-                case 'number':
-                    list.push(name, '=', value, '&');
-                    break;
+                switch (typeof value)
+                {
+                    case 'undefined':
+                        list.push(name, '=&');
+                        break;
 
-                case 'string':
-                case 'function':
-                    list.push(name, '=', encode(value), '&');
-                    break;
+                    case 'boolean':
+                    case 'number':
+                        list.push(name, '=', value, '&');
+                        break;
 
-                default:
-                    if (value instanceof Array)
-                    {
-                        for (var i = 0, l = value.length; i < l; i++)
+                    case 'string':
+                    case 'function':
+                        list.push(name, '=', encode(value), '&');
+                        break;
+
+                    default:
+                        if (value instanceof Array)
                         {
-                            if ((any = value[i]) === void 0)
+                            for (var i = 0, l = value.length; i < l; i++)
                             {
-                                list.push(name, '=&');
-                            }
-                            else
-                            {
-                                list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                                if ((any = value[i]) === void 0)
+                                {
+                                    list.push(name, '=&');
+                                }
+                                else
+                                {
+                                    list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        list.push(name, '=', encodeData(value), '&');
-                    }
-                    break;
+                        else
+                        {
+                            list.push(name, '=', encodeData(value), '&');
+                        }
+                        break;
+                }
             }
+
+            list.pop();
+
+            return list.join('');
         }
 
-        list.pop();
-
-        return list.join('');
+        return '';
     }
 
 
     function send(method, url, data, options, flag) {
 
-        if (Class.mock)
-        {
-            return ajax_mock(method, url, data);
-        }
+        var stream, list;
 
         if (data && !(data instanceof FormData))
         {
@@ -138,67 +202,91 @@ yaxi.http = Object.extend.call({}, function (Class) {
         options.method = method;
         options.url = url;
         options.data = data;
-        options.timeout = options.timeout || Class.timeout;
+        options.timeout = options.timeout || http.timeout;
 
-        return yaxi.__ajax_send(options);
+        if ((list = beforeHandlers).length > 0)
+        {
+            for (var i = 0, l = list.length; i < l; i++)
+            {
+                list[i](options);
+            }
+        }
+
+        stream = new yaxi.Stream();
+
+        if (afterHandlers.length > 0)
+        {
+            stream.map(parseAfterHandlers);
+        }
+
+        if (http.mock)
+        {
+            ajax_mock(stream, options);
+        }
+        else
+        {
+            yaxi.__ajax_send(stream, options);
+        }
+
+        return stream;
     }
 
 
 
-    Class.send = function (method, url, data, options) {
+    http.send = function (method, url, data, options) {
 
         return send(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
     }
 
 
 
-    Class.options = function (url, data, options) {
+    http.options = function (url, data, options) {
 
         return send('OPTIONS', url, data, options || {}, true);
     }
 
 
-    Class.head = function (url, data, options) {
+    http.head = function (url, data, options) {
 
         return send('HEAD', url, data, options || {}, true);
     }
 
 
-    Class.get = function (url, data, options) {
+    http.get = function (url, data, options) {
 
         return send('GET', url, data, options || {}, true);
     }
 
 
-    Class.post = function (url, data, options) {
+    http.post = function (url, data, options) {
 
         return send('POST', url, data, options || {});
     }
 
 
-    Class.put = function (url, data, options) {
+    http.put = function (url, data, options) {
 
         return send('PUT', url, data, options || {});
     }
     
 
-    Class.delete = function (url, data, options) {
+    http.delete = function (url, data, options) {
 
         return send('DELETE', url, data, options || {});
     }
 
 
-    Class.trace = function (url, data, options) {
+    http.trace = function (url, data, options) {
 
         return send('TRACE', url, data, options || {});
     }
 
 
-    Class.connect = function (url, data, options) {
+    http.connect = function (url, data, options) {
 
         return send('CONNECT', url, data, options || {});
     }
 
 
-});
+})(yaxi.http = Object.create(null));
 

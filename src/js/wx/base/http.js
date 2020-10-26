@@ -1,7 +1,5 @@
-yaxi.__ajax_send = function (options) {
+yaxi.__ajax_send = function (stream, options) {
 
-    var stream = new yaxi.Stream();
-    
     options.success = function (res) {
         
         var status = this.statusCode || 600;
