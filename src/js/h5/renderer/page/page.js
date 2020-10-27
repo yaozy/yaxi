@@ -45,14 +45,14 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, options, callbackFn) {
+	yaxi.openPage = function (Page, options, onclosed) {
 
         var stack = all;
         var page;
         
         if (typeof options === 'function')
         {
-            callbackFn = options;
+            onclosed = options;
             options = null;
         }
 
@@ -64,7 +64,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         stack.push(page = new Page(options));
         
         page.onload(page.options = options);
-        page.__cb = callbackFn;
+        page.__onclosed = onclosed;
         page.onshow();
         
         host.appendChild(page.$renderer.render(page));
@@ -76,7 +76,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         var stack = all;
         var page = stack[stack.length - 1];
-        var view, options, callbackFn;
+        var view, options, onclosed;
 
         if (page.onunload(options = page.options) !== false)
         {
@@ -94,10 +94,10 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
             stack.pop();
             
-            if (callbackFn = page.__cb)
+            if (onclosed = page.__onclosed)
             {
-                page.__cb = null;
-                callbackFn(type, payload);
+                page.__onclosed = null;
+                onclosed(type, payload);
             }
 
             if (page = stack[stack.length - 1])

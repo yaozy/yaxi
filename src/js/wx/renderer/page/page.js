@@ -70,14 +70,14 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
     
 
 	// 打开指定页面
-    yaxi.openPage = function (Page, options, callbackFn) {
+    yaxi.openPage = function (Page, options, onclosed) {
 
         var stack = all;
         var wxPage, page;
     
         if (typeof options === 'function')
         {
-            callbackFn = options;
+            onclosed = options;
             options = null;
         }
         
@@ -90,14 +90,14 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         stack.push(page = new Page(options));
 
         page.onload(page.options = options);
-        page.__cb = callbackFn;
+        page.__onclosed = onclosed;
         page.onshow();
 
         // 对话框直接嵌在当前页面内, 不创建新的微信页面
         if (page instanceof yaxi.Dialog && all.length > 0)
         {
             page.__po = wxPage;
-            openDialog(page, options, callbackFn);
+            openDialog(page, options, onclosed);
         }
         else
         {
@@ -213,7 +213,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         var stack = all;
         var page = stack[stack.length - 1];
-        var callbackFn;
+        var onclosed;
 
         page.options = page.__po = null;
         page.destroy();
@@ -222,10 +222,10 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         
         stack.pop();
 
-        if (callbackFn = page.__cb)
+        if (onclosed = page.__onclosed)
         {
-            page.__cb = null;
-            callbackFn(type, payload);
+            page.__onclosed = null;
+            onclosed(type, payload);
         }
 
         if (page = stack[stack.length - 1])

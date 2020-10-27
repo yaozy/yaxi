@@ -26,20 +26,20 @@ yaxi.__ajax_send = function (stream, options) {
             if (timeout)
             {
                 clearTimeout(timeout);
-
-                if (this.status >= 100 && this.status < 300)
-                {
-                    stream.resolve(this.responseText || this.responseXML);
-                }
-                else
-                {
-                    stream.reject({
-                        url: options.url,
-                        status: this.status || 600,
-                        message: this.statusText || this.responseText,
-                        options: options
-                    });
-                }
+            }
+            
+            if (this.status >= 100 && this.status < 300)
+            {
+                stream.resolve(this.responseText || this.responseXML);
+            }
+            else
+            {
+                stream.reject({
+                    url: options.url,
+                    status: this.status || 600,
+                    message: this.statusText || this.responseText,
+                    options: options
+                });
             }
         }
     }
@@ -56,7 +56,7 @@ yaxi.__ajax_send = function (stream, options) {
         // }
     }
 
-    if (any = options.header)
+    if (any = options.headers)
     {
         for (var name in any)
         {
@@ -72,7 +72,8 @@ yaxi.__ajax_send = function (stream, options) {
         stream.reject({
             url: options.url,
             status: 601,
-            message: 'ajax request timeout'
+            message: 'ajax request timeout',
+            options: options
         });
 
     }, options.timeout);

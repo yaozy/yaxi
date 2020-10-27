@@ -61,7 +61,10 @@ yaxi.Control.extend('TextBox', function () {
 
     this.__on_change = function (value) {
 
-        this.$push(value);
+        if (!this.$push(value))
+        {
+            this.value = value;
+        }
     }
 
 

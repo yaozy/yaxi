@@ -1102,6 +1102,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         if (change = this.__onchange)
         {
             change(value);
+            return true;
         }
     }
 
@@ -1207,7 +1208,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         {
             // 插槽控件被移除后就不再是插槽控件了
             this.__slot = null;
-            children.splice(index, 1);
+            children.removeAt(index, 1);
         }
     }
 

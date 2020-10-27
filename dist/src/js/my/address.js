@@ -111,7 +111,7 @@ module.exports = yaxi.Page.extend(function (Class, base) {
 
                 if (type === 'OK')
                 {
-                    arrayModel.splice(index, 1);
+                    arrayModel.removeAt(index, 1);
                 }
             });
         }

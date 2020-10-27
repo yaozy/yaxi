@@ -1208,311 +1208,277 @@ yaxi.Stream = Object.extend(function (Class) {
 
 
 
+    // 从promise对象转成stream流
     Class.fromPromise = function (promise) {
 
-        var instance = new this();
+        let stream = new Stream();
 
-        if (typeof promise === 'function')
-        {
-            promise = promise();
-        }
+        setTimeout(function () {
 
-        promise
-            .then(function (value) {
+            promise.then(function (value) {
 
-                instance.resolve(value);
-            })
-            .catch(function (reason) {
-
-                instance.reject(reason);
+                stream.resolve(value);
+            });
+    
+            promise.catch(function (err) {
+    
+                stream.reject(err);
             });
 
-        return instance;
-    }
+        }, 0);
 
-
-    Class.interval = function (period) {
-
-        var instance = new this();
-        var value = 0;
-
-        function interval() {
-
-            setTimeout(function () {
-
-                instance.resolve(value++);
-                interval();
-
-            }, period | 0);
-        }
-
-        interval();
-
-        return instance;
-    }
-
-
-    Class.all = function () {
-
-        var instance = new this(),
-            cache = [],
-            index = 0,
-            length = 0,
-            item;
-
-        while (item = arguments[index])
-        {
-            length++;
-
-            (function (item, index) {
-
-                item
-                    .then(function (value) {
-
-                        cache[index] = value;
-
-                        if (!--length)
-                        {
-                            instance.resolve(cache);
-                        }
-                    })
-                    .catch(function (reason) {
-                        
-                        instance.reject(reason);
-                    });
-
-            })(item, index++);
-        }
-
-        return instance;
-    }
-
-
-    
-    Class.resolve = function (fn) {
-
-        var stream = new this();
-
-        if (fn)
-        {
-            fn(this)
-        }
-        else
-        {
-            stream.__cache = [void 0];
-        }
-    
         return stream;
     }
 
-    
 
+    Class.resolve = function (value) {
 
-    this.registry = function (fn) {
+        let stream = new Stream();
 
-        var next = this.__next = new Class();
-        var cache = this.__cache;
+        setTimeout(function () {
 
-        this.__fn = fn;
+            stream.resolve(value);
 
-        if (cache)
-        {
-            while (cache.length > 0)
-            {
-                try
-                {
-                    fn.call(this, cache.shift(), next);
-                }
-                catch (e)
-                {
-                    this.reject(e);
-                }
-            }
+        }, 0);
 
-            this.__cache = null;
-        }
-
-        return next;
+        return stream;
     }
 
 
 
+    /**
+     * 成功执行, 继续下一任务流
+     * 
+     * @param {any} value 往后传递的值
+     * @return {Stream} 当前实例
+     */
     this.resolve = function (value) {
 
-        var next = this.__next,
-            any;
+        let next, fn;
 
-        if (next)
+        if (next = this.__next)
         {
-            if (any = this.__fn)
+            try
             {
-                try
+                if (fn = this.__done)
                 {
-                    any.call(this, value, next);
+                    fn.call(this, value, next);
                 }
-                catch (e)
+                else
                 {
-                    this.reject(e);
+                    next.resolve(value);
                 }
+            }
+            catch (err)
+            {
+                next.reject(err);
+            }
+        }
+        else
+        {
+            this.__value = [value];
+        }
+    }
+
+
+    /**
+     * 执行失败, 往后传递错误
+     * 
+     * @param {any} err 当前任务实例
+     * @return {Stream} 当前实例
+     */
+    this.reject = function (err) {
+
+        let next, fn;
+
+        if (next = this.__next)
+        {
+            try
+            {
+                if (fn = this.__fail)
+                {
+                    fn.call(this, err, next);
+                }
+                else
+                {
+                    next.reject(err);
+                }
+            }
+            catch (err)
+            {
+                next.reject(err);
+            }
+        }
+        else
+        {
+            console.error(err);
+        }
+    }
+
+
+    /**
+     * 添加处理
+     * @param {Function} done 成功处理 
+     * @param {Function} fail 失败处理
+     */
+    this.push = function (done, fail) {
+
+        if (typeof done === 'function')
+        {
+            this.__done = done;
+
+            if (done = this.__value)
+            {
+                this.__value = void 0;
+
+                setTimeout(function () {
+
+                    this.resolve(done[0]);
+
+                }.bind(this));
+            }
+        }
+        
+        if (typeof fail === 'function')
+        {
+            this.__fail = fail;
+        }
+
+        return this.__next = new this.constructor();
+    }
+
+
+    /**
+     * 注册继续任务处理方法
+     * 
+     * @param {Function} fn 任务处理函数
+     * @return {Stream} 当前实例
+     */
+    this.then = function (fn) {
+
+        return this.push(function (value, next) {
+            
+            let result;
+
+            // promise
+            if (result = fn(value))
+            {
+                result.then(function (value) {
+
+                    if (value !== false)
+                    {
+                        next.resolve(value);
+                    }
+                });
+
+                result.catch(function (err) {
+
+                    next.reject(err);
+                });
+            }
+            else if (result !== false)
+            {
+                next.resolve(value);
+            }
+        });
+    }
+
+
+    /**
+     * 注册失败处理方法
+     * 
+     * @param {Function} fn 失败处理函数
+     * @return {Stream} 当前实例
+     */
+    this.catch = function (fn) {
+
+        return this.push(null, function (err, next) {
+            
+            let result;
+
+            // promise
+            if (result = fn(err))
+            {
+                result.finally(function (value) {
+
+                    if (value !== false)
+                    {
+                        next.reject(err);
+                    }
+                });
+            }
+            else if (result !== false)
+            {
+                next.reject(err);
+            }
+        });
+    }
+
+
+    /**
+     * 任务值转换
+     * 注: 执行结果作为后续任务流输入值直到被其它值覆盖
+     * 
+     * @param {Function} fn 转换函数
+     * @return {Stream} 当前实例
+     */
+    this.map = function (fn) {
+
+        return this.push(function (value, next) {
+            
+            value = fn(value);
+
+            // promise
+            if (value && typeof value.catch === 'function')
+            {
+                value.then(function (value) {
+
+                    next.resolve(value);
+                });
+
+                value.catch(function (err) {
+
+                    next.reject(err);
+                });
             }
             else
             {
                 next.resolve(value);
             }
-        }
-        else if (any = this.__cache)
-        {
-            any.push(value);
-        }
-        else
-        {
-            this.__cache = [value];
-        }
-    }
-
-
-    this.reject = function (reason) {
-
-        var fn = this.__fail,
-            next = this.__next;
-
-        if (fn)
-        {
-            try
-            {
-                if (fn.call(this, reason, next) === false)
-                {
-                    return false;
-                }
-            }
-            catch (e)
-            {
-                reason = e;
-            }
-        }
-
-        if (next)
-        {
-            next.reject(reason);
-        }
-        else
-        {
-            throw reason;
-        }
-    }
-
-
-    this.then = function (fn) {
-
-        return this.registry(function (value, next) {
-
-            if (fn)
-            {
-                var result = fn(value);
-
-                if (result !== void 0)
-                {
-                    value = result;
-                }
-            }
-
-            next.resolve(value);
         });
     }
 
 
-    this.combine = function (stream) {
+    /**
+     * 注册任务值json处理
+     * 注: 执行结果作为后续任务流输入值直到被其它值覆盖
+     * 
+     * @return {Stream} 当前实例
+     */
+    this.json = function () {
 
-        return this.registry(function (value1, next) {
-
-            stream
-                .then(function (value2) {
-
-                    var array = value1;
-
-                    if (array instanceof Array)
-                    {
-                        array.push(value2);
-                    }
-                    else
-                    {
-                        array = [value1, value2];
-                    }
-
-                    next.resolve(array);
-                })
-                .catch(function (reason) {
-
-                    next.reject(reason);
-                });
-        });
-    }
-
-
-    this.map = function (fn) {
-
-        return this.registry(function (value, next) {
-
-            next.resolve(fn(value));
-        });
-    }
-
-
-    this.json = function (fn) {
-
-        return this.registry(function (value, next) {
-
+        return this.push(function (value, next) {
+            
             if (typeof value === 'string')
             {
                 value = JSON.parse(value);
             }
 
-            if (fn)
-            {
-                value = fn(value);
-            }
-
             next.resolve(value);
         });
     }
 
 
-    this.catch = function (fail) {
-
-        this.__fail = fail;
-        return this.__next = new Class();
-    }
-
-
-    this.wait = function (time) {
-
-        var cache = [];
-        var timeout;
-
-        return this.registry(function (value, next) {
-
-            if (timeout)
-            {
-                cache.push(value);
-            }
-            else
-            {
-                timeout = setTimeout(function () {
-
-                    next.resolve(cache);
-                    timeout = 0;
-                    cache = [];
-
-                }, time | 0);
-            }
-        });
-    }
-
-
+    /**
+     * 注册延时处理
+     * 
+     * @param {int|undefined} time 延时时间, 默认为0
+     * @return {Stream} 当前实例
+     */
     this.delay = function (time) {
 
-        return this.registry(function (value, next) {
-
+        return this.push(function (value, next) {
+            
             setTimeout(function () {
 
                 next.resolve(value);
@@ -1522,167 +1488,212 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
-    this.debounce = function (time) {
 
-        var timeout;
+    /**
+     * 转换成Promise对象
+     * @return {Promise} promise对象
+     */
+    this.toPromise = function () {
 
-        return this.registry(function (value, next) {
+        return new Promise(function (resolve, reject) {
 
-            if (timeout)
-            {
-                clearTimeout(timeout);
-            }
+            this.push(function (value) {
 
-            timeout = setTimeout(function () {
+               resolve(value) 
 
-                next.resolve(value);
-                timeout = 0;
+            }, function (err) {
 
-            }, time | 0);
+                reject(err)
+            });
         });
     }
 
-
-    this.throttle = function (time) {
-
-        var timeout;
-
-        return this.registry(function (value, next) {
-
-            if (!timeout)
-            {
-                next.resolve(value);
-
-                timeout = setTimeout(function () {
-
-                    timeout = 0;
-
-                }, time | 0);
-            }
-        });
-    }
 
 
     
-}, function Stream() { });
+}, function Stream() {});
 
 
 
 
-yaxi.http = Object.extend.call({}, function (Class) {
+;(function (http) {
+
+
+
+    // 全局请求拦截
+    var beforeHandlers = [];
+
+    // 全局响应拦截
+    var afterHandlers = [];
 
 
 
     // 默认超时时间
-    Class.timeout = 10000;
+    http.timeout = 10000;
+
+
+    // 注册或注销全局请求拦截
+    http.before = function (handler, remove) {
+
+        if (typeof handler !== 'function')
+        {
+            throw 'http request must be a function!';
+        }
+
+        if (remove)
+        {
+            for (var i = beforeHandlers.length; i--;)
+            {
+                if (beforeHandlers[i] === handler)
+                {
+                    beforeHandlers.splice(i, 1);
+                }
+            }
+        }
+        else
+        {
+            beforeHandlers.push(handler);
+        }
+    }
+
+
+    // 注册或注销全局响应拦截
+    http.after = function (handler, remove) {
+
+        if (typeof handler !== 'function')
+        {
+            throw 'http response must be a function!';
+        }
+
+        if (remove)
+        {
+            for (var i = afterHandlers.length; i--;)
+            {
+                if (afterHandlers[i] === handler)
+                {
+                    afterHandlers.splice(i, 1);
+                }
+            }
+        }
+        else
+        {
+            afterHandlers.push(handler);
+        }
+    }
 
 
 
-    function ajax_mock(method, url, data) {
+    function parseAfterHandlers(value) {
 
-        var stream = new yaxi.Stream();
-    
+        var list = afterHandlers;
+
+        for (var i = 0, l = list.length; i < l; i++)
+        {
+            value = list[i](value);
+        }
+
+        return value;
+    }
+
+
+
+    function ajax_mock(stream, options) {
+
         setTimeout(function () {
     
             try
             {
-                var response = require('../../mock/' + url);
+                var response = require('../../mock/' + options.url);
     
                 if (typeof response === 'function')
                 {
-                    stream.resolve(response(data));
+                    stream.resolve(response(options.data, options));
                 }
                 else
                 {
                     stream.resolve(response);
                 }
             }
-            catch (e)
+            catch (err)
             {
-                console.error(e);
-                stream.reject(url + '\n' + e);
+                console.error(err);
+                stream.reject(options.url + '\n' + err);
             }
     
         }, 500);
-
-        return stream;
     }
     
 
     function encodeData(data) {
 
-        if (!data)
+        if (data)
         {
-            return '';
-        }
+            var list = [];
+            var encode = encodeURIComponent;
+            var value, any;
 
-        var list = [],
-            encode = encodeURIComponent,
-            value,
-            any;
-
-        for (var name in data)
-        {
-            value = data[name];
-            name = encode(name);
-
-            if (value === null)
+            for (var name in data)
             {
-                list.push(name, '=null', '&');
-                continue;
-            }
+                value = data[name];
+                name = encode(name);
 
-            switch (typeof value)
-            {
-                case 'undefined':
-                    list.push(name, '=&');
-                    break;
+                if (value === null)
+                {
+                    list.push(name, '=null', '&');
+                    continue;
+                }
 
-                case 'boolean':
-                case 'number':
-                    list.push(name, '=', value, '&');
-                    break;
+                switch (typeof value)
+                {
+                    case 'undefined':
+                        list.push(name, '=&');
+                        break;
 
-                case 'string':
-                case 'function':
-                    list.push(name, '=', encode(value), '&');
-                    break;
+                    case 'boolean':
+                    case 'number':
+                        list.push(name, '=', value, '&');
+                        break;
 
-                default:
-                    if (value instanceof Array)
-                    {
-                        for (var i = 0, l = value.length; i < l; i++)
+                    case 'string':
+                    case 'function':
+                        list.push(name, '=', encode(value), '&');
+                        break;
+
+                    default:
+                        if (value instanceof Array)
                         {
-                            if ((any = value[i]) === void 0)
+                            for (var i = 0, l = value.length; i < l; i++)
                             {
-                                list.push(name, '=&');
-                            }
-                            else
-                            {
-                                list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                                if ((any = value[i]) === void 0)
+                                {
+                                    list.push(name, '=&');
+                                }
+                                else
+                                {
+                                    list.push(name, '=', encode(any), '&'); //数组不支持嵌套
+                                }
                             }
                         }
-                    }
-                    else
-                    {
-                        list.push(name, '=', encodeData(value), '&');
-                    }
-                    break;
+                        else
+                        {
+                            list.push(name, '=', encodeData(value), '&');
+                        }
+                        break;
+                }
             }
+
+            list.pop();
+
+            return list.join('');
         }
 
-        list.pop();
-
-        return list.join('');
+        return '';
     }
 
 
     function send(method, url, data, options, flag) {
 
-        if (Class.mock)
-        {
-            return ajax_mock(method, url, data);
-        }
+        var stream, list;
 
         if (data && !(data instanceof FormData))
         {
@@ -1709,69 +1720,93 @@ yaxi.http = Object.extend.call({}, function (Class) {
         options.method = method;
         options.url = url;
         options.data = data;
-        options.timeout = options.timeout || Class.timeout;
+        options.timeout = options.timeout || http.timeout;
 
-        return yaxi.__ajax_send(options);
+        if ((list = beforeHandlers).length > 0)
+        {
+            for (var i = 0, l = list.length; i < l; i++)
+            {
+                list[i](options);
+            }
+        }
+
+        stream = new yaxi.Stream();
+
+        if (afterHandlers.length > 0)
+        {
+            stream.map(parseAfterHandlers);
+        }
+
+        if (http.mock)
+        {
+            ajax_mock(stream, options);
+        }
+        else
+        {
+            yaxi.__ajax_send(stream, options);
+        }
+
+        return stream;
     }
 
 
 
-    Class.send = function (method, url, data, options) {
+    http.send = function (method, url, data, options) {
 
         return send(method ? method.toUpperCase() : 'GET', url, data, options || {}); 
     }
 
 
 
-    Class.options = function (url, data, options) {
+    http.options = function (url, data, options) {
 
         return send('OPTIONS', url, data, options || {}, true);
     }
 
 
-    Class.head = function (url, data, options) {
+    http.head = function (url, data, options) {
 
         return send('HEAD', url, data, options || {}, true);
     }
 
 
-    Class.get = function (url, data, options) {
+    http.get = function (url, data, options) {
 
         return send('GET', url, data, options || {}, true);
     }
 
 
-    Class.post = function (url, data, options) {
+    http.post = function (url, data, options) {
 
         return send('POST', url, data, options || {});
     }
 
 
-    Class.put = function (url, data, options) {
+    http.put = function (url, data, options) {
 
         return send('PUT', url, data, options || {});
     }
     
 
-    Class.delete = function (url, data, options) {
+    http.delete = function (url, data, options) {
 
         return send('DELETE', url, data, options || {});
     }
 
 
-    Class.trace = function (url, data, options) {
+    http.trace = function (url, data, options) {
 
         return send('TRACE', url, data, options || {});
     }
 
 
-    Class.connect = function (url, data, options) {
+    http.connect = function (url, data, options) {
 
         return send('CONNECT', url, data, options || {});
     }
 
 
-});
+})(yaxi.http = Object.create(null));
 
 
 
@@ -4654,6 +4689,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         if (change = this.__onchange)
         {
             change(value);
+            return true;
         }
     }
 
@@ -4759,7 +4795,7 @@ Object.extend.call({}, 'Control', function (Class, base, yaxi) {
         {
             // 插槽控件被移除后就不再是插槽控件了
             this.__slot = null;
-            children.splice(index, 1);
+            children.removeAt(index, 1);
         }
     }
 
@@ -7968,7 +8004,10 @@ yaxi.Control.extend('TextBox', function () {
 
     this.__on_change = function (value) {
 
-        this.$push(value);
+        if (!this.$push(value))
+        {
+            this.value = value;
+        }
     }
 
 
@@ -8558,9 +8597,9 @@ yaxi.Box.extend('Page', function (Class, base) {
 
 
 
-	function open(options, callbackFn) {
+	function open(options, onclosed) {
 
-		yaxi.openPage(this, options, callbackFn);
+		yaxi.openPage(this, options, onclosed);
 	}
 
 
@@ -8620,6 +8659,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 		this.close(event.target.key);
 	}
+
 
 
 	this.init = function (options) {
@@ -8738,12 +8778,11 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-
-	Class.delete = function (text, callbackFn) {
+	Class.delete = function (text, onclosed) {
 
 		if (typeof text === 'function')
 		{
-			callbackFn = text;
+			onclosed = text;
 			text = '';
 		}
 
@@ -8752,18 +8791,19 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 			title: '确认删除',
 			content: '确认要删除' + (text || '') + '?'
 
-		}, callbackFn);
+		}, onclosed);
 	}
 
 
-	Class.info = function (text) {
+	Class.info = function (text, onclosed) {
 
 		this.open({
 
 			title: '提醒',
 			content: text,
 			buttons: 'OK'
-		});
+
+		}, onclosed);
 	}
 
 
@@ -9288,9 +9328,8 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
-yaxi.__ajax_send = function (options) {
+yaxi.__ajax_send = function (stream, options) {
 
-    var stream = new yaxi.Stream();
     var ajax = new XMLHttpRequest();
     var timeout, any;
     
@@ -9317,20 +9356,20 @@ yaxi.__ajax_send = function (options) {
             if (timeout)
             {
                 clearTimeout(timeout);
-
-                if (this.status >= 100 && this.status < 300)
-                {
-                    stream.resolve(this.responseText || this.responseXML);
-                }
-                else
-                {
-                    stream.reject({
-                        url: options.url,
-                        status: this.status || 600,
-                        message: this.statusText || this.responseText,
-                        options: options
-                    });
-                }
+            }
+            
+            if (this.status >= 100 && this.status < 300)
+            {
+                stream.resolve(this.responseText || this.responseXML);
+            }
+            else
+            {
+                stream.reject({
+                    url: options.url,
+                    status: this.status || 600,
+                    message: this.statusText || this.responseText,
+                    options: options
+                });
             }
         }
     }
@@ -9347,7 +9386,7 @@ yaxi.__ajax_send = function (options) {
         // }
     }
 
-    if (any = options.header)
+    if (any = options.headers)
     {
         for (var name in any)
         {
@@ -9363,14 +9402,13 @@ yaxi.__ajax_send = function (options) {
         stream.reject({
             url: options.url,
             status: 601,
-            message: 'ajax request timeout'
+            message: 'ajax request timeout',
+            options: options
         });
 
     }, options.timeout);
 
     ajax.send(options.data);
-
-    return stream;
 }
 
 
@@ -10640,14 +10678,14 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
 
 	// 打开指定页面
-	yaxi.openPage = function (Page, options, callbackFn) {
+	yaxi.openPage = function (Page, options, onclosed) {
 
         var stack = all;
         var page;
         
         if (typeof options === 'function')
         {
-            callbackFn = options;
+            onclosed = options;
             options = null;
         }
 
@@ -10659,7 +10697,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
         stack.push(page = new Page(options));
         
         page.onload(page.options = options);
-        page.__cb = callbackFn;
+        page.__onclosed = onclosed;
         page.onshow();
         
         host.appendChild(page.$renderer.render(page));
@@ -10671,7 +10709,7 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
         var stack = all;
         var page = stack[stack.length - 1];
-        var view, options, callbackFn;
+        var view, options, onclosed;
 
         if (page.onunload(options = page.options) !== false)
         {
@@ -10689,10 +10727,10 @@ yaxi.Page.renderer(function (base, thisControl, yaxi) {
 
             stack.pop();
             
-            if (callbackFn = page.__cb)
+            if (onclosed = page.__onclosed)
             {
-                page.__cb = null;
-                callbackFn(type, payload);
+                page.__onclosed = null;
+                onclosed(type, payload);
             }
 
             if (page = stack[stack.length - 1])

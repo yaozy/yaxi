@@ -5,16 +5,16 @@ yaxi.Stream = Object.extend(function (Class) {
     // 从promise对象转成stream流
     Class.fromPromise = function (promise) {
 
-        var stream = new Stream();
+        let stream = new Stream();
 
         setTimeout(function () {
 
-            promise.then(value => {
+            promise.then(function (value) {
 
                 stream.resolve(value);
             });
     
-            promise.catch(err => {
+            promise.catch(function (err) {
     
                 stream.reject(err);
             });
@@ -25,29 +25,38 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
+    Class.resolve = function (value) {
 
+        let stream = new Stream();
+
+        setTimeout(function () {
+
+            stream.resolve(value);
+
+        }, 0);
+
+        return stream;
+    }
+
+
+
+    /**
+     * 成功执行, 继续下一任务流
+     * 
+     * @param {any} value 往后传递的值
+     * @return {Stream} 当前实例
+     */
     this.resolve = function (value) {
 
-        var next, fn;
+        let next, fn;
 
         if (next = this.__next)
         {
             try
             {
-                if (fn = this.__fn)
+                if (fn = this.__done)
                 {
-                    if (fn = fn.call(this, value, next))
-                    {
-                        fn.then(function (value) {
-
-                            next.resolve(value);
-                        });
-
-                        fn.catch(function (err) {
-
-                            next.reject(err);
-                        });
-                    }
+                    fn.call(this, value, next);
                 }
                 else
                 {
@@ -59,10 +68,19 @@ yaxi.Stream = Object.extend(function (Class) {
                 next.reject(err);
             }
         }
+        else
+        {
+            this.__value = [value];
+        }
     }
 
 
-
+    /**
+     * 执行失败, 往后传递错误
+     * 
+     * @param {any} err 当前任务实例
+     * @return {Stream} 当前实例
+     */
     this.reject = function (err) {
 
         let next, fn;
@@ -71,14 +89,11 @@ yaxi.Stream = Object.extend(function (Class) {
         {
             try
             {
-                if ((fn = this.__fail) && (fn = fn.call(this, err, next)))
+                if (fn = this.__fail)
                 {
-                    fn.catch(function (err) {
-
-                        next.reject(err);
-                    });
+                    fn.call(this, err, next);
                 }
-                else if (fn !== false)
+                else
                 {
                     next.reject(err);
                 }
@@ -90,51 +105,153 @@ yaxi.Stream = Object.extend(function (Class) {
         }
         else
         {
-            throw err;
+            console.error(err);
         }
     }
 
 
+    /**
+     * 添加处理
+     * @param {Function} done 成功处理 
+     * @param {Function} fail 失败处理
+     */
+    this.push = function (done, fail) {
 
+        if (typeof done === 'function')
+        {
+            this.__done = done;
+
+            if (done = this.__value)
+            {
+                this.__value = void 0;
+
+                setTimeout(function () {
+
+                    this.resolve(done[0]);
+
+                }.bind(this));
+            }
+        }
+        
+        if (typeof fail === 'function')
+        {
+            this.__fail = fail;
+        }
+
+        return this.__next = new this.constructor();
+    }
+
+
+    /**
+     * 注册继续任务处理方法
+     * 
+     * @param {Function} fn 任务处理函数
+     * @return {Stream} 当前实例
+     */
     this.then = function (fn) {
 
-        if (typeof fn === 'function')
-        {
-            this.__fn = fn;
-            return this.__next = new this.constructor();
-        }
-        
-        throw 'method then must be a function!';
-    }
-
-
-
-    this.catch = function (fn) {
-
-        if (typeof fn === 'function')
-        {
-            this.__fail = fn;
-            return this.__next = new this.constructor();
-        }
-        
-        throw 'method catch must be a function!';
-    }
-
-
-
-    this.map = function (fn) {
-
-        return this.then(function (value, next) {
+        return this.push(function (value, next) {
             
-            next.resolve(fn(value));
+            let result;
+
+            // promise
+            if (result = fn(value))
+            {
+                result.then(function (value) {
+
+                    if (value !== false)
+                    {
+                        next.resolve(value);
+                    }
+                });
+
+                result.catch(function (err) {
+
+                    next.reject(err);
+                });
+            }
+            else if (result !== false)
+            {
+                next.resolve(value);
+            }
         });
     }
 
 
+    /**
+     * 注册失败处理方法
+     * 
+     * @param {Function} fn 失败处理函数
+     * @return {Stream} 当前实例
+     */
+    this.catch = function (fn) {
 
+        return this.push(null, function (err, next) {
+            
+            let result;
+
+            // promise
+            if (result = fn(err))
+            {
+                result.finally(function (value) {
+
+                    if (value !== false)
+                    {
+                        next.reject(err);
+                    }
+                });
+            }
+            else if (result !== false)
+            {
+                next.reject(err);
+            }
+        });
+    }
+
+
+    /**
+     * 任务值转换
+     * 注: 执行结果作为后续任务流输入值直到被其它值覆盖
+     * 
+     * @param {Function} fn 转换函数
+     * @return {Stream} 当前实例
+     */
+    this.map = function (fn) {
+
+        return this.push(function (value, next) {
+            
+            value = fn(value);
+
+            // promise
+            if (value && typeof value.catch === 'function')
+            {
+                value.then(function (value) {
+
+                    next.resolve(value);
+                });
+
+                value.catch(function (err) {
+
+                    next.reject(err);
+                });
+            }
+            else
+            {
+                next.resolve(value);
+            }
+        });
+    }
+
+
+    /**
+     * 注册任务值json处理
+     * 注: 执行结果作为后续任务流输入值直到被其它值覆盖
+     * 
+     * @return {Stream} 当前实例
+     */
     this.json = function () {
 
-        return this.then(function (value, next) {
+        return this.push(function (value, next) {
             
             if (typeof value === 'string')
             {
@@ -146,18 +263,24 @@ yaxi.Stream = Object.extend(function (Class) {
     }
 
 
-
+    /**
+     * 注册延时处理
+     * 
+     * @param {int|undefined} time 延时时间, 默认为0
+     * @return {Stream} 当前实例
+     */
     this.delay = function (time) {
 
-        return this.then(function (value, next) {
+        return this.push(function (value, next) {
             
-            setTimeout(() => {
+            setTimeout(function () {
 
                 next.resolve(value);
 
             }, time | 0);
         });
     }
+
 
 
     /**
@@ -168,18 +291,17 @@ yaxi.Stream = Object.extend(function (Class) {
 
         return new Promise(function (resolve, reject) {
 
-            this.then(value => {
+            this.push(function (value) {
 
-                resolve(value);
+               resolve(value) 
+
+            }, function (err) {
+
+                reject(err)
             });
-
-            this.catch(err => {
-
-                reject(err);
-            });
-
-        }.bind(this));
+        });
     }
+
 
 
     

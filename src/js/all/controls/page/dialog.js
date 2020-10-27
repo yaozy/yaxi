@@ -37,6 +37,7 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 	}
 
 
+
 	this.init = function (options) {
 
 		var title, content, buttons;
@@ -153,12 +154,11 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 
 
 
-
-	Class.delete = function (text, callbackFn) {
+	Class.delete = function (text, onclosed) {
 
 		if (typeof text === 'function')
 		{
-			callbackFn = text;
+			onclosed = text;
 			text = '';
 		}
 
@@ -167,18 +167,19 @@ yaxi.MessageBox = yaxi.Dialog.extend(function (Class) {
 			title: '确认删除',
 			content: '确认要删除' + (text || '') + '?'
 
-		}, callbackFn);
+		}, onclosed);
 	}
 
 
-	Class.info = function (text) {
+	Class.info = function (text, onclosed) {
 
 		this.open({
 
 			title: '提醒',
 			content: text,
 			buttons: 'OK'
-		});
+
+		}, onclosed);
 	}
 
 
