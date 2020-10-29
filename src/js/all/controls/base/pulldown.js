@@ -8,9 +8,7 @@ yaxi.component('Pulldown', function (Class, base) {
     
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',

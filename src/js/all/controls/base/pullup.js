@@ -2,9 +2,7 @@ yaxi.component('Pullup', function (Class, base) {
 
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',

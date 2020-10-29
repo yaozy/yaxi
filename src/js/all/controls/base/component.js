@@ -22,10 +22,13 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
-    this.__build_get = function (name) {
+    this.__build_get = function (name, options) {
 
         var yx = yaxi;
         var init = create;
+
+        // 标记不使用变更
+        options.change = false;
 
         return function () {
 
@@ -120,16 +123,14 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
         var template = this.template;
         var shadowRoot;
 
-        if (template)
+        if (template && typeof template === 'function')
         {
-            if (typeof template === 'function')
-            {
-                template = template.call(this) || [];
-            }
+            template = template(this);
         }
-        else
+
+        if (!template || template.length <= 0)
         {
-            template = [];
+            throw new Error('component template must be specified!');
         }
 
         if (options[1])

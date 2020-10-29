@@ -19,10 +19,8 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
-    this.template = function () {
+    this.template = function ($this) {
 
-        var $this = this;
-        
         return [
             'box',
             {

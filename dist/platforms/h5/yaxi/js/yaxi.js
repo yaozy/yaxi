@@ -5588,10 +5588,13 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
 
 
 
-    this.__build_get = function (name) {
+    this.__build_get = function (name, options) {
 
         var yx = yaxi;
         var init = create;
+
+        // 标记不使用变更
+        options.change = false;
 
         return function () {
 
@@ -5686,16 +5689,14 @@ yaxi.Component = yaxi.Control.extend(function (Class, base, yaxi) {
         var template = this.template;
         var shadowRoot;
 
-        if (template)
+        if (template && typeof template === 'function')
         {
-            if (typeof template === 'function')
-            {
-                template = template.call(this) || [];
-            }
+            template = template(this);
         }
-        else
+
+        if (!template || template.length <= 0)
         {
-            template = [];
+            throw new Error('component template must be specified!');
         }
 
         if (options[1])
@@ -6742,9 +6743,7 @@ yaxi.component('Pulldown', function (Class, base) {
     
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',
@@ -6899,9 +6898,7 @@ yaxi.component('Pullup', function (Class, base) {
 
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',
@@ -7623,9 +7620,7 @@ yaxi.Box.extend('StackBox', function (Class, base) {
 yaxi.component('Swiper', function (Class, base) {
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',
@@ -8833,10 +8828,8 @@ yaxi.component('Header', function (Class, base, yaxi) {
 
 
 
-    this.template = function () {
+    this.template = function ($this) {
 
-        var $this = this;
-        
         return [
             'box',
             {

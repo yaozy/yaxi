@@ -1,9 +1,7 @@
 yaxi.component('Swiper', function (Class, base) {
 
 
-    this.template = function () {
-
-        var $this = this;
+    this.template = function ($this) {
 
         return [
             'box',
